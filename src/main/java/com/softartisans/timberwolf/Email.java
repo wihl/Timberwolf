@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf;
 
-import java.util.Map;
 import java.util.Date;
 
 public interface Email {
@@ -13,5 +12,6 @@ public interface Email {
     Date getTimeSent();
     // TODO: What other common headers do we want?
 
+    String[] getHeaderKeys();
     String getHeader(String header);
 }
