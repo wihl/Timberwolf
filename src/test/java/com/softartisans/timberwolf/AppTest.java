@@ -3,6 +3,7 @@ package com.softartisans.timberwolf;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit test for simple App.
@@ -34,5 +35,12 @@ public class AppTest
     public void testApp()
     {
         assertTrue( true );
+    }
+    
+    public void testMock()
+    {
+        Email mockEmail = mock(Email.class);
+        when(mockEmail.getBody()).thenReturn("rufio");
+        assertEquals(mockEmail.getBody(),"rufio");
     }
 }
