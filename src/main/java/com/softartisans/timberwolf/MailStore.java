@@ -1,5 +1,7 @@
 package com.softartisans.timberwolf;
 
+import java.util.Iterator;
+
 public interface MailStore {
-    Email[] getMail(String user);
+    Iterator<Email> getMail(String user);
 }

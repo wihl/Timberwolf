@@ -1,5 +1,7 @@
 package com.softartisans.timberwolf;
 
+import java.util.Iterator;
+
 public interface MailWriter {
-    void write(Email[] mails);
+    void write(Iterator<Email> mails);
 }
