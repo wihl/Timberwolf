@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://schemas.microsoft.com/exchange/services/2006/messages" targetNamespace="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:service name="ExchangeService">
+    <wsdl:documentation>Default service endpoint for Exchange 2010</wsdl:documentation>
+    <wsdl:port name="ExchangePort" binding="tns:ExchangeServiceBinding" />
+  </wsdl:service>
+
   <wsdl:types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
       <xs:import schemaLocation="messages.xsd" namespace="http://schemas.microsoft.com/exchange/services/2006/messages" />
