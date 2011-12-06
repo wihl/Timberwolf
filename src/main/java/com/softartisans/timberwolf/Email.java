@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf;
 
 import java.util.Map;
+import java.util.Date;
 
 public interface Email {
     String getBody();
@@ -9,7 +10,7 @@ public interface Email {
     String[] getCcRecipients();
     String[] getBccRecipients();
     String getSubject();
-    DateTime getTimeSent();
+    Date getTimeSent();
     // TODO: What other common headers do we want?
 
     String getHeader(String header);
