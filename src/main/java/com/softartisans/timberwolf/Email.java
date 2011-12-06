@@ -10,10 +10,5 @@ public interface Email {
     String getSubject();
     // TODO: What other common headers do we want?
 
-    // TODO: Preference?
-    Map<String, String> getHeaders();
-    // OR
-    Map<HEADER_TYPE, String> getHeaders();
-    // OR
     String getHeader(String header);
 }
