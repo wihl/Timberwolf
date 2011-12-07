@@ -1,8 +1,21 @@
 package com.softartisans.timberwolf;
 
+import com.microsoft.schemas.exchange.services._2006.types.MessageType;
+
 import java.util.Date;
 
 public class ExchangeEmail implements Email {
+    private String subject;
+
+    public ExchangeEmail(MessageType message) {
+        if (message.isSetSubject()) {
+            subject = message.getSubject();
+        }
+        else {
+            subject = "";
+        }
+    }
+
     public String getBody() {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
@@ -24,7 +37,7 @@ public class ExchangeEmail implements Email {
     }
 
     public String getSubject() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return subject;
     }
 
     public Date getTimeSent() {
