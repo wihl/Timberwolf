@@ -7,7 +7,8 @@ package com.softartisans.timberwolf;
  * keys are exported, and what pieces of data they correspond to, is
  * defined by implementers of MailboxItem.
  */
-public interface MailboxItem {
+public interface MailboxItem
+{
     /** Returns all the keys that this item exports. */
     String[] getHeaderKeys();
 

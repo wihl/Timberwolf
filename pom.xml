@@ -56,6 +56,14 @@
           <configLocation>checkstyle.xml</configLocation>
         </configuration>
       </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-pmd-plugin</artifactId>
+	<version>2.6</version>
+	<configuration>
+	  <targetJdk>1.6</targetJdk>
+	</configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -64,6 +72,16 @@
       </resource>
     </resources>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javancss-maven-plugin</artifactId>
+        <version>2.0-beta-2</version>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <dependencies>
     <dependency>
