@@ -12,6 +12,7 @@ public class ExchangeEmail implements MailboxItem {
     private static final String BODY_KEY = "Body";
     private static final String SUBJECT_KEY = "Subject";
     private static final String TIME_SENT_KEY = "Time Sent";
+    private static final String ID_KEY = "Item ID";
 
     /** The headers that this email exports. */
     private Map<String, String> headers;
@@ -30,6 +31,10 @@ public class ExchangeEmail implements MailboxItem {
         if (message.isSetDateTimeSent()) {
             String time = message.getDateTimeSent().getTime().toString();
             headers.put(TIME_SENT_KEY, time);
+        }
+
+        if (message.isSetItemId()) {
+            headers.put(ID_KEY, message.getItemId().getId());
         }
     }
 

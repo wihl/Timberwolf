@@ -2,6 +2,7 @@ package com.softartisans.timberwolf;
 
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
 
 import java.util.Calendar;
 
@@ -75,5 +76,24 @@ public class ExchangeEmailTest extends TestCase {
         mail = new ExchangeEmail(mockedMessage);
         assertFalse(mail.hasKey("Body"));
         assertNull(mail.getHeader("Body"));
+    }
+
+    public void testItemId() {
+        MessageType mockedMessage = mock(MessageType.class);
+        ItemIdType mockedId = mock(ItemIdType.class);
+        when(mockedMessage.isSetItemId()).thenReturn(true);
+        when(mockedMessage.getItemId()).thenReturn(mockedId);
+        when(mockedId.getId()).thenReturn("ABCD1234");
+
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Item ID"));
+        assertEquals(mail.getHeader("Item ID"), "ABCD1234");
+
+        mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetItemId()).thenReturn(false);
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertFalse(mail.hasKey("Item ID"));
+        assertNull(mail.getHeader("Item ID"));
     }
 }
