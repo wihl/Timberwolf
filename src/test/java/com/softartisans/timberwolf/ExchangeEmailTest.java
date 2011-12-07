@@ -25,14 +25,16 @@ public class ExchangeEmailTest extends TestCase {
         when(mockedMessage.isSetSubject()).thenReturn(true);
         when(mockedMessage.getSubject()).thenReturn("Test Email");
         
-        MailboxItem mail = new ExchangeEmail(mockedMessage);/*
-        assertEquals(mail.getSubject(), "Test Email");
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Subject"));
+        assertEquals(mail.getHeader("Subject"), "Test Email");
 
         mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetSubject()).thenReturn(false);
 
         mail = new ExchangeEmail(mockedMessage);
-        assertEquals(mail.getSubject(), "");*/
+        assertFalse(mail.hasKey("Subject"));
+        assertNull(mail.getHeader("Subject"));
     }
 
     public void testTimeSent() {
@@ -42,25 +44,18 @@ public class ExchangeEmailTest extends TestCase {
         calendar.set(2011, 12, 7, 12, 55);
         when(mockedMessage.getDateTimeSent()).thenReturn(calendar);
 
-        MailboxItem mail = new ExchangeEmail(mockedMessage);/*
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
         Calendar expected = Calendar.getInstance();
         expected.set(2011, 12, 7, 12, 55);
-        assertEquals(mail.getTimeSent(), expected.getTime());
+        assertTrue(mail.hasKey("Time Sent"));
+        assertEquals(mail.getHeader("Time Sent"), expected.getTime().toString());
 
         mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetDateTimeSent()).thenReturn(false);
-        when(mockedMessage.isSetDateTimeReceived()).thenReturn(true);
-        when(mockedMessage.getDateTimeReceived()).thenReturn(calendar);
 
         mail = new ExchangeEmail(mockedMessage);
-        assertEquals(mail.getTimeSent(), expected.getTime());
-
-        mockedMessage = mock(MessageType.class);
-        when(mockedMessage.isSetDateTimeSent()).thenReturn(false);
-        when(mockedMessage.isSetDateTimeReceived()).thenReturn(false);
-
-        mail = new ExchangeEmail(mockedMessage);
-        assertNull(mail.getTimeSent());*/
+        assertFalse(mail.hasKey("Time Sent"));
+        assertNull(mail.getHeader("Time Sent"));
     }
 
     public void testBody() {
@@ -70,13 +65,15 @@ public class ExchangeEmailTest extends TestCase {
         body.setStringValue("This is an email message.");
         when(mockedMessage.getBody()).thenReturn(body);
 
-        MailboxItem mail = new ExchangeEmail(mockedMessage);/*
-        assertEquals(mail.getBody(), "This is an email message.");
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Body"));
+        assertEquals(mail.getHeader("Body"), "This is an email message.");
 
         mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetBody()).thenReturn(false);
 
         mail = new ExchangeEmail(mockedMessage);
-        assertEquals(mail.getBody(), "");*/
+        assertFalse(mail.hasKey("Body"));
+        assertNull(mail.getHeader("Body"));
     }
 }

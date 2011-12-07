@@ -2,80 +2,37 @@ package com.softartisans.timberwolf;
 
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExchangeEmail implements MailboxItem {
-    private String body;
-    private String subject;
-    private Date timeSent;
+    private Map<String, String> headers;
 
     public ExchangeEmail(MessageType message) {
+        headers = new HashMap<String, String>();
+
         if (message.isSetBody()) {
-            // Body can be either HTML or plain text content.  For now we
-            // don't care.
-            body = message.getBody().getStringValue();
-        }
-        else {
-            body = "";
+            headers.put("Body", message.getBody().getStringValue());
         }
 
         if (message.isSetSubject()) {
-            subject = message.getSubject();
-        }
-        else {
-            subject = "";
+            headers.put("Subject", message.getSubject());
         }
 
         if (message.isSetDateTimeSent()) {
-            timeSent = message.getDateTimeSent().getTime();
+            headers.put("Time Sent", message.getDateTimeSent().getTime().toString());
         }
-        // This isn't strictly correct, but it's going to be an okay 
-        // approximation in most cases.
-        else if (message.isSetDateTimeReceived()) {
-            timeSent = message.getDateTimeReceived().getTime();
-        }
-        else {
-            timeSent = null;
-        }
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public String getSender() {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    public String[] getRecipients() {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    public String[] getCcRecipients() {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    public String[] getBccRecipients() {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public Date getTimeSent() {
-        return timeSent;
     }
 
     public String[] getHeaderKeys() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return headers.keySet().toArray(new String[0]);
     }
 
     public boolean hasKey(String key) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return headers.containsKey(key);
     }
 
     public String getHeader(String key) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return headers.get(key);
     }
 }
