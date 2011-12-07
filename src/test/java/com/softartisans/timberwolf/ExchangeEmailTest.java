@@ -24,5 +24,11 @@ public class ExchangeEmailTest extends TestCase {
         
         Email mail = new ExchangeEmail(mockedMessage);
         assertEquals(mail.getSubject(), "Test Email");
+
+        mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetSubject()).thenReturn(false);
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertEquals(mail.getSubject(), "");
     }
 }
