@@ -3,6 +3,8 @@ package com.softartisans.timberwolf;
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
+import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
 
 import java.util.Calendar;
 
@@ -95,5 +97,39 @@ public class ExchangeEmailTest extends TestCase {
         mail = new ExchangeEmail(mockedMessage);
         assertFalse(mail.hasKey("Item ID"));
         assertNull(mail.getHeader("Item ID"));
+    }
+
+    public void testSender() {
+        MessageType mockedMessage = mock(MessageType.class);
+        SingleRecipientType sender = mock(SingleRecipientType.class);
+        EmailAddressType address = mock(EmailAddressType.class);
+        when(mockedMessage.isSetFrom()).thenReturn(true);
+        when(mockedMessage.getFrom()).thenReturn(sender);
+        when(sender.getMailbox()).thenReturn(address);
+        when(address.isSetEmailAddress()).thenReturn(true);
+        when(address.getEmailAddress()).thenReturn("seank@softartisans.com");
+
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Sender"));
+        assertEquals(mail.getHeader("Sender"), "seank@softartisans.com");
+
+        mockedMessage = mock(MessageType.class);
+        sender = mock(SingleRecipientType.class);
+        address = mock(EmailAddressType.class);
+        when(mockedMessage.isSetFrom()).thenReturn(true);
+        when(mockedMessage.getFrom()).thenReturn(sender);
+        when(sender.getMailbox()).thenReturn(address);
+        when(address.isSetEmailAddress()).thenReturn(false);
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertFalse(mail.hasKey("Sender"));
+        assertNull(mail.getHeader("Sender"));
+
+        mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetFrom()).thenReturn(false);
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertFalse(mail.hasKey("Sender"));
+        assertNull(mail.getHeader("Sender"));
     }
 }

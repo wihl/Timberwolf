@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf;
 
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
+import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class ExchangeEmail implements MailboxItem {
     private static final String SUBJECT_KEY = "Subject";
     private static final String TIME_SENT_KEY = "Time Sent";
     private static final String ID_KEY = "Item ID";
+    private static final String SENDER_KEY = "Sender";
 
     /** The headers that this email exports. */
     private Map<String, String> headers;
@@ -35,6 +37,13 @@ public class ExchangeEmail implements MailboxItem {
 
         if (message.isSetItemId()) {
             headers.put(ID_KEY, message.getItemId().getId());
+        }
+
+        if (message.isSetFrom()) {
+            EmailAddressType address = message.getFrom().getMailbox();
+            if (address.isSetEmailAddress()) {
+                headers.put(SENDER_KEY, address.getEmailAddress());
+            }
         }
     }
 
