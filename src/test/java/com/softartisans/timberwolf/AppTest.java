@@ -39,8 +39,8 @@ public class AppTest
     
     public void testMock()
     {
-        Email mockEmail = mock(Email.class);
-        when(mockEmail.getBody()).thenReturn("rufio");
-        assertEquals(mockEmail.getBody(),"rufio");
+        MailboxItem mockEmail = mock(MailboxItem.class);
+        when(mockEmail.getHeader("subject")).thenReturn("rufio");
+        assertEquals(mockEmail.getHeader("subject"),"rufio");
     }
 }

@@ -4,7 +4,7 @@ import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 
 import java.util.Date;
 
-public class ExchangeEmail implements Email {
+public class ExchangeEmail implements MailboxItem {
     private String body;
     private String subject;
     private Date timeSent;
@@ -71,7 +71,11 @@ public class ExchangeEmail implements Email {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
-    public String getHeader(String header) {
+    public boolean hasKey(String key) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    public String getHeader(String key) {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 }
