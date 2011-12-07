@@ -44,6 +44,12 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>target/generated-sources/axis2/wsdl2code/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
   </build>
 
   <dependencies>
