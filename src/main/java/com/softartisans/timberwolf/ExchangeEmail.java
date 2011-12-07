@@ -11,6 +11,10 @@ import java.util.Map;
  * ExchangeEmail represents an email message from an Exchange server.
  */
 public class ExchangeEmail implements MailboxItem {
+    private static final String BODY_KEY = "Body";
+    private static final String SUBJECT_KEY = "Subject";
+    private static final String TIME_SENT_KEY = "Time Sent";
+
     /** The headers that this email exports. */
     private Map<String, String> headers;
 
@@ -18,16 +22,16 @@ public class ExchangeEmail implements MailboxItem {
         headers = new HashMap<String, String>();
 
         if (message.isSetBody()) {
-            headers.put("Body", message.getBody().getStringValue());
+            headers.put(BODY_KEY, message.getBody().getStringValue());
         }
 
         if (message.isSetSubject()) {
-            headers.put("Subject", message.getSubject());
+            headers.put(SUBJECT_KEY, message.getSubject());
         }
 
         if (message.isSetDateTimeSent()) {
             String time = message.getDateTimeSent().getTime().toString();
-            headers.put("Time Sent", time);
+            headers.put(TIME_SENT_KEY, time);
         }
     }
 
