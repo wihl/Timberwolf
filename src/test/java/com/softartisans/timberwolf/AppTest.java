@@ -36,11 +36,4 @@ public class AppTest
     {
         assertTrue( true );
     }
-    
-    public void testMock()
-    {
-        Email mockEmail = mock(Email.class);
-        when(mockEmail.getBody()).thenReturn("rufio");
-        assertEquals(mockEmail.getBody(),"rufio");
-    }
 }
