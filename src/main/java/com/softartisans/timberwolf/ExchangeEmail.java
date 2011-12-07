@@ -6,6 +6,7 @@ import java.util.Date;
 
 public class ExchangeEmail implements Email {
     private String subject;
+    private Date timeSent;
 
     public ExchangeEmail(MessageType message) {
         if (message.isSetSubject()) {
@@ -13,6 +14,18 @@ public class ExchangeEmail implements Email {
         }
         else {
             subject = "";
+        }
+
+        if (message.isSetDateTimeSent()) {
+            timeSent = message.getDateTimeSent().getTime();
+        }
+        // This isn't strictly correct, but it's going to be
+        // an okay approximation in most cases.
+        else if (message.isSetDateTimeReceived()) {
+            timeSent = message.getDateTimeReceived().getTime();
+        }
+        else {
+            timeSent = null;
         }
     }
 
@@ -41,7 +54,7 @@ public class ExchangeEmail implements Email {
     }
 
     public Date getTimeSent() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return timeSent;
     }
 
     public String[] getHeaderKeys() {
