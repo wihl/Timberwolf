@@ -9,9 +9,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -37,6 +35,22 @@ public class HBaseMailWriterTest
     public static Test suite()
     {
         return new TestSuite( HBaseMailWriterTest.class );
+    }
+    
+    private MailboxItem mockMailboxItem(Dictionary<String, String> mailboxItemDescriptions)
+    {
+        MailboxItem mailboxItem = mock(MailboxItem.class);
+
+        Enumeration<String> keys = mailboxItemDescriptions.keys();
+        while(keys.hasMoreElements())
+        {
+            String header = keys.nextElement();
+            String value = mailboxItemDescriptions.get(header);
+
+
+        }
+
+        return mailboxItem;
     }
 
     public void testWrite()
