@@ -3,6 +3,7 @@ package com.softartisans.timberwolf;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit test for simple App.
@@ -28,8 +29,12 @@ public class HBaseMailWriterTest
         return new TestSuite( HBaseMailWriterTest.class );
     }
 
+    /**
+     * Rigourous Test :-)
+     */
     public void testApp()
     {
         assertTrue( true );
     }
+
 }

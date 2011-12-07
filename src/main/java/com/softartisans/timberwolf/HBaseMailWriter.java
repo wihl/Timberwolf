@@ -1,6 +1,8 @@
 package com.softartisans.timberwolf;
 
 import java.util.Iterator;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.*;
 
 public class HBaseMailWriter implements MailWriter{
     

@@ -41,5 +41,10 @@
       <version>1.9.0-rc1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase</artifactId>
+        <version>0.90.4</version>
+    </dependency>
   </dependencies>
 </project>
