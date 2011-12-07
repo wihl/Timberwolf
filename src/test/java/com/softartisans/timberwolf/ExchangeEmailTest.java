@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf;
 
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
+import com.microsoft.schemas.exchange.services._2006.types.BodyType;
 
 import java.util.Calendar;
 
@@ -60,5 +61,22 @@ public class ExchangeEmailTest extends TestCase {
 
         mail = new ExchangeEmail(mockedMessage);
         assertNull(mail.getTimeSent());
+    }
+
+    public void testBody() {
+        MessageType mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetBody()).thenReturn(true);        
+        BodyType body = BodyType.Factory.newInstance();
+        body.setStringValue("This is an email message.");
+        when(mockedMessage.getBody()).thenReturn(body);
+
+        Email mail = new ExchangeEmail(mockedMessage);
+        assertEquals(mail.getBody(), "This is an email message.");
+
+        mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetBody()).thenReturn(false);
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertEquals(mail.getBody(), "");
     }
 }

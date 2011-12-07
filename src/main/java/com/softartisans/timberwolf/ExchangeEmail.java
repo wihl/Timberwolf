@@ -5,10 +5,20 @@ import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import java.util.Date;
 
 public class ExchangeEmail implements Email {
+    private String body;
     private String subject;
     private Date timeSent;
 
     public ExchangeEmail(MessageType message) {
+        if (message.isSetBody()) {
+            // Body can be either HTML or plain text content.  For now we
+            // don't care.
+            body = message.getBody().getStringValue();
+        }
+        else {
+            body = "";
+        }
+
         if (message.isSetSubject()) {
             subject = message.getSubject();
         }
@@ -19,8 +29,8 @@ public class ExchangeEmail implements Email {
         if (message.isSetDateTimeSent()) {
             timeSent = message.getDateTimeSent().getTime();
         }
-        // This isn't strictly correct, but it's going to be
-        // an okay approximation in most cases.
+        // This isn't strictly correct, but it's going to be an okay 
+        // approximation in most cases.
         else if (message.isSetDateTimeReceived()) {
             timeSent = message.getDateTimeReceived().getTime();
         }
@@ -30,7 +40,7 @@ public class ExchangeEmail implements Email {
     }
 
     public String getBody() {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return body;
     }
 
     public String getSender() {
