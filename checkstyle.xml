@@ -148,7 +148,10 @@
     <!-- See http://checkstyle.sf.net/config_blocks.html -->
     <module name="AvoidNestedBlocks"/>
     <module name="EmptyBlock"/>
-    <module name="LeftCurly"/>
+    <!-- EDIT: differing from sun standards to match Apache standards -->
+    <module name="LeftCurly">
+      <property name="option" value="nl" />
+    </module>
     <module name="NeedBraces"/>
     <module name="RightCurly"/>
 
