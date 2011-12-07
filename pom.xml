@@ -38,6 +38,12 @@
           <configLocation>checkstyle.xml</configLocation>
         </configuration>
       </plugin>
+      <plugin>
+	<artifactId>maven-pmd-plugin</artifactId>
+	<configuration>
+	  <targetJdk>1.6</targetJdk>
+	</configuration>
+      </plugin>
     </plugins>
   </build>
 
