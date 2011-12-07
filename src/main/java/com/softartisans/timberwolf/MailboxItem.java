@@ -1,8 +1,6 @@
 package com.softartisans.timberwolf;
 
 /**
- * @author Sean Kermes <seank@softartisans.com>
- *
  * MailboxItem represents a generic item from a mailbox.
  *
  * MailboxItems export a number of headers identified by keys. Exactly which

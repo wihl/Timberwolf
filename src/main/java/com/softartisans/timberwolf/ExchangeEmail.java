@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Sean Kermes <seank@softartisans.com>
- *
  * ExchangeEmail represents an email message from an Exchange server.
  */
 public class ExchangeEmail implements MailboxItem {
