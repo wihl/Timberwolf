@@ -30,7 +30,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.8</version>
         <configuration>
-          <enableRulesSummary>false</enableRulesSummary>
+          <configLocation>checkstyle.xml</configLocation>
         </configuration>
       </plugin>
     </plugins>
