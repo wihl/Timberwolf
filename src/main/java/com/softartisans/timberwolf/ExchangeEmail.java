@@ -30,6 +30,7 @@ public class ExchangeEmail implements MailboxItem
     private static final String ID_KEY = "Item ID";
     private static final String SENDER_KEY = "Sender";
     private static final String TORECIPIENT_KEY = "To";
+    private static final char EMAIL_DELIMITER = ';';
 
     /** The headers that this email exports. */
     private Map<String, String> headers;
@@ -94,7 +95,7 @@ public class ExchangeEmail implements MailboxItem
         for (EmailAddressType address : recipients.getMailboxArray())
         {
             emailList.append(address.getEmailAddress());
-            emailList.append(";");
+            emailList.append(EMAIL_DELIMITER);
         }
         return emailList.toString();
     }
