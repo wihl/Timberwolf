@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.engine.ListenerManager;
 import com.softartisans.timberwolf.exchangeservice.ExchangeServiceStub;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseDocument;
@@ -31,10 +32,9 @@ public class SmockTest
     private MockWebServiceServer mockServer;
 
     public void setUp() {
-        //        mockServer = createServer();
         // client has to be created after createServer was called
         try {
-            stub = new ExchangeServiceStub();
+            stub = new ExchangeServiceStub("http://glue:8080/axis2/services/Exchange");
         } catch (AxisFault axisFault) {
             axisFault.printStackTrace();
             Assert.fail("Could not create ExchangeServiceStub: " + axisFault);
@@ -60,7 +60,7 @@ public class SmockTest
     }
 
     public void testSmock() throws RemoteException {
-        //        mockServer.expect(message("request1.xml")).andRespond(withMessage("response1.xml"));
+        mockServer.expect(message("request1.xml")).andRespond(withMessage("response1.xml"));
         FindItemDocument fid = FindItemDocument.Factory.newInstance();
         ExchangeImpersonationDocument eid = ExchangeImpersonationDocument.Factory.newInstance();
         MailboxCultureDocument mcd = MailboxCultureDocument.Factory.newInstance();
