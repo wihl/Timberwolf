@@ -15,8 +15,7 @@ import java.util.Map;
  * <ul>
  * <li>"Body": The body text of the email (in either HTML or plain text).
  * <li>"Subject": The subject line of the email.
- * <li>"Time Sent": The time the email was sent, formatted with the default
- * Date.toString() formatting.
+ * <li>"Time Sent": The time the email was sent, formatted with the default Date.toString() formatting.
  * <li>"Item ID": The unique ID assigned to this item by Exchange.
  * <li>"Sender": The email address of the user who sent the email.
  * <li>"To": A semicolon-delimited list of recipients.
