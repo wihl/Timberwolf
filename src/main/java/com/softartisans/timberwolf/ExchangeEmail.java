@@ -58,7 +58,8 @@ public class ExchangeEmail implements MailboxItem
 
         // There isn't any documentation on the difference between Sender and
         // From.  I'm preferring From here purely based on the example response
-        // given at: http://msdn.microsoft.com/en-us/library/aa566013(v=EXCHG.140).aspx.
+        // given at:
+        // http://msdn.microsoft.com/en-us/library/aa566013(v=EXCHG.140).aspx.
         SingleRecipientType sender = null;
         if (message.isSetFrom())
         {
