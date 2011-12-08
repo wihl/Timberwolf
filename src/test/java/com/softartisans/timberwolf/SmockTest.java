@@ -27,11 +27,13 @@ import net.javacrumbs.smock.extended.client.connection.MockWebServiceServer;
 public class SmockTest
     extends TestCase
 {
+    private static final String resourcePrefix = "com/softartisans/timberwolf/SmockTest/";
     private ExchangeServiceStub stub;
 
     private MockWebServiceServer mockServer;
 
     public void setUp() {
+        // mockServer = createServer();
         // client has to be created after createServer was called
         try {
             stub = new ExchangeServiceStub("http://glue:8080/axis2/services/Exchange");
@@ -60,7 +62,8 @@ public class SmockTest
     }
 
     public void testSmock() throws RemoteException {
-        mockServer.expect(message("request1.xml")).andRespond(withMessage("response1.xml"));
+        mockServer.expect(message(resourcePrefix + "request1.xml")).
+            andRespond(withMessage(resourcePrefix + "response1.xml"));
         FindItemDocument fid = FindItemDocument.Factory.newInstance();
         ExchangeImpersonationDocument eid = ExchangeImpersonationDocument.Factory.newInstance();
         MailboxCultureDocument mcd = MailboxCultureDocument.Factory.newInstance();

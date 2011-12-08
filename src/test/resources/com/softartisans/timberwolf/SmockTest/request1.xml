@@ -1,0 +1,6 @@
+<ns1:GetFlightsRequest xmlns:ns1="http://www.springframework.org/spring-ws/samples/airline/schemas/messages" xmlns:ns2="http://www.springframework.org/spring-ws/samples/airline/schemas/types">
+  <ns1:from>PRG</ns1:from>
+  <ns1:to>DUB</ns1:to>
+  <ns1:departureDate>${IGNORE}</ns1:departureDate>
+  <ns1:serviceClass>economy</ns1:serviceClass>
+</ns1:GetFlightsRequest>
