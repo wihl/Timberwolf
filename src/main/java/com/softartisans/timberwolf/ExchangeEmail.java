@@ -19,6 +19,9 @@ import java.util.Map;
  * Date.toString() formatting.
  * <li>"Item ID": The unique ID assigned to this item by Exchange.
  * <li>"Sender": The email address of the user who sent the email.
+ * <li>"To": A semicolon-delimited list of recipients.
+ * <li>"Cc": A semicolon-delimited list of cc-recipients.
+ * <li>"Bcc": A semicolon-delimited list of bcc-recipients.
  * </ul>
  */
 public class ExchangeEmail implements MailboxItem
