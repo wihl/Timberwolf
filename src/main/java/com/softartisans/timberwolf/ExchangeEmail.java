@@ -83,15 +83,20 @@ public class ExchangeEmail implements MailboxItem
 
         if (message.isSetToRecipients())
         {
-            StringBuilder emailList = new StringBuilder();
-            ArrayOfRecipientsType mailboxes = message.getToRecipients();
-            for (EmailAddressType address : mailboxes.getMailboxArray())
-            {
-                emailList.append(address.getEmailAddress());
-                emailList.append(";");
-            }
-            headers.put(TORECIPIENT_KEY, emailList.toString());
+            ArrayOfRecipientsType toRecipients = message.getToRecipients();
+            headers.put(TORECIPIENT_KEY, getRecipientString(toRecipients));
         }
+    }
+
+    private static final String getRecipientString(ArrayOfRecipientsType recipients)
+    {
+        StringBuilder emailList = new StringBuilder();
+        for (EmailAddressType address : recipients.getMailboxArray())
+        {
+            emailList.append(address.getEmailAddress());
+            emailList.append(";");
+        }
+        return emailList.toString();
     }
 
     public final String[] getHeaderKeys()
