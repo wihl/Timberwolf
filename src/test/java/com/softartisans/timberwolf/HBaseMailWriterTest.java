@@ -5,6 +5,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -36,7 +37,12 @@ public class HBaseMailWriterTest
     {
         return new TestSuite( HBaseMailWriterTest.class );
     }
-    
+
+    /**
+     * Creates a mock MailboxItem given a dictionary of headers as keys with the header values as values.
+     * @param mailboxItemDescription The above-mentioned dictionary.
+     * @return A mock MailboxItem.
+     */
     private MailboxItem mockMailboxItem(Dictionary<String, String> mailboxItemDescription)
     {
         MailboxItem mailboxItem = mock(MailboxItem.class);
@@ -56,18 +62,69 @@ public class HBaseMailWriterTest
 
         return mailboxItem;
     }
-    
+
+    /**
+     * Generates a dictionary which is suitable for creating a mock MailboxItem. It is assumed that the
+     * first header is the row key.
+     * @return A dictionary of MailboxItem-suitable headers and values.
+     */
+    private Dictionary<String, String> generateMailboxItemDescription()
+    {
+        Dictionary<String, String> mailboxItemDescription = new Hashtable<String, String>();
+        mailboxItemDescription.put("header", "a lonesome value");
+        mailboxItemDescription.put("anotherheader", "another value");
+
+        return mailboxItemDescription;
+    }
+
+    /**
+     * Asserts that all headers and values for a given dictionary are equal to the values present from
+     * get calls to an HTableInterface.
+     * @param mailTable The HTableInterface to query.
+     * @param mailboxItemDescription A description of all the headers and values to query.
+     * @param columnFamily The column family for our headers in table.
+     * @param rowKey The specific rowKey for this description in the table.
+     */
+    private void assertMailboxItemDescription(HTableInterface mailTable, 
+                                              Dictionary<String, String> mailboxItemDescription, 
+                                              String columnFamily,
+                                              String rowKey)
+    {
+        Enumeration<String> headers = mailboxItemDescription.keys();
+        
+        while(headers.hasMoreElements())
+        {
+            String header = headers.nextElement();
+            String value = mailboxItemDescription.get(header);
+            
+            Get get = new Get(Bytes.toBytes(rowKey));
+            
+            try 
+            {
+                Result result = mailTable.get(get);
+                byte[] valueBytes = result.getValue(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
+                Assert.assertEquals(value, Bytes.toString(valueBytes));
+                        
+            }
+            catch (IOException e)
+            {
+                // TODO: Log errors.
+            }
+        }
+    }
+
+    /**
+     * Tests that the writer has written the appropriate values from a mock MailboxItem into a
+     * mock HTableInterface.
+     */
     public void testWrite()
     {
         MockHTable mockHTable = MockHTable.create();
         
         String arbitraryFamily = "columnFamily";
         String arbitraryHeader = "header";
-        String arbitraryValue = "a lonesome value";
 
-        Dictionary<String, String> mailboxItemDescription = new Hashtable<String, String>();
-        mailboxItemDescription.put(arbitraryHeader, arbitraryValue);        
-        
+        Dictionary<String, String> mailboxItemDescription = generateMailboxItemDescription();
         MailboxItem mail = mockMailboxItem(mailboxItemDescription);
         
         List<MailboxItem> mails = new ArrayList<MailboxItem>();
@@ -77,19 +134,7 @@ public class HBaseMailWriterTest
         
         writer.write(mails.iterator());
 
-        Get get = new Get(Bytes.toBytes(arbitraryValue));
-        
-        try
-        {
-            Result result = mockHTable.get(get);
-            byte[] value = result.getValue(Bytes.toBytes(arbitraryFamily), Bytes.toBytes(arbitraryHeader));
-            Assert.assertEquals(arbitraryValue,Bytes.toString(value));
-        }
-        catch (IOException e)
-        {
-            // TODO: Log error.
-        }
-        
+        assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
     }
 
 }
