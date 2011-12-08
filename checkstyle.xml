@@ -122,7 +122,11 @@
 
     <!-- Checks for Size Violations.          -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="LineLength"/>
+    <module name="LineLength">
+      <!-- "^import" relaxes the restriction in import statments.
+           "^ \* " relaxes the restriction in javadoc bodies. -->
+      <property name="ignorePattern" value="^(import)|( \* )" />
+    </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
 
