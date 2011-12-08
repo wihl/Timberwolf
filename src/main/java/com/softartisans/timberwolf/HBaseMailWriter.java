@@ -7,54 +7,68 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class HBaseMailWriter implements MailWriter 
+/**
+ * This class writes a list of MailboxItems to an HTableInterface.
+ */
+public class HBaseMailWriter implements MailWriter
 {
-    private HTableInterface _mailTable;
-    private String _keyHeader;
-    private byte[] _columnFamily;
-    private static final String _defaultColumnFamily = "h";
-    private static final String _defaultKeyHeader = "dkh";
+    /** The HTableInterface to store MailboxItems into. */
+    private HTableInterface pMailTable;
 
-    public HBaseMailWriter(HTableInterface mailTable)
+    /** The selected MailboxItem header to use as a row key. */
+    private String pKeyHeader;
+
+    /** The column family to use for our headers. */
+    private byte[] pColumnFamily;
+
+    /** The default column family to use if left unspecified. */
+    private static final String DEFAULT_COLUMN_FAMILY = "h";
+
+    /** The default header, whose value will be used as a rowkey. */
+    private static final String DEFAULT_KEY_HEADER = "Item ID";
+
+    public HBaseMailWriter(final HTableInterface mailTable)
     {
-        this(mailTable, _defaultKeyHeader, _defaultColumnFamily);
+        this(mailTable, DEFAULT_KEY_HEADER, DEFAULT_COLUMN_FAMILY);
     }
-    
-    public HBaseMailWriter(HTableInterface mailTable, String keyHeader)
+
+    public HBaseMailWriter(final HTableInterface mailTable,
+                           final String keyHeader)
     {
-        this(mailTable, keyHeader, _defaultColumnFamily);
+        this(mailTable, keyHeader, DEFAULT_COLUMN_FAMILY);
     }
-    
-    public HBaseMailWriter(HTableInterface mailTable, String keyHeader, String columnFamily)
+
+    public HBaseMailWriter(final HTableInterface mailTable,
+                           final String keyHeader,
+                           final String columnFamily)
     {
-        _mailTable = mailTable;
-        _keyHeader = keyHeader;
-        _columnFamily = Bytes.toBytes(columnFamily);
-        
+        pMailTable = mailTable;
+        pKeyHeader = keyHeader;
+        pColumnFamily = Bytes.toBytes(columnFamily);
     }
-       
+
     @Override
-    public void write(Iterator<MailboxItem> mails)
+    public final void write(final Iterator<MailboxItem> mails)
     {
-        while(mails.hasNext()) 
+        while (mails.hasNext())
         {
             MailboxItem mailboxItem = mails.next();
-            
-            Put mailboxItemPut = new Put(Bytes.toBytes(mailboxItem.getHeader(_keyHeader)));
-            
+
+            Put mailboxItemPut = new Put(Bytes.toBytes(
+                    mailboxItem.getHeader(pKeyHeader)));
+
             String[] headerKeys = mailboxItem.getHeaderKeys();
-            
-            for( String headerKey : headerKeys)
+
+            for (String headerKey : headerKeys)
             {
-                mailboxItemPut.add(_columnFamily, Bytes.toBytes(headerKey),
+                mailboxItemPut.add(pColumnFamily, Bytes.toBytes(headerKey),
                         Bytes.toBytes(mailboxItem.getHeader(headerKey)));
             }
 
             try
             {
-                _mailTable.put(mailboxItemPut);
-            }
-            catch(IOException e)
+                pMailTable.put(mailboxItemPut);
+            } catch (IOException e)
             {
                 // TODO: Log error.
             }
