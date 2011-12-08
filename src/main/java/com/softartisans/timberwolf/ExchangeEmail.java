@@ -3,9 +3,11 @@ package com.softartisans.timberwolf;
 import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.StringBuilder;
 
 /**
  * ExchangeEmail represents an email message from an Exchange server.
@@ -27,6 +29,7 @@ public class ExchangeEmail implements MailboxItem
     private static final String TIME_SENT_KEY = "Time Sent";
     private static final String ID_KEY = "Item ID";
     private static final String SENDER_KEY = "Sender";
+    private static final String TORECIPIENT_KEY = "To";
 
     /** The headers that this email exports. */
     private Map<String, String> headers;
@@ -76,6 +79,18 @@ public class ExchangeEmail implements MailboxItem
             {
                 headers.put(SENDER_KEY, address.getEmailAddress());
             }
+        }
+
+        if (message.isSetToRecipients())
+        {
+            StringBuilder emailList = new StringBuilder();
+            ArrayOfRecipientsType mailboxes = message.getToRecipients();
+            for (EmailAddressType address : mailboxes.getMailboxArray())
+            {
+                emailList.append(address.getEmailAddress());
+                emailList.append(";");
+            }
+            headers.put(TORECIPIENT_KEY, emailList.toString());
         }
     }
 
