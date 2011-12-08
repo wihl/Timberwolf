@@ -37,36 +37,41 @@ public class HBaseMailWriterTest
         return new TestSuite( HBaseMailWriterTest.class );
     }
     
-    private MailboxItem mockMailboxItem(Dictionary<String, String> mailboxItemDescriptions)
+    private MailboxItem mockMailboxItem(Dictionary<String, String> mailboxItemDescription)
     {
         MailboxItem mailboxItem = mock(MailboxItem.class);
 
-        Enumeration<String> keys = mailboxItemDescriptions.keys();
-        while(keys.hasMoreElements())
+        Enumeration<String> keys = mailboxItemDescription.keys();
+        String[] headers = new String[mailboxItemDescription.size()];
+        headers = Collections.list(keys).toArray(headers);
+        
+        when(mailboxItem.getHeaderKeys()).thenReturn(headers);
+        
+        for( String header : headers)
         {
-            String header = keys.nextElement();
-            String value = mailboxItemDescriptions.get(header);
+            String value = mailboxItemDescription.get(header);
 
-
+            when(mailboxItem.getHeader(header)).thenReturn(value);
         }
 
         return mailboxItem;
     }
-
+    
     public void testWrite()
     {
         MockHTable mockHTable = MockHTable.create();
-        MailboxItem mailboxItem = mock(MailboxItem.class);
         
         String arbitraryFamily = "columnFamily";
         String arbitraryHeader = "header";
         String arbitraryValue = "a lonesome value";
 
-        when(mailboxItem.getHeaderKeys()).thenReturn(new String[]{ arbitraryHeader });
-        when(mailboxItem.getHeader(arbitraryHeader)).thenReturn(arbitraryValue);
-
+        Dictionary<String, String> mailboxItemDescription = new Hashtable<String, String>();
+        mailboxItemDescription.put(arbitraryHeader, arbitraryValue);        
+        
+        MailboxItem mail = mockMailboxItem(mailboxItemDescription);
+        
         List<MailboxItem> mails = new ArrayList<MailboxItem>();
-        mails.add(mailboxItem);
+        mails.add(mail);
         
         HBaseMailWriter writer = new HBaseMailWriter(mockHTable, arbitraryHeader, arbitraryFamily);
         
@@ -74,7 +79,8 @@ public class HBaseMailWriterTest
 
         Get get = new Get(Bytes.toBytes(arbitraryValue));
         
-        try {
+        try
+        {
             Result result = mockHTable.get(get);
             byte[] value = result.getValue(Bytes.toBytes(arbitraryFamily), Bytes.toBytes(arbitraryHeader));
             Assert.assertEquals(arbitraryValue,Bytes.toString(value));
