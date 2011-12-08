@@ -7,7 +7,6 @@ import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType
 
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.StringBuilder;
 
 /**
  * ExchangeEmail represents an email message from an Exchange server.
@@ -103,7 +102,8 @@ public class ExchangeEmail implements MailboxItem
         }
     }
 
-    private static final String getRecipientString(ArrayOfRecipientsType recipients)
+    private static String getRecipientString(
+            final ArrayOfRecipientsType recipients)
     {
         StringBuilder emailList = new StringBuilder();
         for (EmailAddressType address : recipients.getMailboxArray())
