@@ -3,15 +3,20 @@ package com.softartisans.timberwolf;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-
 import java.io.IOException;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class writes a list of MailboxItems to an HTableInterface.
  */
 public class HBaseMailWriter implements MailWriter
 {
+    /** Our general purpose logger. */
+    private static Logger logger =
+            LoggerFactory.getLogger(HBaseMailWriter.class);
+
     /** The HTableInterface to store MailboxItems into. */
     private HTableInterface pMailTable;
 
@@ -70,7 +75,7 @@ public class HBaseMailWriter implements MailWriter
                 pMailTable.put(mailboxItemPut);
             } catch (IOException e)
             {
-                // TODO: Log error.
+               logger.error("Error putting MailboxItem into table.");
             }
         }
     }

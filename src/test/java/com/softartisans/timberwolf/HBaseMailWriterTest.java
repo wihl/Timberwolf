@@ -8,6 +8,8 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,6 +22,8 @@ import static org.mockito.Mockito.*;
 public class HBaseMailWriterTest
         extends TestCase
 {
+    Logger logger = LoggerFactory.getLogger(HBaseMailWriter.class);
+
     /**
      * Create the test case
      *
@@ -50,9 +54,9 @@ public class HBaseMailWriterTest
         Enumeration<String> keys = mailboxItemDescription.keys();
         String[] headers = new String[mailboxItemDescription.size()];
         headers = Collections.list(keys).toArray(headers);
-        
+
         when(mailboxItem.getHeaderKeys()).thenReturn(headers);
-        
+
         for( String header : headers)
         {
             String value = mailboxItemDescription.get(header);
@@ -64,8 +68,7 @@ public class HBaseMailWriterTest
     }
 
     /**
-     * Generates a dictionary which is suitable for creating a mock MailboxItem. It is assumed that the
-     * first header is the row key.
+     * Generates a dictionary which is suitable for creating a mock MailboxItem.
      * @return A dictionary of MailboxItem-suitable headers and values.
      */
     private Dictionary<String, String> generateMailboxItemDescription()
@@ -85,30 +88,30 @@ public class HBaseMailWriterTest
      * @param columnFamily The column family for our headers in table.
      * @param rowKey The specific rowKey for this description in the table.
      */
-    private void assertMailboxItemDescription(HTableInterface mailTable, 
-                                              Dictionary<String, String> mailboxItemDescription, 
+    private void assertMailboxItemDescription(HTableInterface mailTable,
+                                              Dictionary<String, String> mailboxItemDescription,
                                               String columnFamily,
                                               String rowKey)
     {
         Enumeration<String> headers = mailboxItemDescription.keys();
-        
+
         while(headers.hasMoreElements())
         {
             String header = headers.nextElement();
             String value = mailboxItemDescription.get(header);
-            
+
             Get get = new Get(Bytes.toBytes(rowKey));
-            
-            try 
+
+            try
             {
                 Result result = mailTable.get(get);
                 byte[] valueBytes = result.getValue(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
                 Assert.assertEquals(value, Bytes.toString(valueBytes));
-                        
+
             }
             catch (IOException e)
             {
-                // TODO: Log errors.
+                logger.error("Error during get query.");
             }
         }
     }
@@ -120,18 +123,18 @@ public class HBaseMailWriterTest
     public void testWrite()
     {
         MockHTable mockHTable = MockHTable.create();
-        
+
         String arbitraryFamily = "columnFamily";
         String arbitraryHeader = "header";
 
         Dictionary<String, String> mailboxItemDescription = generateMailboxItemDescription();
         MailboxItem mail = mockMailboxItem(mailboxItemDescription);
-        
+
         List<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
-        
+
         HBaseMailWriter writer = new HBaseMailWriter(mockHTable, arbitraryHeader, arbitraryFamily);
-        
+
         writer.write(mails.iterator());
 
         assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
