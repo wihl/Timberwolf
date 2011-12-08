@@ -33,7 +33,7 @@ public class SmockTest
     private MockWebServiceServer mockServer;
 
     public void setUp() {
-        // mockServer = createServer();
+        mockServer = createServer();
         // client has to be created after createServer was called
         try {
             stub = new ExchangeServiceStub("http://glue:8080/axis2/services/Exchange");
