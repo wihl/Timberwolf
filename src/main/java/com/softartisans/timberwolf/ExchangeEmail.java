@@ -30,6 +30,8 @@ public class ExchangeEmail implements MailboxItem
     private static final String ID_KEY = "Item ID";
     private static final String SENDER_KEY = "Sender";
     private static final String TORECIPIENT_KEY = "To";
+    private static final String CCRECIPIENT_KEY = "Cc";
+    private static final String BCCRECIPIENT_KEY = "Bcc";
     private static final char EMAIL_DELIMITER = ';';
 
     /** The headers that this email exports. */
@@ -86,6 +88,18 @@ public class ExchangeEmail implements MailboxItem
         {
             ArrayOfRecipientsType toRecipients = message.getToRecipients();
             headers.put(TORECIPIENT_KEY, getRecipientString(toRecipients));
+        }
+
+        if (message.isSetCcRecipients())
+        {
+            ArrayOfRecipientsType ccRecipients = message.getCcRecipients();
+            headers.put(CCRECIPIENT_KEY, getRecipientString(ccRecipients));
+        }
+
+        if (message.isSetBccRecipients())
+        {
+            ArrayOfRecipientsType bccRecipients = message.getBccRecipients();
+            headers.put(BCCRECIPIENT_KEY, getRecipientString(bccRecipients));
         }
     }
 
