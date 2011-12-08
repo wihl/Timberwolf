@@ -66,7 +66,7 @@ public class SmockTest
         MailboxCultureDocument mcd = MailboxCultureDocument.Factory.newInstance();
         RequestServerVersionDocument rsvd = RequestServerVersionDocument.Factory.newInstance();
         TimeZoneContextDocument tzcd = TimeZoneContextDocument.Factory.newInstance();
-        FindItemResponseDocument fir = stub.findItem(fid, eid, mcd, rsvd, tzcd);
+        FindItemResponseDocument fir = stub.findItem(fid, null, null, null, null);
         mockServer.verify();
         Assert.fail();
     }
