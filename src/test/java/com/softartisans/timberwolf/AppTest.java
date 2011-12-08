@@ -3,14 +3,13 @@ package com.softartisans.timberwolf;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import static org.mockito.Mockito.*;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
+public class AppTest
     extends TestCase
 {
     /**
@@ -37,8 +36,7 @@ public class AppTest
     public void testApp()
     {
         assertTrue( true );
-        Logger testLogger = Logger.getLogger("test");
-        BasicConfigurator.configure();
-        testLogger.info("This is a triumph. I'm making a note here, huge success.") ;
+        Logger logger = LoggerFactory.getLogger(AppTest.class);
+        logger.info("This is a triumph!");
     }
 }
