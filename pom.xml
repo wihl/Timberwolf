@@ -48,6 +48,11 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
   <repositories>
