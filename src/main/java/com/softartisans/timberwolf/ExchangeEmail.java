@@ -1,7 +1,8 @@
 package com.softartisans.timberwolf;
 
-import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
+import com.microsoft.schemas.exchange.services._2006.types.MessageType;
+import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,9 +56,21 @@ public class ExchangeEmail implements MailboxItem
             headers.put(ID_KEY, message.getItemId().getId());
         }
 
+        // There isn't any documentation on the difference between Sender and
+        // From.  I'm preferring From here purely based on the example response
+        // given at: http://msdn.microsoft.com/en-us/library/aa566013(v=EXCHG.140).aspx.
+        SingleRecipientType sender = null;
         if (message.isSetFrom())
         {
-            EmailAddressType address = message.getFrom().getMailbox();
+            sender = message.getFrom();
+        }
+        else if (message.isSetSender())
+        {
+            sender = message.getSender();
+        }
+        if (sender != null)
+        {
+            EmailAddressType address = sender.getMailbox();
             if (address.isSetEmailAddress())
             {
                 headers.put(SENDER_KEY, address.getEmailAddress());

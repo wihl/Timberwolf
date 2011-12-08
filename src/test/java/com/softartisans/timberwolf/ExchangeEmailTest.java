@@ -126,6 +126,20 @@ public class ExchangeEmailTest extends TestCase {
         assertNull(mail.getHeader("Sender"));
 
         mockedMessage = mock(MessageType.class);
+        sender = mock(SingleRecipientType.class);
+        address = mock(EmailAddressType.class);
+        when(mockedMessage.isSetFrom()).thenReturn(false);
+        when(mockedMessage.isSetSender()).thenReturn(true);
+        when(mockedMessage.getSender()).thenReturn(sender);
+        when(sender.getMailbox()).thenReturn(address);
+        when(address.isSetEmailAddress()).thenReturn(true);
+        when(address.getEmailAddress()).thenReturn("seank@softartisans.com");
+
+        mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Sender"));
+        assertEquals(mail.getHeader("Sender"), "seank@softartisans.com");
+
+        mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetFrom()).thenReturn(false);
 
         mail = new ExchangeEmail(mockedMessage);
