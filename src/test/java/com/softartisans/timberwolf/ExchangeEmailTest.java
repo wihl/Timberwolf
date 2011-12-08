@@ -148,22 +148,53 @@ public class ExchangeEmailTest extends TestCase {
         assertNull(mail.getHeader("Sender"));
     }
 
-    public void testToRecipientId()
+    private static ArrayOfRecipientsType assertRecipients()
     {
-        MessageType mockedMessage = mock(MessageType.class);
         ArrayOfRecipientsType mockedArray = mock(ArrayOfRecipientsType.class);
         EmailAddressType[] mockedAddresses = new EmailAddressType[2];
         mockedAddresses[0] = mock(EmailAddressType.class);
         mockedAddresses[1] = mock(EmailAddressType.class);
 
-        when(mockedMessage.isSetToRecipients()).thenReturn(true);
-        when(mockedMessage.getToRecipients()).thenReturn(mockedArray);
         when(mockedArray.getMailboxArray()).thenReturn(mockedAddresses);
         when(mockedAddresses[0].getEmailAddress()).thenReturn("email1@domain.com");
         when(mockedAddresses[1].getEmailAddress()).thenReturn("email2@domain.com");
 
+        return mockedArray;
+    }
+
+    public void testToRecipientId()
+    {
+        MessageType mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetToRecipients()).thenReturn(true);
+        ArrayOfRecipientsType recipients = assertRecipients();
+        when(mockedMessage.getToRecipients()).thenReturn(recipients);
+
         MailboxItem mail = new ExchangeEmail(mockedMessage);
         assertTrue(mail.hasKey("To"));
         assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("To"));
+    }
+
+    public void testCcRecipientId()
+    {
+        MessageType mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetCcRecipients()).thenReturn(true);
+        ArrayOfRecipientsType recipients = assertRecipients();
+        when(mockedMessage.getCcRecipients()).thenReturn(recipients);
+
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Cc"));
+        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("Cc"));
+    }
+
+    public void testBccRecipientId()
+    {
+        MessageType mockedMessage = mock(MessageType.class);
+        when(mockedMessage.isSetBccRecipients()).thenReturn(true);
+        ArrayOfRecipientsType recipients = assertRecipients();
+        when(mockedMessage.getBccRecipients()).thenReturn(recipients);
+
+        MailboxItem mail = new ExchangeEmail(mockedMessage);
+        assertTrue(mail.hasKey("Bcc"));
+        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("Bcc"));
     }
 }
