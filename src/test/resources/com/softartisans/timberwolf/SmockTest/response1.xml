@@ -1,23 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ns3:GetFlightsResponse
-	xmlns:ns3="http://www.springframework.org/spring-ws/samples/airline/schemas/messages"
-	xmlns:ns2="http://www.springframework.org/spring-ws/samples/airline/schemas/types">
-	<ns3:flight>
-		<ns2:number>OK1324</ns2:number>
-		<ns2:departureTime>2011-02-19T10:00:00</ns2:departureTime>
-		<ns2:from>
-			<ns2:code>PRG</ns2:code>
-			<ns2:name>Name PRG</ns2:name>
-
-			<ns2:city>City PRG</ns2:city>
-		</ns2:from>
-		<ns2:arrivalTime>2011-02-19T12:00:00</ns2:arrivalTime>
-		<ns2:to>
-			<ns2:code>DUB</ns2:code>
-			<ns2:name>Name DUB</ns2:name>
-			<ns2:city>City DUB</ns2:city>
-
-		</ns2:to>
-		<ns2:serviceClass>economy</ns2:serviceClass>
-	</ns3:flight>
-</ns3:GetFlightsResponse>
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Header>
+        <t:ServerVersionInfo MajorVersion="8" MinorVersion="0" MajorBuildNumber="595" MinorBuildNumber="0"
+                             xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" />
+    </soap:Header>
+    <soap:Body>
+        <FindItemResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+                          xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+                          xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+            <m:ResponseMessages>
+                <m:FindItemResponseMessage ResponseClass="Success">
+                <m:ResponseCode>NoError</m:ResponseCode>
+                    <m:RootFolder TotalItemsInView="10" IncludesLastItemInRange="true">
+                        <t:Items>
+                            <t:Message>
+                                <t:ItemId Id="AS4AUn=" ChangeKey="fsVU4==" />
+                            </t:Message>
+                            <t:Message>
+                                <t:ItemId Id="AS4AUM=" ChangeKey="fsVUA==" />
+                            </t:Message>
+                        </t:Items>
+                    </m:RootFolder>
+                </m:FindItemResponseMessage>
+            </m:ResponseMessages>
+        </FindItemResponse>
+    </soap:Body>
+</soap:Envelope>
