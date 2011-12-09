@@ -16,9 +16,7 @@ import org.apache.axis2.util.IOUtils;
 import org.apache.xmlbeans.impl.schema.FileResourceLoader;
 
 import java.io.*;
-import java.net.URL;
 import java.util.ArrayDeque;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Queue;
 
@@ -72,9 +70,9 @@ class SmockBase extends TestCase
         return new FileResource(path + filename);
     }
 
-    protected static ResponseAction expect(String filename) {
+    protected static ResponseAction expect(Resource resource) {
         Communication communication = new Communication();
-        communication.setRequest(filename);
+        communication.setRequest(resource);
         SmockBase.communications.add(communication);
         return new ResponseAction(communication);
     }
@@ -119,23 +117,23 @@ class SmockBase extends TestCase
             this.communication = communication;
         }
 
-        public void andRespond(String filename) {
-            communication.setResponse(filename);
+        public void andRespond(Resource resource) {
+            communication.setResponse(resource);
         }
     }
 
     private static class Communication {
 
-        private String request;
-        private String response;
+        private Resource request;
+        private Resource response;
         private ByteArrayOutputStream output;
 
-        public void setRequest(String filename) {
-            this.request = filename;
+        public void setRequest(Resource resource) {
+            this.request = resource;
         }
 
-        public void setResponse(String filename) {
-            this.response = filename;
+        public void setResponse(Resource resource) {
+            this.response = resource;
         }
 
         public OutputStream getOutputStream()
@@ -150,14 +148,9 @@ class SmockBase extends TestCase
             ByteArrayOutputStream expected = null;
             try
             {
-                input = SmockBase.class.getResourceAsStream(request);
+                input = request.getStream();
                 if (input == null)
                 {
-                    System.out.println("Existing resources: ");
-                    for (Enumeration<URL> e = SmockBase.class.getClassLoader().getResources("request1.xml"); e.hasMoreElements();)
-                    {
-                        System.out.println(e.nextElement());
-                    }
                     Assert.fail("Could not find request resource: " + request);
                 }
                 expected = new ByteArrayOutputStream();
@@ -177,29 +170,23 @@ class SmockBase extends TestCase
             }
             finally
             {
-                if (input != null)
+                safeClose(input);
+                safeClose(expected);
+            }
+        }
+
+        private void safeClose(Closeable input)
+        {
+            if (input != null)
+            {
+                try
                 {
-                    try
-                    {
-                        input.close();
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                        Assert.fail(e.toString());
-                    }
+                    input.close();
                 }
-                if (expected != null)
+                catch (IOException e)
                 {
-                    try
-                    {
-                        expected.close();
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                        Assert.fail(e.toString());
-                    }
+                    e.printStackTrace();
+                    Assert.fail(e.toString());
                 }
             }
         }
@@ -212,7 +199,7 @@ class SmockBase extends TestCase
             }
             else
             {
-                InputStream returnValue = SmockBase.class.getResourceAsStream(response);
+                InputStream returnValue = response.getStream();
                 if (returnValue == null)
                 {
                     Assert.fail("Could not find response resource: " + response);
