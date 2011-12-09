@@ -20,7 +20,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Queue;
 
-class Smock {
+class SmockBase
+{
 
     private static Queue<Communication> communications;
 
@@ -51,7 +52,7 @@ class Smock {
     public static ResponseAction expect(String filename) {
         Communication communication = new Communication();
         communication.setRequest(filename);
-        Smock.communications.add(communication);
+        SmockBase.communications.add(communication);
         return new ResponseAction(communication);
     }
 
@@ -104,11 +105,11 @@ class Smock {
             ByteArrayOutputStream expected = null;
             try
             {
-                input = Smock.class.getResourceAsStream(request);
+                input = SmockBase.class.getResourceAsStream(request);
                 if (input == null)
                 {
                     System.out.println("Existing resources: ");
-                    for (Enumeration<URL> e = Smock.class.getClassLoader().getResources("request1.xml"); e.hasMoreElements();)
+                    for (Enumeration<URL> e = SmockBase.class.getClassLoader().getResources("request1.xml"); e.hasMoreElements();)
                     {
                         System.out.println(e.nextElement());
                     }
@@ -166,7 +167,7 @@ class Smock {
             }
             else
             {
-                InputStream returnValue = Smock.class.getResourceAsStream(response);
+                InputStream returnValue = SmockBase.class.getResourceAsStream(response);
                 if (returnValue == null)
                 {
                     Assert.fail("Could not find response resource: " + response);
