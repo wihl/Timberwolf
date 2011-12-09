@@ -18,9 +18,7 @@ import java.rmi.RemoteException;
 public class SmockTest
     extends SmockBase
 {
-    private static final String resourcePrefix = "SmockTest/";
     private ExchangeServiceStub stub;
-
 
     public void setUp() {
         super.setUp();
