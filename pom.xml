@@ -75,14 +75,31 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.2</version>  
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-4</version>
         <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
           <archive>
             <manifest>
-              <addClasspath>true</addClasspath>
               <mainClass>com.softartisans.timberwolf.App</mainClass>
             </manifest>
           </archive>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-my-jar-with-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <resources>
