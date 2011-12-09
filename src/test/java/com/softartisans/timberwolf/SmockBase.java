@@ -1,9 +1,7 @@
 package com.softartisans.timberwolf;
 
 
-
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.context.ConfigurationContext;
@@ -13,19 +11,24 @@ import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.util.IOUtils;
-import org.apache.xmlbeans.impl.schema.FileResourceLoader;
 import org.junit.After;
 import org.junit.Before;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
 
-class SmockBase
+public class SmockBase
 {
 
-    private static Queue<Communication> communications;
+    private Queue<Communication> communications;
     private String path;
 
     public SmockBase()
@@ -40,10 +43,12 @@ class SmockBase
         {
             communications = new ArrayDeque<Communication>();
             ConfigurationContext configurationContext =
-                ConfigurationContextFactory.
-                        createConfigurationContextFromFileSystem(null, null);
-            HashMap<String, TransportOutDescription> transportsOut =
-                configurationContext.getAxisConfiguration().getTransportsOut();
+                    ConfigurationContextFactory
+                            .createConfigurationContextFromFileSystem(null,
+                                                                      null);
+            HashMap<String, TransportOutDescription> transportsOut
+                    = configurationContext.getAxisConfiguration()
+                                          .getTransportsOut();
             for (TransportOutDescription tod: transportsOut.values())
             {
                 if (tod!=null)
@@ -57,8 +62,8 @@ class SmockBase
         }
         catch (AxisFault e)
         {
-            throw new IllegalStateException(
-                    "Can not set ConfigurationContext.", e);
+            throw new IllegalStateException("Can not set ConfigurationContext.",
+                    e);
         }
     }
 
@@ -67,21 +72,21 @@ class SmockBase
         return new FileResource(path + filename);
     }
 
-    protected static ResponseAction expect(Resource resource)
+    protected ResponseAction expect(Resource resource)
     {
         Communication communication = new Communication();
         communication.setRequest(resource);
-        SmockBase.communications.add(communication);
+        communications.add(communication);
         return new ResponseAction(communication);
     }
 
     @After
-    protected static void verify()
+    public void verify()
     {
         if (!communications.isEmpty())
         {
-            Assert.fail("Expected " + communications.size() +
-                    " more calls than happened");
+            Assert.fail("Expected " + communications.size()
+                        + " more calls than happened");
         }
     }
 
@@ -107,31 +112,37 @@ class SmockBase
         }
     }
 
-    protected static class ResponseAction {
+    protected static class ResponseAction
+    {
 
 
         private Communication communication;
 
-        public ResponseAction(Communication communication) {
+        public ResponseAction(Communication communication)
+        {
             this.communication = communication;
         }
 
-        public void andRespond(Resource resource) {
+        public void andRespond(Resource resource)
+        {
             communication.setResponse(resource);
         }
     }
 
-    private static class Communication {
+    private static class Communication
+    {
 
         private Resource request;
         private Resource response;
         private ByteArrayOutputStream output;
 
-        public void setRequest(Resource resource) {
+        public void setRequest(Resource resource)
+        {
             this.request = resource;
         }
 
-        public void setResponse(Resource resource) {
+        public void setResponse(Resource resource)
+        {
             this.response = resource;
         }
 
@@ -155,7 +166,7 @@ class SmockBase
                 expected = new ByteArrayOutputStream();
                 IOUtils.copy(input, expected, false);
                 Assert.assertEquals(expected.toString("UTF-8"),
-                        output.toString("UTF-8"));
+                                    output.toString("UTF-8"));
             }
             catch (UnsupportedEncodingException e)
             {
@@ -201,31 +212,43 @@ class SmockBase
                 InputStream returnValue = response.getStream();
                 if (returnValue == null)
                 {
-                    Assert.fail("Could not find response resource: " + response);
+                    Assert.fail("Could not find response resource: "
+                                + response);
                 }
                 return returnValue;
             }
         }
     }
 
-    private static class MockTransportSender extends AbstractHandler implements TransportSender {
+    private class MockTransportSender
+            extends AbstractHandler
+            implements TransportSender
+    {
 
-        public InvocationResponse invoke(MessageContext msgContext) throws AxisFault {
+        public InvocationResponse invoke(MessageContext msgContext)
+                throws AxisFault
+        {
             Communication communication = communications.remove();
-            TransportUtils.writeMessage(msgContext, communication.getOutputStream());
+            TransportUtils.writeMessage(msgContext,
+                                        communication.getOutputStream());
             communication.assertRequest();
-            msgContext.setProperty(MessageContext.TRANSPORT_IN, communication.getInputStream());
+            msgContext.setProperty(MessageContext.TRANSPORT_IN,
+                                   communication.getInputStream());
             TransportUtils.setResponseWritten(msgContext, true);
             return InvocationResponse.CONTINUE;
         }
 
-        public void cleanup(MessageContext msgContext) throws AxisFault {
+        public void cleanup(MessageContext msgContext) throws AxisFault
+        {
         }
 
-        public void init(ConfigurationContext configurationContext, TransportOutDescription transportOut) throws AxisFault {
+        public void init(ConfigurationContext configurationContext,
+                         TransportOutDescription transportOut) throws AxisFault
+        {
         }
 
-        public void stop() {
+        public void stop()
+        {
         }
     }
 

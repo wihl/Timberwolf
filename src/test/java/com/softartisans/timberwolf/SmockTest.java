@@ -31,11 +31,11 @@ public class SmockTest extends SmockBase
 
     @Test
     public void testSmock() throws RemoteException {
-        SmockBase.expect(fromFile("request1.xml")).
-            andRespond(fromFile("response1.xml"));
+        expect(fromFile("request1.xml"))
+                .andRespond(fromFile("response1.xml"));
         FindItemDocument fid = FindItemDocument.Factory.newInstance();
         FindItemResponseDocument fir = stub.findItem(fid,
-                null, null, null, null);
+                                                     null, null, null, null);
     }
 
 }
