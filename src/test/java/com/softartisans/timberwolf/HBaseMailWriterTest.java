@@ -1,5 +1,6 @@
 package com.softartisans.timberwolf;
 
+import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;

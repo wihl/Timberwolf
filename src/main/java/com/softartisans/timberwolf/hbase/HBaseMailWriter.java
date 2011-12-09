@@ -1,5 +1,7 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.hbase;
 
+import com.softartisans.timberwolf.MailWriter;
+import com.softartisans.timberwolf.MailboxItem;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
