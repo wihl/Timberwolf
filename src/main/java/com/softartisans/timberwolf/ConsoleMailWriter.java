@@ -1,22 +1,20 @@
 package com.softartisans.timberwolf;
 
-import java.lang.System;
-
 /**
  * Writes a series of mails to the console, for debugging purposes.
  *
  */
 public final class ConsoleMailWriter implements MailWriter
 {
-    private final static String betweenMails = 
+    private static final String BETWEEN_MAIL =
             "===========================================================";
     
     @Override
-    public void write(Iterable<MailboxItem> mails)
+    public void write(final Iterable<MailboxItem> mails)
     {
         for (final MailboxItem mail : mails)
         {
-            System.out.println(betweenMails);
+            System.out.println(BETWEEN_MAIL);
             for (String key : mail.getHeaderKeys())
             {
                 System.out.print(key);
