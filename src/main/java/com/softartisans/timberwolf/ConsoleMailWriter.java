@@ -8,7 +8,7 @@ public final class ConsoleMailWriter implements MailWriter
 {
     private static final String BETWEEN_MAIL =
             "===========================================================";
-    
+
     @Override
     public void write(final Iterable<MailboxItem> mails)
     {
