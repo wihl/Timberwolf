@@ -14,35 +14,30 @@ import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.util.IOUtils;
 import org.apache.xmlbeans.impl.schema.FileResourceLoader;
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.*;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
 
-class SmockBase extends TestCase
+class SmockBase
 {
 
     private static Queue<Communication> communications;
     private String path;
 
-    public SmockBase(String testName)
+    public SmockBase()
     {
-        super(testName);
         path = '/' + getClass().getCanonicalName().replace('.','/') + '/';
     }
 
-    public void setUp()
+    @Before
+    public void initialize()
     {
-        SmockBase.initialize();
-    }
-
-    public void tearDown() {
-        SmockBase.verify();
-    }
-
-    public static void initialize() {
-        try {
+        try
+        {
             communications = new ArrayDeque<Communication>();
             ConfigurationContext configurationContext =
                 ConfigurationContextFactory.
@@ -59,7 +54,9 @@ class SmockBase extends TestCase
             MessageContext messageContext = new MessageContext();
             messageContext.setConfigurationContext(configurationContext);
             MessageContext.setCurrentMessageContext(messageContext);
-        } catch (AxisFault e) {
+        }
+        catch (AxisFault e)
+        {
             throw new IllegalStateException(
                     "Can not set ConfigurationContext.", e);
         }
@@ -70,13 +67,15 @@ class SmockBase extends TestCase
         return new FileResource(path + filename);
     }
 
-    protected static ResponseAction expect(Resource resource) {
+    protected static ResponseAction expect(Resource resource)
+    {
         Communication communication = new Communication();
         communication.setRequest(resource);
         SmockBase.communications.add(communication);
         return new ResponseAction(communication);
     }
 
+    @After
     protected static void verify()
     {
         if (!communications.isEmpty())
