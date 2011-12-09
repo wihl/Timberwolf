@@ -12,13 +12,15 @@ import org.junit.Test;
 
 import java.rmi.RemoteException;
 
-/**
- * Unit test for testing SmockBase
- */
+/** Test suite for testing SmockBase */
 public class SmockTest extends SmockBase
 {
     private ExchangeServiceStub stub;
 
+    /**
+     * Initializes stub to be an ExchangeServiceStub that doesn't point to an
+     * actual server
+     */
     @Before
     public void setUp() {
         try {
