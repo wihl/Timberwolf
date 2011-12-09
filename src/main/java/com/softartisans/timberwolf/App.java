@@ -4,6 +4,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Driver class to grab emails and put them in HBase.
  */
@@ -72,21 +75,15 @@ final class App
             return;
         }
 
-        System.out.print("exchange url: ");
-        System.out.println(exchangeUrl);
-        System.out.print("exchange user: ");
-        System.out.println(exchangeUser);
-        System.out.print("exchange password: ");
-        System.out.println(exchangePassword);
-        System.out.print("target user: ");
-        System.out.println(targetUser);
-        System.out.print("hbase quorum: ");
-        System.out.println(hbaseQuorum);
-        System.out.print("hbase port: ");
-        System.out.println(hbasePort);
-        System.out.print("hbase table name: ");
-        System.out.println(hbaseTableName);
-        System.out.print("hbase column family: ");
-        System.out.println(hbaseColumnFamily);
+        Logger log = LoggerFactory.getLogger(App.class);
+        log.info("Timberwolf invoked with the following arguments:");
+        log.info("Exchange URL: {}", exchangeUrl);
+        log.info("Exchange User: {}", exchangeUser);
+        log.info("Exchange Password: {}", exchangePassword);
+        log.info("Target User: {}", targetUser);
+        log.info("HBase Quorum: {}", hbaseQuorum);
+        log.info("HBase Port: {}", hbasePort);
+        log.info("HBase Table Name: {}", hbaseTableName);
+        log.info("HBase Column Family: {}", hbaseColumnFamily);
     }
 }
