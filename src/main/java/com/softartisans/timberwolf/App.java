@@ -86,7 +86,7 @@ final class App
 
             // if no HBase args, write to console (for debugging).
             // Else, write to HBase
-            
+
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser,
