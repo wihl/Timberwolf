@@ -3,6 +3,7 @@ package com.softartisans.timberwolf;
 
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.context.ConfigurationContext;
@@ -20,10 +21,24 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Queue;
 
-class SmockBase
+class SmockBase extends TestCase
 {
 
     private static Queue<Communication> communications;
+
+    public SmockBase(String testName)
+    {
+        super(testName);
+    }
+
+    public void setUp()
+    {
+        SmockBase.initialize();
+    }
+
+    public void tearDown() {
+        SmockBase.verify();
+    }
 
     public static void initialize() {
         try {
@@ -197,4 +212,5 @@ class SmockBase
         public void stop() {
         }
     }
+
 }

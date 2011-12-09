@@ -17,15 +17,14 @@ import java.rmi.RemoteException;
  * Unit test for simple App.
  */
 public class SmockTest
-    extends TestCase
+    extends SmockBase
 {
     private static final String resourcePrefix = "SmockTest/";
     private ExchangeServiceStub stub;
 
 
     public void setUp() {
-        SmockBase.initialize();
-        // client has to be created after createServer was called
+        super.setUp();
         try {
             stub = new ExchangeServiceStub("http://glue:8080/axis2/services/Exchange");
         } catch (AxisFault axisFault) {
@@ -60,10 +59,6 @@ public class SmockTest
         FindItemDocument fid = FindItemDocument.Factory.newInstance();
         ExchangeImpersonationDocument eid = ExchangeImpersonationDocument.Factory.newInstance();
         FindItemResponseDocument fir = stub.findItem(fid, null, null, null, null);
-    }
-
-    public void tearDown() {
-        SmockBase.verify();
     }
 
 }
