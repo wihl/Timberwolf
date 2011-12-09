@@ -9,5 +9,5 @@ import java.util.Iterator;
 public interface MailWriter
 {
     /** Writes the given MailboxItems into the repository. */
-    void write(Iterator<MailboxItem> mails);
+    void write(Iterable<MailboxItem> mails);
 }
