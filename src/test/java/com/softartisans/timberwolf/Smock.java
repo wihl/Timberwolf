@@ -11,9 +11,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
+import org.apache.axis2.util.IOUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Queue;
 
@@ -25,7 +28,8 @@ class Smock {
         try {
             communications = new ArrayDeque<Communication>();
             ConfigurationContext configurationContext =
-                ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
+                ConfigurationContextFactory.
+                        createConfigurationContextFromFileSystem(null, null);
             HashMap<String, TransportOutDescription> transportsOut =
                 configurationContext.getAxisConfiguration().getTransportsOut();
             for (TransportOutDescription tod: transportsOut.values())
@@ -39,13 +43,14 @@ class Smock {
             messageContext.setConfigurationContext(configurationContext);
             MessageContext.setCurrentMessageContext(messageContext);
         } catch (AxisFault e) {
-            throw new IllegalStateException("Can not set ListenerManager.defaultConfigurationContext.",e);
+            throw new IllegalStateException(
+                    "Can not set ConfigurationContext.", e);
         }
     }
 
-    public static ResponseAction expect(String xml) {
+    public static ResponseAction expect(String filename) {
         Communication communication = new Communication();
-        communication.setRequest(xml);
+        communication.setRequest(filename);
         Smock.communications.add(communication);
         return new ResponseAction(communication);
     }
@@ -54,7 +59,8 @@ class Smock {
     {
         if (!communications.isEmpty())
         {
-            Assert.fail("Expected " + communications.size() + " more calls than happened");
+            Assert.fail("Expected " + communications.size() +
+                    " more calls than happened");
         }
     }
 
@@ -67,8 +73,8 @@ class Smock {
             this.communication = communication;
         }
 
-        public void andRespond(String xml) {
-            communication.setResponse(xml);
+        public void andRespond(String filename) {
+            communication.setResponse(filename);
         }
     }
 
@@ -78,12 +84,12 @@ class Smock {
         private String response;
         private ByteArrayOutputStream output;
 
-        public void setRequest(String xml) {
-            this.request = xml;
+        public void setRequest(String filename) {
+            this.request = filename;
         }
 
-        public void setResponse(String xml) {
-            this.response = xml;
+        public void setResponse(String filename) {
+            this.response = filename;
         }
 
         public OutputStream getOutputStream()
@@ -94,33 +100,79 @@ class Smock {
 
         public void assertRequest()
         {
+            InputStream input = null;
+            ByteArrayOutputStream expected = null;
             try
             {
-                Assert.assertEquals(request, output.toString("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
+                input = Smock.class.getResourceAsStream(request);
+                if (input == null)
+                {
+                    System.out.println("Existing resources: ");
+                    for (Enumeration<URL> e = Smock.class.getClassLoader().getResources("request1.xml"); e.hasMoreElements();)
+                    {
+                        System.out.println(e.nextElement());
+                    }
+                    Assert.fail("Could not find request resource: " + request);
+                }
+                expected = new ByteArrayOutputStream();
+                IOUtils.copy(input, expected, false);
+                Assert.assertEquals(expected.toString("UTF-8"),
+                        output.toString("UTF-8"));
+            }
+            catch (UnsupportedEncodingException e)
+            {
                 e.printStackTrace();
                 Assert.fail(e.toString());
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                Assert.fail(e.toString());
+            }
+            finally
+            {
+                if (input != null)
+                {
+                    try
+                    {
+                        input.close();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        Assert.fail(e.toString());
+                    }
+                }
+                if (expected != null)
+                {
+                    try
+                    {
+                        expected.close();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        Assert.fail(e.toString());
+                    }
+                }
             }
         }
 
         public InputStream getInputStream()
         {
-            try
+            if (response == null)
             {
-                if (response == null)
-                {
-                    return new ByteArrayInputStream(new byte[0]);
-                }
-                else
-                {
-                    return new ByteArrayInputStream(response.getBytes("UTF-8"));
-                }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                Assert.fail(e.toString());
+                return new ByteArrayInputStream(new byte[0]);
             }
-            // this line will never be reached but java doesn't know that
-            return new ByteArrayInputStream(new byte[0]);
+            else
+            {
+                InputStream returnValue = Smock.class.getResourceAsStream(response);
+                if (returnValue == null)
+                {
+                    Assert.fail("Could not find response resource: " + response);
+                }
+                return returnValue;
+            }
         }
     }
 
@@ -130,8 +182,6 @@ class Smock {
             Communication communication = communications.remove();
             TransportUtils.writeMessage(msgContext, communication.getOutputStream());
             communication.assertRequest();
-            //String response = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"                xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"                xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">  <soap:Header>    <t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"595\" MinorBuildNumber=\"0\"                          xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" />  </soap:Header>  <soap:Body>    <FindItemResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\"                       xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"                       xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">      <m:ResponseMessages>        <m:FindItemResponseMessage ResponseClass=\"Success\">          <m:ResponseCode>NoError</m:ResponseCode>          <m:RootFolder TotalItemsInView=\"10\" IncludesLastItemInRange=\"true\">            <t:Items>              <t:Message>                <t:ItemId Id=\"AS4AUn=\" ChangeKey=\"fsVU4==\" />              </t:Message>              <t:Message>                <t:ItemId Id=\"AS4AUM=\" ChangeKey=\"fsVUA==\" />              </t:Message>            </t:Items>          </m:RootFolder>        </m:FindItemResponseMessage>      </m:ResponseMessages>    </FindItemResponse>  </soap:Body></soap:Envelope>";
-            //InputStream inStream = new ByteArrayInputStream(response.getBytes("UTF-8"));
             msgContext.setProperty(MessageContext.TRANSPORT_IN, communication.getInputStream());
             TransportUtils.setResponseWritten(msgContext, true);
             return InvocationResponse.CONTINUE;
