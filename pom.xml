@@ -102,17 +102,6 @@
 	</configuration>
       </plugin>
 
-    </plugins>
-    <resources>
-      <resource>
-        <directory>target/generated-sources/axis2/wsdl2code/resources</directory>
-        <filtering>false</filtering>
-      </resource>
-    </resources>
-  </build>
-
-  <reporting>
-    <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>javancss-maven-plugin</artifactId>
@@ -134,7 +123,13 @@
 	</configuration>
       </plugin>
     </plugins>
-  </reporting>
+    <resources>
+      <resource>
+        <directory>target/generated-sources/axis2/wsdl2code/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+  </build>
 
   <dependencies>
     <dependency>
