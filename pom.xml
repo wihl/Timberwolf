@@ -80,9 +80,10 @@
         <version>2.5.1</version>
 	<configuration>
 	  <instrumentation>
-	    <excludes>
-	      <exclude>**/generated-sources/**</exclude>
-	    </excludes>
+	    <ignores>
+	      <ignore>com.microsoft.*</ignore>
+	      <ignore>com.softartisans.timberwolf.exchangeservice</ignore>
+	    </ignores>
 	  </instrumentation>
 	</configuration>
       </plugin>
