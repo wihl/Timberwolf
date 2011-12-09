@@ -13,6 +13,7 @@ import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
 
 import java.io.*;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
 
@@ -22,6 +23,7 @@ class Smock {
 
     public static void initialize() {
         try {
+            communications = new ArrayDeque<Communication>();
             ConfigurationContext configurationContext =
                 ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
             HashMap<String, TransportOutDescription> transportsOut =
