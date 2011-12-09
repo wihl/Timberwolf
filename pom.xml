@@ -93,6 +93,15 @@
 	  <whiteList>com.microsoft.*:com.softartisans.timberwolf.exchangeservice.*:org.apache.*</whiteList>
 	</configuration>
       </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8</version>
+	<configuration>
+	  <excludePackageNames>com.microsoft.*:com.softartisans.timberwolf.exchangeservice*:org.*</excludePackageNames>
+	</configuration>
+      </plugin>
+
     </plugins>
     <resources>
       <resource>
@@ -112,14 +121,6 @@
 	  <excludes>
 	    <exclude>**/generated-sources/**</exclude>
 	  </excludes>
-	</configuration>
-      </plugin>
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
-	<configuration>
-	  <excludePackageNames>com.microsoft.*</excludePackageNames>
 	</configuration>
       </plugin>
       <plugin>
