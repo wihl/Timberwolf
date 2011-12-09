@@ -70,7 +70,8 @@
 	  <targetJdk>1.6</targetJdk>
 	  <excludes>
 	    <exclude>**/microsoft/**</exclude>
-	    <exclude>**/generated-sources/**</exclude>
+	    <exclude>**/org/xmlsoap/**</exclude>
+	    <exclude>**/org/w3/**</exclude>
 	  </excludes>
 	</configuration>
       </plugin>
@@ -83,6 +84,8 @@
 	    <excludes>
 	      <exclude>com/microsoft/**</exclude>
 	      <exclude>com/softartisans/timberwolf/exchangeservice/**</exclude>
+	      <exclude>org/xmlsoap/**</exclude>
+	      <exclude>org/w3/**</exclude>
 	    </excludes>
 	  </instrumentation>
 	</configuration>
