@@ -4,6 +4,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import org.apache.log4j.BasicConfigurator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +78,7 @@ final class App
         }
 
         Logger log = LoggerFactory.getLogger(App.class);
+        BasicConfigurator.configure();
         log.info("Timberwolf invoked with the following arguments:");
         log.info("Exchange URL: {}", exchangeUrl);
         log.info("Exchange User: {}", exchangeUser);
