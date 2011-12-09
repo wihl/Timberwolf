@@ -78,17 +78,20 @@ final class App
             log.info("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
-                    hbaseQuorum == null && hbasePort == null && hbaseTableName == null;
+                    hbaseQuorum == null && hbasePort == null
+                    && hbaseTableName == null;
             boolean allHBaseArgs =
-                    hbaseQuorum != null && hbasePort != null && hbaseTableName != null;
+                    hbaseQuorum != null && hbasePort != null
+                    && hbaseTableName != null;
 
-            // if no HBase args, write to console (for debugging). Else, write to HBase
+            // if no HBase args, write to console (for debugging).
+            // Else, write to HBase
             
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser,
-                        "HBase Quorum, HBase Port, and HBase Table Name " +
-                        "must all be specified if at least one is specified");
+                        "HBase Quorum, HBase Port, and HBase Table Name must"
+                        + " all be specified if at least one is specified");
             }
         }
         catch (CmdLineException e)
