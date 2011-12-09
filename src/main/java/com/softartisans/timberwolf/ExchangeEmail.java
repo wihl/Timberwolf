@@ -5,7 +5,11 @@ import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
 import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType;
 
+import java.text.DateFormat;
+
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -15,7 +19,8 @@ import java.util.Map;
  * <ul>
  * <li>"Body": The body text of the email (in either HTML or plain text).
  * <li>"Subject": The subject line of the email.
- * <li>"Time Sent": The time the email was sent, formatted with the default Date.toString() formatting.
+ * <li>"Time Sent": The time the email was sent, formatted with the MEDIUM date
+ * and time formatting from the US locale.
  * <li>"Item ID": The unique ID assigned to this item by Exchange.
  * <li>"Sender": The email address of the user who sent the email.
  * <li>"To": A semicolon-delimited list of recipients.
@@ -36,7 +41,7 @@ public class ExchangeEmail implements MailboxItem
     private static final char EMAIL_DELIMITER = ';';
 
     /** The headers that this email exports. */
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
 
     public ExchangeEmail(final MessageType message)
     {
@@ -54,8 +59,12 @@ public class ExchangeEmail implements MailboxItem
 
         if (message.isSetDateTimeSent())
         {
-            String time = message.getDateTimeSent().getTime().toString();
-            headers.put(TIME_SENT_KEY, time);
+            Date time = message.getDateTimeSent().getTime();
+            // I'd really like an equivalent of C#'s InvariantCulture, but it
+            // looks like this is the closest I can get in Java.
+            DateFormat format = DateFormat.getDateTimeInstance(
+                DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
+            headers.put(TIME_SENT_KEY, format.format(time));
         }
 
         if (message.isSetItemId())
