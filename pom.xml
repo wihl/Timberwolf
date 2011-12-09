@@ -70,6 +70,7 @@
 	  <targetJdk>1.6</targetJdk>
 	  <excludes>
 	    <exclude>**/microsoft/**</exclude>
+	    <exclude>**/generated-sources/**</exclude>
 	  </excludes>
 	</configuration>
       </plugin>
