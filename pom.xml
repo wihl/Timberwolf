@@ -68,7 +68,9 @@
 	<version>2.6</version>
 	<configuration>
 	  <targetJdk>1.6</targetJdk>
-	  <exclude>**/generated-sources/**</exclude>
+	  <excludes>
+	    <exclude>**/microsoft/**</exclude>
+	  </excludes>
 	</configuration>
       </plugin>
       <plugin>
@@ -81,6 +83,14 @@
 	      <exclude>**/generated-sources/**</exclude>
 	    </excludes>
 	  </instrumentation>
+	</configuration>
+      </plugin>
+      <plugin>
+	<groupId>com.google.testability-explorer</groupId>
+	<artifactId>maven-testability-plugin</artifactId>
+	<version>1.3.3</version>
+	<configuration>
+	  <whiteList>com.microsoft.*:com.softartisans.timberwolf.exchangeservice.*:org.apache.*</whiteList>
 	</configuration>
       </plugin>
     </plugins>
