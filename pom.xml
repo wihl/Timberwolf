@@ -50,6 +50,9 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.3.3</version>
+	<configuration>
+	  <onlyAnalyze>com.softartisans.timberwolf.*</onlyAnalyze>
+	</configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
