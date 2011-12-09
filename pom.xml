@@ -80,10 +80,10 @@
         <version>2.5.1</version>
 	<configuration>
 	  <instrumentation>
-	    <ignores>
-	      <ignore>com.microsoft.*</ignore>
-	      <ignore>com.softartisans.timberwolf.exchangeservice</ignore>
-	    </ignores>
+	    <excludes>
+	      <exclude>com/microsoft/**</exclude>
+	      <exclude>com/softartisans/timberwolf/exchangeservice/**</exclude>
+	    </excludes>
 	  </instrumentation>
 	</configuration>
       </plugin>
