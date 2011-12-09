@@ -78,7 +78,7 @@ final class App
         }
 
         Logger log = LoggerFactory.getLogger(App.class);
-        BasicConfigurator.configure();
+
         log.info("Timberwolf invoked with the following arguments:");
         log.info("Exchange URL: {}", exchangeUrl);
         log.info("Exchange User: {}", exchangeUser);
