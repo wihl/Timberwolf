@@ -1,7 +1,5 @@
 package com.softartisans.timberwolf;
 
-import java.util.Iterator;
-
 /**
  * MailWriter is an object that can take some MailboxItems and write them into
  * some repository.
