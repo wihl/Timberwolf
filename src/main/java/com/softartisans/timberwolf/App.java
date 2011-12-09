@@ -25,7 +25,7 @@ final class App
     private String exchangePassword;
 
     @Option(required=true, name="--get-email-for",
-            usage="The user for whom to retrieve emai.")
+            usage="The user for whom to retrieve email.")
     private String targetUser;
 
     @Option(required=true, name="--hbase-quorum",
