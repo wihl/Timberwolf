@@ -63,16 +63,11 @@ public class SmockTest
                 andRespond("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n               xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n    <soap:Header>\n        <t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"595\" MinorBuildNumber=\"0\"\n                             xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" />\n    </soap:Header>\n    <soap:Body>\n        <FindItemResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                          xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                          xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">\n            <m:ResponseMessages>\n                <m:FindItemResponseMessage ResponseClass=\"Success\">\n                <m:ResponseCode>NoError</m:ResponseCode>\n                    <m:RootFolder TotalItemsInView=\"10\" IncludesLastItemInRange=\"true\">\n                        <t:Items>\n                            <t:Message>\n                                <t:ItemId Id=\"AS4AUn=\" ChangeKey=\"fsVU4==\" />\n                            </t:Message>\n                            <t:Message>\n                                <t:ItemId Id=\"AS4AUM=\" ChangeKey=\"fsVUA==\" />\n                            </t:Message>\n                        </t:Items>\n                    </m:RootFolder>\n                </m:FindItemResponseMessage>\n            </m:ResponseMessages>\n        </FindItemResponse>\n    </soap:Body>\n</soap:Envelope>");
         FindItemDocument fid = FindItemDocument.Factory.newInstance();
         ExchangeImpersonationDocument eid = ExchangeImpersonationDocument.Factory.newInstance();
-        MailboxCultureDocument mcd = MailboxCultureDocument.Factory.newInstance();
-        RequestServerVersionDocument rsvd = RequestServerVersionDocument.Factory.newInstance();
-        TimeZoneContextDocument tzcd = TimeZoneContextDocument.Factory.newInstance();
         FindItemResponseDocument fir = stub.findItem(fid, null, null, null, null);
-//        mockServer.verify();
-        Assert.fail();
     }
 
     public void tearDown() {
-        //        mockServer.verify();
+        Smock.verify();
     }
 
 }

@@ -50,6 +50,14 @@ class Smock {
         return new ResponseAction(communication);
     }
 
+    public static void verify()
+    {
+        if (!communications.isEmpty())
+        {
+            Assert.fail("Expected " + communications.size() + " more calls than happened");
+        }
+    }
+
     public static class ResponseAction {
 
 
