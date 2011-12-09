@@ -2,7 +2,6 @@ package com.softartisans.timberwolf;
 
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.axis2.AxisFault;
@@ -52,6 +51,7 @@ public class SmockTest
     }
 
     public void testSmock() throws RemoteException {
+        fromFile("request1.xml");
         SmockBase.expect(resourcePrefix + "request1.xml").
             andRespond(resourcePrefix + "response1.xml");
         //SmockBase.expect("<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body><xml-fragment /></soapenv:Body></soapenv:Envelope>").

@@ -13,6 +13,7 @@ import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.TransportSender;
 import org.apache.axis2.transport.TransportUtils;
 import org.apache.axis2.util.IOUtils;
+import org.apache.xmlbeans.impl.schema.FileResourceLoader;
 
 import java.io.*;
 import java.net.URL;
@@ -25,10 +26,12 @@ class SmockBase extends TestCase
 {
 
     private static Queue<Communication> communications;
+    private String path;
 
     public SmockBase(String testName)
     {
         super(testName);
+        path = '/' + getClass().getCanonicalName().replace('.','/') + '/';
     }
 
     public void setUp()
@@ -64,14 +67,19 @@ class SmockBase extends TestCase
         }
     }
 
-    public static ResponseAction expect(String filename) {
+    protected Resource fromFile(String filename)
+    {
+        return new FileResource(path + filename);
+    }
+
+    protected static ResponseAction expect(String filename) {
         Communication communication = new Communication();
         communication.setRequest(filename);
         SmockBase.communications.add(communication);
         return new ResponseAction(communication);
     }
 
-    public static void verify()
+    protected static void verify()
     {
         if (!communications.isEmpty())
         {
@@ -80,7 +88,29 @@ class SmockBase extends TestCase
         }
     }
 
-    public static class ResponseAction {
+    protected static interface Resource
+    {
+        InputStream getStream();
+    }
+
+    private class FileResource implements Resource
+    {
+
+        private String filename;
+
+        public FileResource(String filename)
+        {
+            this.filename = filename;
+        }
+
+        @Override
+        public InputStream getStream()
+        {
+            return SmockBase.class.getResourceAsStream(filename);
+        }
+    }
+
+    protected static class ResponseAction {
 
 
         private Communication communication;
