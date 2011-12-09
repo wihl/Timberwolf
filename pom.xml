@@ -71,6 +71,7 @@
 	  <excludes>
 	    <exclude>**/microsoft/**</exclude>
 	    <exclude>**/org/xmlsoap/**</exclude>
+	    <exclude>**/exchangeservice/**</exclude>
 	    <exclude>**/org/w3/**</exclude>
 	  </excludes>
 	</configuration>
