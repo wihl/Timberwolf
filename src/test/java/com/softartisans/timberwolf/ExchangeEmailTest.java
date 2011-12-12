@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.test;
 
 import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
