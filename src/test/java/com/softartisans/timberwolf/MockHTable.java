@@ -128,6 +128,11 @@ public class MockHTable implements HTableInterface {
   private NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data = new TreeMap<byte[], NavigableMap<byte[],NavigableMap<byte[],NavigableMap<Long,byte[]>>>>(Bytes.BYTES_COMPARATOR);
 
   /**
+   * The table name, if specified in create.
+   */
+  private String name;
+
+  /**
    * Helper method to convert some data into a list of KeyValue's
    *
    * @param row
@@ -171,11 +176,18 @@ public class MockHTable implements HTableInterface {
   }
 
   /**
-   * Clients should not rely on table names so this returns null.
-   * @return null
+   * Clients should not rely on table names so this returns null, unless
+   * specified.
+   * @return null, unless the table name has been specified.
    */
   @Override
-  public byte[] getTableName() { return null; }
+  public byte[] getTableName() {
+      if (name != null)
+      {
+          return Bytes.toBytes(name);
+      }
+      return null;
+  }
 
   /**
    * No configuration needed to work so this returns null.
@@ -592,6 +604,18 @@ public class MockHTable implements HTableInterface {
    */
   public static MockHTable create(){
     return new MockHTable();
+  }
+
+  /**
+   * Creates a MockHTable with the specified name.
+   * @param name The name of this MockHTable.
+   * @return a new MockHTable.
+   */
+  public static MockHTable create(String name)
+  {
+      MockHTable table = new MockHTable();
+      table.name = name;
+      return table;
   }
 
   /**

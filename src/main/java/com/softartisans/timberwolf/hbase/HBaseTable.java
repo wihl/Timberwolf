@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf.hbase;
 
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
@@ -15,11 +16,11 @@ import java.util.List;
 public class HBaseTable implements IHBaseTable
 {
     private static Logger logger = LoggerFactory.getLogger(HBaseTable.class);
-    private HTable table;
+    private HTableInterface table;
     private List<Put> puts;
     private final String name;
 
-    protected HBaseTable(HTable table)
+    public HBaseTable(HTableInterface table)
     {
         this.table = table;
         name = Bytes.toString(table.getTableName());

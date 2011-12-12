@@ -1,6 +1,9 @@
 package com.softartisans.timberwolf;
 
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+import com.softartisans.timberwolf.hbase.HBaseManager;
+import com.softartisans.timberwolf.hbase.HBaseTable;
+import com.softartisans.timberwolf.hbase.IHBaseTable;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -139,6 +142,20 @@ public class HBaseMailWriterTest
         writer.write(mails.iterator());
 
         assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
+    }
+
+    public void testInterfaces()
+    {
+        HBaseManager hbase = new HBaseManager();
+        MockHTable mockHTable = MockHTable.create("defaultTableName");
+        String tableName = Bytes.toString(mockHTable.getTableName());
+
+        IHBaseTable table = new HBaseTable(mockHTable);
+        Assert.assertEquals(tableName, table.getName());
+        hbase.add(table);
+
+        IHBaseTable managerTable = hbase.get(tableName);
+        Assert.assertEquals(table, managerTable);
     }
 
 }
