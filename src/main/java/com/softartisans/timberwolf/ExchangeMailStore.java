@@ -1,8 +1,5 @@
 package com.softartisans.timberwolf;
 
-import java.util.Iterator;
-
-
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseDocument;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemType;
@@ -20,13 +17,16 @@ import java.rmi.RemoteException;
 
 import org.apache.axis2.AxisFault;
 
-
 /**
  * ExchangeMailStore represents a remote Exchange mail store.  It uses the
  * Exchange Web Services API to communicate with the Exchange server.
  */
 public class ExchangeMailStore implements MailStore
 {
+    ExchangeServiceStub stub;
+    private String user;
+    private String password;
+
     /**
      * Constructor that takes authentication information and a service endpoint.
      *
