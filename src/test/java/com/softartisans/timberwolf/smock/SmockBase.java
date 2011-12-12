@@ -66,7 +66,7 @@ public class SmockBase
             {
                 if (tod!=null)
                 {
-                    tod.setSender(new MockTransportSender());
+                    tod.setSender(new MockTransportSender(communications));
                 }
             }
             MessageContext messageContext = new MessageContext();
@@ -274,10 +274,18 @@ public class SmockBase
      * The class handed to axis as the TransportSender, which actually just
      * asserts the request is correct and returns the mock response.
      */
-    private class MockTransportSender
+    private static class MockTransportSender
             extends AbstractHandler
             implements TransportSender
     {
+
+        private Queue<Communication> communications;
+
+        public MockTransportSender(
+                Queue<Communication> communications)
+        {
+            this.communications = communications;
+        }
 
         public InvocationResponse invoke(MessageContext msgContext)
                 throws AxisFault
