@@ -1,12 +1,12 @@
 package com.softartisans.timberwolf;
 
+import com.softartisans.timberwolf.smock.SmockBase;
 import junit.framework.Assert;
 
 import org.apache.axis2.AxisFault;
 import com.softartisans.timberwolf.exchangeservice.ExchangeServiceStub;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseDocument;
-import com.microsoft.schemas.exchange.services._2006.types.ExchangeImpersonationDocument;
 import org.junit.Before;
 import org.junit.Test;
 

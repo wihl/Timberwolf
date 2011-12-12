@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.smock;
 
 
 import junit.framework.Assert;
