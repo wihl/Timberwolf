@@ -20,7 +20,7 @@ public class HBaseMailWriter implements MailWriter
             LoggerFactory.getLogger(HBaseMailWriter.class);
 
     /** The HTableInterface to store MailboxItems into. */
-    private HTableInterface pMailTable;
+    private IHBaseTable pMailTable;
 
     /** The selected MailboxItem header to use as a row key. */
     private String pKeyHeader;
@@ -34,18 +34,18 @@ public class HBaseMailWriter implements MailWriter
     /** The default header, whose value will be used as a rowkey. */
     private static final String DEFAULT_KEY_HEADER = "Item ID";
 
-    public HBaseMailWriter(final HTableInterface mailTable)
+    public HBaseMailWriter(final IHBaseTable mailTable)
     {
         this(mailTable, DEFAULT_KEY_HEADER, DEFAULT_COLUMN_FAMILY);
     }
 
-    public HBaseMailWriter(final HTableInterface mailTable,
+    public HBaseMailWriter(final IHBaseTable mailTable,
                            final String keyHeader)
     {
         this(mailTable, keyHeader, DEFAULT_COLUMN_FAMILY);
     }
 
-    public HBaseMailWriter(final HTableInterface mailTable,
+    public HBaseMailWriter(final IHBaseTable mailTable,
                            final String keyHeader,
                            final String columnFamily)
     {
@@ -72,14 +72,10 @@ public class HBaseMailWriter implements MailWriter
                         Bytes.toBytes(mailboxItem.getHeader(headerKey)));
             }
 
-            try
-            {
-                pMailTable.put(mailboxItemPut);
-            } catch (IOException e)
-            {
-               logger.error("Error putting MailboxItem into table.");
-            }
+            pMailTable.put(mailboxItemPut);
+
         }
+        pMailTable.flush();
     }
 
 }

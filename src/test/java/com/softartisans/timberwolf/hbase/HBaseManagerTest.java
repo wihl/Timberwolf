@@ -64,6 +64,14 @@ public class HBaseManagerTest
     }
 
     /**
+     * Test that we can get a table that previously existed.
+     */
+    public void testGetPreviouslyExisted()
+    {
+        //TODO: Hookups for connections against HBase cluster.
+    }
+
+    /**
      * Creates an IHBaseTable with a specific name.
      * @param name The name of the IHBaseTable.
      * @return A IHBaseTable with a specific name.

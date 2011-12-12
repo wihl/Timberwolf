@@ -135,7 +135,9 @@ public class HBaseMailWriterTest
         List<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
 
-        HBaseMailWriter writer = new HBaseMailWriter(mockHTable, arbitraryHeader, arbitraryFamily);
+        HBaseTable table = new HBaseTable(mockHTable);
+
+        HBaseMailWriter writer = new HBaseMailWriter(table, arbitraryHeader, arbitraryFamily);
 
         writer.write(mails.iterator());
 
