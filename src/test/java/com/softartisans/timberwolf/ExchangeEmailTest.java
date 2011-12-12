@@ -9,20 +9,25 @@ import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
 
 import java.util.Calendar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
+/** Test the ExchangeEmail plugin. */
 public class ExchangeEmailTest
 {
     @Test
-    public void testSubject()
+    public final void testSubject()
     {
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetSubject()).thenReturn(true);
         when(mockedMessage.getSubject()).thenReturn("Test Email");
-        
+
         MailboxItem mail = new ExchangeEmail(mockedMessage);
         assertTrue(mail.hasKey("Subject"));
         assertEquals("Test Email", mail.getHeader("Subject"));
@@ -36,12 +41,18 @@ public class ExchangeEmailTest
     }
 
     @Test
-    public void testTimeSent()
+    public final void testTimeSent()
     {
+        final int year = 2011,
+                  month = 12,
+                  day = 7,
+                  hour = 12,
+                  minute = 55,
+                  second = 30;
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetDateTimeSent()).thenReturn(true);
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2011, 12, 7, 12, 55, 30);
+        calendar.set(year, month, day, hour, minute, second);
         when(mockedMessage.getDateTimeSent()).thenReturn(calendar);
 
         MailboxItem mail = new ExchangeEmail(mockedMessage);
@@ -56,10 +67,10 @@ public class ExchangeEmailTest
     }
 
     @Test
-    public void testBody()
+    public final void testBody()
     {
         MessageType mockedMessage = mock(MessageType.class);
-        when(mockedMessage.isSetBody()).thenReturn(true);        
+        when(mockedMessage.isSetBody()).thenReturn(true);
         BodyType body = BodyType.Factory.newInstance();
         body.setStringValue("This is an email message.");
         when(mockedMessage.getBody()).thenReturn(body);
@@ -77,7 +88,7 @@ public class ExchangeEmailTest
     }
 
     @Test
-    public void testItemId()
+    public final void testItemId()
     {
         MessageType mockedMessage = mock(MessageType.class);
         ItemIdType mockedId = mock(ItemIdType.class);
@@ -98,7 +109,7 @@ public class ExchangeEmailTest
     }
 
     @Test
-    public void testSender()
+    public final void testSender()
     {
         MessageType mockedMessage = mock(MessageType.class);
         SingleRecipientType sender = mock(SingleRecipientType.class);
@@ -149,20 +160,22 @@ public class ExchangeEmailTest
 
     private static ArrayOfRecipientsType assertRecipients()
     {
+        final String email1 = "email1@domain.com";
+        final String email2 = "email2@domain.com";
         ArrayOfRecipientsType mockedArray = mock(ArrayOfRecipientsType.class);
         EmailAddressType[] mockedAddresses = new EmailAddressType[2];
         mockedAddresses[0] = mock(EmailAddressType.class);
         mockedAddresses[1] = mock(EmailAddressType.class);
 
         when(mockedArray.getMailboxArray()).thenReturn(mockedAddresses);
-        when(mockedAddresses[0].getEmailAddress()).thenReturn("email1@domain.com");
-        when(mockedAddresses[1].getEmailAddress()).thenReturn("email2@domain.com");
+        when(mockedAddresses[0].getEmailAddress()).thenReturn(email1);
+        when(mockedAddresses[1].getEmailAddress()).thenReturn(email2);
 
         return mockedArray;
     }
 
     @Test
-    public void testToRecipientId()
+    public final void testToRecipientId()
     {
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetToRecipients()).thenReturn(true);
@@ -171,11 +184,12 @@ public class ExchangeEmailTest
 
         MailboxItem mail = new ExchangeEmail(mockedMessage);
         assertTrue(mail.hasKey("To"));
-        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("To"));
+        assertEquals("email1@domain.com;email2@domain.com;",
+                     mail.getHeader("To"));
     }
 
     @Test
-    public void testCcRecipientId()
+    public final void testCcRecipientId()
     {
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetCcRecipients()).thenReturn(true);
@@ -184,11 +198,12 @@ public class ExchangeEmailTest
 
         MailboxItem mail = new ExchangeEmail(mockedMessage);
         assertTrue(mail.hasKey("Cc"));
-        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("Cc"));
+        assertEquals("email1@domain.com;email2@domain.com;",
+                     mail.getHeader("Cc"));
     }
 
     @Test
-    public void testBccRecipientId()
+    public final void testBccRecipientId()
     {
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetBccRecipients()).thenReturn(true);
@@ -197,11 +212,12 @@ public class ExchangeEmailTest
 
         MailboxItem mail = new ExchangeEmail(mockedMessage);
         assertTrue(mail.hasKey("Bcc"));
-        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("Bcc"));
+        assertEquals("email1@domain.com;email2@domain.com;",
+                     mail.getHeader("Bcc"));
     }
 
     @Test
-    public void testMultipleProperties()
+    public final void testMultipleProperties()
     {
         MessageType mockedMessage = mock(MessageType.class);
         BodyType mockedBody = mock(BodyType.class);
@@ -225,7 +241,8 @@ public class ExchangeEmailTest
         assertFalse(mail.hasKey("Bcc"));
 
         String[] keys = mail.getHeaderKeys();
-        assertEquals(3, keys.length);
+        final int expectedKeyLength = 3;
+        assertEquals(expectedKeyLength, keys.length);
         assertEquals("Body", keys[0]);
         assertEquals("Subject", keys[1]);
         assertEquals("To", keys[2]);
@@ -235,7 +252,8 @@ public class ExchangeEmailTest
         assertNull(mail.getHeader("Time Sent"));
         assertNull(mail.getHeader("Item ID"));
         assertNull(mail.getHeader("Sender"));
-        assertEquals("email1@domain.com;email2@domain.com;", mail.getHeader("To"));
+        assertEquals("email1@domain.com;email2@domain.com;",
+                     mail.getHeader("To"));
         assertNull(mail.getHeader("Cc"));
         assertNull(mail.getHeader("Bcc"));
     }
