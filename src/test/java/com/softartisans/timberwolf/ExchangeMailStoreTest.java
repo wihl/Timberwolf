@@ -8,7 +8,7 @@ public class ExchangeMailStoreTest
     @Test
     public void testGetSomeMail()
     {
-        ExchangeMailStore store = new ExchangeMailStore("abenjamin", "pass@word1", "https://int.tartarus.com/ews/exchange.asmx");
+        ExchangeMailStore store = new ExchangeMailStore("abenjamin", "pass@word1", "https://devexch01.int.tartarus.com/ews/exchange.asmx");
         store.getMail("abenjamin");
     }
 }
