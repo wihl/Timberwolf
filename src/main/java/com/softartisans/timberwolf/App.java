@@ -1,10 +1,10 @@
 package com.softartisans.timberwolf;
 
+import org.apache.log4j.BasicConfigurator;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
-import org.apache.log4j.BasicConfigurator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

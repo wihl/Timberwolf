@@ -1,22 +1,22 @@
 package com.softartisans.timberwolf.test;
 
-import com.microsoft.schemas.exchange.services._2006.types.MessageType;
-import com.microsoft.schemas.exchange.services._2006.types.BodyType;
-import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
 import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType;
+import com.microsoft.schemas.exchange.services._2006.types.BodyType;
 import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
+import com.microsoft.schemas.exchange.services._2006.types.MessageType;
+import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
 
 import java.util.Calendar;
 
-import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /** Test the ExchangeEmail plugin. */
 public class ExchangeEmailTest

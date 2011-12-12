@@ -118,6 +118,9 @@
     <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
+    <module name="ImportOrder">
+      <property name="separated" value="true" />
+    </module>
 
 
     <!-- Checks for Size Violations.          -->
