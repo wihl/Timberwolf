@@ -261,7 +261,6 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.1.2</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 
