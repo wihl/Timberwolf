@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ public class HBaseTable implements IHBaseTable
 {
     private static Logger logger = LoggerFactory.getLogger(HBaseTable.class);
     private HTableInterface table;
-    private List<Put> puts;
+    private List<Put> puts = new ArrayList<Put>();
     private final String name;
 
     public HBaseTable(HTableInterface table)
