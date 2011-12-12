@@ -1,9 +1,7 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.hbase;
 
-import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import com.softartisans.timberwolf.hbase.HBaseManager;
-import com.softartisans.timberwolf.hbase.HBaseTable;
-import com.softartisans.timberwolf.hbase.IHBaseTable;
+import com.softartisans.timberwolf.MailboxItem;
+import com.softartisans.timberwolf.MockHTable;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;

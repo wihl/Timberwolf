@@ -1,19 +1,16 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.hbase;
 
-import com.softartisans.timberwolf.hbase.HBaseTable;
-import com.softartisans.timberwolf.hbase.IHBaseTable;
+import com.softartisans.timberwolf.MockHTable;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit test for simple App.
+ * Unit tests for HBaseTable.
  */
 public class HBaseTableTest
         extends TestCase
