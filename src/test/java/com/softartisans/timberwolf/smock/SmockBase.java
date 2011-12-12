@@ -42,31 +42,45 @@ public class SmockBase
     @Before
     public void initialize()
     {
+        communications = new ArrayDeque<Communication>();
+        MessageContext messageContext =
+                MessageContext.getCurrentMessageContext();
+        if (messageContext == null)
+        {
+            messageContext = new MessageContext();
+            MessageContext.setCurrentMessageContext(messageContext);
+        }
+        ConfigurationContext configurationContext =
+                messageContext.getConfigurationContext();
+        if (configurationContext == null)
+        {
+            configurationContext = defaultConfigurationContext();
+            messageContext.setConfigurationContext(configurationContext);
+        }
+        HashMap<String, TransportOutDescription> transportsOut
+                = configurationContext.getAxisConfiguration()
+                                      .getTransportsOut();
+        for (TransportOutDescription tod : transportsOut.values())
+        {
+            if (tod != null)
+            {
+                tod.setSender(new MockTransportSender(communications));
+            }
+        }
+    }
+
+    private ConfigurationContext defaultConfigurationContext()
+    {
         try
         {
-            communications = new ArrayDeque<Communication>();
-            ConfigurationContext configurationContext =
-                    ConfigurationContextFactory
-                            .createConfigurationContextFromFileSystem(null,
-                                                                      null);
-            HashMap<String, TransportOutDescription> transportsOut
-                    = configurationContext.getAxisConfiguration()
-                                          .getTransportsOut();
-            for (TransportOutDescription tod: transportsOut.values())
-            {
-                if (tod!=null)
-                {
-                    tod.setSender(new MockTransportSender(communications));
-                }
-            }
-            MessageContext messageContext = new MessageContext();
-            messageContext.setConfigurationContext(configurationContext);
-            MessageContext.setCurrentMessageContext(messageContext);
+            return ConfigurationContextFactory
+                    .createConfigurationContextFromFileSystem(null,
+                                                              null);
         }
         catch (AxisFault e)
         {
             throw new IllegalStateException("Can not set ConfigurationContext.",
-                    e);
+                                            e);
         }
     }
 
