@@ -1,13 +1,21 @@
 package com.softartisans.timberwolf;
 
+import com.cloudera.alfredo.client.AuthenticationException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import com.cloudera.alfredo.client.AuthenticatedURL;
 
 import org.apache.log4j.BasicConfigurator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Driver class to grab emails and put them in HBase.
@@ -19,29 +27,29 @@ final class App
                   + "example: https://example.contoso.com/ews/exchange.asmx")
     private String exchangeUrl;
 
-    @Option(required = true, name = "--exchange-user",
+    @Option(required = false, name = "--exchange-user",
             usage = "The username that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangeUser;
 
-    @Option(required = true, name = "--exchange-password",
+    @Option(required = false, name = "--exchange-password",
             usage = "The password that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangePassword;
 
-    @Option(required = true, name = "--get-email-for",
+    @Option(required = false, name = "--get-email-for",
             usage = "The user for whom to retrieve email.")
     private String targetUser;
 
-    @Option(required = true, name = "--hbase-quorum",
+    @Option(required = false, name = "--hbase-quorum",
             usage = "The Zookeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
-    @Option(required = true, name = "--hbase-port",
+    @Option(required = false, name = "--hbase-port",
             usage = "The port used to connect to HBase.")
     private String hbasePort;
 
-    @Option(required = true, name = "--hbase-table",
+    @Option(required = false, name = "--hbase-table",
             usage = "The HBase table name that email data will be imported "
                   + "into.")
     private String hbaseTableName;
@@ -56,11 +64,13 @@ final class App
     }
 
     public static void main(final String[] args)
+            throws IOException, AuthenticationException
     {
         new App().run(args);
     }
 
     private void run(final String[] args)
+            throws IOException, AuthenticationException
     {
         CmdLineParser parser = new CmdLineParser(this);
 
@@ -88,5 +98,23 @@ final class App
         log.info("HBase Port: {}", hbasePort);
         log.info("HBase Table Name: {}", hbaseTableName);
         log.info("HBase Column Family: {}", hbaseColumnFamily);
+
+        AuthenticatedURL.Token token = new AuthenticatedURL.Token();
+        URL url = new URL(exchangeUrl);
+        HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
+        System.out.println();
+        System.out.println("Token value: " + token);
+        System.out.println("Status code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
+        System.out.println();
+        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line = reader.readLine();
+            while (line != null) {
+                System.out.println(line);
+                line = reader.readLine();
+            }
+            reader.close();
+        }
+        System.out.println();
     }
 }
