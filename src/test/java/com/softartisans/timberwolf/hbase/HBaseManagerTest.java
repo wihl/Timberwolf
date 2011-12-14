@@ -83,26 +83,15 @@ public class HBaseManagerTest
     public void testLocalConnect()
     {
         String tableName = "testTable";
-        List<String> columnFamiles = new ArrayList<String>();
-        columnFamiles.add("h");
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add("h");
 
         Configuration configuration = HBaseConfiguration.create();
+        HBaseManager hbase = new HBaseManager(configuration);
+        hbase.createTable(tableName, columnFamilies);
+        IHBaseTable table = hbase.getTable(tableName);
 
-        try
-        {
-            HBaseManager hbase = new HBaseManager(configuration);
-            hbase.createTable(tableName, columnFamiles);
-            IHBaseTable table = hbase.getTable(tableName);
-
-//            HBaseAdmin hbase = new HBaseAdmin(configuration);
-//            HTable table = new HTable(configuration, "testtable");
-           logger.info(Bytes.toString(table.getTableName()));
-
-        } catch (Exception e)
-        {
-
-        }
-
+        Assert.assertEquals(tableName, table.getName());
     }
 
     /**
