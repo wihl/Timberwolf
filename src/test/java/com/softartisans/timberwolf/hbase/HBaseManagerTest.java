@@ -1,12 +1,8 @@
 package com.softartisans.timberwolf.hbase;
 
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +15,6 @@ import static org.mockito.Mockito.*;
  * Unit test for HBaseManager.
  */
 public class HBaseManagerTest
-        extends TestCase
 {
     /**
      * Our logger for this class.
@@ -27,26 +22,9 @@ public class HBaseManagerTest
     Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
 
     /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public HBaseManagerTest( String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( HBaseManagerTest.class );
-    }
-
-    /**
      * Create test.
      */
+    @Test
     public void testCreate()
     {
         HBaseManager hbase = new HBaseManager();
@@ -55,6 +33,7 @@ public class HBaseManagerTest
     /**
      * Test that we can simply add.
      */
+    @Test
     public void testAdd()
     {
         HBaseManager hbase = new HBaseManager();
@@ -66,6 +45,7 @@ public class HBaseManagerTest
      * Test that we can get a table, and it is the same
      * as the one put in.
      */
+    @Test
     public void testGetFromAdd()
     {
         String tableName = "defaultTableName";
@@ -80,6 +60,7 @@ public class HBaseManagerTest
     /**
      * Test connecting to local HBase Instance.
      */
+    @Test
     public void testLocalConnect()
     {
         String tableName = "testTable";
@@ -95,19 +76,11 @@ public class HBaseManagerTest
     }
 
     /**
-     * Test that we can get a table that previously existed.
-     */
-    public void testGetPreviouslyExisted()
-    {
-        //TODO: Hookups for connections against HBase cluster.
-    }
-
-    /**
-::q!
      * Creates an IHBaseTable with a specific name.
      * @param name The name of the IHBaseTable.
      * @return A IHBaseTable with a specific name.
      */
+    @Test
     private IHBaseTable createNamedTable(String name)
     {
         HBaseTable table = mock(HBaseTable.class);
