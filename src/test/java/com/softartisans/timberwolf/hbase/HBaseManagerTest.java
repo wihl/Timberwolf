@@ -6,11 +6,12 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -58,7 +59,7 @@ public class HBaseManagerTest
     {
         HBaseManager hbase = new HBaseManager();
         IHBaseTable table = mock(HBaseTable.class);
-        hbase.add(table);
+        hbase.addTable(table);
     }
 
     /**
@@ -70,8 +71,8 @@ public class HBaseManagerTest
         String tableName = "defaultTableName";
         HBaseManager hbase = new HBaseManager();
         IHBaseTable table = createNamedTable(tableName);
-        hbase.add(table);
-        IHBaseTable managerTable = hbase.get(tableName);
+        hbase.addTable(table);
+        IHBaseTable managerTable = hbase.getTable(tableName);
         Assert.assertEquals(table, managerTable);
         Assert.assertEquals(tableName, managerTable.getName());
     }
@@ -81,18 +82,21 @@ public class HBaseManagerTest
      */
     public void testLocalConnect()
     {
-        String tableName = "defaultTable";
+        String tableName = "testTable";
+        List<String> columnFamiles = new ArrayList<String>();
+        columnFamiles.add("h");
+
         Configuration configuration = HBaseConfiguration.create();
 
         try
         {
-            HBaseAdmin hbase = new HBaseAdmin(configuration);
-            if (!hbase.tableExists(tableName))
-            {
+            HBaseManager hbase = new HBaseManager(configuration);
+            hbase.createTable(tableName, columnFamiles);
+            IHBaseTable table = hbase.getTable(tableName);
 
-            }
-            HTable table = new HTable(configuration, "testtable");
-            logger.info(Bytes.toString(table.getTableName()));
+//            HBaseAdmin hbase = new HBaseAdmin(configuration);
+//            HTable table = new HTable(configuration, "testtable");
+           logger.info(Bytes.toString(table.getTableName()));
 
         } catch (Exception e)
         {

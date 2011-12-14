@@ -1,6 +1,8 @@
 package com.softartisans.timberwolf.hbase;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,7 +63,7 @@ public class HBaseManager {
 
         try
         {
-            HBaseAdmin.checkHBaseAvailable(configuration);
+            //HBaseAdmin.checkHBaseAvailable(configuration);
             hbase = new HBaseAdmin(configuration);
         } catch (MasterNotRunningException e)
         {
@@ -76,7 +79,7 @@ public class HBaseManager {
      * already exists, it will do nothing.
      * @param table The IHBaseTable to add.
      */
-    public void add(IHBaseTable table)
+    public void addTable(IHBaseTable table)
     {
         if (!tables.containsValue(table))
         {
@@ -90,7 +93,7 @@ public class HBaseManager {
      * @param tableName The name of the HTable to get.
      * @return The IHBaseTable for this table name.
      */
-    public IHBaseTable get(String tableName)
+    public IHBaseTable getTable(String tableName)
     {
         if (tables.containsKey(tableName))
         {
@@ -99,9 +102,23 @@ public class HBaseManager {
         IHBaseTable table = getTableRemotely(tableName);
         if (table != null)
         {
-            add(table);
+            addTable(table);
         }
         return table;
+    }
+
+    /**
+     * Determines whether or not a given table currently exists.
+     * @param tableName The name of the table.
+     * @return Whether or not the specified table exists.
+     */
+    public boolean tableExists(String tableName)
+    {
+        if (tables.containsKey(tableName) || tableExistsRemotely(tableName))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -135,6 +152,7 @@ public class HBaseManager {
         {
             if (tableExistsRemotely(tableName))
             {
+                logger.info("Table " + tableName + " exists.");
                 HTableInterface table;
                 try {
                     table = new HTable(tableName);
@@ -144,6 +162,10 @@ public class HBaseManager {
                     logger.error("Could not acquire reference to table "
                             + tableName + "!");
                 }
+            }
+            else
+            {
+                logger.info("Table " + tableName + " does not exist.");
             }
         }
         return null;
@@ -161,10 +183,35 @@ public class HBaseManager {
         }
         if (hbase == null)
         {
-            throw new IllegalStateException("Cannot determine whether or not "
-                    + "a table exists when not connected to an HBase "
-                    + "instance!");
+            logger.error("HBase instance is not initialized!");
         }
         return true;
+    }
+
+    /**
+     * Creates a table with the given name and list of column family names.
+     * @param tableName The name of the table.
+     * @param columnFamilies A list of column family names.
+     */
+    public void createTable(String tableName, List<String> columnFamilies)
+    {
+        if (canRemote())
+        {
+            HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
+            for(String columnFamily : columnFamilies)
+            {
+                HColumnDescriptor columnDescriptor =
+                        new HColumnDescriptor(columnFamily);
+                tableDescriptor.addFamily(columnDescriptor);
+            }
+            try
+            {
+                hbase.createTable(tableDescriptor);
+            }
+            catch (IOException e)
+            {
+                logger.error("Error creating table " + tableName + "!");
+            }
+        }
     }
 }

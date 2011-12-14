@@ -152,9 +152,9 @@ public class HBaseMailWriterTest
 
         IHBaseTable table = new HBaseTable(mockHTable);
         Assert.assertEquals(tableName, table.getName());
-        hbase.add(table);
+        hbase.addTable(table);
 
-        IHBaseTable managerTable = hbase.get(tableName);
+        IHBaseTable managerTable = hbase.getTable(tableName);
         Assert.assertEquals(table, managerTable);
     }
 
