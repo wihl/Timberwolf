@@ -2,7 +2,9 @@
 <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://schemas.microsoft.com/exchange/services/2006/messages" targetNamespace="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:service name="ExchangeService">
     <wsdl:documentation>Default service endpoint for Exchange 2010</wsdl:documentation>
-    <wsdl:port name="ExchangePort" binding="tns:ExchangeServiceBinding" />
+    <wsdl:port name="ExchangePort" binding="tns:ExchangeServiceBinding">
+      <soap:address location="https://devexch01.int.tartarus.com/ews/exchange.asmx" />
+    </wsdl:port>
   </wsdl:service>
 
   <wsdl:types>
@@ -831,7 +833,7 @@
     <wsdl:documentation>
       <wsi:Claim conformsTo="http://ws-i.org/profiles/basic/1.0" xmlns:wsi="http://ws-i.org/schemas/conformanceClaim/" />
     </wsdl:documentation>
-    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="ResolveNames">
       <soap:operation soapAction="http://schemas.microsoft.com/exchange/services/2006/messages/ResolveNames" />
       <wsdl:input>

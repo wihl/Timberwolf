@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <cxf.version>2.5.0</cxf.version>
   </properties>
 
   <build>
@@ -29,6 +30,29 @@
         </configuration>
       </plugin>
       <plugin>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-codegen-plugin</artifactId>
+	<version>${cxf.version}</version>
+	<executions>
+	  <execution>
+	    <phase>generate-sources</phase>
+	    <configuration>
+	      <wsdlOptions>
+		<wsdlOption>
+		  <wsdl>src/main/resources/wsdl/Services.wsdl</wsdl>
+		  <extraargs>
+		    <extraarg>-client</extraarg>
+		  </extraargs>
+		</wsdlOption>
+	      </wsdlOptions>
+	    </configuration>
+	    <goals>
+	      <goal>wsdl2java</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+<!--      <plugin>
         <groupId>org.apache.axis2</groupId>
         <artifactId>axis2-wsdl2code-maven-plugin</artifactId>
         <version>1.5.1</version>
@@ -46,7 +70,7 @@
           <packageName>com.softartisans.timberwolf.exchangeservice</packageName>
         </configuration>
       </plugin>
-      <plugin>
+-->      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.3.3</version>
@@ -177,10 +201,20 @@
       <version>4.9</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
+<!--    <dependency>
       <groupId>org.apache.axis2</groupId>
       <artifactId>axis2</artifactId>
       <version>1.6.1</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-transports-http</artifactId>
+      <version>${cxf.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.ws.commons.axiom</groupId>
