@@ -189,7 +189,8 @@ public class HBaseManager {
     }
 
     /**
-     * Creates a table with the given name and list of column family names.
+     * Creates a table with the given name and list of column family names. It
+     * will be added to the underlying table collection.
      * @param tableName The name of the table.
      * @param columnFamilies A list of column family names.
      */
@@ -207,11 +208,47 @@ public class HBaseManager {
             try
             {
                 hbase.createTable(tableDescriptor);
+                HTableInterface table = new HTable(tableName);
+                addTable(new HBaseTable(table));
             }
             catch (IOException e)
             {
                 logger.error("Error creating table " + tableName + "!");
             }
         }
+    }
+
+    /**
+     * Deletes a table with the given name. If remotely connected, will
+     * delete the table from HBase.
+     * @param tableName The name of the table to delete.
+     */
+    public void deleteTable(String tableName)
+    {
+        if (canRemote())
+        {
+            try
+            {
+                hbase.deleteTable(tableName);
+            }
+            catch (IOException e)
+            {
+                logger.error("Error deleting table " + tableName + "!");
+            }
+        }
+        tables.remove(tableName);
+    }
+
+    /**
+     * Closes the connections for all managed tables and clears
+     * the underlying table collection.
+     */
+    public void close()
+    {
+        for (IHBaseTable table : tables.values())
+        {
+            table.close();
+        }
+        tables.clear();
     }
 }

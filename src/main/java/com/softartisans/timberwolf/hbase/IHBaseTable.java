@@ -6,4 +6,5 @@ public interface IHBaseTable {
     void put(Put put);
     void flush();
     String getName();
+    void close();
 }

@@ -62,4 +62,19 @@ public class HBaseTable implements IHBaseTable
     public String getName() {
         return name;
     }
+
+    /**
+     * Closes the connection to the underlying table.
+     */
+    public void close()
+    {
+        try
+        {
+            table.close();
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not close table " + name + "!");
+        }
+    }
 }

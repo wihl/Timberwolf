@@ -20,6 +20,33 @@ public class HBaseManagerTest
      * Our logger for this class.
      */
     Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
+    HBaseManager hBaseManager;
+    private final String tableName = "testTable";
+
+    /**
+     * Fixture setup.
+     */
+    @Before
+    public void setUp()
+    {
+        Configuration configuration = HBaseConfiguration.create();
+        hBaseManager = new HBaseManager(configuration);
+
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add("h");
+
+        hBaseManager.createTable(tableName, columnFamilies);
+    }
+
+    /**
+     * Fixture tear down.
+     */
+    @After
+    public void tearDown()
+    {
+        hBaseManager.deleteTable(tableName);
+        hBaseManager.close();
+    }
 
     /**
      * Create test.
@@ -58,21 +85,26 @@ public class HBaseManagerTest
     }
 
     /**
-     * Test connecting to local HBase Instance.
+     * Tests getting a remote table instance.
      */
     @Test
-    public void testLocalConnect()
+    public void testGetTableRemotely()
     {
-        String tableName = "testTable";
-        List<String> columnFamilies = new ArrayList<String>();
-        columnFamilies.add("h");
-
-        Configuration configuration = HBaseConfiguration.create();
-        HBaseManager hbase = new HBaseManager(configuration);
-        hbase.createTable(tableName, columnFamilies);
-        IHBaseTable table = hbase.getTable(tableName);
-
+        IHBaseTable table = hBaseManager.getTable(tableName);
         Assert.assertEquals(tableName, table.getName());
+    }
+
+    /**
+     * Tests creating and deleting a table remotely.
+     */
+    @Test
+    public void testCreateAndDeleteTable()
+    {
+        String table = "aNewTable";
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add("cf");
+        hBaseManager.createTable(table, columnFamilies);
+        hBaseManager.deleteTable(table);
     }
 
     /**
@@ -80,7 +112,6 @@ public class HBaseManagerTest
      * @param name The name of the IHBaseTable.
      * @return A IHBaseTable with a specific name.
      */
-    @Test
     private IHBaseTable createNamedTable(String name)
     {
         HBaseTable table = mock(HBaseTable.class);
