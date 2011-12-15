@@ -93,7 +93,7 @@ final class App
 
     public static void main(final String[] args)
     {
-        new App().run(new String[] {"--exchange-url", "https://devexch01.int.tartarus.com/ews/exchange.asmx", "--get-email-for", "me"});
+        new App().run(args);
     }
 
     private void run(final String[] args)
