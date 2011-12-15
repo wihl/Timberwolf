@@ -2,15 +2,22 @@ package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticatedURL;
 import com.cloudera.alfredo.client.AuthenticationException;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Vector;
@@ -59,12 +66,25 @@ public class ExchangeService implements MailStore
         this.exchangeUrl = exchangeUrl;
     }
 
-    private static byte[] getFindItemsRequest(int offset, String folder)
+    private static byte[] getFindItemsRequest(int offset,
+            DistinguishedFolderIdNameType.Enum folder)
             throws UnsupportedEncodingException
     {
-        // TODO paging and ask folder insertion
-        String fi = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n    <soap:Body>\n        <FindItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                  xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                  Traversal=\"Shallow\">\n            <ItemShape>\n                <t:BaseShape>IdOnly</t:BaseShape>\n            </ItemShape>\n            <ParentFolderIds>\n                <t:DistinguishedFolderId Id=\"inbox\"/>\n            </ParentFolderIds>\n        </FindItem>\n    </soap:Body>\n</soap:Envelope>";
-        return fi.getBytes("UTF-8");
+        EnvelopeDocument envelopeDocument = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = envelopeDocument.addNewEnvelope();
+        FindItemType findItem = envelope.addNewBody().addNewFindItem();
+        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        DistinguishedFolderIdType folderId =
+                findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
+        folderId.setId(folder);
+        // TODO paging
+
+        String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
+                .xmlText();
+        //request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n    <soap:Body>\n        <FindItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                  xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                  Traversal=\"Shallow\">\n            <ItemShape>\n                <t:BaseShape>IdOnly</t:BaseShape>\n            </ItemShape>\n            <ParentFolderIds>\n                <t:DistinguishedFolderId Id=\"inbox\"/>\n            </ParentFolderIds>\n        </FindItem>\n    </soap:Body>\n</soap:Envelope>";
+        System.out.println(request);
+        return request.getBytes("UTF-8");
     }
 
     private static byte[] getGetItemsRequest(Vector<String> ids)
@@ -74,10 +94,17 @@ public class ExchangeService implements MailStore
     }
 
     @Override
-    public Iterator<MailboxItem> getMail(String user)
+    public Iterable<MailboxItem> getMail(String user)
             throws IOException, AuthenticationException
     {
-        return null;
+        return new Iterable<MailboxItem>()
+        {
+            @Override
+            public Iterator<MailboxItem> iterator()
+            {
+                return new EmailIterator(exchangeUrl);
+            }
+        };
     }
 
     private static class EmailIterator implements Iterator<MailboxItem>
@@ -112,7 +139,8 @@ public class ExchangeService implements MailStore
         private static Vector<String> findItems(int offset, String exchangeUrl)
                 throws IOException, AuthenticationException
         {
-            byte[] bytes = getFindItemsRequest(offset, "inbox");
+            byte[] bytes = getFindItemsRequest(offset,
+                                               DistinguishedFolderIdNameType.INBOX);
             HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -147,29 +175,7 @@ public class ExchangeService implements MailStore
          */
         private static Vector<String> getItems(int count, int startIndex, Vector<String> ids)
         {
-            byte[] bytes = getFindItemsRequest(offset, "inbox");
-            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
-
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line = reader.readLine();
-                while (line != null) {
-                    System.out.println(line);
-                    line = reader.readLine();
-                }
-                reader.close();
-                // TODO: parse response
-                return new Vector<String>();
-            }
-            else
-            {
-                log.error("Failed to find items; Status code: "
-                          + conn.getResponseCode() + " "
-                          + conn.getResponseMessage());
-            }
-
             return new Vector<String>();
-
         }
 
 

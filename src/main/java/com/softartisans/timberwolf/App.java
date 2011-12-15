@@ -99,44 +99,10 @@ final class App
         log.info("HBase Table Name: {}", hbaseTableName);
         log.info("HBase Column Family: {}", hbaseColumnFamily);
 
-
-        String fi = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n    <soap:Body>\n        <FindItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                  xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                  Traversal=\"Shallow\">\n            <ItemShape>\n                <t:BaseShape>AllProperties</t:BaseShape>\n            </ItemShape>\n            <ParentFolderIds>\n                <t:DistinguishedFolderId Id=\"inbox\"/>\n            </ParentFolderIds>\n        </FindItem>\n    </soap:Body>\n</soap:Envelope>";
-        byte[] bytes = fi.getBytes("UTF-8");
-//        InputStream findItems = App.class.getResourceAsStream("/findItems.xml");
-        int totalLength = bytes.length;
-//        ByteArrayOutputStream tempStream = new ByteArrayOutputStream();
-//        byte[] buffer = new byte[1024];
-//        int length = 0;
-//        while ((length = findItems.read(buffer)) >= 0)
-//        {
-//            totalLength+=length;
-//            tempStream.write(buffer);
-//        }
-
-        AuthenticatedURL.Token token = new AuthenticatedURL.Token();
-        URL url = new URL(exchangeUrl);
-        HttpURLConnection conn = new AuthenticatedURL().openConnection(url,
-                                                                       token);
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setReadTimeout(10000);
-        conn.setRequestProperty("Content-Type", "text/xml");
-        conn.setRequestProperty("Content-Length", "" + totalLength);
-        conn.getOutputStream().write(bytes);
-
-        System.out.println();
-        System.out.println("Token value: " + token);
-        System.out.println("Status code: " + conn.getResponseCode() + " " + conn.getResponseMessage());
-        System.out.println();
-        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line = reader.readLine();
-            while (line != null) {
-                System.out.println(line);
-                line = reader.readLine();
-            }
-            reader.close();
+        ExchangeService service = new ExchangeService(exchangeUrl);
+        for (MailboxItem item : service.getMail("bkerr"))
+        {
+            System.out.println(item.getHeader("Body"));
         }
-        System.out.println();
     }
 }
