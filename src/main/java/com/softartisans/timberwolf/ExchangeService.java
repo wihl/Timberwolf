@@ -6,6 +6,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMes
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
@@ -222,11 +223,19 @@ public class ExchangeService implements MailStore
                 System.out.println();
                 System.out.println();
                 System.out.println(doc.xmlText());
-                ArrayOfResponseMessagesType array =
-                        doc.getEnvelope().getBody().getGetItemResponse().getResponseMessages();
-                System.out.println(doc.xmlText());
-                // TODO: parse response
-                return new Vector<MailboxItem>();
+                ItemInfoResponseMessageType[] array =
+                        doc.getEnvelope().getBody().getGetItemResponse()
+                           .getResponseMessages().getGetItemResponseMessageArray();
+                Vector<MailboxItem> items = new Vector<MailboxItem>();
+                for (ItemInfoResponseMessageType message : array)
+                {
+                    for (MessageType item : message.getItems().getMessageArray())
+                    {
+                        items.add(new ExchangeEmail(item));
+                    }
+
+                }
+                return items;
             }
             else
             {
@@ -272,6 +281,7 @@ public class ExchangeService implements MailStore
         @Override
         public MailboxItem next()
         {
+            // TODO: not return null, requires calling getItems in hasNext
             if (currentIds == null)
             {
                 return null;
