@@ -41,8 +41,10 @@ public class ExchangeService implements MailStore
      * GetItems takes multiple ids, but we don't want to call GetItems on all
      * MaxFindItemEntries at a time, because those could be massive responses
      * Instead, get a smaller number at a time.
+     * This should evenly divide MaxFindItemEntries
+     * TODO make this larger
      */
-    private static final int MaxGetItemsEntries = 50;
+    private static final int MaxGetItemsEntries = 5;
 
     /**
      * The url of the service, passed in as a command line parameter, or from a
@@ -60,9 +62,15 @@ public class ExchangeService implements MailStore
     private static byte[] getFindItemsRequest(int offset, String folder)
             throws UnsupportedEncodingException
     {
-        // TODO paging,and ask folder insertion
+        // TODO paging and ask folder insertion
         String fi = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n    <soap:Body>\n        <FindItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                  xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                  Traversal=\"Shallow\">\n            <ItemShape>\n                <t:BaseShape>IdOnly</t:BaseShape>\n            </ItemShape>\n            <ParentFolderIds>\n                <t:DistinguishedFolderId Id=\"inbox\"/>\n            </ParentFolderIds>\n        </FindItem>\n    </soap:Body>\n</soap:Envelope>";
         return fi.getBytes("UTF-8");
+    }
+
+    private static byte[] getGetItemsRequest(Vector<String> ids)
+            throws UnsupportedEncodingException
+    {
+        return "foo".toString().getBytes("UTF-8");
     }
 
     @Override
@@ -84,7 +92,8 @@ public class ExchangeService implements MailStore
             this.exchangeUrl = exchangeUrl;
         }
 
-        private static Vector<String> findItems(int offset, String exchangeUrl)
+        private static HttpURLConnection makeRequest(String exchangeUrl,
+                                                     byte[] request)
                 throws IOException, AuthenticationException
         {
             AuthenticatedURL.Token token = new AuthenticatedURL.Token();
@@ -95,9 +104,16 @@ public class ExchangeService implements MailStore
             conn.setDoOutput(true);
             conn.setReadTimeout(10000);
             conn.setRequestProperty("Content-Type", "text/xml");
+            conn.setRequestProperty("Content-Length", "" + request.length);
+            conn.getOutputStream().write(request);
+            return conn;
+        }
+
+        private static Vector<String> findItems(int offset, String exchangeUrl)
+                throws IOException, AuthenticationException
+        {
             byte[] bytes = getFindItemsRequest(offset, "inbox");
-            conn.setRequestProperty("Content-Length", "" + bytes.length);
-            conn.getOutputStream().write(bytes);
+            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -119,6 +135,43 @@ public class ExchangeService implements MailStore
 
             return new Vector<String>();
         }
+
+        /**
+         * Get a list of items from the server
+         * @param count the number of items to get.
+         * if startIndex+count > ids.size() then only ids.size()-startIndex
+         * items will be returned
+         * @param startIndex the index in ids of the first item to get
+         * @param ids a list of the ids to get
+         * @return
+         */
+        private static Vector<String> getItems(int count, int startIndex, Vector<String> ids)
+        {
+            byte[] bytes = getFindItemsRequest(offset, "inbox");
+            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line = reader.readLine();
+                while (line != null) {
+                    System.out.println(line);
+                    line = reader.readLine();
+                }
+                reader.close();
+                // TODO: parse response
+                return new Vector<String>();
+            }
+            else
+            {
+                log.error("Failed to find items; Status code: "
+                          + conn.getResponseCode() + " "
+                          + conn.getResponseMessage());
+            }
+
+            return new Vector<String>();
+
+        }
+
 
         @Override
         public boolean hasNext()
