@@ -20,14 +20,14 @@ public class HBaseManagerTest
      * Our logger for this class.
      */
     Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
-    HBaseManager hBaseManager;
-    private final String tableName = "testTable";
+    private static HBaseManager hBaseManager;
+    private static final String tableName = "testTable";
 
     /**
      * Fixture setup.
      */
-    @Before
-    public void setUp()
+    @BeforeClass
+    public static void setUp()
     {
         Configuration configuration = HBaseConfiguration.create();
         hBaseManager = new HBaseManager(configuration);
@@ -41,8 +41,8 @@ public class HBaseManagerTest
     /**
      * Fixture tear down.
      */
-    @After
-    public void tearDown()
+    @AfterClass
+    public static void tearDown()
     {
         hBaseManager.deleteTable(tableName);
         hBaseManager.close();
