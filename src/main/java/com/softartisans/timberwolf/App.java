@@ -77,15 +77,15 @@ final class App
             parser.parseArgument(args);
             Logger log = LoggerFactory.getLogger(App.class);
 
-            log.info("Timberwolf invoked with the following arguments:");
-            log.info("Exchange URL: {}", exchangeUrl);
-            log.info("Exchange User: {}", exchangeUser);
-            log.info("Exchange Password: {}", exchangePassword);
-            log.info("Target User: {}", targetUser);
-            log.info("HBase Quorum: {}", hbaseQuorum);
-            log.info("HBase Port: {}", hbasePort);
-            log.info("HBase Table Name: {}", hbaseTableName);
-            log.info("HBase Column Family: {}", hbaseColumnFamily);
+            log.debug("Timberwolf invoked with the following arguments:");
+            log.debug("Exchange URL: {}", exchangeUrl);
+            log.debug("Exchange User: {}", exchangeUser);
+            log.debug("Exchange Password: {}", exchangePassword);
+            log.debug("Target User: {}", targetUser);
+            log.debug("HBase Quorum: {}", hbaseQuorum);
+            log.debug("HBase Port: {}", hbasePort);
+            log.debug("HBase Table Name: {}", hbaseTableName);
+            log.debug("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbasePort == null

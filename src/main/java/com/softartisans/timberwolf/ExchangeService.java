@@ -93,7 +93,7 @@ public class ExchangeService implements MailStore
         String request =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
                         .xmlText();
-        System.out.println(request);
+        log.debug(request);
         return request.getBytes("UTF-8");
     }
 
@@ -113,7 +113,7 @@ public class ExchangeService implements MailStore
         String request =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
                         .xmlText();
-        System.out.println(request);
+        log.debug(request);
         return request.getBytes("UTF-8");
     }
 
@@ -137,6 +137,8 @@ public class ExchangeService implements MailStore
         int currentIdIndex = 0;
         int findItemsOffset = 0;
         String exchangeUrl;
+        private Vector<MailboxItem> mailBoxItems;
+        private int currentMailboxItemIndex = 0;
 
         private EmailIterator(String exchangeUrl)
         {
@@ -251,6 +253,7 @@ public class ExchangeService implements MailStore
             {
                 try
                 {
+                    currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
                     currentIds = findItems(findItemsOffset, exchangeUrl);
                 }
@@ -270,41 +273,49 @@ public class ExchangeService implements MailStore
                     return false;
                 }
             }
-            // TODO change this back
-            return currentIdIndex < 1;//currentIds.size();
+            // TODO paging here
+            if (currentIdIndex >= currentIds.size())
+            {
+                return false;
+            }
+            if (mailBoxItems == null)
+            {
+                try
+                {
+                    currentMailboxItemIndex = 0;
+                    mailBoxItems = getItems(1, currentIdIndex, currentIds, exchangeUrl);
+                    return currentMailboxItemIndex < mailBoxItems.size();
+                }
+                catch (IOException e)
+                {
+                    log.error("getItems failed", e);
+                }
+                catch (AuthenticationException e)
+                {
+                    log.error("getItems could not authenticate", e);
+                }
+                catch (XmlException e)
+                {
+                    log.error("getItems could not decode response", e);
+                }
+            }
+            // TODO call getItems more than once
+            return currentMailboxItemIndex < mailBoxItems.size();
         }
 
         @Override
         public MailboxItem next()
         {
-            // TODO: not return null, requires calling getItems in hasNext
-            if (currentIds == null)
+            if (currentMailboxItemIndex < mailBoxItems.size())
+            {
+                MailboxItem item = mailBoxItems.get(currentMailboxItemIndex);
+                currentMailboxItemIndex++;
+                return item;
+            }
+            else
             {
                 return null;
             }
-            Vector<MailboxItem> items = null;
-            try
-            {
-                items = getItems(1, currentIdIndex, currentIds, exchangeUrl);
-                currentIdIndex++;
-                if (items.size() > 0)
-                {
-                    return items.get(0);
-                }
-            }
-            catch (IOException e)
-            {
-                log.error("getItems failed", e);
-            }
-            catch (AuthenticationException e)
-            {
-                log.error("getItems could not authenticate", e);
-            }
-            catch (XmlException e)
-            {
-                log.error("getItems could not decode response", e);
-            }
-            return null;
         }
 
         @Override
