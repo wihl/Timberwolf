@@ -1,5 +1,9 @@
 package com.softartisans.timberwolf;
 
+import com.cloudera.alfredo.client.AuthenticationException;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 
 /**
@@ -8,5 +12,6 @@ import java.util.Iterator;
 public interface MailStore
 {
     /** Returns some mail for the given user. */
-    Iterator<MailboxItem> getMail(String user);
+    Iterator<MailboxItem> getMail(String user)
+            throws IOException, AuthenticationException;
 }
