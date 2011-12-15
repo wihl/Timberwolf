@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is an XML schema for the SOAP envelopes surrounding Exchange
+     Web Services calls.  This is not intended to be a general-purpose
+     schema for SOAP handling, as it defines the contents of the SOAP body
+     and header tags, which are deliberately left undefined in the SOAP
+     specification. -->
+<!-- At the moment, this schema only supports a subset of the methods defined
+     by EWS.  The operations this schema supports are:
+        - FindItem request -->
+<xs:schema xmlns="http://www.w3.org/2003/05/soap-envelope"
+           xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+           xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+           elementFormDefault="qualified"
+           targetNamespace="http://www.w3.org/2003/05/soap-envelope"
+           id="envelope"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+  <xs:import namespace="http://schemas.microsoft.com/exchange/services/2006/types"
+             schemaLocation="types.xsd" />
+  <xs:import namespace="http://schemas.microsoft.com/exchange/services/2006/messages"
+             schemaLocation="messages.xsd" />
+  <xs:complexType name="EnvelopeType">
+    <xs:sequence>
+      <xs:element name="Header"
+                  type="HeaderType"
+                  minOccurs="0"
+                  maxOccurs="1" />
+      <xs:element name="Body"
+                  type="BodyType"
+                  minOccurs="1"
+                  maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="HeaderType">
+    <xs:choice>
+      <xs:element ref="t:ServerVersionInfo" />
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="BodyType">
+    <xs:choice maxOccurs="1">
+      <xs:element ref="m:FindItem" />
+      <xs:element ref="m:FindItemResponse" />
+    </xs:choice>
+  </xs:complexType>
+</xs:schema>
