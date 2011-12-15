@@ -29,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -97,7 +98,7 @@ public class ExchangeService implements MailStore
         return request.getBytes("UTF-8");
     }
 
-    private static byte[] getGetItemsRequest(Vector<String> ids)
+    private static byte[] getGetItemsRequest(List<String> ids)
             throws UnsupportedEncodingException
     {
         EnvelopeDocument envelopeDocument =
@@ -107,9 +108,10 @@ public class ExchangeService implements MailStore
         getItem.addNewItemShape()
                .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        ItemIdType itemId = items.addNewItemId();
-        itemId.setId(ids.get(0));
-        // TODO can we set more than one here??
+        for (String id : ids)
+        {
+            items.addNewItemId().setId(id);
+        }
         String request =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
                         .xmlText();
@@ -212,7 +214,12 @@ public class ExchangeService implements MailStore
                                                     String exchangeUrl)
                 throws IOException, AuthenticationException, XmlException
         {
-            byte[] bytes = getGetItemsRequest(ids);
+            int max = Math.min(startIndex + count, ids.size())-1;
+            if (max < startIndex)
+            {
+                return new Vector<MailboxItem>();
+            }
+            byte[] bytes = getGetItemsRequest(ids.subList(startIndex, max));
             HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
@@ -284,7 +291,7 @@ public class ExchangeService implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(1, currentIdIndex, currentIds, exchangeUrl);
+                    mailBoxItems = getItems(3, currentIdIndex, currentIds, exchangeUrl);
                     log.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
