@@ -5,12 +5,15 @@ import com.cloudera.alfredo.client.AuthenticationException;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
@@ -95,7 +98,17 @@ public class ExchangeService implements MailStore
     private static byte[] getGetItemsRequest(Vector<String> ids)
             throws UnsupportedEncodingException
     {
-        return "foo".toString().getBytes("UTF-8");
+        EnvelopeDocument envelopeDocument = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = envelopeDocument.addNewEnvelope();
+        GetItemType getItem = envelope.addNewBody().addNewGetItem();
+        NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
+        ItemIdType itemId = items.addNewItemId();
+        itemId.setId(ids.get(0));
+        // TODO can we set more than one here??
+        String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
+                .xmlText();
+        System.out.println(request);
+        return request.getBytes("UTF-8");
     }
 
     @Override
