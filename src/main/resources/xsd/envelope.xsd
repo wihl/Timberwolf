@@ -32,6 +32,8 @@
                   maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>
+  <xs:element name="Envelope"
+              type="EnvelopeType" />
   <xs:complexType name="HeaderType">
     <xs:choice>
       <xs:element ref="t:ServerVersionInfo"
