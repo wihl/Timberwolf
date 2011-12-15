@@ -1,0 +1,82 @@
+package com.softartisans.timberwolf.hbase;
+
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A proxy class for an HTable.
+ */
+public class HBaseTable implements IHBaseTable
+{
+    private static Logger logger = LoggerFactory.getLogger(HBaseTable.class);
+    private HTableInterface table;
+    private List<Put> puts = new ArrayList<Put>();
+    private final String name;
+
+    public HBaseTable(final HTableInterface hbaseTable)
+    {
+        this.table = hbaseTable;
+        name = Bytes.toString(hbaseTable.getTableName());
+    }
+
+    /**
+     * Adds a put to the underlying buffer to our HTable. It will not be added
+     * to the HTable until flush is called.
+     * @param put
+     */
+    @Override
+    public final void put(final Put put)
+    {
+        puts.add(put);
+    }
+
+    /**
+     * Batch processes all puts in the underlying buffer to a HTable.
+     */
+    @Override
+    public final void flush()
+    {
+        try
+        {
+            table.put(puts);
+            puts.clear();
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not write puts to HTable!");
+        }
+
+    }
+
+    /**
+     * Gets the name of the underlying HTable.
+     * @return The name of the underlying HTable.
+     */
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
+     * Closes the connection to the underlying table.
+     */
+    public final void close()
+    {
+        try
+        {
+            table.close();
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not close table " + name + "!");
+        }
+    }
+}
