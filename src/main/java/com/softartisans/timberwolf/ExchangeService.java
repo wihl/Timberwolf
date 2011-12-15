@@ -256,6 +256,7 @@ public class ExchangeService implements MailStore
                     currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
                     currentIds = findItems(findItemsOffset, exchangeUrl);
+                    log.debug("Got " + currentIds.size() + " email ids");
                 }
                 catch (IOException e)
                 {
@@ -284,6 +285,7 @@ public class ExchangeService implements MailStore
                 {
                     currentMailboxItemIndex = 0;
                     mailBoxItems = getItems(1, currentIdIndex, currentIds, exchangeUrl);
+                    log.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
                 catch (IOException e)
@@ -314,6 +316,7 @@ public class ExchangeService implements MailStore
             }
             else
             {
+                log.debug("All done, " + currentMailboxItemIndex + " >= " + mailBoxItems.size());
                 return null;
             }
         }
