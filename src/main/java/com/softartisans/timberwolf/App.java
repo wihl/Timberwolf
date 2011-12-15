@@ -31,6 +31,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.codehaus.plexus.util.cli.CommandLineException;
 import org.junit.runners.ParentRunner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -62,12 +63,12 @@ final class App
                   + "example: https://example.contoso.com/ews/exchange.asmx")
     private String exchangeUrl;
 
-    @Option(required = true, name = "--exchange-user",
+    @Option(name = "--exchange-user",
             usage = "The username that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangeUser;
 
-    @Option(required = true, name = "--exchange-password",
+    @Option(name = "--exchange-password",
             usage = "The password that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangePassword;
@@ -101,7 +102,7 @@ final class App
     public static void main(final String[] args)
     {
         new App().run(new String[]{"--get-email-for", "developer", "--exchange-url", "https://devexch01.int.tartarus.com/ews/Exchange.asmx",
-                "--exchange-user", "developer", "--exchange-password", "pass@word1"});
+                "--exchange-user", "bkerr", "--exchange-password", "pass@word1"});
     }
 
     private void run(final String[] args)
@@ -116,44 +117,52 @@ final class App
             log.info("Timberwolf invoked with the following arguments:");
             log.info("Exchange URL: {}", exchangeUrl);
             log.info("Exchange User: {}", exchangeUser);
-            log.info("Exchange Password: {}", exchangePassword);
             log.info("Target User: {}", targetUser);
             log.info("HBase Quorum: {}", hbaseQuorum);
             log.info("HBase Port: {}", hbasePort);
             log.info("HBase Table Name: {}", hbaseTableName);
             log.info("HBase Column Family: {}", hbaseColumnFamily);
 
-            ExchangeService service = new ExchangeService(new URL("file:///home/georges/timberwolf/src/main/resources/wsdl/Services.wsdl"));
-            
+            if (exchangeUser != null && exchangePassword == null)
+            {
+                throw new CmdLineException(parser, "If you provide a username, you must also provide a password");
+            }
+            if (exchangeUser == null && exchangePassword != null)
+            {
+                throw new CmdLineException(parser, "If you provide a password, you must also provide a username");
+            }
+
+            // create the object through which we interact with Exchange
+            ExchangeService service = new ExchangeService();
             ExchangeServicePortType port = service.getExchangePort();
+            
+            // add logging. I'm not sure if this integrates cleanly with log4j
             Client client = ClientProxy.getClient(port);
             client.getInInterceptors().add(new LoggingInInterceptor());
             client.getOutInterceptors().add(new LoggingOutInterceptor());
 
-            
+            // We must turn off chunking for authentication to work. I'm not sure why it would matter
+            // see also 'A Note About Chunking':
+            // https://cxf.apache.org/docs/client-http-transport-including-ssl-support.html
             HTTPConduit conduit = (HTTPConduit)client.getConduit();
             HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
             httpClientPolicy.setAllowChunking(false);
             conduit.setClient(httpClientPolicy);
-            
+
+            // this only seems to matter if we're using NTLM
+            // this is SPNEGO, which chooses a good authentication scheme at runtime
+            // (either Kerberos or NTLM). It seems to always choose Kerberos
+            // if we have a Kerberos ticket (check klist). If so it will ignore 
+            // this username and password
             AuthorizationPolicy auth = new AuthorizationPolicy();
-            auth.setUserName("bkerr");
-            //auth.setPassword("pass@word1");
+            if (exchangeUser != null)
+            {
+                auth.setUserName(exchangeUser);
+                auth.setPassword(exchangePassword);
+            }
             conduit.setAuthorization(auth);
             
-            FindItemType type = new FindItemType();
-            type.setTraversal(ItemQueryTraversalType.SHALLOW);
-            ItemResponseShapeType shapeType = new ItemResponseShapeType();
-            shapeType.setBaseShape(DefaultShapeNamesType.ID_ONLY);
-            type.setItemShape(shapeType);
-            
-            NonEmptyArrayOfBaseFolderIdsType folders = new NonEmptyArrayOfBaseFolderIdsType();
-            DistinguishedFolderIdType distinguishedFolderIdType = new DistinguishedFolderIdType();
-            distinguishedFolderIdType.setId(DistinguishedFolderIdNameType.INBOX);
-            folders.getFolderIdOrDistinguishedFolderId().add(distinguishedFolderIdType);
-            type.setParentFolderIds(folders);
-            
-            port.findItem(type, null, null, null, null, null, null);
+            // TODO: implement program here 
             
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbasePort == null
@@ -179,11 +188,6 @@ final class App
             parser.printUsage(System.err);
             System.err.println();
             return;
-        } catch (MalformedURLException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
-        
     }
 }
