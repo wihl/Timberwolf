@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf.hbase;
 
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -21,10 +20,10 @@ public class HBaseTable implements IHBaseTable
     private List<Put> puts = new ArrayList<Put>();
     private final String name;
 
-    public HBaseTable(HTableInterface table)
+    public HBaseTable(final HTableInterface hbaseTable)
     {
-        this.table = table;
-        name = Bytes.toString(table.getTableName());
+        this.table = hbaseTable;
+        name = Bytes.toString(hbaseTable.getTableName());
     }
 
     /**
@@ -33,7 +32,7 @@ public class HBaseTable implements IHBaseTable
      * @param put
      */
     @Override
-    public void put(Put put)
+    public final void put(final Put put)
     {
         puts.add(put);
     }
@@ -42,13 +41,15 @@ public class HBaseTable implements IHBaseTable
      * Batch processes all puts in the underlying buffer to a HTable.
      */
     @Override
-    public void flush()
+    public final void flush()
     {
         try
         {
             table.put(puts);
             puts.clear();
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             logger.error("Could not write puts to HTable!");
         }
 
@@ -59,14 +60,15 @@ public class HBaseTable implements IHBaseTable
      * @return The name of the underlying HTable.
      */
     @Override
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     /**
      * Closes the connection to the underlying table.
      */
-    public void close()
+    public final void close()
     {
         try
         {

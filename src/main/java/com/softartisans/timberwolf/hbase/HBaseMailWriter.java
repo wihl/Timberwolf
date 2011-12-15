@@ -2,11 +2,8 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
-import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import java.io.IOException;
-import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +52,10 @@ public class HBaseMailWriter implements MailWriter
     }
 
     @Override
-    public final void write(final Iterator<MailboxItem> mails)
+    public final void write(final Iterable<MailboxItem> mails)
     {
-        while (mails.hasNext())
+        for (MailboxItem mailboxItem : mails)
         {
-            MailboxItem mailboxItem = mails.next();
-
             Put mailboxItemPut = new Put(Bytes.toBytes(
                     mailboxItem.getHeader(pKeyHeader)));
 

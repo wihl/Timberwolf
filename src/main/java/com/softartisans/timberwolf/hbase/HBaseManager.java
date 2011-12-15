@@ -19,7 +19,8 @@ import java.util.Map;
 /**
  * Manages the set of HBaseTables currently in use.
  */
-public class HBaseManager {
+public class HBaseManager
+{
 
     /**
      * The logger for this class.
@@ -29,7 +30,8 @@ public class HBaseManager {
     /**
      * The underlying table collection.
      */
-    private Map<String, IHBaseTable> tables = new HashMap<String, IHBaseTable> ();
+    private Map<String, IHBaseTable> tables =
+            new HashMap<String, IHBaseTable>();
 
     /**
      * The underlying remote configuration.
@@ -57,18 +59,20 @@ public class HBaseManager {
     /**
      * Constructor for creating a manager for an HBase configuration.
      */
-    public HBaseManager(Configuration configuration)
+    public HBaseManager(final Configuration hbaseConfiguration)
     {
-        this.configuration = configuration;
+        configuration = hbaseConfiguration;
 
         try
         {
             //HBaseAdmin.checkHBaseAvailable(configuration);
             hbase = new HBaseAdmin(configuration);
-        } catch (MasterNotRunningException e)
+        }
+        catch (MasterNotRunningException e)
         {
             logger.error("Unable to connect to Master!");
-        } catch (ZooKeeperConnectionException e)
+        }
+        catch (ZooKeeperConnectionException e)
         {
             logger.error("Unable to connect to ZooKeeper!");
         }
@@ -79,7 +83,7 @@ public class HBaseManager {
      * already exists, it will do nothing.
      * @param table The IHBaseTable to add.
      */
-    public void addTable(IHBaseTable table)
+    public final void addTable(final IHBaseTable table)
     {
         if (!tables.containsValue(table))
         {
@@ -93,7 +97,7 @@ public class HBaseManager {
      * @param tableName The name of the HTable to get.
      * @return The IHBaseTable for this table name.
      */
-    public IHBaseTable getTable(String tableName)
+    public final IHBaseTable getTable(final String tableName)
     {
         if (tables.containsKey(tableName))
         {
@@ -112,7 +116,7 @@ public class HBaseManager {
      * @param tableName The name of the table.
      * @return Whether or not the specified table exists.
      */
-    public boolean tableExists(String tableName)
+    public final boolean tableExists(final String tableName)
     {
         if (tables.containsKey(tableName) || tableExistsRemotely(tableName))
         {
@@ -126,13 +130,15 @@ public class HBaseManager {
      * @param tableName The name of the table.
      * @return Whether or not the table exists remotely.
      */
-    private boolean tableExistsRemotely(String tableName)
+    private boolean tableExistsRemotely(final String tableName)
     {
         if (canRemote())
         {
-            try {
+            try
+            {
                 return hbase.tableExists(tableName);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 logger.error("Could not determine existence of table "
                         + tableName + "!");
@@ -146,7 +152,7 @@ public class HBaseManager {
      * @param tableName The name of the table.
      * @return An IHBaseTable for a remote table instance.
      */
-    private IHBaseTable getTableRemotely(String tableName)
+    private IHBaseTable getTableRemotely(final String tableName)
     {
         if (canRemote())
         {
@@ -154,10 +160,12 @@ public class HBaseManager {
             {
                 logger.info("Table " + tableName + " exists.");
                 HTableInterface table;
-                try {
+                try
+                {
                     table = new HTable(tableName);
                     return new HBaseTable(table);
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     logger.error("Could not acquire reference to table "
                             + tableName + "!");
@@ -190,16 +198,19 @@ public class HBaseManager {
 
     /**
      * Creates a table with the given name and list of column family names. It
-     * will be added to the underlying table collection.
+     * will be added to the underlying table collection. If the table already
+     * exists, a warning will be logged and the table will be added to the
+     * underlying collection.
      * @param tableName The name of the table.
      * @param columnFamilies A list of column family names.
      */
-    public void createTable(String tableName, List<String> columnFamilies)
+    public final void createTable(final String tableName,
+                                  final List<String> columnFamilies)
     {
         if (canRemote())
         {
             HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-            for(String columnFamily : columnFamilies)
+            for (String columnFamily : columnFamilies)
             {
                 HColumnDescriptor columnDescriptor =
                         new HColumnDescriptor(columnFamily);
@@ -207,7 +218,15 @@ public class HBaseManager {
             }
             try
             {
-                hbase.createTable(tableDescriptor);
+                if (hbase.tableExists(tableName))
+                {
+                    logger.error("Cannot create table " + tableName + ", as "
+                        + "the table already exists!");
+                }
+                else
+                {
+                    hbase.createTable(tableDescriptor);
+                }
                 HTableInterface table = new HTable(tableName);
                 addTable(new HBaseTable(table));
             }
@@ -223,12 +242,13 @@ public class HBaseManager {
      * delete the table from HBase.
      * @param tableName The name of the table to delete.
      */
-    public void deleteTable(String tableName)
+    public final void deleteTable(final String tableName)
     {
         if (canRemote())
         {
             try
             {
+                hbase.disableTable(tableName);
                 hbase.deleteTable(tableName);
             }
             catch (IOException e)
@@ -243,7 +263,7 @@ public class HBaseManager {
      * Closes the connections for all managed tables and clears
      * the underlying table collection.
      */
-    public void close()
+    public final void close()
     {
         for (IHBaseTable table : tables.values())
         {

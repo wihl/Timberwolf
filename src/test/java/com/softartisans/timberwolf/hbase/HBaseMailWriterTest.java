@@ -139,7 +139,7 @@ public class HBaseMailWriterTest
 
         HBaseMailWriter writer = new HBaseMailWriter(table, arbitraryHeader, arbitraryFamily);
 
-        writer.write(mails.iterator());
+        writer.write(mails);
 
         assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
     }
