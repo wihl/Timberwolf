@@ -1,39 +1,19 @@
 package com.softartisans.timberwolf;
 
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
-import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.headers.Header;
-import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.cxf.jaxws.handler.soap.SOAPHandlerInterceptor;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.apache.cxf.phase.Phase;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.junit.runners.ParentRunner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -48,14 +28,12 @@ import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfBaseFolderIdsType;
-import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 
 /**
  * Driver class to grab emails and put them in HBase.
