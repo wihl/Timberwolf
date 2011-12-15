@@ -114,12 +114,8 @@ final class App
         }
 
         Logger log = LoggerFactory.getLogger(App.class);
-        BasicConfigurator.configure();
 
         ExchangeService service = new ExchangeService(exchangeUrl);
-        for (MailboxItem item : service.getMail("bkerr"))
-        {
-            System.out.println(item.getHeader("Body"));
-        }
+        new ConsoleMailWriter().write(service.getMail("bkerr"));
     }
 }

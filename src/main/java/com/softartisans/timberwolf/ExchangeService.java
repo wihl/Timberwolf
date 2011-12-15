@@ -2,11 +2,16 @@ package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticatedURL;
 import com.cloudera.alfredo.client.AuthenticationException;
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,14 +102,23 @@ public class ExchangeService implements MailStore
     public Iterable<MailboxItem> getMail(String user)
             throws IOException, AuthenticationException
     {
-        return new Iterable<MailboxItem>()
+        try
         {
-            @Override
-            public Iterator<MailboxItem> iterator()
-            {
-                return new EmailIterator(exchangeUrl);
-            }
-        };
+            return EmailIterator.findItems(0,exchangeUrl);
+        }
+        catch (XmlException e)
+        {
+            e.printStackTrace();
+        }
+//                new Iterable<MailboxItem>()
+//        {
+//            @Override
+//            public Iterator<MailboxItem> iterator()
+//            {
+//                return new EmailIterator(exchangeUrl);
+//            }
+//        };
+        return new Vector<MailboxItem>();
     }
 
     private static class EmailIterator implements Iterator<MailboxItem>
@@ -136,23 +150,37 @@ public class ExchangeService implements MailStore
             return conn;
         }
 
-        private static Vector<String> findItems(int offset, String exchangeUrl)
-                throws IOException, AuthenticationException
+        private static Iterable<MailboxItem> findItems(int offset, String exchangeUrl)
+                throws IOException, AuthenticationException, XmlException
         {
             byte[] bytes = getFindItemsRequest(offset,
                                                DistinguishedFolderIdNameType.INBOX);
             HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line = reader.readLine();
-                while (line != null) {
-                    System.out.println(line);
-                    line = reader.readLine();
+                EnvelopeDocument doc =
+                        EnvelopeDocument.Factory.parse(conn.getInputStream());
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                ArrayOfResponseMessagesType array =
+                        doc.getEnvelope().getBody().getFindItemResponse()
+                           .getResponseMessages();
+                for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
+                {
+                    log.debug(message.getResponseCode().toString());
+                    Vector<MailboxItem> items = new Vector<MailboxItem>();
+                    for (MessageType item : message.getRootFolder().getItems().getMessageArray())
+                    {
+                        items.add(new ExchangeEmail(item));
+                    }
+                    return items;
                 }
-                reader.close();
+                System.out.println(doc.xmlText());
                 // TODO: parse response
-                return new Vector<String>();
+                return new Vector<MailboxItem>();
             }
             else
             {
@@ -161,7 +189,7 @@ public class ExchangeService implements MailStore
                           + conn.getResponseMessage());
             }
 
-            return new Vector<String>();
+            return new Vector<MailboxItem>();
         }
 
         /**
@@ -182,24 +210,29 @@ public class ExchangeService implements MailStore
         @Override
         public boolean hasNext()
         {
-            if (currentIds == null)
-            {
-                try
-                {
-                    currentIdIndex = 0;
-                    currentIds = findItems(findItemsOffset, exchangeUrl);
-                }
-                catch (IOException e)
-                {
-                    log.error("findItems failed to get ids", e);
-                    return false;
-                }
-                catch (AuthenticationException e)
-                {
-                    log.error("findItems could not authenticate", e);
-                    return false;
-                }
-            }
+//            if (currentIds == null)
+//            {
+//                try
+//                {
+//                    currentIdIndex = 0;
+//                    currentIds = findItems(findItemsOffset, exchangeUrl);
+//                }
+//                catch (IOException e)
+//                {
+//                    log.error("findItems failed to get ids", e);
+//                    return false;
+//                }
+//                catch (AuthenticationException e)
+//                {
+//                    log.error("findItems could not authenticate", e);
+//                    return false;
+//                }
+//                catch (XmlException e)
+//                {
+//                    log.error("findItems could not decode response", e);
+//                    return false;
+//                }
+//            }
             return currentIdIndex < currentIds.size();
         }
 
