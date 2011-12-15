@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -40,10 +41,13 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.microsoft.schemas.exchange.services._2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeService;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
@@ -101,8 +105,7 @@ final class App
 
     public static void main(final String[] args)
     {
-        new App().run(new String[]{"--get-email-for", "developer", "--exchange-url", "https://devexch01.int.tartarus.com/ews/Exchange.asmx",
-                "--exchange-user", "bkerr", "--exchange-password", "pass@word1"});
+        new App().run(args);
     }
 
     private void run(final String[] args)
@@ -162,8 +165,6 @@ final class App
             }
             conduit.setAuthorization(auth);
             
-            // TODO: implement program here 
-            
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbasePort == null
                     && hbaseTableName == null;
@@ -180,6 +181,34 @@ final class App
                         "HBase Quorum, HBase Port, and HBase Table Name must"
                         + " all be specified if at least one is specified");
             }
+            if (noHBaseArgs)
+            {
+                ConsoleMailWriter mailWriter = new ConsoleMailWriter();
+                ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
+                //TODO: this code is pretty hackish, we should refactor soon  
+                
+                FindItemType request = createConsoleFindItemType();
+                
+                Holder<FindItemResponseType> responses = new Holder<FindItemResponseType>();
+                port.findItem(request, null, null, null, null, responses, null);
+                
+                ArrayOfResponseMessagesType messages = responses.value.getResponseMessages();
+                List<JAXBElement<? extends ResponseMessageType>> elements =
+                        messages.getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
+                for (JAXBElement<? extends ResponseMessageType> element : elements)
+                {
+                    ResponseMessageType type = element.getValue();
+                    if (type instanceof FindItemResponseMessageType)
+                    {
+                        FindItemResponseMessageType response = (FindItemResponseMessageType)type;
+                        //esponse.
+                        //TODO items.add(e);
+                    }
+                }
+                
+                mailWriter.write(items);
+            }
+            
         }
         catch (CmdLineException e)
         {
@@ -189,5 +218,25 @@ final class App
             System.err.println();
             return;
         }
+    }
+
+    /**
+     * Create a request to get some email items to display 
+     * to the console so we know everything's working
+     */
+    private FindItemType createConsoleFindItemType()
+    {
+        FindItemType type = new FindItemType();
+        type.setTraversal(ItemQueryTraversalType.SHALLOW);
+        ItemResponseShapeType shapeType = new ItemResponseShapeType();
+        shapeType.setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        type.setItemShape(shapeType);
+
+        NonEmptyArrayOfBaseFolderIdsType folders = new NonEmptyArrayOfBaseFolderIdsType();
+        DistinguishedFolderIdType distinguishedFolderIdType = new DistinguishedFolderIdType();
+        distinguishedFolderIdType.setId(DistinguishedFolderIdNameType.INBOX);
+        folders.getFolderIdOrDistinguishedFolderId().add(distinguishedFolderIdType);
+        type.setParentFolderIds(folders);
+        return type;
     }
 }

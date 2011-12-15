@@ -47,19 +47,20 @@ public class ExchangeEmail implements MailboxItem
     {
         headers = new HashMap<String, String>();
 
-        if (message.isSetBody())
+        if (message.getBody() != null)
         {
-            headers.put(BODY_KEY, message.getBody().getStringValue());
+            headers.put(BODY_KEY, message.getBody().getValue());
         }
 
-        if (message.isSetSubject())
+        if (message.getSubject() != null)
         {
             headers.put(SUBJECT_KEY, message.getSubject());
         }
 
-        if (message.isSetDateTimeSent())
+        if (message.getDateTimeSent() != null)
         {
-            Date time = message.getDateTimeSent().getTime();
+            // TODO: should we store in GMT, or in whatever time we're given?
+            Date time = message.getDateTimeSent().toGregorianCalendar().getTime();
             // I'd really like an equivalent of C#'s InvariantCulture, but it
             // looks like this is the closest I can get in Java.
             DateFormat format = DateFormat.getDateTimeInstance(
@@ -67,7 +68,7 @@ public class ExchangeEmail implements MailboxItem
             headers.put(TIME_SENT_KEY, format.format(time));
         }
 
-        if (message.isSetItemId())
+        if (message.getItemId() != null)
         {
             headers.put(ID_KEY, message.getItemId().getId());
         }
@@ -77,36 +78,36 @@ public class ExchangeEmail implements MailboxItem
         // given at:
         // http://msdn.microsoft.com/en-us/library/aa566013(v=EXCHG.140).aspx.
         SingleRecipientType sender = null;
-        if (message.isSetFrom())
+        if (message.getFrom() != null)
         {
             sender = message.getFrom();
         }
-        else if (message.isSetSender())
+        else if (message.getSender() != null)
         {
             sender = message.getSender();
         }
         if (sender != null)
         {
             EmailAddressType address = sender.getMailbox();
-            if (address.isSetEmailAddress())
+            if (address.getEmailAddress() != null)
             {
                 headers.put(SENDER_KEY, address.getEmailAddress());
             }
         }
 
-        if (message.isSetToRecipients())
+        if (message.getToRecipients() != null)
         {
             ArrayOfRecipientsType toRecipients = message.getToRecipients();
             headers.put(TORECIPIENT_KEY, getRecipientString(toRecipients));
         }
 
-        if (message.isSetCcRecipients())
+        if (message.getCcRecipients() != null)
         {
             ArrayOfRecipientsType ccRecipients = message.getCcRecipients();
             headers.put(CCRECIPIENT_KEY, getRecipientString(ccRecipients));
         }
 
-        if (message.isSetBccRecipients())
+        if (message.getBccRecipients() != null)
         {
             ArrayOfRecipientsType bccRecipients = message.getBccRecipients();
             headers.put(BCCRECIPIENT_KEY, getRecipientString(bccRecipients));
@@ -117,7 +118,7 @@ public class ExchangeEmail implements MailboxItem
             final ArrayOfRecipientsType recipients)
     {
         StringBuilder emailList = new StringBuilder();
-        for (EmailAddressType address : recipients.getMailboxArray())
+        for (EmailAddressType address : recipients.getMailbox())
         {
             emailList.append(address.getEmailAddress());
             emailList.append(EMAIL_DELIMITER);
