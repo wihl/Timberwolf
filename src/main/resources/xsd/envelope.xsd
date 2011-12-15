@@ -8,11 +8,11 @@
      by EWS.  The operations this schema supports are:
         - FindItem request and response 
         - GetItem request and response -->
-<xs:schema xmlns="http://www.w3.org/2003/05/soap-envelope"
+<xs:schema xmlns="http://schemas.xmlsoap.org/soap/envelope/"
            xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
            xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
            elementFormDefault="qualified"
-           targetNamespace="http://www.w3.org/2003/05/soap-envelope"
+           targetNamespace="http://schemas.xmlsoap.org/soap/envelope/"
            id="envelope"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
