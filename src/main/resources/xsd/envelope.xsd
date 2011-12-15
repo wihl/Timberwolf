@@ -33,7 +33,8 @@
   </xs:complexType>
   <xs:complexType name="HeaderType">
     <xs:choice>
-      <xs:element ref="t:ServerVersionInfo" />
+      <xs:element ref="t:ServerVersionInfo"
+                  minOccurs="0" />
     </xs:choice>
   </xs:complexType>
   <xs:complexType name="BodyType">
