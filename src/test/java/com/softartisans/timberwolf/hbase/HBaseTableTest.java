@@ -1,10 +1,7 @@
 package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MockHTable;
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.*;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import static org.mockito.Mockito.*;
@@ -13,29 +10,11 @@ import static org.mockito.Mockito.*;
  * Unit tests for HBaseTable.
  */
 public class HBaseTableTest
-        extends TestCase
 {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public HBaseTableTest( String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( HBaseTableTest.class );
-    }
-
     /**
      * Default constructor test.
      */
+    @Test
     public void testCreate()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
@@ -44,6 +23,7 @@ public class HBaseTableTest
     /**
      * Name test.
      */
+    @Test
     public void testName()
     {
         String name = "defaultTableName";
@@ -54,6 +34,7 @@ public class HBaseTableTest
     /**
      * Put test.
      */
+    @Test
     public void testPut()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
@@ -64,6 +45,7 @@ public class HBaseTableTest
     /**
      * Multiple puts test.
      */
+    @Test
     public void testPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
@@ -77,6 +59,7 @@ public class HBaseTableTest
     /**
      * Just flush test.
      */
+    @Test
     public void testFlush()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
@@ -86,6 +69,7 @@ public class HBaseTableTest
     /**
      * Flush with puts.
      */
+    @Test
     public void testFlushWithPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());

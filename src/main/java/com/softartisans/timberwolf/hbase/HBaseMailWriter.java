@@ -17,13 +17,13 @@ public class HBaseMailWriter implements MailWriter
             LoggerFactory.getLogger(HBaseMailWriter.class);
 
     /** The HTableInterface to store MailboxItems into. */
-    private IHBaseTable pMailTable;
+    private IHBaseTable mailTable;
 
     /** The selected MailboxItem header to use as a row key. */
-    private String pKeyHeader;
+    private String keyHeader;
 
     /** The column family to use for our headers. */
-    private byte[] pColumnFamily;
+    private byte[] columnFamily;
 
     /** The default column family to use if left unspecified. */
     private static final String DEFAULT_COLUMN_FAMILY = "h";
@@ -46,9 +46,9 @@ public class HBaseMailWriter implements MailWriter
                            final String keyHeader,
                            final String columnFamily)
     {
-        pMailTable = mailTable;
-        pKeyHeader = keyHeader;
-        pColumnFamily = Bytes.toBytes(columnFamily);
+        this.mailTable = mailTable;
+        this.keyHeader = keyHeader;
+        this.columnFamily = Bytes.toBytes(columnFamily);
     }
 
     @Override
@@ -57,20 +57,20 @@ public class HBaseMailWriter implements MailWriter
         for (MailboxItem mailboxItem : mails)
         {
             Put mailboxItemPut = new Put(Bytes.toBytes(
-                    mailboxItem.getHeader(pKeyHeader)));
+                    mailboxItem.getHeader(keyHeader)));
 
             String[] headerKeys = mailboxItem.getHeaderKeys();
 
             for (String headerKey : headerKeys)
             {
-                mailboxItemPut.add(pColumnFamily, Bytes.toBytes(headerKey),
+                mailboxItemPut.add(columnFamily, Bytes.toBytes(headerKey),
                         Bytes.toBytes(mailboxItem.getHeader(headerKey)));
             }
 
-            pMailTable.put(mailboxItemPut);
+            mailTable.put(mailboxItemPut);
 
         }
-        pMailTable.flush();
+        mailTable.flush();
     }
 
 }

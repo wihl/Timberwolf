@@ -65,7 +65,6 @@ public class HBaseManager
 
         try
         {
-            //HBaseAdmin.checkHBaseAvailable(configuration);
             hbase = new HBaseAdmin(configuration);
         }
         catch (MasterNotRunningException e)

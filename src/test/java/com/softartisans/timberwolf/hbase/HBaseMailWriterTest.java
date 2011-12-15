@@ -2,16 +2,13 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.MockHTable;
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.junit.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,27 +19,8 @@ import static org.mockito.Mockito.*;
  * Unit test for simple App.
  */
 public class HBaseMailWriterTest
-        extends TestCase
 {
     Logger logger = LoggerFactory.getLogger(HBaseMailWriter.class);
-
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public HBaseMailWriterTest( String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( HBaseMailWriterTest.class );
-    }
 
     /**
      * Creates a mock MailboxItem given a dictionary of headers as keys with the header values as values.
@@ -122,6 +100,7 @@ public class HBaseMailWriterTest
      * Tests that the writer has written the appropriate values from a mock MailboxItem into a
      * mock HTableInterface.
      */
+    @Test
     public void testWrite()
     {
         MockHTable mockHTable = MockHTable.create();
@@ -144,6 +123,10 @@ public class HBaseMailWriterTest
         assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
     }
 
+    /**
+     * Test some of the interfaces the mail writer interacts with.
+     */
+    @Test
     public void testInterfaces()
     {
         HBaseManager hbase = new HBaseManager();
