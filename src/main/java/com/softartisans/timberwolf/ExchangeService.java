@@ -101,6 +101,7 @@ public class ExchangeService implements MailStore
         EnvelopeDocument envelopeDocument = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = envelopeDocument.addNewEnvelope();
         GetItemType getItem = envelope.addNewBody().addNewGetItem();
+        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
         ItemIdType itemId = items.addNewItemId();
         itemId.setId(ids.get(0));
@@ -179,7 +180,7 @@ public class ExchangeService implements MailStore
                     Vector<String> items = new Vector<String>();
                     for (MessageType item : message.getRootFolder().getItems().getMessageArray())
                     {
-                        items.add(item.getInternetMessageId());
+                        items.add(item.getItemId().getId());
                     }
                     return items;
                 }
