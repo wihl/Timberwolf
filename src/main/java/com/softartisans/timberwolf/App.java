@@ -21,19 +21,21 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeService;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
-import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services._2006.types.ItemQueryTraversalType;
-import com.microsoft.schemas.exchange.services._2006.types.ItemResponseShapeType;
-import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfBaseFolderIdsType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 
 /**
  * Driver class to grab emails and put them in HBase.
@@ -165,23 +167,17 @@ final class App
                 ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
                 //TODO: this code is pretty hackish, we should refactor soon  
                 
-                FindItemType request = createConsoleFindItemType();
+                FindItemDocument request = createConsoleFindItemType();
                 
-                Holder<FindItemResponseType> responses = new Holder<FindItemResponseType>();
+                Holder<FindItemResponseDocument> responses = new Holder<FindItemResponseDocument>();
                 port.findItem(request, null, null, null, null, responses, null);
                 
-                ArrayOfResponseMessagesType messages = responses.value.getResponseMessages();
-                List<JAXBElement<? extends ResponseMessageType>> elements =
-                        messages.getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-                for (JAXBElement<? extends ResponseMessageType> element : elements)
+                ArrayOfResponseMessagesType messages = responses.value.getFindItemResponse().getResponseMessages();
+                List<FindItemResponseMessageType> elements =
+                        messages.getFindItemResponseMessageList();
+                for (FindItemResponseMessageType element : elements)
                 {
-                    ResponseMessageType type = element.getValue();
-                    if (type instanceof FindItemResponseMessageType)
-                    {
-                        FindItemResponseMessageType response = (FindItemResponseMessageType)type;
-                        //esponse.
-                        //TODO items.add(e);
-                    }
+                    //TODO items.add(e);
                 }
                 
                 mailWriter.write(items);
@@ -202,19 +198,23 @@ final class App
      * Create a request to get some email items to display 
      * to the console so we know everything's working
      */
-    private FindItemType createConsoleFindItemType()
+    private FindItemDocument createConsoleFindItemType()
     {
-        FindItemType type = new FindItemType();
+        FindItemDocument doc = FindItemDocument.Factory.newInstance();
+        FindItemType type = FindItemType.Factory.newInstance();
         type.setTraversal(ItemQueryTraversalType.SHALLOW);
-        ItemResponseShapeType shapeType = new ItemResponseShapeType();
+        ItemResponseShapeType shapeType = ItemResponseShapeType.Factory.newInstance();
         shapeType.setBaseShape(DefaultShapeNamesType.ID_ONLY);
         type.setItemShape(shapeType);
 
-        NonEmptyArrayOfBaseFolderIdsType folders = new NonEmptyArrayOfBaseFolderIdsType();
-        DistinguishedFolderIdType distinguishedFolderIdType = new DistinguishedFolderIdType();
+        NonEmptyArrayOfBaseFolderIdsType folders = NonEmptyArrayOfBaseFolderIdsType.Factory.newInstance();
+        DistinguishedFolderIdType distinguishedFolderIdType = DistinguishedFolderIdType.Factory.newInstance();
         distinguishedFolderIdType.setId(DistinguishedFolderIdNameType.INBOX);
-        folders.getFolderIdOrDistinguishedFolderId().add(distinguishedFolderIdType);
+        folders.getDistinguishedFolderIdList().add(distinguishedFolderIdType);
         type.setParentFolderIds(folders);
-        return type;
+        
+        doc.setFindItem(type);
+        
+        return doc;
     }
 }

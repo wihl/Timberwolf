@@ -42,6 +42,8 @@
 		  <wsdl>src/main/resources/wsdl/Services.wsdl</wsdl>
 		  <extraargs>
 		    <extraarg>-client</extraarg>
+		    <extraarg>-db</extraarg>
+		    <extraarg>xmlbeans</extraarg>
 		  </extraargs>
 		</wsdlOption>
 	      </wsdlOptions>
@@ -214,6 +216,11 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-transports-http</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-databinding-xmlbeans</artifactId>
       <version>${cxf.version}</version>
     </dependency>
     <dependency>

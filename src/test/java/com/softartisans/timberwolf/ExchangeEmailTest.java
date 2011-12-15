@@ -1,11 +1,11 @@
 package com.softartisans.timberwolf;
 
-import com.microsoft.schemas.exchange.services._2006.types.MessageType;
-import com.microsoft.schemas.exchange.services._2006.types.BodyType;
-import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
-import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType;
-import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.BodyType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRecipientsType;
+import com.microsoft.schemas.exchange.services.x2006.types.EmailAddressType;
 
 import java.util.Calendar;
 

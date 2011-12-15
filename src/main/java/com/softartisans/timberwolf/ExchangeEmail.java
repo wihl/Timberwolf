@@ -1,16 +1,16 @@
 package com.softartisans.timberwolf;
 
-import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
-import com.microsoft.schemas.exchange.services._2006.types.MessageType;
-import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
-import com.microsoft.schemas.exchange.services._2006.types.ArrayOfRecipientsType;
-
 import java.text.DateFormat;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRecipientsType;
+import com.microsoft.schemas.exchange.services.x2006.types.EmailAddressType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.SingleRecipientType;
 
 /**
  * ExchangeEmail represents an email message from an Exchange server.
@@ -47,20 +47,19 @@ public class ExchangeEmail implements MailboxItem
     {
         headers = new HashMap<String, String>();
 
-        if (message.getBody() != null)
+        if (message.isSetBody())
         {
-            headers.put(BODY_KEY, message.getBody().getValue());
+            headers.put(BODY_KEY, message.getBody().getStringValue());
         }
 
-        if (message.getSubject() != null)
+        if (message.isSetSubject())
         {
             headers.put(SUBJECT_KEY, message.getSubject());
         }
 
-        if (message.getDateTimeSent() != null)
+        if (message.isSetDateTimeSent())
         {
-            // TODO: should we store in GMT, or in whatever time we're given?
-            Date time = message.getDateTimeSent().toGregorianCalendar().getTime();
+            Date time = message.getDateTimeSent().getTime();
             // I'd really like an equivalent of C#'s InvariantCulture, but it
             // looks like this is the closest I can get in Java.
             DateFormat format = DateFormat.getDateTimeInstance(
@@ -68,7 +67,7 @@ public class ExchangeEmail implements MailboxItem
             headers.put(TIME_SENT_KEY, format.format(time));
         }
 
-        if (message.getItemId() != null)
+        if (message.isSetItemId())
         {
             headers.put(ID_KEY, message.getItemId().getId());
         }
@@ -78,36 +77,36 @@ public class ExchangeEmail implements MailboxItem
         // given at:
         // http://msdn.microsoft.com/en-us/library/aa566013(v=EXCHG.140).aspx.
         SingleRecipientType sender = null;
-        if (message.getFrom() != null)
+        if (message.isSetFrom())
         {
             sender = message.getFrom();
         }
-        else if (message.getSender() != null)
+        else if (message.isSetSender())
         {
             sender = message.getSender();
         }
         if (sender != null)
         {
             EmailAddressType address = sender.getMailbox();
-            if (address.getEmailAddress() != null)
+            if (address.isSetEmailAddress())
             {
                 headers.put(SENDER_KEY, address.getEmailAddress());
             }
         }
 
-        if (message.getToRecipients() != null)
+        if (message.isSetToRecipients())
         {
             ArrayOfRecipientsType toRecipients = message.getToRecipients();
             headers.put(TORECIPIENT_KEY, getRecipientString(toRecipients));
         }
 
-        if (message.getCcRecipients() != null)
+        if (message.isSetCcRecipients())
         {
             ArrayOfRecipientsType ccRecipients = message.getCcRecipients();
             headers.put(CCRECIPIENT_KEY, getRecipientString(ccRecipients));
         }
 
-        if (message.getBccRecipients() != null)
+        if (message.isSetBccRecipients())
         {
             ArrayOfRecipientsType bccRecipients = message.getBccRecipients();
             headers.put(BCCRECIPIENT_KEY, getRecipientString(bccRecipients));
@@ -118,7 +117,7 @@ public class ExchangeEmail implements MailboxItem
             final ArrayOfRecipientsType recipients)
     {
         StringBuilder emailList = new StringBuilder();
-        for (EmailAddressType address : recipients.getMailbox())
+        for (EmailAddressType address : recipients.getMailboxArray())
         {
             emailList.append(address.getEmailAddress());
             emailList.append(EMAIL_DELIMITER);
