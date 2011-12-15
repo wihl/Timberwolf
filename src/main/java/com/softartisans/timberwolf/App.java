@@ -6,8 +6,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import com.cloudera.alfredo.client.AuthenticatedURL;
 
-import org.apache.log4j.BasicConfigurator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +39,15 @@ final class App
             usage = "The user for whom to retrieve email.")
     private String targetUser;
 
-    @Option(required = false, name = "--hbase-quorum",
+    @Option(name = "--hbase-quorum",
             usage = "The Zookeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
-    @Option(required = false, name = "--hbase-port",
+    @Option(name = "--hbase-port",
             usage = "The port used to connect to HBase.")
     private String hbasePort;
 
-    @Option(required = false, name = "--hbase-table",
+    @Option(name = "--hbase-table",
             usage = "The HBase table name that email data will be imported "
                   + "into.")
     private String hbaseTableName;
@@ -77,6 +75,34 @@ final class App
         try
         {
             parser.parseArgument(args);
+            Logger log = LoggerFactory.getLogger(App.class);
+
+            log.info("Timberwolf invoked with the following arguments:");
+            log.info("Exchange URL: {}", exchangeUrl);
+            log.info("Exchange User: {}", exchangeUser);
+            log.info("Exchange Password: {}", exchangePassword);
+            log.info("Target User: {}", targetUser);
+            log.info("HBase Quorum: {}", hbaseQuorum);
+            log.info("HBase Port: {}", hbasePort);
+            log.info("HBase Table Name: {}", hbaseTableName);
+            log.info("HBase Column Family: {}", hbaseColumnFamily);
+
+            boolean noHBaseArgs =
+                    hbaseQuorum == null && hbasePort == null
+                    && hbaseTableName == null;
+            boolean allHBaseArgs =
+                    hbaseQuorum != null && hbasePort != null
+                    && hbaseTableName != null;
+
+            // if no HBase args, write to console (for debugging).
+            // Else, write to HBase
+
+            if (!noHBaseArgs && !allHBaseArgs)
+            {
+                throw new CmdLineException(parser,
+                        "HBase Quorum, HBase Port, and HBase Table Name must"
+                        + " all be specified if at least one is specified");
+            }
         }
         catch (CmdLineException e)
         {
@@ -89,15 +115,6 @@ final class App
 
         Logger log = LoggerFactory.getLogger(App.class);
         BasicConfigurator.configure();
-        log.info("Timberwolf invoked with the following arguments:");
-        log.info("Exchange URL: {}", exchangeUrl);
-        log.info("Exchange User: {}", exchangeUser);
-        log.info("Exchange Password: {}", exchangePassword);
-        log.info("Target User: {}", targetUser);
-        log.info("HBase Quorum: {}", hbaseQuorum);
-        log.info("HBase Port: {}", hbasePort);
-        log.info("HBase Table Name: {}", hbaseTableName);
-        log.info("HBase Column Family: {}", hbaseColumnFamily);
 
         ExchangeService service = new ExchangeService(exchangeUrl);
         for (MailboxItem item : service.getMail("bkerr"))
