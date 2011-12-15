@@ -59,9 +59,8 @@ public class ExchangeService implements MailStore
      * MaxFindItemEntries at a time, because those could be massive responses
      * Instead, get a smaller number at a time.
      * This should evenly divide MaxFindItemEntries
-     * TODO make this larger
      */
-    private static final int MaxGetItemsEntries = 5;
+    private static final int MaxGetItemsEntries = 50;
 
     /**
      * The url of the service, passed in as a command line parameter, or from a
@@ -214,7 +213,7 @@ public class ExchangeService implements MailStore
                                                     String exchangeUrl)
                 throws IOException, AuthenticationException, XmlException
         {
-            int max = Math.min(startIndex + count, ids.size())-1;
+            int max = Math.min(startIndex + count, ids.size());
             if (max < startIndex)
             {
                 return new Vector<MailboxItem>();
@@ -291,7 +290,7 @@ public class ExchangeService implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(3, currentIdIndex, currentIds, exchangeUrl);
+                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex, currentIds, exchangeUrl);
                     log.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
