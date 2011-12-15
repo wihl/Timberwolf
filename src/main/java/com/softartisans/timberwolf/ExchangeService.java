@@ -115,23 +115,14 @@ public class ExchangeService implements MailStore
     public Iterable<MailboxItem> getMail(String user)
             throws IOException, AuthenticationException
     {
-        try
+        return new Iterable<MailboxItem>()
         {
-            return EmailIterator.findItems(0,exchangeUrl);
-        }
-        catch (XmlException e)
-        {
-            e.printStackTrace();
-        }
-//                new Iterable<MailboxItem>()
-//        {
-//            @Override
-//            public Iterator<MailboxItem> iterator()
-//            {
-//                return new EmailIterator(exchangeUrl);
-//            }
-//        };
-        return new Vector<MailboxItem>();
+            @Override
+            public Iterator<MailboxItem> iterator()
+            {
+                return new EmailIterator(exchangeUrl);
+            }
+        };
     }
 
     private static class EmailIterator implements Iterator<MailboxItem>
@@ -163,7 +154,7 @@ public class ExchangeService implements MailStore
             return conn;
         }
 
-        private static Iterable<MailboxItem> findItems(int offset, String exchangeUrl)
+        private static Vector<String> findItems(int offset, String exchangeUrl)
                 throws IOException, AuthenticationException, XmlException
         {
             byte[] bytes = getFindItemsRequest(offset,
@@ -178,19 +169,60 @@ public class ExchangeService implements MailStore
                 System.out.println();
                 System.out.println();
                 System.out.println();
+                System.out.println(doc.xmlText());
                 ArrayOfResponseMessagesType array =
                         doc.getEnvelope().getBody().getFindItemResponse()
                            .getResponseMessages();
                 for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
                 {
                     log.debug(message.getResponseCode().toString());
-                    Vector<MailboxItem> items = new Vector<MailboxItem>();
+                    Vector<String> items = new Vector<String>();
                     for (MessageType item : message.getRootFolder().getItems().getMessageArray())
                     {
-                        items.add(new ExchangeEmail(item));
+                        items.add(item.getInternetMessageId());
                     }
                     return items;
                 }
+                System.out.println(doc.xmlText());
+                // TODO: parse response
+                return new Vector<String>();
+            }
+            else
+            {
+                log.error("Failed to find items; Status code: "
+                          + conn.getResponseCode() + " "
+                          + conn.getResponseMessage());
+            }
+
+            return new Vector<String>();
+        }
+
+        /**
+         * Get a list of items from the server
+         * @param count the number of items to get.
+         * if startIndex+count > ids.size() then only ids.size()-startIndex
+         * items will be returned
+         * @param startIndex the index in ids of the first item to get
+         * @param ids a list of the ids to get
+         * @return
+         */
+        private static Vector<MailboxItem> getItems(int count, int startIndex, Vector<String> ids, String exchangeUrl)
+                throws IOException, AuthenticationException, XmlException
+        {
+            byte[] bytes = getGetItemsRequest(ids);
+            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                EnvelopeDocument doc =
+                        EnvelopeDocument.Factory.parse(conn.getInputStream());
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println(doc.xmlText());
+                ArrayOfResponseMessagesType array =
+                        doc.getEnvelope().getBody().getGetItemResponse().getResponseMessages();
                 System.out.println(doc.xmlText());
                 // TODO: parse response
                 return new Vector<MailboxItem>();
@@ -205,53 +237,66 @@ public class ExchangeService implements MailStore
             return new Vector<MailboxItem>();
         }
 
-        /**
-         * Get a list of items from the server
-         * @param count the number of items to get.
-         * if startIndex+count > ids.size() then only ids.size()-startIndex
-         * items will be returned
-         * @param startIndex the index in ids of the first item to get
-         * @param ids a list of the ids to get
-         * @return
-         */
-        private static Vector<String> getItems(int count, int startIndex, Vector<String> ids)
-        {
-            return new Vector<String>();
-        }
-
 
         @Override
         public boolean hasNext()
         {
-//            if (currentIds == null)
-//            {
-//                try
-//                {
-//                    currentIdIndex = 0;
-//                    currentIds = findItems(findItemsOffset, exchangeUrl);
-//                }
-//                catch (IOException e)
-//                {
-//                    log.error("findItems failed to get ids", e);
-//                    return false;
-//                }
-//                catch (AuthenticationException e)
-//                {
-//                    log.error("findItems could not authenticate", e);
-//                    return false;
-//                }
-//                catch (XmlException e)
-//                {
-//                    log.error("findItems could not decode response", e);
-//                    return false;
-//                }
-//            }
-            return currentIdIndex < currentIds.size();
+            if (currentIds == null)
+            {
+                try
+                {
+                    currentIdIndex = 0;
+                    currentIds = findItems(findItemsOffset, exchangeUrl);
+                }
+                catch (IOException e)
+                {
+                    log.error("findItems failed to get ids", e);
+                    return false;
+                }
+                catch (AuthenticationException e)
+                {
+                    log.error("findItems could not authenticate", e);
+                    return false;
+                }
+                catch (XmlException e)
+                {
+                    log.error("findItems could not decode response", e);
+                    return false;
+                }
+            }
+            // TODO change this back
+            return currentIdIndex < 1;//currentIds.size();
         }
 
         @Override
         public MailboxItem next()
         {
+            if (currentIds == null)
+            {
+                return null;
+            }
+            Vector<MailboxItem> items = null;
+            try
+            {
+                items = getItems(1, currentIdIndex, currentIds, exchangeUrl);
+                currentIdIndex++;
+                if (items.size() > 0)
+                {
+                    return items.get(0);
+                }
+            }
+            catch (IOException e)
+            {
+                log.error("getItems failed", e);
+            }
+            catch (AuthenticationException e)
+            {
+                log.error("getItems could not authenticate", e);
+            }
+            catch (XmlException e)
+            {
+                log.error("getItems could not decode response", e);
+            }
             return null;
         }
 
