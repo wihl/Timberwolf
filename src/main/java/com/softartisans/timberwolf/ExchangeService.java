@@ -75,11 +75,12 @@ public class ExchangeService implements MailStore
         this.exchangeUrl = exchangeUrl;
     }
 
-    private static byte[] getFindItemsRequest(int offset,
-            DistinguishedFolderIdNameType.Enum folder)
+    private static byte[] getFindItemsRequest(
+            int offset, DistinguishedFolderIdNameType.Enum folder)
             throws UnsupportedEncodingException
     {
-        EnvelopeDocument envelopeDocument = EnvelopeDocument.Factory.newInstance();
+        EnvelopeDocument envelopeDocument =
+                EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = envelopeDocument.addNewEnvelope();
         FindItemType findItem = envelope.addNewBody().addNewFindItem();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -89,9 +90,9 @@ public class ExchangeService implements MailStore
         folderId.setId(folder);
         // TODO paging
 
-        String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
-                .xmlText();
-        //request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n    <soap:Body>\n        <FindItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n                  xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"\n                  Traversal=\"Shallow\">\n            <ItemShape>\n                <t:BaseShape>IdOnly</t:BaseShape>\n            </ItemShape>\n            <ParentFolderIds>\n                <t:DistinguishedFolderId Id=\"inbox\"/>\n            </ParentFolderIds>\n        </FindItem>\n    </soap:Body>\n</soap:Envelope>";
+        String request =
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
+                        .xmlText();
         System.out.println(request);
         return request.getBytes("UTF-8");
     }
@@ -99,16 +100,19 @@ public class ExchangeService implements MailStore
     private static byte[] getGetItemsRequest(Vector<String> ids)
             throws UnsupportedEncodingException
     {
-        EnvelopeDocument envelopeDocument = EnvelopeDocument.Factory.newInstance();
+        EnvelopeDocument envelopeDocument =
+                EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = envelopeDocument.addNewEnvelope();
         GetItemType getItem = envelope.addNewBody().addNewGetItem();
-        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        getItem.addNewItemShape()
+               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
         ItemIdType itemId = items.addNewItemId();
         itemId.setId(ids.get(0));
         // TODO can we set more than one here??
-        String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
-                .xmlText();
+        String request =
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
+                        .xmlText();
         System.out.println(request);
         return request.getBytes("UTF-8");
     }
@@ -159,35 +163,29 @@ public class ExchangeService implements MailStore
         private static Vector<String> findItems(int offset, String exchangeUrl)
                 throws IOException, AuthenticationException, XmlException
         {
-            byte[] bytes = getFindItemsRequest(offset,
-                                               DistinguishedFolderIdNameType.INBOX);
+            byte[] bytes = getFindItemsRequest(
+                    offset, DistinguishedFolderIdNameType.INBOX);
             HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+            {
                 EnvelopeDocument doc =
                         EnvelopeDocument.Factory.parse(conn.getInputStream());
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println(doc.xmlText());
                 ArrayOfResponseMessagesType array =
                         doc.getEnvelope().getBody().getFindItemResponse()
                            .getResponseMessages();
-                for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
+                Vector<String> items = new Vector<String>();
+                for (FindItemResponseMessageType message : array
+                        .getFindItemResponseMessageArray())
                 {
                     log.debug(message.getResponseCode().toString());
-                    Vector<String> items = new Vector<String>();
-                    for (MessageType item : message.getRootFolder().getItems().getMessageArray())
+                    for (MessageType item : message.getRootFolder().getItems()
+                                                   .getMessageArray())
                     {
                         items.add(item.getItemId().getId());
                     }
-                    return items;
                 }
-                System.out.println(doc.xmlText());
-                // TODO: parse response
-                return new Vector<String>();
+                return items;
             }
             else
             {
@@ -195,7 +193,6 @@ public class ExchangeService implements MailStore
                           + conn.getResponseCode() + " "
                           + conn.getResponseMessage());
             }
-
             return new Vector<String>();
         }
 
@@ -208,28 +205,27 @@ public class ExchangeService implements MailStore
          * @param ids a list of the ids to get
          * @return
          */
-        private static Vector<MailboxItem> getItems(int count, int startIndex, Vector<String> ids, String exchangeUrl)
+        private static Vector<MailboxItem> getItems(int count, int startIndex,
+                                                    Vector<String> ids,
+                                                    String exchangeUrl)
                 throws IOException, AuthenticationException, XmlException
         {
             byte[] bytes = getGetItemsRequest(ids);
             HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
 
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+            {
                 EnvelopeDocument doc =
                         EnvelopeDocument.Factory.parse(conn.getInputStream());
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println();
-                System.out.println(doc.xmlText());
                 ItemInfoResponseMessageType[] array =
                         doc.getEnvelope().getBody().getGetItemResponse()
-                           .getResponseMessages().getGetItemResponseMessageArray();
+                           .getResponseMessages()
+                           .getGetItemResponseMessageArray();
                 Vector<MailboxItem> items = new Vector<MailboxItem>();
                 for (ItemInfoResponseMessageType message : array)
                 {
-                    for (MessageType item : message.getItems().getMessageArray())
+                    for (MessageType item : message.getItems()
+                                                   .getMessageArray())
                     {
                         items.add(new ExchangeEmail(item));
                     }
