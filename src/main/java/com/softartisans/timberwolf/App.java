@@ -1,6 +1,9 @@
 package com.softartisans.timberwolf;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -10,8 +13,11 @@ import javax.xml.ws.Holder;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.frontend.ClientProxyFactoryBean;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.service.Service;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.kohsuke.args4j.CmdLineException;
@@ -30,11 +36,13 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 
 /**
@@ -85,7 +93,7 @@ final class App
 
     public static void main(final String[] args)
     {
-        new App().run(args);
+        new App().run(new String[] {"--exchange-url", "https://devexch01.int.tartarus.com/ews/exchange.asmx", "--get-email-for", "me"});
     }
 
     private void run(final String[] args)
@@ -163,24 +171,7 @@ final class App
             }
             if (noHBaseArgs)
             {
-                ConsoleMailWriter mailWriter = new ConsoleMailWriter();
-                ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
-                //TODO: this code is pretty hackish, we should refactor soon  
-                
-                FindItemDocument request = createConsoleFindItemType();
-                
-                Holder<FindItemResponseDocument> responses = new Holder<FindItemResponseDocument>();
-                port.findItem(request, null, null, null, null, responses, null);
-                
-                ArrayOfResponseMessagesType messages = responses.value.getFindItemResponse().getResponseMessages();
-                List<FindItemResponseMessageType> elements =
-                        messages.getFindItemResponseMessageList();
-                for (FindItemResponseMessageType element : elements)
-                {
-                    //TODO items.add(e);
-                }
-                
-                mailWriter.write(items);
+                writeMailToConsole(port);
             }
             
         }
@@ -192,6 +183,68 @@ final class App
             System.err.println();
             return;
         }
+    }
+
+    /**
+     * Writes mails to console so we know something good happened 
+     */
+    private void writeMailToConsole(ExchangeServicePortType port)
+    {
+        ConsoleMailWriter mailWriter = new ConsoleMailWriter();
+        ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
+        //TODO: this code is pretty hackish, we should refactor soon  
+        
+        FindItemDocument request = createConsoleFindItemType();
+        
+        Holder<FindItemResponseDocument> responses = new Holder<FindItemResponseDocument>();
+        port.findItem(request, null, null, null, null, responses, null);
+        
+        ArrayOfResponseMessagesType messages = responses.value.getFindItemResponse().getResponseMessages();
+        List<FindItemResponseMessageType> elements =
+                messages.getFindItemResponseMessageList();
+        for (FindItemResponseMessageType element : elements)
+        {
+            if (com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType.Enum.forString("NoError").equals(element.getResponseCode()))
+            {
+                ArrayOfRealItemsType stuff = element.getRootFolder().getItems();
+                List<MessageType> moreMessages = stuff.getMessageList();
+                for (final MessageType messageType : moreMessages)
+                {
+                    MailboxItem item = new MailboxItem()
+                    {
+                        @Override
+                        public boolean hasKey(String key)
+                        {
+                            return "ID".equals(key);
+                        }
+
+                        @Override
+                        public String[] getHeaderKeys()
+                        {
+                            return new String[]{"ID"};
+                        }
+
+                        @Override
+                        public String getHeader(String key)
+                        {
+                            if ("ID".equals(key))
+                            {
+                                return messageType.getItemId().getId();
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    };
+
+                    items.add(item);
+                }
+            }
+        }
+        
+        mailWriter.write(items);
+        
     }
 
     /**

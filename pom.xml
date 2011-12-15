@@ -131,8 +131,12 @@
     </plugins>
     <resources>
       <resource>
-        <directory>target/generated-sources/axis2/wsdl2code/resources</directory>
-        <filtering>false</filtering>
+	<targetPath>schemaorg_apache_xmlbeans</targetPath>
+        <directory>target/generated-sources/cxf/schemaorg_apache_xmlbeans</directory>
+	<includes>
+	  <include>**/*.xsb</include>
+	  <include>**/*.class</include>
+	</includes>
       </resource>
     </resources>
   </build>
