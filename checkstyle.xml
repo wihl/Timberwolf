@@ -74,7 +74,10 @@
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
     <!--<module name="JavadocMethod"/>-->
     <module name="JavadocType"/>
-    <module name="JavadocVariable"/>
+    <module name="JavadocVariable">
+      <property name="scope" value="protected" />
+      <property name="excludeScope" value="private" />
+    </module>
     <module name="JavadocStyle"/>
 
 
@@ -119,7 +122,11 @@
 
     <!-- Checks for Size Violations.          -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="LineLength"/>
+    <module name="LineLength">
+      <!-- "^import" relaxes the restriction in import statments.
+           "^ \* " relaxes the restriction in javadoc bodies. -->
+      <property name="ignorePattern" value="^(import)|( \* )" />
+    </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
 
@@ -153,7 +160,9 @@
       <property name="option" value="nl" />
     </module>
     <module name="NeedBraces"/>
-    <module name="RightCurly"/>
+    <module name="RightCurly">
+      <property name="option" value="alone" />
+    </module>
 
 
     <!-- Checks for common coding problems         -->
