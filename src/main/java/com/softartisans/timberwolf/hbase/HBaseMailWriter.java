@@ -2,6 +2,7 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
@@ -51,6 +52,31 @@ public class HBaseMailWriter implements MailWriter
         this.columnFamily = Bytes.toBytes(columnFamily);
     }
 
+    /**
+     * Factory method for creating a HBaseMailWriter for a specific HBase
+     * instance and table, with properties.
+     * @param rootDir The directory shared by the HBase region servers.
+     * @param master The host and port number that the HBase master runs at.
+     * @param tableName The name of the table to store mail.
+     * @return A HBaseMailWriter utilizing the above parameters.
+     */
+    public static HBaseMailWriter create(final String rootDir,
+                                         final String master,
+                                         final String tableName,
+                                         final String keyHeader,
+                                         final String columnFamily)
+    {
+        Configuration configuration = HBaseConfigurator.createConfiguration(
+                rootDir, master);
+        HBaseManager hbase = new HBaseManager(configuration);
+        return new HBaseMailWriter(hbase.getTable(tableName), keyHeader,
+                columnFamily);
+    }
+
+    /**
+     * Writes the iterable list of MailboxItems to the underlying HBase table.
+     * @param mails The iterable list of MailBoxItems.
+     */
     @Override
     public final void write(final Iterable<MailboxItem> mails)
     {
