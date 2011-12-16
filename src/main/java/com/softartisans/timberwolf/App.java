@@ -55,7 +55,7 @@ final class App
                   + "Exchange Web Services.")
     private String exchangePassword;
 
-    @Option(required = true, name = "--get-email-for",
+    @Option(name = "--get-email-for",
             usage = "The user for whom to retrieve email.")
     private String targetUser;
 
