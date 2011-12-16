@@ -1,5 +1,13 @@
 package com.softartisans.timberwolf;
 
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +54,21 @@ public class ExchangeMailStore implements MailStore
                 return new EmailIterator(exchangeUrl);
             }
         };
+    }
+
+    private static FindItemDocument getFindItemDocument()
+    {
+        FindItemDocument doc = FindItemDocument.Factory.newInstance();
+        FindItemType type = doc.addNewFindItem();
+        type.setTraversal(ItemQueryTraversalType.SHALLOW);
+        ItemResponseShapeType shapeType = type.addNewItemShape();
+        shapeType.setBaseShape(DefaultShapeNamesType.ID_ONLY);
+
+        NonEmptyArrayOfBaseFolderIdsType folders = type.addNewParentFolderIds();
+        DistinguishedFolderIdType distinguishedFolderIdType =
+                folders.addNewDistinguishedFolderId();
+        distinguishedFolderIdType.setId(DistinguishedFolderIdNameType.INBOX);
+        return doc;
     }
 
 
@@ -95,6 +118,7 @@ public class ExchangeMailStore implements MailStore
         private static Vector<String> findItems(int findItemsOffset,
                                                 String exchangeUrl)
         {
+
             return new Vector<String>();
         }
 
