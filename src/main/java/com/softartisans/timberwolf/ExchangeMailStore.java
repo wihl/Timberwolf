@@ -1,10 +1,6 @@
 package com.softartisans.timberwolf;
 
 
-import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseDocument;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
@@ -18,19 +14,29 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeService;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.ws.Holder;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -93,7 +99,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public Iterable<MailboxItem> getMail(String user)
+    public Iterable<MailboxItem> getMail()
     {
         return new Iterable<MailboxItem>()
         {
@@ -120,6 +126,19 @@ public class ExchangeMailStore implements MailStore
         return doc;
     }
 
+    private static GetItemDocument getGetItemDocument(List<String> ids)
+    {
+        GetItemDocument doc = GetItemDocument.Factory.newInstance();
+        GetItemType getItem = doc.addNewGetItem();
+        getItem.addNewItemShape()
+               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
+        for (String id : ids)
+        {
+            items.addNewItemId().setId(id);
+        }
+        return doc;
+    }
 
     private static class EmailIterator implements Iterator<MailboxItem>
     {
@@ -188,16 +207,50 @@ public class ExchangeMailStore implements MailStore
         }
 
         private static Vector<MailboxItem> getItems(
-                int maxGetItemsEntries, int currentIdIndex,
-                Vector<String> currentIds, ExchangeServicePortType exchangePort)
+                int count, int startIndex, Vector<String> ids,
+                ExchangeServicePortType exchangePort)
         {
-            return new Vector<MailboxItem>();
+            int max = Math.min(startIndex + count, ids.size());
+            if (max < startIndex)
+            {
+                return new Vector<MailboxItem>();
+            }
+            Holder<GetItemResponseDocument> response
+                = new Holder<GetItemResponseDocument>();
+            exchangePort.getItem(
+                    getGetItemDocument(ids.subList(startIndex, max)),
+                    null, null, null, null, response, null);
+            ItemInfoResponseMessageType[] array =
+                response.value.getGetItemResponse()
+                .getResponseMessages()
+                .getGetItemResponseMessageArray();
+            Vector<MailboxItem> items = new Vector<MailboxItem>();
+            for (ItemInfoResponseMessageType message : array)
+            {
+                    for (MessageType item : message.getItems()
+                             .getMessageArray())
+                    {
+                        items.add(new ExchangeEmail(item));
+                    }
+            }
+            return items;
         }
 
         @Override
         public MailboxItem next()
         {
-            return null;
+            if (currentMailboxItemIndex < mailBoxItems.size())
+            {
+                MailboxItem item = mailBoxItems.get(currentMailboxItemIndex);
+                currentMailboxItemIndex++;
+                return item;
+            }
+            else
+            {
+                log.debug("All done, " + currentMailboxItemIndex + " >= "
+                          + mailBoxItems.size());
+                return null;
+            }
         }
 
         @Override

@@ -131,7 +131,9 @@ final class App
             }
             if (noHBaseArgs)
             {
-//                writeMailToConsole(port);
+                new ConsoleMailWriter().write(
+                        new ExchangeMailStore(exchangeUrl, exchangeUser,
+                                              exchangePassword).getMail());
             }
 
         }

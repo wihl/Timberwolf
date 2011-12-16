@@ -8,5 +8,5 @@ import java.util.Iterator;
 public interface MailStore
 {
     /** Returns some mail for the given user. */
-    Iterable<MailboxItem> getMail(String user);
+    Iterable<MailboxItem> getMail();
 }
