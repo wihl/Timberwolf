@@ -72,10 +72,10 @@ public class ExchangeMailStore implements MailStore
         URL url = ExchangeService.class.getResource("/wsdl/Services.wsdl");
         ExchangeService service = new ExchangeService(url, ExchangeService.SERVICE);
         service.addPort(ExchangeService.ExchangePort, javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING, exchangeUrl);
-        ExchangeServicePortType port = service.getExchangePort();
+        exchangePort = service.getExchangePort();
 
         // add logging. I'm not sure if this integrates cleanly with log4j
-        Client client = ClientProxy.getClient(port);
+        Client client = ClientProxy.getClient(exchangePort);
         client.getInInterceptors().add(new LoggingInInterceptor());
         client.getOutInterceptors().add(new LoggingOutInterceptor());
 
