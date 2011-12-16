@@ -44,6 +44,11 @@ final class App
                   + "into.")
     private String hbaseTableName;
 
+    @Option(name = "--hbase-key-header.",
+            usage = "The header id to use as a row key for the imported email "
+                    + "data.  Default row key is 'Item ID'.")
+    private String hbaseKeyHeader = "Item ID";
+
     @Option(name = "--hbase-column-family.",
             usage = "The column family for the imported email data.  Default "
                   + "family is 'h'.")
@@ -75,6 +80,7 @@ final class App
             log.info("HBase RootDir: {}", hbaseRootDir);
             log.info("HBase Master Port: {}", hbaseMasterPort);
             log.info("HBase Table Name: {}", hbaseTableName);
+            log.info("HBase Key Header: {}", hbaseKeyHeader);
             log.info("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =

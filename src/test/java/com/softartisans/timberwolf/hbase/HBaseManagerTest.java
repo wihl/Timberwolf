@@ -22,6 +22,22 @@ public class HBaseManagerTest
     Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
     private static HBaseManager hBaseManager;
     private static final String tableName = "testTable";
+    private static final String defaultRootDir =
+            "/usr/local/hbase-0.90.4/hbase";
+    private static final String defaultMaster = "127.0.0.1:60000";
+    private static List<String> columnFamilies;
+
+    /**
+     * Creates an IHBaseTable with a specific name.
+     * @param name The name of the IHBaseTable.
+     * @return A IHBaseTable with a specific name.
+     */
+    private IHBaseTable createNamedTable(String name)
+    {
+        HBaseTable table = mock(HBaseTable.class);
+        when(table.getName()).thenReturn(name);
+        return table;
+    }
 
     /**
      * Fixture setup.
@@ -32,7 +48,7 @@ public class HBaseManagerTest
         Configuration configuration = HBaseConfiguration.create();
         hBaseManager = new HBaseManager(configuration);
 
-        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies = new ArrayList<String>();
         columnFamilies.add("h");
 
         hBaseManager.createTable(tableName, columnFamilies);
@@ -108,14 +124,27 @@ public class HBaseManagerTest
     }
 
     /**
-     * Creates an IHBaseTable with a specific name.
-     * @param name The name of the IHBaseTable.
-     * @return A IHBaseTable with a specific name.
+     * Simple test to show that we can make a HBaseManager for a specific HBase
+     * instance.
      */
-    private IHBaseTable createNamedTable(String name)
+    @Test
+    public void testCreateSpecificRemote()
     {
-        HBaseTable table = mock(HBaseTable.class);
-        when(table.getName()).thenReturn(name);
-        return table;
+        HBaseManager hbase = new HBaseManager(defaultRootDir, defaultMaster);
     }
+
+    /**
+     * Tests that we can perform actions on a specific HBase table.
+     * TODO: Make generic.
+     */
+    @Test
+    public void testCreateTableSpecificRemote()
+    {
+        String aTable = "aTempTable";
+        HBaseManager hbase = new HBaseManager(defaultRootDir, defaultMaster);
+        hbase.createTable(aTable, columnFamilies);
+        hbase.deleteTable(aTable);
+    }
+
+
 }

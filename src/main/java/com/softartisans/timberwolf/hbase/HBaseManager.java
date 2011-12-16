@@ -57,7 +57,7 @@ public class HBaseManager
     }
 
     /**
-     * Constructor for creating a manager for an HBase configuration.
+     * Constructor for creating a manager for the default HBase configuration.
      */
     public HBaseManager(final Configuration hbaseConfiguration)
     {
@@ -75,6 +75,16 @@ public class HBaseManager
         {
             logger.error("Unable to connect to ZooKeeper!");
         }
+    }
+
+    /**
+     * Constructor for creating a manager for a specific HBase instance.
+     * @param rootDir The directory shared by the HBase region servers.
+     * @param master The host and port number that the HBase master runs at.
+     */
+    public HBaseManager(final String rootDir, final String master)
+    {
+        this(HBaseConfigurator.createConfiguration(rootDir, master));
     }
 
     /**

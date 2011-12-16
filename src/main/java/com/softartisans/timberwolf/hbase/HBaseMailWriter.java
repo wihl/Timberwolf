@@ -55,21 +55,19 @@ public class HBaseMailWriter implements MailWriter
     /**
      * Factory method for creating a HBaseMailWriter for a specific HBase
      * instance and table, with properties.
-     * @param rootDir The directory shared by the HBase region servers.
-     * @param master The host and port number that the HBase master runs at.
+     * @param hbase The HBase manager instance to use for this connection.
      * @param tableName The name of the table to store mail.
+     * @param keyHeader The mail header to use as a row key in HBase.
+     * @param columnFamily The column family to use for storing headers in
+     *                     HBase.
      * @return A HBaseMailWriter utilizing the above parameters.
      */
-    public static HBaseMailWriter create(final String rootDir,
-                                         final String master,
+    public static HBaseMailWriter create(final HBaseManager hbase,
                                          final String tableName,
                                          final String keyHeader,
                                          final String columnFamily)
     {
-        Configuration configuration = HBaseConfigurator.createConfiguration(
-                rootDir, master);
-        HBaseManager hbase = new HBaseManager(configuration);
-        return new HBaseMailWriter(hbase.getTable(tableName), keyHeader,
+       return new HBaseMailWriter(hbase.getTable(tableName), keyHeader,
                 columnFamily);
     }
 

@@ -141,4 +141,10 @@ public class HBaseMailWriterTest
         Assert.assertEquals(table, managerTable);
     }
 
+    @Test
+    public void testFactoryCreate()
+    {
+        //HBaseMailWriter mailWriter = HBaseMailWriter.create();
+    }
+
 }
