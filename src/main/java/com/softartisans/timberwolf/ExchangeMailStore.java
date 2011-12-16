@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.ws.Holder;
+
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -67,7 +69,9 @@ public class ExchangeMailStore implements MailStore
     {
 
         // create the object through which we interact with Exchange
-        ExchangeService service = new ExchangeService();
+        URL url = ExchangeService.class.getResource("/wsdl/Services.wsdl");
+        ExchangeService service = new ExchangeService(url, ExchangeService.SERVICE);
+        service.addPort(ExchangeService.ExchangePort, javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING, exchangeUrl);
         ExchangeServicePortType port = service.getExchangePort();
 
         // add logging. I'm not sure if this integrates cleanly with log4j
