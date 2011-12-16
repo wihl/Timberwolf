@@ -2,14 +2,13 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class writes a list of MailboxItems to an HTableInterface.
+ * This class writes a list of MailboxItems to an IHBaseTable.
  */
 public class HBaseMailWriter implements MailWriter
 {
