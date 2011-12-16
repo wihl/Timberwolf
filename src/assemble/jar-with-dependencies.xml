@@ -20,5 +20,17 @@
             <source>src/main/resources/log4j.xml</source>
             <outputDirectory>/</outputDirectory>
         </file>
+        <file>
+            <source>src/main/resources/wsdl/Services.wsdl</source>
+            <outputDirectory>/wsdl/</outputDirectory>
+        </file>
+        <file>
+            <source>src/main/resources/wsdl/messages.xsd</source>
+            <outputDirectory>/wsdl/</outputDirectory>
+        </file>
+        <file>
+            <source>src/main/resources/wsdl/types.xsd</source>
+            <outputDirectory>/wsdl/</outputDirectory>
+        </file>
     </files>
 </assembly>
