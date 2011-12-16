@@ -1,6 +1,10 @@
 package com.softartisans.timberwolf;
 
 
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
@@ -25,6 +29,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.ws.Holder;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -138,7 +143,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                currentIds = findItems(findItemsOffset, exchangePort);
+                currentIds = findItems(exchangePort);
                 log.debug("Got " + currentIds.size() + " email ids");
             }
             // TODO paging here
@@ -160,10 +165,26 @@ public class ExchangeMailStore implements MailStore
         }
 
         private static Vector<String> findItems(
-                int findItemsOffset, ExchangeServicePortType exchangePort)
+                ExchangeServicePortType exchangePort)
         {
-
-            return new Vector<String>();
+            Holder<FindItemResponseDocument> responses = new Holder<FindItemResponseDocument>();
+            exchangePort.findItem(getFindItemDocument(),
+                                  null, null, null, null, responses, null);
+            ArrayOfResponseMessagesType array =
+                    responses.value.getFindItemResponse()
+                       .getResponseMessages();
+            Vector<String> items = new Vector<String>();
+            for (FindItemResponseMessageType message : array
+                    .getFindItemResponseMessageArray())
+            {
+                log.debug(message.getResponseCode().toString());
+                for (MessageType item : message.getRootFolder().getItems()
+                                               .getMessageArray())
+                {
+                    items.add(item.getItemId().getId());
+                }
+            }
+            return items;
         }
 
         private static Vector<MailboxItem> getItems(
