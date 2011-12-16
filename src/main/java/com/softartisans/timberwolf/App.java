@@ -10,16 +10,6 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 
-import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.frontend.ClientProxyFactoryBean;
-import org.apache.cxf.interceptor.LoggingInInterceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.cxf.service.Service;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -123,36 +113,6 @@ final class App
                 throw new CmdLineException(parser, "If you provide a password, you must also provide a username");
             }
 
-            // create the object through which we interact with Exchange
-            ExchangeService service = new ExchangeService();
-            ExchangeServicePortType port = service.getExchangePort();
-            
-            // add logging. I'm not sure if this integrates cleanly with log4j
-            Client client = ClientProxy.getClient(port);
-            client.getInInterceptors().add(new LoggingInInterceptor());
-            client.getOutInterceptors().add(new LoggingOutInterceptor());
-
-            // We must turn off chunking for authentication to work. I'm not sure why it would matter
-            // see also 'A Note About Chunking':
-            // https://cxf.apache.org/docs/client-http-transport-including-ssl-support.html
-            HTTPConduit conduit = (HTTPConduit)client.getConduit();
-            HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
-            httpClientPolicy.setAllowChunking(false);
-            conduit.setClient(httpClientPolicy);
-
-            // this only seems to matter if we're using NTLM
-            // this is SPNEGO, which chooses a good authentication scheme at runtime
-            // (either Kerberos or NTLM). It seems to always choose Kerberos
-            // if we have a Kerberos ticket (check klist). If so it will ignore 
-            // this username and password
-            AuthorizationPolicy auth = new AuthorizationPolicy();
-            if (exchangeUser != null)
-            {
-                auth.setUserName(exchangeUser);
-                auth.setPassword(exchangePassword);
-            }
-            conduit.setAuthorization(auth);
-            
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbasePort == null
                     && hbaseTableName == null;
@@ -171,9 +131,9 @@ final class App
             }
             if (noHBaseArgs)
             {
-                writeMailToConsole(port);
+//                writeMailToConsole(port);
             }
-            
+
         }
         catch (CmdLineException e)
         {
@@ -186,19 +146,19 @@ final class App
     }
 
     /**
-     * Writes mails to console so we know something good happened 
+     * Writes mails to console so we know something good happened
      */
     private void writeMailToConsole(ExchangeServicePortType port)
     {
         ConsoleMailWriter mailWriter = new ConsoleMailWriter();
         ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
-        //TODO: this code is pretty hackish, we should refactor soon  
-        
+        //TODO: this code is pretty hackish, we should refactor soon
+
         FindItemDocument request = createConsoleFindItemType();
-        
+
         Holder<FindItemResponseDocument> responses = new Holder<FindItemResponseDocument>();
         port.findItem(request, null, null, null, null, responses, null);
-        
+
         ArrayOfResponseMessagesType messages = responses.value.getFindItemResponse().getResponseMessages();
         List<FindItemResponseMessageType> elements =
                 messages.getFindItemResponseMessageList();
@@ -242,13 +202,13 @@ final class App
                 }
             }
         }
-        
+
         mailWriter.write(items);
-        
+
     }
 
     /**
-     * Create a request to get some email items to display 
+     * Create a request to get some email items to display
      * to the console so we know everything's working
      */
     private FindItemDocument createConsoleFindItemType()
@@ -265,9 +225,9 @@ final class App
         distinguishedFolderIdType.setId(DistinguishedFolderIdNameType.INBOX);
         folders.getDistinguishedFolderIdList().add(distinguishedFolderIdType);
         type.setParentFolderIds(folders);
-        
+
         doc.setFindItem(type);
-        
+
         return doc;
     }
 }
