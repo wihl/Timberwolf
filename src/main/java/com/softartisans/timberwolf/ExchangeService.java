@@ -28,12 +28,20 @@ import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
  */
 public class ExchangeService
 {
-    private static final String declaration =
+    private static final String DECLARATION =
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+    private static final String HTTP_METHOD = "POST";
+    private static final int TIMEOUT = 10000;
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String SOAP_CONTENT_TYPE = "text/xml";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String SOAP_ENCODING = "UTF-8";
 
     private String endpoint;
 
-    /** Creates a new ExchangeService that talks to the given Exchange server. */    
+    /** 
+     * Creates a new ExchangeService that talks to the given Exchange server.
+     */    
     public ExchangeService(String url)
     {
         endpoint = url;
@@ -50,12 +58,13 @@ public class ExchangeService
         AuthenticatedURL.Token token = new AuthenticatedURL.Token();
         URL url = new URL(endpoint);
         
-        HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
-        conn.setRequestMethod("POST");
+        HttpURLConnection conn = new AuthenticatedURL().openConnection(url, 
+                                                                       token);
+        conn.setRequestMethod(HTTP_METHOD);
         conn.setDoOutput(true);
-        conn.setReadTimeout(10000);
-        conn.setRequestProperty("Content-Type", "text/xml");
-        conn.setRequestProperty("Content-Length", "" + request.length);
+        conn.setReadTimeout(TIMEOUT);
+        conn.setRequestProperty(CONTENT_TYPE_HEADER, SOAP_CONTENT_TYPE);
+        conn.setRequestProperty(CONTENT_LENGTH_HEADER, "" + request.length);
         conn.getOutputStream().write(request);
         return conn;
     }
@@ -65,13 +74,14 @@ public class ExchangeService
         throws UnsupportedEncodingException, IOException, XmlException,
                AuthenticationException
     {
-        String request = declaration + envelope.xmlText();
+        String request = DECLARATION + envelope.xmlText();
         // TODO: log request.
 
-        HttpURLConnection conn = makeRequest(request.getBytes("UTF-8"));
+        HttpURLConnection conn = makeRequest(request.getBytes(SOAP_ENCODING));
         if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
         {
-            EnvelopeDocument response = EnvelopeDocument.Factory.parse(conn.getInputStream());
+            EnvelopeDocument response = EnvelopeDocument.Factory.parse(
+                conn.getInputStream());
             return response;
         }
         else
