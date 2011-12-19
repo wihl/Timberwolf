@@ -53,28 +53,38 @@ public class ExchangeService
         return conn;
     }
 
+    /** Sends a SOAP envelope request and returns the response. */
+    private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
+        throws UnsupportedEncodingException, IOException, XmlException,
+               AuthenticationException
+    {
+        String request = declaration + envelope.xmlText();
+        // TODO: log request.
+
+        HttpURLConnection conn = makeRequest(request.getBytes("UTF-8"));
+        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+        {
+            EnvelopeDocument response = EnvelopeDocument.Factory.parse(conn.getInputStream());
+            return response;
+        }
+        else
+        {
+            // TODO: log error
+            // And return something better.
+            return EnvelopeDocument.Factory.newInstance();
+        }
+    }
+
     /** Returns the results of a find item request. */
     public FindItemResponseType findItem(FindItemType findItem)
         throws UnsupportedEncodingException, IOException, XmlException,
                AuthenticationException
     {
-        EnvelopeDocument envelopeDoc = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = envelopeDoc.addNewEnvelope();
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
         envelope.addNewBody().setFindItem(findItem);
-        String request = declaration + envelopeDoc.xmlText();
-        // TODO: log request
-        
-        HttpURLConnection conn = makeRequest(request.getBytes("UTF-8"));
-        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
-        {
-            EnvelopeDocument responseDoc = EnvelopeDocument.Factory.parse(conn.getInputStream());
-            // TODO: Check for error response.
-            return responseDoc.getEnvelope().getBody().getFindItemResponse();
-        }
-        else
-        {
-            // TODO: log error
-            return FindItemResponseType.Factory.newInstance();
-        }
+
+        EnvelopeDocument response = sendRequest(request);
+        return response.getEnvelope().getBody().getFindItemResponse();
     }
 }
