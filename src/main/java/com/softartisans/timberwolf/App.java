@@ -115,7 +115,7 @@ final class App
 
         Logger log = LoggerFactory.getLogger(App.class);
 
-        ExchangeService service = new ExchangeService(exchangeUrl);
-        new ConsoleMailWriter().write(service.getMail("bkerr"));
+        ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
+        new ConsoleMailWriter().write(mailStore.getMail("bkerr"));
     }
 }

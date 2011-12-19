@@ -35,10 +35,10 @@ import java.util.Vector;
 /**
  * This is the MailStore implementation for Exchange email
  */
-public class ExchangeService implements MailStore
+public class ExchangeMailStore implements MailStore
 {
     private static final Logger log = LoggerFactory.getLogger(
-            ExchangeService.class);
+            ExchangeMailStore.class);
     /**
      * When FindItems is run, you can limit the number of items to get at a time
      * and page, starting with 1000, but we'll probably want to profile this a
@@ -68,7 +68,7 @@ public class ExchangeService implements MailStore
      */
     private String exchangeUrl;
 
-    public ExchangeService(String exchangeUrl)
+    public ExchangeMailStore(String exchangeUrl)
             throws IOException, UnsupportedEncodingException,
                    AuthenticationException
     {
