@@ -1,18 +1,25 @@
 package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticatedURL;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.cloudera.alfredo.client.AuthenticationException;
+
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
-import java.net.URL;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.io.IOException;
 import java.net.ProtocolException;
-import java.io.UnsupportedEncodingException;
+import java.net.URL;
+
 import org.apache.xmlbeans.XmlException;
-import com.cloudera.alfredo.client.AuthenticationException;
+
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 /**
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,
@@ -86,5 +93,18 @@ public class ExchangeService
 
         EnvelopeDocument response = sendRequest(request);
         return response.getEnvelope().getBody().getFindItemResponse();
+    }
+
+    /** Returns the results of a get item request. */
+    public GetItemResponseType getItem(GetItemType getItem)
+        throws UnsupportedEncodingException, IOException, XmlException,
+               AuthenticationException
+    {
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
+        envelope.addNewBody().setGetItem(getItem);
+
+        EnvelopeDocument response = sendRequest(request);
+        return response.getEnvelope().getBody().getGetItemResponse();
     }
 }
