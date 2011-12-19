@@ -38,36 +38,21 @@ public class ExchangeService
     private static final String SOAP_ENCODING = "UTF-8";
 
     private String endpoint;
+    private HttpUrlConnectionFactory connectionFactory;
+
+    public ExchangeService(String url, HttpUrlConnectionFactory factory)
+    {
+        endpoint = url;
+        connectionFactory = factory;
+    }
 
     /** 
      * Creates a new ExchangeService that talks to the given Exchange server.
      */    
     public ExchangeService(String url)
     {
-        endpoint = url;
-    }
-
-    /** 
-     * Creates a new HTTP connection to the exchange server that will deliver
-     * the given request.
-     */
-    private HttpURLConnection makeRequest(byte[] request)
-        throws MalformedURLException, IOException, ProtocolException,
-               AuthenticationException
-    {
-        AuthenticatedURL.Token token = new AuthenticatedURL.Token();
-        URL url = new URL(endpoint);
-        
-        HttpURLConnection conn = new AuthenticatedURL().openConnection(url, 
-                                                                       token);
-        conn.setRequestMethod(HTTP_METHOD);
-        conn.setDoOutput(true);
-        conn.setReadTimeout(TIMEOUT);
-        conn.setRequestProperty(CONTENT_TYPE_HEADER, SOAP_CONTENT_TYPE);
-        conn.setRequestProperty(CONTENT_LENGTH_HEADER, "" + request.length);
-        conn.getOutputStream().write(request);
-        return conn;
-    }
+        this(url, new AlfredoHttpUrlConnectionFactory());
+    }    
 
     /** Sends a SOAP envelope request and returns the response. */
     private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
@@ -77,7 +62,8 @@ public class ExchangeService
         String request = DECLARATION + envelope.xmlText();
         // TODO: log request.
 
-        HttpURLConnection conn = makeRequest(request.getBytes(SOAP_ENCODING));
+        HttpURLConnection conn = connectionFactory.newInstance(endpoint, 
+            request.getBytes(SOAP_ENCODING));
         if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
         {
             EnvelopeDocument response = EnvelopeDocument.Factory.parse(
