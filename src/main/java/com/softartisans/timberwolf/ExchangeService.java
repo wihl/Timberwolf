@@ -26,11 +26,16 @@ public class ExchangeService
 
     private String endpoint;
 
+    /** Creates a new ExchangeService that talks to the given Exchange server. */    
     public ExchangeService(String url)
     {
         endpoint = url;
     }
 
+    /** 
+     * Creates a new HTTP connection to the exchange server that will deliver
+     * the given request.
+     */
     private HttpURLConnection makeRequest(byte[] request)
         throws MalformedURLException, IOException, ProtocolException,
                AuthenticationException
@@ -48,6 +53,7 @@ public class ExchangeService
         return conn;
     }
 
+    /** Returns the results of a find item request. */
     public FindItemResponseType findItem(FindItemType findItem)
         throws UnsupportedEncodingException, IOException, XmlException,
                AuthenticationException
