@@ -1,31 +1,11 @@
 package com.softartisans.timberwolf;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.ws.Holder;
-
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeService;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
@@ -34,6 +14,15 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalTyp
 import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.ws.Holder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Driver class to grab emails and put them in HBase.
@@ -81,8 +70,10 @@ final class App
     {
     }
 
-    public static void main(final String[] args)
+    public static void main(final String[] args) throws InterruptedException
     {
+        System.out.println("Starting");
+        Thread.sleep(30000);
         new App().run(args);
     }
 

@@ -140,6 +140,14 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>1.5</version>
         <configuration>
+<!--          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
+              <resource>META-INF/cxf/cxf.xml</resource>
+              Add this to enable loading of DTDs
+                   <ignoreDtd>false</ignoreDtd>
+              
+            </transformer>
+          </transformers>-->
         </configuration>
         <executions>
           <execution>
@@ -151,7 +159,7 @@
         </executions>
       </plugin>
     </plugins>
-    <resources>
+<!--    <resources>
       <resource>
 	<targetPath>schemaorg_apache_xmlbeans</targetPath>
         <directory>target/generated-sources/cxf/schemaorg_apache_xmlbeans</directory>
@@ -160,7 +168,7 @@
 	  <include>**/*.class</include>
 	</includes>
       </resource>
-    </resources>
+    </resources>-->
   </build>
 
   <reporting>
