@@ -29,7 +29,7 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindItemRequest()
+    public void testFindItemRequestInbox()
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -40,6 +40,20 @@ public class ExchangeMailStoreTest
         assertEquals(findItem.xmlText(),
                      ExchangeMailStore.getFindItemsRequest(
                              DistinguishedFolderIdNameType.INBOX).xmlText());
+    }
+
+    @Test
+    public void testFindItemRequestDeletedItems()
+    {
+        FindItemType findItem = FindItemType.Factory.newInstance();
+        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        DistinguishedFolderIdType folderId =
+                findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
+        folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
+        assertEquals(findItem.xmlText(),
+                     ExchangeMailStore.getFindItemsRequest(
+                             DistinguishedFolderIdNameType.DELETEDITEMS).xmlText());
     }
 
 }
