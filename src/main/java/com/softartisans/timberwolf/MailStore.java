@@ -3,8 +3,6 @@ package com.softartisans.timberwolf;
 import com.cloudera.alfredo.client.AuthenticationException;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Iterator;
 
 /**
  * MailStore represents a repository, either local or remote, of mail.

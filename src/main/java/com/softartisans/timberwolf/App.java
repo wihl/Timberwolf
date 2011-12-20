@@ -4,16 +4,10 @@ import com.cloudera.alfredo.client.AuthenticationException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import com.cloudera.alfredo.client.AuthenticatedURL;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Driver class to grab emails and put them in HBase.

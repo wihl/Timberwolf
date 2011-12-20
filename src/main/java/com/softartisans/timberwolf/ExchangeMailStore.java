@@ -24,15 +24,15 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * This is the MailStore implementation for Exchange email
+ * This is the MailStore implementation for Exchange email.
  * This uses the Exchange web services to access exchange and get back email
- * items
+ * items.
  */
 public class ExchangeMailStore implements MailStore
 {
-    private static final Logger log = LoggerFactory.getLogger(
+    private static final Logger LOG = LoggerFactory.getLogger(
             ExchangeMailStore.class);
-    /**
+    /*
      * I'm leaving this here for when we get to doing paging. If we decide
      * not to do paging these variables and notes should probably be removed
      *
@@ -60,31 +60,31 @@ public class ExchangeMailStore implements MailStore
      * Instead, get a smaller number at a time.
      * This should evenly divide MaxFindItemEntries
      */
-    private static final int MaxGetItemsEntries = 50;
+    private static final int MAX_GET_ITEMS_ENTRIES = 50;
 
-    /** The service that does the actual sending of soap packages to exchange */
+    /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
 
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
-     * server at the provided url
+     * server at the provided url.
      *
      * @param exchangeUrl the url to the exchange web service such as
      * https://devexch01.int.tartarus.com/ews/exchange.asmx
      */
-    public ExchangeMailStore(String exchangeUrl)
+    public ExchangeMailStore(final String exchangeUrl)
     {
         exchangeService = new ExchangeService(exchangeUrl);
     }
 
     /**
-     * Creates a FindItemType to request all the ids for the given folder
+     * Creates a FindItemType to request all the ids for the given folder.
      *
      * @param folder the folder from which to get ids
      * @return the FindItemType necessary to request the ids
      */
     private static FindItemType getFindItemsRequest(
-            DistinguishedFolderIdNameType.Enum folder)
+            final DistinguishedFolderIdNameType.Enum folder)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -97,12 +97,12 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
-     * Creates a GetItemType to request the info for the given ids
+     * Creates a GetItemType to request the info for the given ids.
      *
      * @param ids the ids to request
      * @return the GetItemType necessary to request the info for those ids
      */
-    private static GetItemType getGetItemsRequest(List<String> ids)
+    private static GetItemType getGetItemsRequest(final List<String> ids)
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
         getItem.addNewItemShape()
@@ -116,7 +116,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public Iterable<MailboxItem> getMail(String user)
+    public final Iterable<MailboxItem> getMail(final String user)
             throws IOException, AuthenticationException
     {
         return new Iterable<MailboxItem>()
@@ -133,22 +133,22 @@ public class ExchangeMailStore implements MailStore
      * This Iterator will request a list of all ids from the exchange service
      * and then get actual mail items for those ids.
      */
-    private static class EmailIterator implements Iterator<MailboxItem>
+    private static final class EmailIterator implements Iterator<MailboxItem>
     {
-        Vector<String> currentIds;
-        int currentIdIndex = 0;
-        int findItemsOffset = 0;
+        private Vector<String> currentIds;
+        private int currentIdIndex = 0;
+        private int findItemsOffset = 0;
         private Vector<MailboxItem> mailBoxItems;
         private int currentMailboxItemIndex = 0;
         private final ExchangeService exchangeService;
 
-        private EmailIterator(ExchangeService exchangeService)
+        private EmailIterator(final ExchangeService service)
         {
-            this.exchangeService = exchangeService;
+            this.exchangeService = service;
         }
 
         /**
-         * Gets a list of ids for the inbox for the current user
+         * Gets a list of ids for the inbox for the current user.
          *
          * @param exchangeService the actual service to use when requesting ids
          * @return a list of exchange ids
@@ -157,7 +157,8 @@ public class ExchangeMailStore implements MailStore
          * @throws IOException If we can't connect to the exchange service
          * @throws XmlException If the response cannot be parsed
          */
-        private static Vector<String> findItems(ExchangeService exchangeService)
+        private static Vector<String> findItems(
+                final ExchangeService exchangeService)
                 throws IOException, AuthenticationException, XmlException
         {
             FindItemResponseType response =
@@ -169,7 +170,7 @@ public class ExchangeMailStore implements MailStore
             for (FindItemResponseMessageType message : array
                     .getFindItemResponseMessageArray())
             {
-                log.debug(message.getResponseCode().toString());
+                LOG.debug(message.getResponseCode().toString());
                 for (MessageType item : message.getRootFolder().getItems()
                                                .getMessageArray())
                 {
@@ -180,7 +181,7 @@ public class ExchangeMailStore implements MailStore
         }
 
         /**
-         * Get a list of items from the server
+         * Get a list of items from the server.
          *
          * @param count the number of items to get.
          * if startIndex+count > ids.size() then only ids.size()-startIndex
@@ -196,9 +197,9 @@ public class ExchangeMailStore implements MailStore
          * @throws IOException If we can't connect to the exchange service
          * @throws XmlException If the response cannot be parsed
          */
-        private static Vector<MailboxItem> getItems(int count, int startIndex,
-                                                    Vector<String> ids,
-                                                    ExchangeService exchangeService)
+        private static Vector<MailboxItem> getItems(
+                final int count, final int startIndex, final Vector<String> ids,
+                final ExchangeService exchangeService)
                 throws IOException, AuthenticationException, XmlException
         {
             int max = Math.min(startIndex + count, ids.size());
@@ -235,21 +236,21 @@ public class ExchangeMailStore implements MailStore
                     currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
                     currentIds = findItems(exchangeService);
-                    log.debug("Got " + currentIds.size() + " email ids");
+                    LOG.debug("Got " + currentIds.size() + " email ids");
                 }
                 catch (IOException e)
                 {
-                    log.error("findItems failed to get ids", e);
+                    LOG.error("findItems failed to get ids", e);
                     return false;
                 }
                 catch (AuthenticationException e)
                 {
-                    log.error("findItems could not authenticate", e);
+                    LOG.error("findItems could not authenticate", e);
                     return false;
                 }
                 catch (XmlException e)
                 {
-                    log.error("findItems could not decode response", e);
+                    LOG.error("findItems could not decode response", e);
                     return false;
                 }
             }
@@ -263,22 +264,23 @@ public class ExchangeMailStore implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex,
-                                            currentIds, exchangeService);
-                    log.debug("Got " + mailBoxItems.size() + " emails");
+                    mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES,
+                                            currentIdIndex, currentIds,
+                                            exchangeService);
+                    LOG.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
                 catch (IOException e)
                 {
-                    log.error("getItems failed", e);
+                    LOG.error("getItems failed", e);
                 }
                 catch (AuthenticationException e)
                 {
-                    log.error("getItems could not authenticate", e);
+                    LOG.error("getItems could not authenticate", e);
                 }
                 catch (XmlException e)
                 {
-                    log.error("getItems could not decode response", e);
+                    LOG.error("getItems could not decode response", e);
                 }
             }
             // TODO call getItems more than once
@@ -296,7 +298,7 @@ public class ExchangeMailStore implements MailStore
             }
             else
             {
-                log.debug("All done, " + currentMailboxItemIndex + " >= "
+                LOG.debug("All done, " + currentMailboxItemIndex + " >= "
                           + mailBoxItems.size());
                 return null;
             }
