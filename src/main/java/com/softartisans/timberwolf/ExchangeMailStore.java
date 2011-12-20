@@ -156,10 +156,13 @@ public class ExchangeMailStore implements MailStore
          * exchange service
          * @throws IOException If we can't connect to the exchange service
          * @throws XmlException If the response cannot be parsed
+         * @throws HttpUrlConnectionCreationException if it failed to create a
+         * connection to the service
          */
         private static Vector<String> findItems(
                 final ExchangeService exchangeService)
-                throws IOException, AuthenticationException, XmlException
+                throws IOException, AuthenticationException, XmlException,
+                       HttpUrlConnectionCreationException
         {
             FindItemResponseType response =
                     exchangeService.findItem(getFindItemsRequest(
@@ -196,11 +199,14 @@ public class ExchangeMailStore implements MailStore
          * exchange service
          * @throws IOException If we can't connect to the exchange service
          * @throws XmlException If the response cannot be parsed
+         * @throws HttpUrlConnectionCreationException If it failed to connect
+         * to the service
          */
         private static Vector<MailboxItem> getItems(
                 final int count, final int startIndex, final Vector<String> ids,
                 final ExchangeService exchangeService)
-                throws IOException, AuthenticationException, XmlException
+                throws IOException, AuthenticationException, XmlException,
+                       HttpUrlConnectionCreationException
         {
             int max = Math.min(startIndex + count, ids.size());
             if (max < startIndex)
@@ -253,6 +259,11 @@ public class ExchangeMailStore implements MailStore
                     LOG.error("findItems could not decode response", e);
                     return false;
                 }
+                catch (HttpUrlConnectionCreationException e)
+                {
+                    LOG.error("findItems failed to get ids", e);
+                    return false;
+                }
             }
             // TODO paging here
             if (currentIdIndex >= currentIds.size())
@@ -281,6 +292,10 @@ public class ExchangeMailStore implements MailStore
                 catch (XmlException e)
                 {
                     LOG.error("getItems could not decode response", e);
+                }
+                catch (HttpUrlConnectionCreationException e)
+                {
+                    LOG.error("getItems failed", e);
                 }
             }
             // TODO call getItems more than once
