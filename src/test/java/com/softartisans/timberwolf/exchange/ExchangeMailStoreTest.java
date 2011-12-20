@@ -1,12 +1,19 @@
 package com.softartisans.timberwolf.exchange;
 
 import com.cloudera.alfredo.client.AuthenticationException;
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import org.apache.xmlbeans.XmlException;
 import org.junit.After;
@@ -18,9 +25,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for ExchangeMailStore, uses mock exchange service
@@ -79,6 +87,35 @@ public class ExchangeMailStoreTest
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
         Vector<String> items = ExchangeMailStore.findItems(service);
         assertEquals(0,items.size());
+    }
+
+    @Test
+    public void testFindItemsDeletedItemsRespond0()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        FindItemType findItem = ExchangeMailStore
+                .getFindItemsRequest(
+                        DistinguishedFolderIdNameType.DELETEDITEMS);
+        FindItemResponseType response = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType array =
+                mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType message =
+                mock(FindItemResponseMessageType.class);
+        FindItemParentType root = mock(FindItemParentType.class);
+        ArrayOfRealItemsType realItems = mock(ArrayOfRealItemsType.class);
+        when(service.findItem(LikeThis(findItem))).thenReturn(response);
+        when(response.getResponseMessages()).thenReturn(array);
+        when(array.getFindItemResponseMessageArray())
+                .thenReturn(new FindItemResponseMessageType[]{message});
+        when(message.getRootFolder()).thenReturn(root);
+        // For logging right now, might actually be checked later
+        when(message.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(root.getItems()).thenReturn(realItems);
+        when(realItems.getMessageArray()).thenReturn(new MessageType[0]);
+        Vector<String> items = ExchangeMailStore.findItems(service);
+        assertEquals(0, items.size());
     }
 
     @Test
