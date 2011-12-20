@@ -2,10 +2,14 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class writes a list of MailboxItems to an IHBaseTable.
@@ -52,22 +56,37 @@ public class HBaseMailWriter implements MailWriter
     }
 
     /**
-     * Factory method for creating a HBaseMailWriter for a specific HBase
-     * instance and table, with properties.
-     * @param hbase The HBase manager instance to use for this connection.
-     * @param tableName The name of the table to store mail.
-     * @param keyHeader The mail header to use as a row key in HBase.
-     * @param columnFamily The column family to use for storing headers in
-     *                     HBase.
-     * @return A HBaseMailWriter utilizing the above parameters.
+     * Creates an HBaseMailWriter with the specified settings. If the table
+     * specified by tableName does not currently exist, it will be created
+     * with the specified columnFamily.
+     * @param quorum The ZooKeeper quorum.
+     * @param clientPort The ZooKeeper client port.
+     * @param tableName The table to connect to.
+     * @param keyHeader The MailboxItem header to use as a row key.
+     * @param columnFamily The column family to deposit mails into.
+     * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static HBaseMailWriter create(final HBaseManager hbase,
+    public static HBaseMailWriter create(final String quorum,
+                                         final String clientPort,
                                          final String tableName,
                                          final String keyHeader,
                                          final String columnFamily)
     {
-       return new HBaseMailWriter(hbase.getTable(tableName), keyHeader,
-                columnFamily);
+        Configuration configuration =
+                HBaseConfigurator.createConfiguration(quorum,
+                        clientPort);
+        HBaseManager hbase = new HBaseManager(configuration);
+
+        List<String> cfs = new ArrayList<String>();
+        cfs.add(columnFamily);
+
+        if (! hbase.tableExists(tableName))
+        {
+            hbase.createTable(tableName,cfs);
+        }
+
+        IHBaseTable table = hbase.getTable(tableName);
+        return new HBaseMailWriter(table, keyHeader, columnFamily);
     }
 
     /**
@@ -91,7 +110,6 @@ public class HBaseMailWriter implements MailWriter
             }
 
             mailTable.put(mailboxItemPut);
-
         }
         mailTable.flush();
     }

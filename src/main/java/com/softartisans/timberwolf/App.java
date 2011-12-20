@@ -1,11 +1,19 @@
 package com.softartisans.timberwolf;
 
+import com.softartisans.timberwolf.hbase.HBaseConfigurator;
+import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+import com.softartisans.timberwolf.hbase.HBaseManager;
+import com.softartisans.timberwolf.hbase.IHBaseTable;
+import org.apache.hadoop.conf.Configuration;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Driver class to grab emails and put them in HBase.
@@ -92,6 +100,16 @@ final class App
 
             // if no HBase args, write to console (for debugging).
             // Else, write to HBase
+            if (noHBaseArgs)
+            {
+
+            }
+            else
+            {
+                MailWriter mailWriter = HBaseMailWriter.create(hbaseQuorum,
+                        hbaseclientPort, hbaseTableName, hbaseKeyHeader,
+                        hbaseColumnFamily);
+            }
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
@@ -109,6 +127,5 @@ final class App
             System.err.println();
             return;
         }
-
     }
 }
