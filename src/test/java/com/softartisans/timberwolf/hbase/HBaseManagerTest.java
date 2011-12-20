@@ -45,13 +45,13 @@ public class HBaseManagerTest
     @BeforeClass
     public static void setUp()
     {
-        Configuration configuration = HBaseConfiguration.create();
-        hBaseManager = new HBaseManager(configuration);
-
-        columnFamilies = new ArrayList<String>();
-        columnFamilies.add("h");
-
-        hBaseManager.createTable(tableName, columnFamilies);
+//        Configuration configuration = HBaseConfiguration.create();
+//        hBaseManager = new HBaseManager(configuration);
+//
+//        columnFamilies = new ArrayList<String>();
+//        columnFamilies.add("h");
+//
+//        hBaseManager.createTable(tableName, columnFamilies);
     }
 
     /**
@@ -60,8 +60,8 @@ public class HBaseManagerTest
     @AfterClass
     public static void tearDown()
     {
-        hBaseManager.deleteTable(tableName);
-        hBaseManager.close();
+//        hBaseManager.deleteTable(tableName);
+//        hBaseManager.close();
     }
 
     /**
@@ -144,6 +144,20 @@ public class HBaseManagerTest
         HBaseManager hbase = new HBaseManager(defaultRootDir, defaultMaster);
         hbase.createTable(aTable, columnFamilies);
         hbase.deleteTable(aTable);
+    }
+
+    /**
+     * Simple HBase connection to a remote network server.
+     */
+    @Test
+    public void testRemoteConnection()
+    {
+        HBaseManager hbase = new HBaseManager("hdhbase01.int.softartisans.com",
+                "45000");
+        List<String> cfs = new ArrayList<String>();
+        cfs.add("cf");
+        hbase.createTable("testTable",cfs);
+        hbase.deleteTable("testTable");
     }
 
 

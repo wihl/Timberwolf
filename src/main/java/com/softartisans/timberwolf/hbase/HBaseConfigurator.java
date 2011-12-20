@@ -10,28 +10,29 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 public abstract class HBaseConfigurator {
 
     /**
-     * The property name for the rootdir property.
+     * The property name for the ZooKeepr quorum.
      */
-    private static final String HBASE_ROOTDIR = "hbase.rootdir";
+    private static final String ZK_QUORUM = "hbase.zookeeper.quorum";
 
     /**
-     * The property name of the master property.
+     * The property name of ZooKeeper client port property.
      */
-    private static final String HBASE_MASTER = "hbase.master";
+    private static final String ZK_CLIENT_PORT =
+            "hbase.zookeeper.property.clientPort";
 
     /**
      * Creates a Hadoop Configuration for HBase using the specified
      * properties.
-     * @param rootDir The directory shared by the HBase region servers.
-     * @param master The host and port number that the HBase master runs at.
+     * @param quorum The ZooKeeper quorum members.
+     * @param clientPort The port number to seek the ZooKeeper master.
      * @return A Hadoop Configuration object with the above parameters.
      */
-    public static final Configuration createConfiguration(final String rootDir,
-                                                          final String master)
+    public static final Configuration createConfiguration(final String quorum,
+                                                        final String clientPort)
     {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set(HBASE_ROOTDIR, rootDir);
-        configuration.set(HBASE_MASTER, master);
+        configuration.set(ZK_QUORUM, quorum);
+        //configuration.set(ZK_CLIENT_PORT, clientPort);
         return configuration;
     }
 }

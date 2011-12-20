@@ -171,7 +171,7 @@ public class HBaseManager
                 HTableInterface table;
                 try
                 {
-                    table = new HTable(tableName);
+                    table = new HTable(configuration, tableName);
                     return new HBaseTable(table);
                 }
                 catch (IOException e)
@@ -236,7 +236,7 @@ public class HBaseManager
                 {
                     hbase.createTable(tableDescriptor);
                 }
-                HTableInterface table = new HTable(tableName);
+                HTableInterface table = new HTable(configuration, tableName);
                 addTable(new HBaseTable(table));
             }
             catch (IOException e)
