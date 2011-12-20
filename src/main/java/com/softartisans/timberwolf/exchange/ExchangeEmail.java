@@ -1,10 +1,11 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.exchange;
 
 
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRecipientsType;
 import com.microsoft.schemas.exchange.services.x2006.types.EmailAddressType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SingleRecipientType;
+import com.softartisans.timberwolf.MailboxItem;
 
 import java.text.DateFormat;
 

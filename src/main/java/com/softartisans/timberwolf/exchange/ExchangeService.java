@@ -1,25 +1,16 @@
-package com.softartisans.timberwolf;
-
-import com.cloudera.alfredo.client.AuthenticatedURL;
-import com.cloudera.alfredo.client.AuthenticationException;
+package com.softartisans.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import org.apache.xmlbeans.XmlException;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-
-import org.apache.xmlbeans.XmlException;
-
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 /**
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,
@@ -41,13 +32,13 @@ public class ExchangeService
         connectionFactory = factory;
     }
 
-    /** 
+    /**
      * Creates a new ExchangeService that talks to the given Exchange server.
-     */    
+     */
     public ExchangeService(String url)
     {
         this(url, new AlfredoHttpUrlConnectionFactory());
-    }    
+    }
 
     /** Sends a SOAP envelope request and returns the response. */
     private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
@@ -57,8 +48,9 @@ public class ExchangeService
         String request = DECLARATION + envelope.xmlText();
         // TODO: log request.
 
-        HttpURLConnection conn = connectionFactory.newInstance(endpoint, 
-            request.getBytes(SOAP_ENCODING));
+        HttpURLConnection conn = connectionFactory.newInstance(endpoint,
+                                                               request.getBytes(
+                                                                       SOAP_ENCODING));
         if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
         {
             EnvelopeDocument response = EnvelopeDocument.Factory.parse(

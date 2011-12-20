@@ -1,14 +1,16 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.exchange;
 
-import java.net.HttpURLConnection;
-import static org.mockito.Mockito.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-/** 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
  * An http connection factory that returns mock connections.  These can be used
  * for testing.
  */
@@ -37,13 +39,13 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
                         new ByteArrayInputStream(mockRequest.responseData));
                     return mockConn;
                 }
-            }    
+            }
         }
         catch(IOException e)
         {
             throw new HttpUrlConnectionCreationException(
-                "There was an IO exception while mocking the request.", null);            
-        }        
+                "There was an IO exception while mocking the request.", null);
+        }
 
         throw new HttpUrlConnectionCreationException(
             "There was no mocked request matching the given url and data.", null);

@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.exchange;
 
 /** Exception that can be thrown by HttpUrlConnectionFactories. */
 public class HttpUrlConnectionCreationException extends Exception

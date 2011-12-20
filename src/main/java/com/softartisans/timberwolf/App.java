@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticationException;
+import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
