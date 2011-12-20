@@ -155,9 +155,12 @@ public class ExchangeMailStore implements MailStore
         getItem.addNewItemShape()
                .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        for (String id : ids)
+        if (ids != null)
         {
-            items.addNewItemId().setId(id);
+            for (String id : ids)
+            {
+                items.addNewItemId().setId(id);
+            }
         }
         return getItem;
     }
