@@ -80,6 +80,15 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
+     * Creates a new ExchangeMailStore for getting mail.
+     * @param exchangeService The exchange service to use
+     */
+    ExchangeMailStore(ExchangeService exchangeService)
+    {
+        this.exchangeService = exchangeService;
+    }
+
+    /**
      * Creates a FindItemType to request all the ids for the given folder.
      *
      * @param folder the folder from which to get ids
