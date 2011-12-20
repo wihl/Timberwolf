@@ -116,7 +116,7 @@ public class HBaseMailWriterTest
 
         HBaseTable table = new HBaseTable(mockHTable);
 
-        HBaseMailWriter writer = new HBaseMailWriter(table, arbitraryHeader, arbitraryFamily);
+        HBaseMailWriter writer = HBaseMailWriter.create(table, arbitraryHeader, arbitraryFamily);
 
         writer.write(mails);
 
@@ -140,11 +140,4 @@ public class HBaseMailWriterTest
         IHBaseTable managerTable = hbase.getTable(tableName);
         Assert.assertEquals(table, managerTable);
     }
-
-    @Test
-    public void testFactoryCreate()
-    {
-        //HBaseMailWriter mailWriter = HBaseMailWriter.create();
-    }
-
 }

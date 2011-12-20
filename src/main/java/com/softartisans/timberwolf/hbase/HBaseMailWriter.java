@@ -35,20 +35,9 @@ public class HBaseMailWriter implements MailWriter
     /** The default header, whose value will be used as a rowkey. */
     private static final String DEFAULT_KEY_HEADER = "Item ID";
 
-    public HBaseMailWriter(final IHBaseTable mailTable)
-    {
-        this(mailTable, DEFAULT_KEY_HEADER, DEFAULT_COLUMN_FAMILY);
-    }
-
-    public HBaseMailWriter(final IHBaseTable mailTable,
-                           final String keyHeader)
-    {
-        this(mailTable, keyHeader, DEFAULT_COLUMN_FAMILY);
-    }
-
-    public HBaseMailWriter(final IHBaseTable mailTable,
-                           final String keyHeader,
-                           final String columnFamily)
+    private HBaseMailWriter(final IHBaseTable mailTable,
+                            final String keyHeader,
+                            final String columnFamily)
     {
         this.mailTable = mailTable;
         this.keyHeader = keyHeader;
@@ -58,12 +47,13 @@ public class HBaseMailWriter implements MailWriter
     /**
      * Creates an HBaseMailWriter with the specified settings. If the table
      * specified by tableName does not currently exist, it will be created
-     * with the specified columnFamily.
+     * with the specified columnFamily. Currently, it's not a great idea to
+     * make multiple HBaseMailWriters to the same underlying instance.
      * @param quorum The ZooKeeper quorum.
      * @param clientPort The ZooKeeper client port.
      * @param tableName The table to connect to.
      * @param keyHeader The MailboxItem header to use as a row key.
-     * @param columnFamily The column family to deposit mails into.
+     * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
     public static HBaseMailWriter create(final String quorum,
@@ -86,6 +76,20 @@ public class HBaseMailWriter implements MailWriter
         }
 
         IHBaseTable table = hbase.getTable(tableName);
+        return new HBaseMailWriter(table, keyHeader, columnFamily);
+    }
+
+    /**
+     * Creates an HBaseMailWriter with the specified settings.
+     * @param table The IHBaseTable to write to.
+     * @param keyHeader The MailboxItem header to use as a row key.
+     * @param columnFamily The column family to add mail headers to.
+     * @return A new HBaseMailWriter instance with the specified settings.
+     */
+    public static HBaseMailWriter create(final IHBaseTable table,
+                                         final String keyHeader,
+                                         final String columnFamily)
+    {
         return new HBaseMailWriter(table, keyHeader, columnFamily);
     }
 

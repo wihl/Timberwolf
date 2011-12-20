@@ -24,7 +24,7 @@ public abstract class HBaseConfigurator {
      * Creates a Hadoop Configuration for HBase using the specified
      * properties.
      * @param quorum The ZooKeeper quorum members.
-     * @param clientPort The port number to seek the ZooKeeper master.
+     * @param clientPort The ZooKeeper client port.
      * @return A Hadoop Configuration object with the above parameters.
      */
     public static final Configuration createConfiguration(final String quorum,

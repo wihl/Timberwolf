@@ -6,7 +6,6 @@ public class HBaseConfiguratorTest {
 
     /**
      * Simple test to actually make a non-default Hadoop configuration.
-     * TODO: Make generic.
      */
     @Test
     public void testCreate()
