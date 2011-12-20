@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf;
 
-import com.cloudera.alfredo.client.AuthenticatedURL;
 import com.cloudera.alfredo.client.AuthenticationException;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
@@ -20,26 +19,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 /**
  * This is the MailStore implementation for Exchange email
- * This uses the Exchange web services to access
+ * This uses the Exchange web services to access exchange and get back email
+ * items
  */
 public class ExchangeMailStore implements MailStore
 {
     private static final Logger log = LoggerFactory.getLogger(
             ExchangeMailStore.class);
     /**
+     * I'm leaving this here for when we get to doing paging. If we decide
+     * not to do paging these variables and notes should probably be removed
+     *
+     *
+     *
+     *
      * When FindItems is run, you can limit the number of items to get at a time
      * and page, starting with 1000, but we'll probably want to profile this a
      * bit to figure out if we want more or less
-     */
+     *
     private static final int MaxFindItemEntries = 1000;
 
     /**
@@ -47,8 +50,9 @@ public class ExchangeMailStore implements MailStore
      * I'm not sure which one is the earliest or latest yet, but the options
      * are "beginning" or "end"
      * TODO change this to an actual enum from our xml binding
-     */
+     *
     private static final String FindItemsBasePoint = "Beginning";
+     */
 
     /**
      * GetItems takes multiple ids, but we don't want to call GetItems on all
@@ -63,16 +67,24 @@ public class ExchangeMailStore implements MailStore
      */
     private final ExchangeService exchangeService;
 
+    /**
+     * Creates a new ExchangeMailStore for getting mail from the exchange
+     * server at the provided url
+     * @param exchangeUrl the url to the exchange web service such as
+     * https://devexch01.int.tartarus.com/ews/exchange.asmx
+     */
     public ExchangeMailStore(String exchangeUrl)
-            throws IOException, UnsupportedEncodingException,
-                   AuthenticationException
     {
         exchangeService = new ExchangeService(exchangeUrl);
     }
 
+    /**
+     * Creates a FindItemType to request all the ids for the given folder
+     * @param folder the folder from which to get ids
+     * @return the FindItemType necessary to request the ids
+     */
     private static FindItemType getFindItemsRequest(
-            int offset, DistinguishedFolderIdNameType.Enum folder)
-            throws UnsupportedEncodingException
+            DistinguishedFolderIdNameType.Enum folder)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -80,12 +92,16 @@ public class ExchangeMailStore implements MailStore
         DistinguishedFolderIdType folderId =
                 findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
-        // TODO paging
+        // TODO paging - put off until HAM-78
         return findItem;
     }
 
+    /**
+     * Creates a GetItemType to request the info for the given ids
+     * @param ids the ids to request
+     * @return the GetItemType necessary to request the info for those ids
+     */
     private static GetItemType getGetItemsRequest(List<String> ids)
-            throws UnsupportedEncodingException
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
         getItem.addNewItemShape()
@@ -112,6 +128,10 @@ public class ExchangeMailStore implements MailStore
         };
     }
 
+    /**
+     * This Iterator will request a list of all ids from the exchange service
+     * and then get actual mail items for those ids.
+     */
     private static class EmailIterator implements Iterator<MailboxItem>
     {
         Vector<String> currentIds;
@@ -126,30 +146,21 @@ public class ExchangeMailStore implements MailStore
             this.exchangeService = exchangeService;
         }
 
-        private static HttpURLConnection makeRequest(String exchangeUrl,
-                                                     byte[] request)
-                throws IOException, AuthenticationException
-        {
-            AuthenticatedURL.Token token = new AuthenticatedURL.Token();
-            URL url = new URL(exchangeUrl);
-            HttpURLConnection conn = new AuthenticatedURL().openConnection(url,
-                                                                           token);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setReadTimeout(10000);
-            conn.setRequestProperty("Content-Type", "text/xml");
-            conn.setRequestProperty("Content-Length", "" + request.length);
-            conn.getOutputStream().write(request);
-            return conn;
-        }
-
-        private static Vector<String> findItems(
-                int offset, ExchangeService exchangeService)
+        /**
+         * Gets a list of ids for the inbox for the current user
+         * @param exchangeService the actual service to use when requesting ids
+         * @return a list of exchange ids
+         * @throws AuthenticationException If we can't authenticate to the
+         * exchange service
+         * @throws IOException If we can't connect to the exchange service
+         * @throws XmlException If the response cannot be parsed
+         */
+        private static Vector<String> findItems(ExchangeService exchangeService)
                 throws IOException, AuthenticationException, XmlException
         {
             FindItemResponseType response =
                     exchangeService.findItem(getFindItemsRequest(
-                            offset, DistinguishedFolderIdNameType.INBOX));
+                            DistinguishedFolderIdNameType.INBOX));
             ArrayOfResponseMessagesType array =
                     response.getResponseMessages();
             Vector<String> items = new Vector<String>();
@@ -173,8 +184,15 @@ public class ExchangeMailStore implements MailStore
          * if startIndex+count > ids.size() then only ids.size()-startIndex
          * items will be returned
          * @param startIndex the index in ids of the first item to get
-         * @param ids a list of the ids to get
-         * @return
+         * @param ids a list of ids to get
+         * @param exchangeService the backend service used for contacting
+         * exchange
+         * @return a list of mailbox items that correspond to the ids in the
+         * In the list of ids
+         * @throws AuthenticationException If we can't authenticate to the
+         * exchange service
+         * @throws IOException If we can't connect to the exchange service
+         * @throws XmlException If the response cannot be parsed
          */
         private static Vector<MailboxItem> getItems(int count, int startIndex,
                                                     Vector<String> ids,
@@ -214,7 +232,7 @@ public class ExchangeMailStore implements MailStore
                 {
                     currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
-                    currentIds = findItems(findItemsOffset, exchangeService);
+                    currentIds = findItems(exchangeService);
                     log.debug("Got " + currentIds.size() + " email ids");
                 }
                 catch (IOException e)
