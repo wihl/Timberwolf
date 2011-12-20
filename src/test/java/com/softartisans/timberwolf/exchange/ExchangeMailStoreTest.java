@@ -1,5 +1,6 @@
 package com.softartisans.timberwolf.exchange;
 
+import com.cloudera.alfredo.client.AuthenticationException;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
@@ -7,14 +8,19 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import org.apache.xmlbeans.XmlException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 
 /**
  * Test for ExchangeMailStore, uses mock exchange service
@@ -59,6 +65,20 @@ public class ExchangeMailStoreTest
         assertEquals(findItem.xmlText(),
                      ExchangeMailStore.getFindItemsRequest(
                              DistinguishedFolderIdNameType.DELETEDITEMS).xmlText());
+    }
+
+    @Test
+    @Ignore("HAM-33 - I really have to stop writing negative tests")
+    public void testFindItemsInboxRespondNull()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        FindItemType findItem = ExchangeMailStore
+                .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
+        when(service.findItem(LikeThis(findItem))).thenReturn(null);
+        Vector<String> items = ExchangeMailStore.findItems(service);
+        assertEquals(0,items.size());
     }
 
     @Test
