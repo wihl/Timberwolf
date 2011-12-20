@@ -1,11 +1,6 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.exchange;
 
-import java.util.Calendar;
-
-import static org.junit.Assert.*;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
 
 public class ExchangeEmailTest
 {
