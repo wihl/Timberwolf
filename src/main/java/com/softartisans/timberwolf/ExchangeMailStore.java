@@ -4,27 +4,22 @@ import com.cloudera.alfredo.client.AuthenticatedURL;
 import com.cloudera.alfredo.client.AuthenticationException;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -34,6 +29,7 @@ import java.util.Vector;
 
 /**
  * This is the MailStore implementation for Exchange email
+ * This uses the Exchange web services to access
  */
 public class ExchangeMailStore implements MailStore
 {
@@ -63,47 +59,35 @@ public class ExchangeMailStore implements MailStore
     private static final int MaxGetItemsEntries = 50;
 
     /**
-     * The url of the service, passed in as a command line parameter, or from a
-     * config
+     * The service that does the actual sending of soap packages to exchange
      */
-    private String exchangeUrl;
+    private final ExchangeService exchangeService;
 
     public ExchangeMailStore(String exchangeUrl)
             throws IOException, UnsupportedEncodingException,
                    AuthenticationException
     {
-        this.exchangeUrl = exchangeUrl;
+        exchangeService = new ExchangeService(exchangeUrl);
     }
 
-    private static byte[] getFindItemsRequest(
+    private static FindItemType getFindItemsRequest(
             int offset, DistinguishedFolderIdNameType.Enum folder)
             throws UnsupportedEncodingException
     {
-        EnvelopeDocument envelopeDocument =
-                EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = envelopeDocument.addNewEnvelope();
-        FindItemType findItem = envelope.addNewBody().addNewFindItem();
+        FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
         DistinguishedFolderIdType folderId =
                 findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
         // TODO paging
-
-        String request =
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
-                        .xmlText();
-        log.debug(request);
-        return request.getBytes("UTF-8");
+        return findItem;
     }
 
-    private static byte[] getGetItemsRequest(List<String> ids)
+    private static GetItemType getGetItemsRequest(List<String> ids)
             throws UnsupportedEncodingException
     {
-        EnvelopeDocument envelopeDocument =
-                EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = envelopeDocument.addNewEnvelope();
-        GetItemType getItem = envelope.addNewBody().addNewGetItem();
+        GetItemType getItem = GetItemType.Factory.newInstance();
         getItem.addNewItemShape()
                .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
@@ -111,11 +95,7 @@ public class ExchangeMailStore implements MailStore
         {
             items.addNewItemId().setId(id);
         }
-        String request =
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + envelopeDocument
-                        .xmlText();
-        log.debug(request);
-        return request.getBytes("UTF-8");
+        return getItem;
     }
 
     @Override
@@ -127,7 +107,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeUrl);
+                return new EmailIterator(exchangeService);
             }
         };
     }
@@ -137,13 +117,13 @@ public class ExchangeMailStore implements MailStore
         Vector<String> currentIds;
         int currentIdIndex = 0;
         int findItemsOffset = 0;
-        String exchangeUrl;
         private Vector<MailboxItem> mailBoxItems;
         private int currentMailboxItemIndex = 0;
+        private final ExchangeService exchangeService;
 
-        private EmailIterator(String exchangeUrl)
+        private EmailIterator(ExchangeService exchangeService)
         {
-            this.exchangeUrl = exchangeUrl;
+            this.exchangeService = exchangeService;
         }
 
         private static HttpURLConnection makeRequest(String exchangeUrl,
@@ -163,44 +143,32 @@ public class ExchangeMailStore implements MailStore
             return conn;
         }
 
-        private static Vector<String> findItems(int offset, String exchangeUrl)
+        private static Vector<String> findItems(
+                int offset, ExchangeService exchangeService)
                 throws IOException, AuthenticationException, XmlException
         {
-            byte[] bytes = getFindItemsRequest(
-                    offset, DistinguishedFolderIdNameType.INBOX);
-            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
-
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+            FindItemResponseType response =
+                    exchangeService.findItem(getFindItemsRequest(
+                            offset, DistinguishedFolderIdNameType.INBOX));
+            ArrayOfResponseMessagesType array =
+                    response.getResponseMessages();
+            Vector<String> items = new Vector<String>();
+            for (FindItemResponseMessageType message : array
+                    .getFindItemResponseMessageArray())
             {
-                EnvelopeDocument doc =
-                        EnvelopeDocument.Factory.parse(conn.getInputStream());
-                ArrayOfResponseMessagesType array =
-                        doc.getEnvelope().getBody().getFindItemResponse()
-                           .getResponseMessages();
-                Vector<String> items = new Vector<String>();
-                for (FindItemResponseMessageType message : array
-                        .getFindItemResponseMessageArray())
+                log.debug(message.getResponseCode().toString());
+                for (MessageType item : message.getRootFolder().getItems()
+                                               .getMessageArray())
                 {
-                    log.debug(message.getResponseCode().toString());
-                    for (MessageType item : message.getRootFolder().getItems()
-                                                   .getMessageArray())
-                    {
-                        items.add(item.getItemId().getId());
-                    }
+                    items.add(item.getItemId().getId());
                 }
-                return items;
             }
-            else
-            {
-                log.error("Failed to find items; Status code: "
-                          + conn.getResponseCode() + " "
-                          + conn.getResponseMessage());
-            }
-            return new Vector<String>();
+            return items;
         }
 
         /**
          * Get a list of items from the server
+         *
          * @param count the number of items to get.
          * if startIndex+count > ids.size() then only ids.size()-startIndex
          * items will be returned
@@ -210,7 +178,7 @@ public class ExchangeMailStore implements MailStore
          */
         private static Vector<MailboxItem> getItems(int count, int startIndex,
                                                     Vector<String> ids,
-                                                    String exchangeUrl)
+                                                    ExchangeService exchangeService)
                 throws IOException, AuthenticationException, XmlException
         {
             int max = Math.min(startIndex + count, ids.size());
@@ -218,37 +186,22 @@ public class ExchangeMailStore implements MailStore
             {
                 return new Vector<MailboxItem>();
             }
-            byte[] bytes = getGetItemsRequest(ids.subList(startIndex, max));
-            HttpURLConnection conn = makeRequest(exchangeUrl, bytes);
-
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
+            GetItemResponseType response = exchangeService
+                    .getItem(getGetItemsRequest(ids.subList(startIndex, max)));
+            ItemInfoResponseMessageType[] array =
+                    response.getResponseMessages()
+                            .getGetItemResponseMessageArray();
+            Vector<MailboxItem> items = new Vector<MailboxItem>();
+            for (ItemInfoResponseMessageType message : array)
             {
-                EnvelopeDocument doc =
-                        EnvelopeDocument.Factory.parse(conn.getInputStream());
-                ItemInfoResponseMessageType[] array =
-                        doc.getEnvelope().getBody().getGetItemResponse()
-                           .getResponseMessages()
-                           .getGetItemResponseMessageArray();
-                Vector<MailboxItem> items = new Vector<MailboxItem>();
-                for (ItemInfoResponseMessageType message : array)
+                for (MessageType item : message.getItems()
+                                               .getMessageArray())
                 {
-                    for (MessageType item : message.getItems()
-                                                   .getMessageArray())
-                    {
-                        items.add(new ExchangeEmail(item));
-                    }
-
+                    items.add(new ExchangeEmail(item));
                 }
-                return items;
-            }
-            else
-            {
-                log.error("Failed to find items; Status code: "
-                          + conn.getResponseCode() + " "
-                          + conn.getResponseMessage());
-            }
 
-            return new Vector<MailboxItem>();
+            }
+            return items;
         }
 
 
@@ -261,7 +214,7 @@ public class ExchangeMailStore implements MailStore
                 {
                     currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
-                    currentIds = findItems(findItemsOffset, exchangeUrl);
+                    currentIds = findItems(findItemsOffset, exchangeService);
                     log.debug("Got " + currentIds.size() + " email ids");
                 }
                 catch (IOException e)
@@ -290,7 +243,7 @@ public class ExchangeMailStore implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex, currentIds, exchangeUrl);
+                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex, currentIds, exchangeService);
                     log.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
