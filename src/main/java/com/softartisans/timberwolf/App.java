@@ -31,13 +31,13 @@ final class App
             usage = "The user for whom to retrieve email.")
     private String targetUser;
 
-    @Option(name = "--hbase-rootdir",
-            usage = "The root directory used to connect to HBase.")
-    private String hbaseRootDir;
+    @Option(name = "--hbase-quorum",
+            usage = "The ZooKeeper quorum used to connect to HBase.")
+    private String hbaseQuorum;
 
-    @Option(name = "--hbase-masterport",
-            usage = "The port used to connect to HBase.")
-    private String hbaseMasterPort;
+    @Option(name = "--hbase-clientport",
+            usage = "The ZooKeeper client port used to connect to HBase.")
+    private String hbaseclientPort;
 
     @Option(name = "--hbase-table",
             usage = "The HBase table name that email data will be imported "
@@ -77,17 +77,17 @@ final class App
             log.info("Exchange User: {}", exchangeUser);
             log.info("Exchange Password: {}", exchangePassword);
             log.info("Target User: {}", targetUser);
-            log.info("HBase RootDir: {}", hbaseRootDir);
-            log.info("HBase Master Port: {}", hbaseMasterPort);
+            log.info("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+            log.info("HBase ZooKeeper Client Port: {}", hbaseclientPort);
             log.info("HBase Table Name: {}", hbaseTableName);
             log.info("HBase Key Header: {}", hbaseKeyHeader);
             log.info("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
-                    hbaseRootDir == null && hbaseMasterPort == null
+                    hbaseQuorum == null && hbaseclientPort == null
                     && hbaseTableName == null;
             boolean allHBaseArgs =
-                    hbaseRootDir != null && hbaseMasterPort != null
+                    hbaseQuorum != null && hbaseclientPort != null
                     && hbaseTableName != null;
 
             // if no HBase args, write to console (for debugging).
@@ -96,8 +96,9 @@ final class App
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser,
-                        "HBase Root Dir, HBase Port, and HBase Table Name must"
-                        + " all be specified if at least one is specified");
+                        "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, "
+                        + "and HBase Table Name must all be specified if at"
+                        + "least one is specified");
             }
         }
         catch (CmdLineException e)

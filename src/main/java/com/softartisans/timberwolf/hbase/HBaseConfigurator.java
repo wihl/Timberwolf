@@ -10,12 +10,12 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 public abstract class HBaseConfigurator {
 
     /**
-     * The property name for the ZooKeepr quorum.
+     * The property name for the ZooKeeper quorum property.
      */
     private static final String ZK_QUORUM = "hbase.zookeeper.quorum";
 
     /**
-     * The property name of ZooKeeper client port property.
+     * The property name of the ZooKeeper client port property.
      */
     private static final String ZK_CLIENT_PORT =
             "hbase.zookeeper.property.clientPort";
@@ -32,7 +32,7 @@ public abstract class HBaseConfigurator {
     {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set(ZK_QUORUM, quorum);
-        //configuration.set(ZK_CLIENT_PORT, clientPort);
+        configuration.set(ZK_CLIENT_PORT, clientPort);
         return configuration;
     }
 }
