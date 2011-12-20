@@ -43,15 +43,15 @@ public class ExchangeMailStore implements MailStore
      * and page, starting with 1000, but we'll probably want to profile this a
      * bit to figure out if we want more or less
      *
-    private static final int MaxFindItemEntries = 1000;
+     private static final int MaxFindItemEntries = 1000;
 
-    /**
+     /**
      * This is the side of the search results to start paging at.
      * I'm not sure which one is the earliest or latest yet, but the options
      * are "beginning" or "end"
      * TODO change this to an actual enum from our xml binding
      *
-    private static final String FindItemsBasePoint = "Beginning";
+     private static final String FindItemsBasePoint = "Beginning";
      */
 
     /**
@@ -62,14 +62,13 @@ public class ExchangeMailStore implements MailStore
      */
     private static final int MaxGetItemsEntries = 50;
 
-    /**
-     * The service that does the actual sending of soap packages to exchange
-     */
+    /** The service that does the actual sending of soap packages to exchange */
     private final ExchangeService exchangeService;
 
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
      * server at the provided url
+     *
      * @param exchangeUrl the url to the exchange web service such as
      * https://devexch01.int.tartarus.com/ews/exchange.asmx
      */
@@ -80,6 +79,7 @@ public class ExchangeMailStore implements MailStore
 
     /**
      * Creates a FindItemType to request all the ids for the given folder
+     *
      * @param folder the folder from which to get ids
      * @return the FindItemType necessary to request the ids
      */
@@ -98,6 +98,7 @@ public class ExchangeMailStore implements MailStore
 
     /**
      * Creates a GetItemType to request the info for the given ids
+     *
      * @param ids the ids to request
      * @return the GetItemType necessary to request the info for those ids
      */
@@ -148,6 +149,7 @@ public class ExchangeMailStore implements MailStore
 
         /**
          * Gets a list of ids for the inbox for the current user
+         *
          * @param exchangeService the actual service to use when requesting ids
          * @return a list of exchange ids
          * @throws AuthenticationException If we can't authenticate to the
@@ -188,7 +190,7 @@ public class ExchangeMailStore implements MailStore
          * @param exchangeService the backend service used for contacting
          * exchange
          * @return a list of mailbox items that correspond to the ids in the
-         * In the list of ids
+         *         In the list of ids
          * @throws AuthenticationException If we can't authenticate to the
          * exchange service
          * @throws IOException If we can't connect to the exchange service
@@ -261,7 +263,8 @@ public class ExchangeMailStore implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex, currentIds, exchangeService);
+                    mailBoxItems = getItems(MaxGetItemsEntries, currentIdIndex,
+                                            currentIds, exchangeService);
                     log.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
@@ -293,7 +296,8 @@ public class ExchangeMailStore implements MailStore
             }
             else
             {
-                log.debug("All done, " + currentMailboxItemIndex + " >= " + mailBoxItems.size());
+                log.debug("All done, " + currentMailboxItemIndex + " >= "
+                          + mailBoxItems.size());
                 return null;
             }
         }
