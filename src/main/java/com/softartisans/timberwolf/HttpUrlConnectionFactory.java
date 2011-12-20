@@ -1,12 +1,6 @@
 package com.softartisans.timberwolf;
 
-import com.cloudera.alfredo.client.AuthenticationException;
-
-import java.io.IOException;
-
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 
 /** Represents a factory for HTTP requests. */
 interface HttpUrlConnectionFactory
@@ -16,6 +10,5 @@ interface HttpUrlConnectionFactory
      * specified url with the specified request as a payload.
      */
     public HttpURLConnection newInstance(String address, byte[] request)
-        throws MalformedURLException, IOException, ProtocolException,
-               AuthenticationException;
+        throws HttpUrlConnectionCreationException;
 }

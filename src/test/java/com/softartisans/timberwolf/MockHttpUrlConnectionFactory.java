@@ -1,15 +1,12 @@
 package com.softartisans.timberwolf;
 
-import com.cloudera.alfredo.client.AuthenticationException;
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /** 
  * An http connection factory that returns mock connections.  These can be used
@@ -25,24 +22,31 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
     }
 
     public HttpURLConnection newInstance(String address, byte[] request)
-        throws MalformedURLException, IOException, ProtocolException,
-               AuthenticationException
+        throws HttpUrlConnectionCreationException
     {
-        for (MockRequest mockRequest : requests)
+        try
         {
-            if (mockRequest.url == address &&
-                Arrays.equals(mockRequest.requestData, request))
+            for (MockRequest mockRequest : requests)
             {
-                HttpURLConnection mockConn = mock(HttpURLConnection.class);
-                when(mockConn.getResponseCode()).thenReturn(mockRequest.code);
-                when(mockConn.getInputStream()).thenReturn(
-                    new ByteArrayInputStream(mockRequest.responseData));
-                return mockConn;
-            }
+                if (mockRequest.url == address &&
+                    Arrays.equals(mockRequest.requestData, request))
+                {
+                    HttpURLConnection mockConn = mock(HttpURLConnection.class);
+                    when(mockConn.getResponseCode()).thenReturn(mockRequest.code);
+                    when(mockConn.getInputStream()).thenReturn(
+                        new ByteArrayInputStream(mockRequest.responseData));
+                    return mockConn;
+                }
+            }    
         }
+        catch(IOException e)
+        {
+            throw new HttpUrlConnectionCreationException(
+                "There was an IO exception while mocking the request.", null);            
+        }        
 
-        //FIXME
-        throw new ProtocolException("No mocked request matched that URL and request data.");
+        throw new HttpUrlConnectionCreationException(
+            "There was no mocked request matching the given url and data.", null);
     }
 
     public class MockRequest

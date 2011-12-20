@@ -51,8 +51,8 @@ public class ExchangeService
 
     /** Sends a SOAP envelope request and returns the response. */
     private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
-        throws UnsupportedEncodingException, IOException, XmlException,
-               AuthenticationException
+        throws UnsupportedEncodingException, XmlException,
+               HttpUrlConnectionCreationException, IOException
     {
         String request = DECLARATION + envelope.xmlText();
         // TODO: log request.
@@ -75,8 +75,8 @@ public class ExchangeService
 
     /** Returns the results of a find item request. */
     public FindItemResponseType findItem(FindItemType findItem)
-        throws UnsupportedEncodingException, IOException, XmlException,
-               AuthenticationException
+        throws UnsupportedEncodingException, XmlException,
+               HttpUrlConnectionCreationException, IOException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
@@ -88,8 +88,8 @@ public class ExchangeService
 
     /** Returns the results of a get item request. */
     public GetItemResponseType getItem(GetItemType getItem)
-        throws UnsupportedEncodingException, IOException, XmlException,
-               AuthenticationException
+        throws UnsupportedEncodingException, XmlException,
+               HttpUrlConnectionCreationException, IOException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
