@@ -7,7 +7,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
  * Factory class for creating HBase-compatible Hadoop Configurations from
  * specified elements.
  */
-public abstract class HBaseConfigurator {
+public abstract class HBaseConfigurator
+{
 
     /**
      * The property name for the ZooKeeper quorum property.
