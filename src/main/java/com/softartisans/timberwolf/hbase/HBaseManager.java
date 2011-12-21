@@ -79,12 +79,12 @@ public class HBaseManager
 
     /**
      * Constructor for creating a manager for a specific HBase instance.
-     * @param rootDir The directory shared by the HBase region servers.
-     * @param master The host and port number that the HBase master runs at.
+     * @param quorum The ZooKeeper quorum.
+     * @param clientPort The ZooKeeper client port.
      */
-    public HBaseManager(final String rootDir, final String master)
+    public HBaseManager(final String quorum, final String clientPort)
     {
-        this(HBaseConfigurator.createConfiguration(rootDir, master));
+        this(HBaseConfigurator.createConfiguration(quorum, clientPort));
     }
 
     /**

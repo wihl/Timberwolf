@@ -28,13 +28,17 @@ public class HBaseIntegrated
     @BeforeClass
     public static void setUp()
     {
-        Configuration configuration = HBaseConfiguration.create();
-        hBaseManager = new HBaseManager(configuration);
+        hBaseManager = new HBaseManager(
+                IntegrationSettings.ZooKeeperQuorum,
+                IntegrationSettings.ZooKeeperClientPort);
 
-        columnFamilies = new ArrayList<String>();
-        columnFamilies.add("h");
-
-        hBaseManager.createTable(tableName, columnFamilies);
+//        Configuration configuration = HBaseConfiguration.create();
+//        hBaseManager = new HBaseManager(configuration);
+//
+//        columnFamilies = new ArrayList<String>();
+//        columnFamilies.add("h");
+//
+//        hBaseManager.createTable(tableName, columnFamilies);
     }
 
     /**
@@ -43,7 +47,7 @@ public class HBaseIntegrated
     @AfterClass
     public static void tearDown()
     {
-        hBaseManager.deleteTable(tableName);
+//        hBaseManager.deleteTable(tableName);
         hBaseManager.close();
     }
 
@@ -93,16 +97,18 @@ public class HBaseIntegrated
     }
 
     /**
-     * Simple HBase connection to a remote network server.
+     * Tests that we can create and delete a table on the remote HBase instance.
      */
     @Test
     public void testRemoteConnection()
     {
-        HBaseManager hbase = new HBaseManager("hdhbase01.int.softartisans.com",
-                "45000");
+        String tableName = "testTable";
+
         List<String> cfs = new ArrayList<String>();
         cfs.add("cf");
-        hbase.createTable("testTable",cfs);
-        hbase.deleteTable("testTable");
+        hBaseManager.createTable(tableName,cfs);
+        Assert.assertTrue(hBaseManager.tableExists(tableName));
+        hBaseManager.deleteTable(tableName);
+        Assert.assertFalse(hBaseManager.tableExists(tableName));
     }
 }
