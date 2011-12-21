@@ -10,8 +10,13 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
+    private static final Logger LOG = LoggerFactory.getLogger(AlfredoHttpUrlConnectionFactory.class);
+
     private static final String HTTP_METHOD = "POST";
     private static final int TIMEOUT = 10000;
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
@@ -37,21 +42,24 @@ public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         }
         catch (AuthenticationException e)
         {
+            LOG.error("Authentication error for URL " + address, e);
             throw new HttpUrlConnectionCreationException(
                 "There was an error authenticating with the remote server.", e);
         }
         catch (MalformedURLException e)
         {
-            throw new HttpUrlConnectionCreationException(
-                "The given url was not properly formed.", e);
+            LOG.error("Improperly formed URL " + address, e);
+            throw new HttpUrlConnectionCreationException("The given url was not properly formed.", e);
         }
         catch (ProtocolException e)
         {
+            LOG.error("Protocol exception when contacting URL " + address + " with request " + new String(request), e);
             throw new HttpUrlConnectionCreationException(
                 "There was a protocol error while creating and sending the request.", e);
         }
         catch (IOException e)
         {
+            LOG.error("IO exception when contacting URL " + address + " with request " + new String(request), e);
             throw new HttpUrlConnectionCreationException(
                 "There was an IO error while sending a request to the remote server.", e);
         }
