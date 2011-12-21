@@ -20,6 +20,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,10 +37,21 @@ import static org.mockito.Mockito.when;
  */
 public class ExchangeMailStoreTest
 {
+    @Mock
+    private FindItemResponseType findItemResponse;
+    @Mock
+    private ArrayOfResponseMessagesType arrayOfResponseMessages;
+    @Mock
+    private FindItemResponseMessageType findItemResponseMessage;
+    @Mock
+    private FindItemParentType findItemParent;
+    @Mock
+    private ArrayOfRealItemsType arrayOfRealItems;
+
     @Before
     public void setUp() throws Exception
     {
-
+        MockitoAnnotations.initMocks(this);
     }
 
     @After
@@ -90,30 +103,26 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindItemsDeletedItemsRespond0()
+    public void testFindItemsItemsRespond0()
             throws XmlException, IOException,
                    HttpUrlConnectionCreationException, AuthenticationException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(
-                        DistinguishedFolderIdNameType.DELETEDITEMS);
-        FindItemResponseType response = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType array =
-                mock(ArrayOfResponseMessagesType.class);
-        FindItemResponseMessageType message =
-                mock(FindItemResponseMessageType.class);
-        FindItemParentType root = mock(FindItemParentType.class);
-        ArrayOfRealItemsType realItems = mock(ArrayOfRealItemsType.class);
-        when(service.findItem(LikeThis(findItem))).thenReturn(response);
-        when(response.getResponseMessages()).thenReturn(array);
-        when(array.getFindItemResponseMessageArray())
-                .thenReturn(new FindItemResponseMessageType[]{message});
-        when(message.getRootFolder()).thenReturn(root);
+                        DistinguishedFolderIdNameType.INBOX);
+        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(findItemResponse.getResponseMessages()).thenReturn(
+                arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getFindItemResponseMessageArray())
+                .thenReturn(new FindItemResponseMessageType[]{
+                        findItemResponseMessage});
+        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
         // For logging right now, might actually be checked later
-        when(message.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        when(root.getItems()).thenReturn(realItems);
-        when(realItems.getMessageArray()).thenReturn(new MessageType[0]);
+        when(findItemResponseMessage.getResponseCode()).thenReturn(
+                ResponseCodeType.NO_ERROR);
+        when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
+        when(arrayOfRealItems.getMessageArray()).thenReturn(new MessageType[0]);
         Vector<String> items = ExchangeMailStore.findItems(service);
         assertEquals(0, items.size());
     }
