@@ -20,7 +20,6 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.softartisans.timberwolf.MailboxItem;
 import org.apache.xmlbeans.XmlException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -38,9 +37,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * Test for ExchangeMailStore, uses mock exchange service
- */
+/** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest
 {
     @Mock
@@ -57,17 +54,12 @@ public class ExchangeMailStoreTest
     private GetItemResponseType getItemResponse;
     @Mock
     private ItemInfoResponseMessageType itemInfoResponseMessage;
+    private final String idHeaderKey = "Item ID";
 
     @Before
     public void setUp() throws Exception
     {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @After
-    public void tearDown() throws Exception
-    {
-
     }
 
     @Test
@@ -95,7 +87,8 @@ public class ExchangeMailStoreTest
         folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
         assertEquals(findItem.xmlText(),
                      ExchangeMailStore.getFindItemsRequest(
-                             DistinguishedFolderIdNameType.DELETEDITEMS).xmlText());
+                             DistinguishedFolderIdNameType.DELETEDITEMS)
+                                      .xmlText());
     }
 
     @Test
@@ -109,7 +102,7 @@ public class ExchangeMailStoreTest
                 .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
         Vector<String> items = ExchangeMailStore.findItems(service);
-        assertEquals(0,items.size());
+        assertEquals(0, items.size());
     }
 
     @Test
@@ -129,7 +122,7 @@ public class ExchangeMailStoreTest
                    HttpUrlConnectionCreationException, AuthenticationException
     {
         MessageType message = mockMessageItemId("foobar27");
-        MessageType[] messages = new MessageType[] {message};
+        MessageType[] messages = new MessageType[]{message};
         ExchangeService service = mockFindItem(messages);
         Vector<String> items = ExchangeMailStore.findItems(service);
         Vector<String> expected = new Vector<String>(1);
@@ -171,7 +164,8 @@ public class ExchangeMailStoreTest
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{
                         findItemResponseMessage});
-        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
+        when(findItemResponseMessage.getRootFolder())
+                .thenReturn(findItemParent);
         // For logging right now, might actually be checked later
         when(findItemResponseMessage.getResponseCode()).thenReturn(
                 ResponseCodeType.NO_ERROR);
@@ -231,12 +225,12 @@ public class ExchangeMailStoreTest
         getItem.addNewItemShape()
                .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        for (int i=0; i<100; i++)
+        for (int i = 0; i < 100; i++)
         {
             items.addNewItemId().setId("idNumber" + i);
         }
         ArrayList<String> ids = new ArrayList<String>();
-        for (int i=0; i<100; i++)
+        for (int i = 0; i < 100; i++)
         {
             ids.add("idNumber" + i);
         }
@@ -276,7 +270,7 @@ public class ExchangeMailStoreTest
         Vector<MailboxItem>
                 items = ExchangeMailStore.getItems(1, 0, wholeList, service);
         assertEquals(1, items.size());
-        assertEquals(idValue,items.get(0).getHeader("Item ID"));
+        assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
 
     @Test
@@ -299,7 +293,7 @@ public class ExchangeMailStoreTest
         Vector<MailboxItem>
                 items = ExchangeMailStore.getItems(1, 3, wholeList, service);
         assertEquals(1, items.size());
-        assertEquals(idValue,items.get(0).getHeader("Item ID"));
+        assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
 
     @Test
@@ -350,7 +344,7 @@ public class ExchangeMailStoreTest
         for (int i = 0; i < requestedList.size(); i++)
         {
             assertEquals(requestedList.get(i),
-                         items.get(i).getHeader("Item ID"));
+                         items.get(i).getHeader(idHeaderKey));
         }
     }
 
@@ -447,7 +441,7 @@ public class ExchangeMailStoreTest
         for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
         {
             assertEquals(requestedList.get(i),
-                         mailboxItem.getHeader("Item ID"));
+                         mailboxItem.getHeader(idHeaderKey));
             i++;
         }
         if (i < requestedList.size())
