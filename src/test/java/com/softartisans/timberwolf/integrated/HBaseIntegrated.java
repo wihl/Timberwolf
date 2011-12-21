@@ -56,7 +56,7 @@ public class HBaseIntegrated
      * Tests that we can create and delete a table on the remote HBase instance.
      */
     @Test
-    public void testRemoteConnection()
+    public void testRemoteCreateDeleteTable()
     {
         String tableName = "HBaseIntegratedtestRemoteConnection";
 

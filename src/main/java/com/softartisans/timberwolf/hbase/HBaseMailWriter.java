@@ -37,11 +37,11 @@ public final class HBaseMailWriter implements MailWriter
 
     private HBaseMailWriter(final IHBaseTable table,
                             final String mailboxItemKeyHeader,
-                            final String zkColumnFamily)
+                            final String hbaseColumnFamily)
     {
         this.mailTable = table;
         this.keyHeader = mailboxItemKeyHeader;
-        this.columnFamily = Bytes.toBytes(zkColumnFamily);
+        this.columnFamily = Bytes.toBytes(hbaseColumnFamily);
     }
 
     /**
@@ -56,23 +56,20 @@ public final class HBaseMailWriter implements MailWriter
      * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static HBaseMailWriter create(final String quorum,
+    public static MailWriter create(final String quorum,
                                          final String clientPort,
                                          final String tableName,
                                          final String keyHeader,
                                          final String columnFamily)
     {
-        Configuration configuration =
-                HBaseConfigurator.createConfiguration(quorum,
-                        clientPort);
-        HBaseManager hbase = new HBaseManager(configuration);
+        HBaseManager hbase = new HBaseManager(quorum, clientPort);
 
-        List<String> cfs = new ArrayList<String>();
-        cfs.add(columnFamily);
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add(columnFamily);
 
         if (!hbase.tableExists(tableName))
         {
-            hbase.createTable(tableName, cfs);
+            hbase.createTable(tableName, columnFamilies);
         }
 
         IHBaseTable table = hbase.getTable(tableName);
@@ -86,7 +83,7 @@ public final class HBaseMailWriter implements MailWriter
      * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static HBaseMailWriter create(final IHBaseTable table,
+    public static MailWriter create(final IHBaseTable table,
                                          final String keyHeader,
                                          final String columnFamily)
     {

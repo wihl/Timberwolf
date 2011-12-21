@@ -57,7 +57,7 @@ public class HBaseManager
     }
 
     /**
-     * Constructor for creating a manager for the default HBase configuration.
+     * Constructor for creating a manager for a specific HBase configuration.
      */
     public HBaseManager(final Configuration hbaseConfiguration)
     {

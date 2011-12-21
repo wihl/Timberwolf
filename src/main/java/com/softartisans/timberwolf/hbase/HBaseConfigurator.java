@@ -13,12 +13,12 @@ public abstract class HBaseConfigurator
     /**
      * The property name for the ZooKeeper quorum property.
      */
-    private static final String ZK_QUORUM = "hbase.zookeeper.quorum";
+    private static final String ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
 
     /**
      * The property name of the ZooKeeper client port property.
      */
-    private static final String ZK_CLIENT_PORT =
+    private static final String ZOOKEEPER_CLIENT_PORT =
             "hbase.zookeeper.property.clientPort";
 
     /**
@@ -32,8 +32,8 @@ public abstract class HBaseConfigurator
                                                         final String clientPort)
     {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set(ZK_QUORUM, quorum);
-        configuration.set(ZK_CLIENT_PORT, clientPort);
+        configuration.set(ZOOKEEPER_QUORUM, quorum);
+        configuration.set(ZOOKEEPER_CLIENT_PORT, clientPort);
         return configuration;
     }
 }
