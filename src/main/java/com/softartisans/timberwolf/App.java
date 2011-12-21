@@ -1,7 +1,6 @@
 package com.softartisans.timberwolf;
 
-import org.apache.log4j.BasicConfigurator;
-
+import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -34,17 +33,22 @@ final class App
     private String targetUser;
 
     @Option(name = "--hbase-quorum",
-            usage = "The Zookeeper quorum used to connect to HBase.")
+            usage = "The ZooKeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
-    @Option(name = "--hbase-port",
-            usage = "The port used to connect to HBase.")
-    private String hbasePort;
+    @Option(name = "--hbase-clientport",
+            usage = "The ZooKeeper client port used to connect to HBase.")
+    private String hbaseclientPort;
 
     @Option(name = "--hbase-table",
             usage = "The HBase table name that email data will be imported "
                   + "into.")
     private String hbaseTableName;
+
+    @Option(name = "--hbase-key-header.",
+            usage = "The header id to use as a row key for the imported email "
+                    + "data.  Default row key is 'Item ID'.")
+    private String hbaseKeyHeader = "Item ID";
 
     @Option(name = "--hbase-column-family.",
             usage = "The column family for the imported email data.  Default "
@@ -74,26 +78,40 @@ final class App
             log.info("Exchange User: {}", exchangeUser);
             log.info("Exchange Password: {}", exchangePassword);
             log.info("Target User: {}", targetUser);
-            log.info("HBase Quorum: {}", hbaseQuorum);
-            log.info("HBase Port: {}", hbasePort);
+            log.info("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+            log.info("HBase ZooKeeper Client Port: {}", hbaseclientPort);
             log.info("HBase Table Name: {}", hbaseTableName);
+            log.info("HBase Key Header: {}", hbaseKeyHeader);
             log.info("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
-                    hbaseQuorum == null && hbasePort == null
+                    hbaseQuorum == null && hbaseclientPort == null
                     && hbaseTableName == null;
             boolean allHBaseArgs =
-                    hbaseQuorum != null && hbasePort != null
+                    hbaseQuorum != null && hbaseclientPort != null
                     && hbaseTableName != null;
 
             // if no HBase args, write to console (for debugging).
             // Else, write to HBase
+            if (noHBaseArgs)
+            {
+                ConsoleMailWriter consoleMailWriter = new ConsoleMailWriter();
+                // .write goes here.
+            }
+            else
+            {
+                MailWriter mailWriter = HBaseMailWriter.create(hbaseQuorum,
+                        hbaseclientPort, hbaseTableName, hbaseKeyHeader,
+                        hbaseColumnFamily);
+                // .write goes here.
+            }
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser,
-                        "HBase Quorum, HBase Port, and HBase Table Name must"
-                        + " all be specified if at least one is specified");
+                        "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, "
+                        + "and HBase Table Name must all be specified if at"
+                        + "least one is specified");
             }
         }
         catch (CmdLineException e)
@@ -104,6 +122,5 @@ final class App
             System.err.println();
             return;
         }
-
     }
 }

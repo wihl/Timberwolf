@@ -2,6 +2,7 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.MockHTable;
+import com.softartisans.timberwolf.MailWriter;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
@@ -116,7 +117,7 @@ public class HBaseMailWriterTest
 
         HBaseTable table = new HBaseTable(mockHTable);
 
-        HBaseMailWriter writer = new HBaseMailWriter(table, arbitraryHeader, arbitraryFamily);
+        MailWriter writer = HBaseMailWriter.create(table, arbitraryHeader, arbitraryFamily);
 
         writer.write(mails);
 
@@ -140,5 +141,4 @@ public class HBaseMailWriterTest
         IHBaseTable managerTable = hbase.getTable(tableName);
         Assert.assertEquals(table, managerTable);
     }
-
 }
