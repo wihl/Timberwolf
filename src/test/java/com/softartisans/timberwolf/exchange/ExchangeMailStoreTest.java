@@ -5,7 +5,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMes
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
@@ -27,6 +29,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
@@ -49,6 +52,10 @@ public class ExchangeMailStoreTest
     private FindItemParentType findItemParent;
     @Mock
     private ArrayOfRealItemsType arrayOfRealItems;
+    @Mock
+    private GetItemResponseType getItemResponse;
+    @Mock
+    private ItemInfoResponseMessageType itemInfoResponseMessage;
 
     @Before
     public void setUp() throws Exception
@@ -120,10 +127,7 @@ public class ExchangeMailStoreTest
             throws XmlException, IOException,
                    HttpUrlConnectionCreationException, AuthenticationException
     {
-        MessageType message = mock(MessageType.class);
-        ItemIdType itemId = mock(ItemIdType.class);
-        when(message.getItemId()).thenReturn(itemId);
-        when(itemId.getId()).thenReturn("foobar27");
+        MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[] {message};
         ExchangeService service = mockFindItem(messages);
         Vector<String> items = ExchangeMailStore.findItems(service);
@@ -141,11 +145,7 @@ public class ExchangeMailStoreTest
         MessageType[] messages = new MessageType[count];
         for (int i = 0; i < count; i++)
         {
-            MessageType message = mock(MessageType.class);
-            ItemIdType itemId = mock(ItemIdType.class);
-            when(message.getItemId()).thenReturn(itemId);
-            when(itemId.getId()).thenReturn("the" + i + "id");
-            messages[i] = message;
+            messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
         Vector<String> items = ExchangeMailStore.findItems(service);
@@ -253,5 +253,110 @@ public class ExchangeMailStoreTest
         Vector<MailboxItem>
                 items = ExchangeMailStore.getItems(0, 0, list, service);
         assertEquals(0, items.size());
+    }
+
+    @Test
+    public void testGetItems0to1()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
+        {
+            wholeList.add(null);
+        }
+        List<String> requestedList = new Vector<String>(1);
+        String idValue = "id1";
+        wholeList.set(0, idValue);
+        requestedList.add(idValue);
+        ExchangeService service =
+                mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
+                            requestedList);
+        Vector<MailboxItem>
+                items = ExchangeMailStore.getItems(1, 0, wholeList, service);
+        assertEquals(1, items.size());
+        assertEquals(idValue,items.get(0).getHeader("Item ID"));
+    }
+
+    @Test
+    public void testGetItems3to4()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
+        {
+            wholeList.add(null);
+        }
+        List<String> requestedList = new Vector<String>(1);
+        String idValue = "id1";
+        wholeList.set(3, idValue);
+        requestedList.add(idValue);
+        ExchangeService service =
+                mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
+                            requestedList);
+        Vector<MailboxItem>
+                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+        assertEquals(1, items.size());
+        assertEquals(idValue,items.get(0).getHeader("Item ID"));
+    }
+
+    @Test
+    public void testGetItems2to93()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        Vector<String> wholeList = new Vector<String>(100);
+        for (int i = 0; i < 100; i++)
+        {
+            wholeList.add(null);
+        }
+        List<String> requestedList = new Vector<String>(1);
+        MessageType[] messages = new MessageType[91];
+        for (int i = 2; i < 93; i++)
+        {
+            String id = "id #" + i;
+            wholeList.set(i, id);
+            requestedList.add(id);
+            messages[i - 2] = mockMessageItemId(id);
+        }
+        ExchangeService service = mockGetItem(messages, requestedList);
+        Vector<MailboxItem>
+                items = ExchangeMailStore.getItems(91, 2, wholeList, service);
+        assertEquals(requestedList.size(), items.size());
+        for (int i = 0; i < requestedList.size(); i++)
+        {
+            assertEquals(requestedList.get(i),
+                         items.get(i).getHeader("Item ID"));
+        }
+    }
+
+    private MessageType mockMessageItemId(String itemId)
+    {
+
+        MessageType mockedMessage = mock(MessageType.class);
+        ItemIdType mockedId = mock(ItemIdType.class);
+        when(mockedMessage.isSetItemId()).thenReturn(true);
+        when(mockedMessage.getItemId()).thenReturn(mockedId);
+        when(mockedId.getId()).thenReturn(itemId);
+        return mockedMessage;
+    }
+
+    private ExchangeService mockGetItem(MessageType[] messages,
+                                        List<String> requestedList)
+            throws XmlException, HttpUrlConnectionCreationException, IOException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        GetItemType getItem =
+                ExchangeMailStore.getGetItemsRequest(requestedList);
+        when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
+        when(getItemResponse.getResponseMessages())
+                .thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getGetItemResponseMessageArray())
+                .thenReturn(new ItemInfoResponseMessageType[]{
+                        itemInfoResponseMessage});
+        when(itemInfoResponseMessage.getItems()).thenReturn(arrayOfRealItems);
+        when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
+        return service;
     }
 }
