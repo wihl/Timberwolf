@@ -19,8 +19,7 @@ import java.net.HttpURLConnection;
  */
 public class ExchangeService
 {
-    private static final String DECLARATION =
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+    private static final String DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
     private static final String SOAP_ENCODING = "UTF-8";
 
     private String endpoint;
@@ -42,19 +41,15 @@ public class ExchangeService
 
     /** Sends a SOAP envelope request and returns the response. */
     private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
-        throws UnsupportedEncodingException, XmlException,
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, IOException
     {
         String request = DECLARATION + envelope.xmlText();
         // TODO: log request.
 
-        HttpURLConnection conn = connectionFactory.newInstance(endpoint,
-                                                               request.getBytes(
-                                                                       SOAP_ENCODING));
+        HttpURLConnection conn = connectionFactory.newInstance(endpoint, request.getBytes(SOAP_ENCODING));
         if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
         {
-            EnvelopeDocument response = EnvelopeDocument.Factory.parse(
-                conn.getInputStream());
+            EnvelopeDocument response = EnvelopeDocument.Factory.parse(conn.getInputStream());
             return response;
         }
         else
@@ -67,8 +62,7 @@ public class ExchangeService
 
     /** Returns the results of a find item request. */
     public FindItemResponseType findItem(FindItemType findItem)
-        throws UnsupportedEncodingException, XmlException,
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, IOException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
