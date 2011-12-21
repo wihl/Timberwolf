@@ -12,6 +12,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
@@ -107,6 +108,57 @@ public class ExchangeMailStoreTest
             throws XmlException, IOException,
                    HttpUrlConnectionCreationException, AuthenticationException
     {
+        MessageType[] messages = new MessageType[0];
+        ExchangeService service = mockFindItem(messages);
+        Vector<String> items = ExchangeMailStore.findItems(service);
+        assertEquals(0, items.size());
+    }
+
+    @Test
+    public void testFindItemsItemsRespond1()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        MessageType message = mock(MessageType.class);
+        ItemIdType itemId = mock(ItemIdType.class);
+        when(message.getItemId()).thenReturn(itemId);
+        when(itemId.getId()).thenReturn("foobar27");
+        MessageType[] messages = new MessageType[] {message};
+        ExchangeService service = mockFindItem(messages);
+        Vector<String> items = ExchangeMailStore.findItems(service);
+        Vector<String> expected = new Vector<String>(1);
+        expected.add("foobar27");
+        assertEquals(expected, items);
+    }
+
+    @Test
+    public void testFindItemsItemsRespond100()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        int count = 100;
+        MessageType[] messages = new MessageType[count];
+        for (int i = 0; i < count; i++)
+        {
+            MessageType message = mock(MessageType.class);
+            ItemIdType itemId = mock(ItemIdType.class);
+            when(message.getItemId()).thenReturn(itemId);
+            when(itemId.getId()).thenReturn("the" + i + "id");
+            messages[i] = message;
+        }
+        ExchangeService service = mockFindItem(messages);
+        Vector<String> items = ExchangeMailStore.findItems(service);
+        Vector<String> expected = new Vector<String>(count);
+        for (int i = 0; i < count; i++)
+        {
+            expected.add("the" + i + "id");
+        }
+        assertEquals(expected, items);
+    }
+
+    private ExchangeService mockFindItem(MessageType[] messages)
+            throws XmlException, HttpUrlConnectionCreationException, IOException
+    {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(
@@ -122,9 +174,8 @@ public class ExchangeMailStoreTest
         when(findItemResponseMessage.getResponseCode()).thenReturn(
                 ResponseCodeType.NO_ERROR);
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
-        when(arrayOfRealItems.getMessageArray()).thenReturn(new MessageType[0]);
-        Vector<String> items = ExchangeMailStore.findItems(service);
-        assertEquals(0, items.size());
+        when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
+        return service;
     }
 
     @Test
