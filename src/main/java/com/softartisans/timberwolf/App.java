@@ -112,6 +112,6 @@ final class App
         Logger log = LoggerFactory.getLogger(App.class);
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
-        new ConsoleMailWriter().write(mailStore.getMail("bkerr"));
+        new ConsoleMailWriter().write(mailStore.getMail());
     }
 }

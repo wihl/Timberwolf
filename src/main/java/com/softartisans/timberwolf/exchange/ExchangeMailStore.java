@@ -80,12 +80,21 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
+     * Creates a new ExchangeMailStore for getting mail.
+     * @param exchangeService The exchange service to use
+     */
+    ExchangeMailStore(ExchangeService exchangeService)
+    {
+        this.exchangeService = exchangeService;
+    }
+
+    /**
      * Creates a FindItemType to request all the ids for the given folder.
      *
      * @param folder the folder from which to get ids
      * @return the FindItemType necessary to request the ids
      */
-    private static FindItemType getFindItemsRequest(
+    static FindItemType getFindItemsRequest(
             final DistinguishedFolderIdNameType.Enum folder)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
@@ -99,26 +108,113 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
+     * Gets a list of ids for the inbox for the current user.
+     *
+     * @param exchangeService the actual service to use when requesting ids
+     * @return a list of exchange ids
+     * @throws AuthenticationException If we can't authenticate to the
+     * exchange service
+     * @throws IOException If we can't connect to the exchange service
+     * @throws XmlException If the response cannot be parsed
+     * @throws HttpUrlConnectionCreationException if it failed to create a
+     * connection to the service
+     */
+    static Vector<String> findItems(
+            final ExchangeService exchangeService)
+            throws IOException, AuthenticationException, XmlException,
+                   HttpUrlConnectionCreationException
+    {
+        FindItemResponseType response =
+                exchangeService.findItem(getFindItemsRequest(
+                        DistinguishedFolderIdNameType.INBOX));
+        ArrayOfResponseMessagesType array =
+                response.getResponseMessages();
+        Vector<String> items = new Vector<String>();
+        for (FindItemResponseMessageType message : array
+                .getFindItemResponseMessageArray())
+        {
+            LOG.debug(message.getResponseCode().toString());
+            for (MessageType item : message.getRootFolder().getItems()
+                                           .getMessageArray())
+            {
+                items.add(item.getItemId().getId());
+            }
+        }
+        return items;
+    }
+
+    /**
      * Creates a GetItemType to request the info for the given ids.
      *
      * @param ids the ids to request
      * @return the GetItemType necessary to request the info for those ids
      */
-    private static GetItemType getGetItemsRequest(final List<String> ids)
+    static GetItemType getGetItemsRequest(final List<String> ids)
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
         getItem.addNewItemShape()
                .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        for (String id : ids)
+        if (ids != null)
         {
-            items.addNewItemId().setId(id);
+            for (String id : ids)
+            {
+                items.addNewItemId().setId(id);
+            }
         }
         return getItem;
     }
 
+    /**
+     * Get a list of items from the server.
+     *
+     * @param count the number of items to get.
+     * if startIndex+count > ids.size() then only ids.size()-startIndex
+     * items will be returned
+     * @param startIndex the index in ids of the first item to get
+     * @param ids a list of ids to get
+     * @param exchangeService the backend service used for contacting
+     * exchange
+     * @return a list of mailbox items that correspond to the ids in the
+     *         In the list of ids
+     * @throws AuthenticationException If we can't authenticate to the
+     * exchange service
+     * @throws IOException If we can't connect to the exchange service
+     * @throws XmlException If the response cannot be parsed
+     * @throws HttpUrlConnectionCreationException If it failed to connect
+     * to the service
+     */
+    static Vector<MailboxItem> getItems(
+            final int count, final int startIndex, final Vector<String> ids,
+            final ExchangeService exchangeService)
+            throws IOException, AuthenticationException, XmlException,
+                   HttpUrlConnectionCreationException
+    {
+        int max = Math.min(startIndex + count, ids.size());
+        if (max <= startIndex)
+        {
+            return new Vector<MailboxItem>();
+        }
+        GetItemResponseType response = exchangeService
+                .getItem(getGetItemsRequest(ids.subList(startIndex, max)));
+        ItemInfoResponseMessageType[] array =
+                response.getResponseMessages()
+                        .getGetItemResponseMessageArray();
+        Vector<MailboxItem> items = new Vector<MailboxItem>();
+        for (ItemInfoResponseMessageType message : array)
+        {
+            for (MessageType item : message.getItems()
+                                           .getMessageArray())
+            {
+                items.add(new ExchangeEmail(item));
+            }
+
+        }
+        return items;
+    }
+
     @Override
-    public final Iterable<MailboxItem> getMail(final String user)
+    public final Iterable<MailboxItem> getMail()
             throws IOException, AuthenticationException
     {
         return new Iterable<MailboxItem>()
@@ -147,90 +243,6 @@ public class ExchangeMailStore implements MailStore
         private EmailIterator(final ExchangeService service)
         {
             this.exchangeService = service;
-        }
-
-        /**
-         * Gets a list of ids for the inbox for the current user.
-         *
-         * @param exchangeService the actual service to use when requesting ids
-         * @return a list of exchange ids
-         * @throws AuthenticationException If we can't authenticate to the
-         * exchange service
-         * @throws IOException If we can't connect to the exchange service
-         * @throws XmlException If the response cannot be parsed
-         * @throws HttpUrlConnectionCreationException if it failed to create a
-         * connection to the service
-         */
-        private static Vector<String> findItems(
-                final ExchangeService exchangeService)
-                throws IOException, AuthenticationException, XmlException,
-                       HttpUrlConnectionCreationException
-        {
-            FindItemResponseType response =
-                    exchangeService.findItem(getFindItemsRequest(
-                            DistinguishedFolderIdNameType.INBOX));
-            ArrayOfResponseMessagesType array =
-                    response.getResponseMessages();
-            Vector<String> items = new Vector<String>();
-            for (FindItemResponseMessageType message : array
-                    .getFindItemResponseMessageArray())
-            {
-                LOG.debug(message.getResponseCode().toString());
-                for (MessageType item : message.getRootFolder().getItems()
-                                               .getMessageArray())
-                {
-                    items.add(item.getItemId().getId());
-                }
-            }
-            return items;
-        }
-
-        /**
-         * Get a list of items from the server.
-         *
-         * @param count the number of items to get.
-         * if startIndex+count > ids.size() then only ids.size()-startIndex
-         * items will be returned
-         * @param startIndex the index in ids of the first item to get
-         * @param ids a list of ids to get
-         * @param exchangeService the backend service used for contacting
-         * exchange
-         * @return a list of mailbox items that correspond to the ids in the
-         *         In the list of ids
-         * @throws AuthenticationException If we can't authenticate to the
-         * exchange service
-         * @throws IOException If we can't connect to the exchange service
-         * @throws XmlException If the response cannot be parsed
-         * @throws HttpUrlConnectionCreationException If it failed to connect
-         * to the service
-         */
-        private static Vector<MailboxItem> getItems(
-                final int count, final int startIndex, final Vector<String> ids,
-                final ExchangeService exchangeService)
-                throws IOException, AuthenticationException, XmlException,
-                       HttpUrlConnectionCreationException
-        {
-            int max = Math.min(startIndex + count, ids.size());
-            if (max < startIndex)
-            {
-                return new Vector<MailboxItem>();
-            }
-            GetItemResponseType response = exchangeService
-                    .getItem(getGetItemsRequest(ids.subList(startIndex, max)));
-            ItemInfoResponseMessageType[] array =
-                    response.getResponseMessages()
-                            .getGetItemResponseMessageArray();
-            Vector<MailboxItem> items = new Vector<MailboxItem>();
-            for (ItemInfoResponseMessageType message : array)
-            {
-                for (MessageType item : message.getItems()
-                                               .getMessageArray())
-                {
-                    items.add(new ExchangeEmail(item));
-                }
-
-            }
-            return items;
         }
 
 
