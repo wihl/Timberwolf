@@ -44,7 +44,7 @@ public class ExchangeServiceTest
         "        <t:DistinguishedFolderId Id=\"inbox\"/>" +
         "      </ParentFolderIds>" +
         "    </FindItem>";
-    private static final String findOneItemResponse =        
+    private static final String findItemResponse =        
         "    <m:FindItemResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" " +
         "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" " +
         "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\">\n" +
@@ -68,20 +68,20 @@ public class ExchangeServiceTest
     }
 
     @Test
-    public void testFindOneItem()
+    public void testFindItem()
         throws UnsupportedEncodingException, XmlException, 
                HttpUrlConnectionCreationException, IOException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(findItemsRequest).getBytes("UTF-8"))
-               .respondWith(HttpURLConnection.HTTP_OK, soap(findOneItemResponse).getBytes("UTF-8"));
+               .respondWith(HttpURLConnection.HTTP_OK, soap(findItemResponse).getBytes("UTF-8"));
         
         FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
 
         ExchangeService service = new ExchangeService(url, factory);
         FindItemResponseType response = service.findItem(findReq);
                 
-        FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(findOneItemResponse))
+        FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(findItemResponse))
                                         .getEnvelope().getBody().getFindItemResponse();
 
         assertEquals(expected.xmlText(), response.xmlText());
