@@ -214,7 +214,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail(final String user)
+    public final Iterable<MailboxItem> getMail()
             throws IOException, AuthenticationException
     {
         return new Iterable<MailboxItem>()
