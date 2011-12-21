@@ -34,6 +34,7 @@ import java.util.Vector;
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -302,6 +303,28 @@ public class ExchangeMailStoreTest
     }
 
     @Test
+    public void testGetItems2to3Return0()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
+        {
+            wholeList.add(null);
+        }
+        List<String> requestedList = new Vector<String>(1);
+        String idValue = "id1";
+        wholeList.set(3, idValue);
+        requestedList.add(idValue);
+        ExchangeService service =
+                mockGetItem(new MessageType[0],
+                            requestedList);
+        Vector<MailboxItem>
+                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+        assertEquals(0, items.size());
+    }
+
+    @Test
     public void testGetItems2to93()
             throws XmlException, IOException,
                    HttpUrlConnectionCreationException, AuthenticationException
@@ -359,4 +382,45 @@ public class ExchangeMailStoreTest
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
         return service;
     }
+
+    @Test
+    public void testGetMailFind0()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        // Exchange returns 0 mail when findItem is called
+        MessageType[] messages = new MessageType[0];
+        ExchangeService service = mockFindItem(messages);
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+        {
+            fail("There shouldn't be any mailBoxItems");
+        }
+    }
+
+    @Test
+    @Ignore("HAM-33 - I really have to stop writing negative tests")
+    public void testGetMailGet0()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        // Exchange returns 0 mail even though you asked for some mail
+        int count = 100;
+        MessageType[] messages = new MessageType[count];
+        for (int i = 0; i < count; i++)
+        {
+            messages[i] = mockMessageItemId("the" + i + "id");
+        }
+        ExchangeService service = mockFindItem(messages);
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+        {
+            fail("There shouldn't be any mailBoxItems");
+        }
+    }
+
+    @Test
+    public void testGetMail30()
+    {
+        // Exchange returns 30 in FindItems and 30 in GetItems
+    }
+
 }
