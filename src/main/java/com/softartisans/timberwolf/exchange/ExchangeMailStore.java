@@ -191,7 +191,7 @@ public class ExchangeMailStore implements MailStore
                    HttpUrlConnectionCreationException
     {
         int max = Math.min(startIndex + count, ids.size());
-        if (max < startIndex)
+        if (max <= startIndex)
         {
             return new Vector<MailboxItem>();
         }

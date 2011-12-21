@@ -16,6 +16,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.softartisans.timberwolf.MailboxItem;
 import org.apache.xmlbeans.XmlException;
 import org.junit.After;
 import org.junit.Before;
@@ -242,4 +243,15 @@ public class ExchangeMailStoreTest
                      ExchangeMailStore.getGetItemsRequest(ids).xmlText());
     }
 
+    @Test
+    public void testGetItems0()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        Vector<String> list = new Vector<String>();
+        Vector<MailboxItem>
+                items = ExchangeMailStore.getItems(0, 0, list, service);
+        assertEquals(0, items.size());
+    }
 }
