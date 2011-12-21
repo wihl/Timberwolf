@@ -370,6 +370,14 @@ public class ExchangeMailStoreTest
             throws XmlException, HttpUrlConnectionCreationException, IOException
     {
         ExchangeService service = mock(ExchangeService.class);
+        mockGetItem(messages, requestedList, service);
+        return service;
+    }
+
+    private void mockGetItem(MessageType[] messages, List<String> requestedList,
+                             ExchangeService service)
+            throws XmlException, HttpUrlConnectionCreationException, IOException
+    {
         GetItemType getItem =
                 ExchangeMailStore.getGetItemsRequest(requestedList);
         when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
@@ -380,7 +388,6 @@ public class ExchangeMailStoreTest
                         itemInfoResponseMessage});
         when(itemInfoResponseMessage.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
-        return service;
     }
 
     @Test
@@ -419,8 +426,34 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetMail30()
+            throws XmlException, IOException,
+                   HttpUrlConnectionCreationException, AuthenticationException
     {
         // Exchange returns 30 in FindItems and 30 in GetItems
+        int count = 30;
+        MessageType[] findItems = new MessageType[count];
+        List<String> requestedList = new Vector<String>(count);
+        MessageType[] messages = new MessageType[count];
+        for (int i = 0; i < 30; i++)
+        {
+            String id = "the #" + i + " id";
+            findItems[i] = mockMessageItemId(id);
+            requestedList.add(id);
+            messages[i] = mockMessageItemId(id);
+        }
+        ExchangeService service = mockFindItem(findItems);
+        mockGetItem(messages, requestedList, service);
+        int i = 0;
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+        {
+            assertEquals(requestedList.get(i),
+                         mailboxItem.getHeader("Item ID"));
+            i++;
+        }
+        if (i < requestedList.size())
+        {
+            fail("There were less items returned than there should have been");
+        }
     }
 
 }
