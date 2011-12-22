@@ -117,7 +117,7 @@ public class ExchangeMailStore implements MailStore
      * connection to the service
      */
     static Vector<String> findItems(final ExchangeService exchangeService)
-            throws IOException, AuthenticationException, XmlException, HttpUrlConnectionCreationException
+            throws HttpUrlConnectionCreationException, HttpErrorException
     {
         FindItemResponseType response = 
             exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
@@ -176,7 +176,7 @@ public class ExchangeMailStore implements MailStore
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService)
-        throws IOException, AuthenticationException, XmlException, HttpUrlConnectionCreationException
+        throws HttpUrlConnectionCreationException, HttpErrorException
     {
         int max = Math.min(startIndex + count, ids.size());
         if (max <= startIndex)
@@ -240,26 +240,16 @@ public class ExchangeMailStore implements MailStore
                     currentIdIndex = 0;
                     currentIds = findItems(exchangeService);
                     LOG.debug("Got " + currentIds.size() + " email ids");
-                }
-                catch (IOException e)
-                {
-                    LOG.error("findItems failed to get ids", e);
-                    return false;
-                }
-                catch (AuthenticationException e)
-                {
-                    LOG.error("findItems could not authenticate", e);
-                    return false;
-                }
-                catch (XmlException e)
-                {
-                    LOG.error("findItems could not decode response", e);
-                    return false;
-                }
+                }                
                 catch (HttpUrlConnectionCreationException e)
                 {
-                    LOG.error("findItems failed to get ids", e);
-                    return false;
+                    LOG.error("Failed to find item ids.", e);
+                    throw new ExchangeRuntimeException("Failed to find item ids.", e);
+                }
+                catch (HttpErrorException e)
+                {
+                    LOG.error("Failed to find item ids.", e);
+                    throw new ExchangeRuntimeException("Failed to find item ids.", e);
                 }
             }
             // TODO paging here
@@ -275,22 +265,16 @@ public class ExchangeMailStore implements MailStore
                     mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
                     LOG.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
-                }
-                catch (IOException e)
-                {
-                    LOG.error("getItems failed", e);
-                }
-                catch (AuthenticationException e)
-                {
-                    LOG.error("getItems could not authenticate", e);
-                }
-                catch (XmlException e)
-                {
-                    LOG.error("getItems could not decode response", e);
-                }
+                }                
                 catch (HttpUrlConnectionCreationException e)
                 {
-                    LOG.error("getItems failed", e);
+                    LOG.error("Failed to get item details.", e);
+                    throw new ExchangeRuntimeException("Failed to get item details.", e);
+                }
+                catch (HttpErrorException e)
+                {
+                    LOG.error("Failed to get item details.", e);
+                    throw new ExchangeRuntimeException("Failed to get item details.", e);
                 }
             }
             // TODO call getItems more than once

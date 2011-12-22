@@ -2,6 +2,7 @@ package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticationException;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
+import com.softartisans.timberwolf.exchange.ExchangeRuntimeException;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -111,6 +112,15 @@ final class App
         }
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
-        new ConsoleMailWriter().write(mailStore.getMail());
+
+        try
+        {
+            new ConsoleMailWriter().write(mailStore.getMail());
+        }
+        catch (ExchangeRuntimeException e)
+        {
+            System.err.println(
+                "There was an error downloading messages from the Exchange server.  See log for details.");
+        }
     }
 }
