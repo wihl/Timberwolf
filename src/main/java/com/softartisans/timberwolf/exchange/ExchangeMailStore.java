@@ -117,7 +117,7 @@ public class ExchangeMailStore implements MailStore
      * connection to the service
      */
     static Vector<String> findItems(final ExchangeService exchangeService)
-            throws HttpUrlConnectionCreationException, HttpErrorException
+            throws ServiceCallException, HttpErrorException
     {
         FindItemResponseType response = 
             exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
@@ -176,7 +176,7 @@ public class ExchangeMailStore implements MailStore
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService)
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         int max = Math.min(startIndex + count, ids.size());
         if (max <= startIndex)
@@ -241,7 +241,7 @@ public class ExchangeMailStore implements MailStore
                     currentIds = findItems(exchangeService);
                     LOG.debug("Got " + currentIds.size() + " email ids");
                 }                
-                catch (HttpUrlConnectionCreationException e)
+                catch (ServiceCallException e)
                 {
                     LOG.error("Failed to find item ids.", e);
                     throw new ExchangeRuntimeException("Failed to find item ids.", e);
@@ -266,7 +266,7 @@ public class ExchangeMailStore implements MailStore
                     LOG.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }                
-                catch (HttpUrlConnectionCreationException e)
+                catch (ServiceCallException e)
                 {
                     LOG.error("Failed to get item details.", e);
                     throw new ExchangeRuntimeException("Failed to get item details.", e);

@@ -47,7 +47,7 @@ public class ExchangeService
 
     /** Sends a SOAP envelope request and returns the response. */
     private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
-        throws HttpErrorException, HttpUrlConnectionCreationException
+        throws HttpErrorException, ServiceCallException
     {
         String request = DECLARATION + envelope.xmlText();
         LOG.trace("Sending SOAP request to {}.  SOAP envelope:", endpoint);
@@ -63,12 +63,12 @@ public class ExchangeService
         catch (UnsupportedEncodingException e)
         {
             LOG.error("Request body could not be encoded into " + SOAP_ENCODING, e);
-            throw new HttpUrlConnectionCreationException("Error encoding request body.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error encoding request body.", e);
         }
         catch (IOException e)
         {
             LOG.error("There was an error getting the HTTP status code for the response.", e);
-            throw new HttpUrlConnectionCreationException("Error getting HTTP status code.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting HTTP status code.", e);
         }
 
         InputStream responseData;
@@ -79,7 +79,7 @@ public class ExchangeService
         catch (IOException e)
         {
             LOG.error("There was an error getting the input stream for the response.", e);
-            throw new HttpUrlConnectionCreationException("Error getting input stream.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
         }
         
         if (code == HttpURLConnection.HTTP_OK)
@@ -92,7 +92,7 @@ public class ExchangeService
             catch (IOException e)
             {
                 LOG.error("There was an error reading from the response stream.", e);
-                throw new HttpUrlConnectionCreationException("Error reading response stream.", e);
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading response stream.", e);
             }
             catch (XmlException e)
             {
@@ -100,7 +100,7 @@ public class ExchangeService
                 LOG.debug("Response body:");
                 // Why this works: http://stackoverflow.com/questions/309424/in-java-how-do-i-read-convert-an-inputstream-to-a-string#5445161
                 LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());
-                throw new HttpUrlConnectionCreationException("Error parsing SOAP response.", e);
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
             }
             
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
@@ -125,7 +125,7 @@ public class ExchangeService
 
     /** Returns the results of a find item request. */
     public FindItemResponseType findItem(FindItemType findItem)
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
@@ -137,7 +137,7 @@ public class ExchangeService
 
     /** Returns the results of a get item request. */
     public GetItemResponseType getItem(GetItemType getItem)
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();

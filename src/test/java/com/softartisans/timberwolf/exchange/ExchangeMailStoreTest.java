@@ -100,7 +100,7 @@ public class ExchangeMailStoreTest
     @Test
     @Ignore("HAM-33 - I really have to stop writing negative tests")
     public void testFindItemsInboxRespondNull()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
@@ -112,7 +112,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testFindItemsItemsRespond0()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
@@ -122,7 +122,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testFindItemsItemsRespond1()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[] {message};
@@ -135,7 +135,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testFindItemsItemsRespond100()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         int count = 100;
         MessageType[] messages = new MessageType[count];
@@ -154,7 +154,7 @@ public class ExchangeMailStoreTest
     }
 
     private ExchangeService mockFindItem(MessageType[] messages)
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
@@ -241,7 +241,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems0()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         Vector<String> list = new Vector<String>();
@@ -252,7 +252,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems0to1()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -274,7 +274,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems3to4()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -296,7 +296,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems2to93()
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         Vector<String> wholeList = new Vector<String>(100);
         for (int i = 0; i < 100; i++)
@@ -335,7 +335,7 @@ public class ExchangeMailStoreTest
     }
 
     private ExchangeService mockGetItem(MessageType[] messages, List<String> requestedList)
-        throws HttpUrlConnectionCreationException, HttpErrorException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         GetItemType getItem =

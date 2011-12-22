@@ -23,8 +23,7 @@ public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
     private static final String SOAP_CONTENT_TYPE = "text/xml";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
-    public HttpURLConnection newInstance(String address, byte[] request)
-        throws HttpUrlConnectionCreationException
+    public HttpURLConnection newInstance(String address, byte[] request) throws ServiceCallException
     {
         try
         {
@@ -43,24 +42,25 @@ public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         catch (AuthenticationException e)
         {
             LOG.error("Authentication error for URL " + address, e);
-            throw new HttpUrlConnectionCreationException(
+            throw new ServiceCallException(ServiceCallException.Reason.AUTHENTICATION,
                 "There was an error authenticating with the remote server.", e);
         }
         catch (MalformedURLException e)
         {
             LOG.error("Improperly formed URL " + address, e);
-            throw new HttpUrlConnectionCreationException("The given url was not properly formed.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                "The given url was not properly formed.", e);
         }
         catch (ProtocolException e)
         {
             LOG.error("Protocol exception when contacting URL " + address + " with request " + new String(request), e);
-            throw new HttpUrlConnectionCreationException(
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
                 "There was a protocol error while creating and sending the request.", e);
         }
         catch (IOException e)
         {
             LOG.error("IO exception when contacting URL " + address + " with request " + new String(request), e);
-            throw new HttpUrlConnectionCreationException(
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
                 "There was an IO error while sending a request to the remote server.", e);
         }
     }
