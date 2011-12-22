@@ -50,11 +50,11 @@
   <!-- Checks that property files contain the same keys.     -->
   <!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
   <module name="Translation"/>
-  
+
   <!-- Checks for Size Violations.          -->
   <!-- See http://checkstyle.sf.net/config_sizes.html -->
   <module name="FileLength"/>
-  
+
   <!-- Checks for whitespace                 -->
   <!-- See http://checkstyle.sf.net/config_whitespace.html -->
   <module name="FileTabCharacter"/>
@@ -118,6 +118,9 @@
     <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
+    <module name="ImportOrder">
+      <property name="separated" value="true" />
+    </module>
 
 
     <!-- Checks for Size Violations.          -->
@@ -126,6 +129,7 @@
       <!-- "^import" relaxes the restriction in import statments.
            "^ \* " relaxes the restriction in javadoc bodies. -->
       <property name="ignorePattern" value="^(import)|( \* )" />
+      <property name="max" value="120" />
     </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
@@ -182,7 +186,6 @@
 
     <!-- Checks for class design             -->
     <!-- See http://checkstyle.sf.net/config_design.html -->
-    <module name="DesignForExtension"/>
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
     <module name="InterfaceIsType"/>
