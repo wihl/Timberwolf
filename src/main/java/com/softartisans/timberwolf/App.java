@@ -16,6 +16,8 @@ import java.io.IOException;
  */
 final class App
 {
+    private static final LOG = LoggerFactory.getLogger(App.class);
+
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor "
                   + "example: https://example.contoso.com/ews/exchange.asmx")
@@ -71,17 +73,16 @@ final class App
         try
         {
             parser.parseArgument(args);
-            Logger log = LoggerFactory.getLogger(App.class);
 
-            log.debug("Timberwolf invoked with the following arguments:");
-            log.debug("Exchange URL: {}", exchangeUrl);
-            log.debug("Exchange User: {}", exchangeUser);
-            log.debug("Exchange Password: {}", exchangePassword);
-            log.debug("Target User: {}", targetUser);
-            log.debug("HBase Quorum: {}", hbaseQuorum);
-            log.debug("HBase Port: {}", hbasePort);
-            log.debug("HBase Table Name: {}", hbaseTableName);
-            log.debug("HBase Column Family: {}", hbaseColumnFamily);
+            LOG.debug("Timberwolf invoked with the following arguments:");
+            LOG.debug("Exchange URL: {}", exchangeUrl);
+            LOG.debug("Exchange User: {}", exchangeUser);
+            LOG.debug("Exchange Password: {}", exchangePassword);
+            LOG.debug("Target User: {}", targetUser);
+            LOG.debug("HBase Quorum: {}", hbaseQuorum);
+            LOG.debug("HBase Port: {}", hbasePort);
+            LOG.debug("HBase Table Name: {}", hbaseTableName);
+            LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbasePort == null
@@ -108,8 +109,6 @@ final class App
             System.err.println();
             return;
         }
-
-        Logger log = LoggerFactory.getLogger(App.class);
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
         new ConsoleMailWriter().write(mailStore.getMail("bkerr"));
