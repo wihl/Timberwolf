@@ -142,8 +142,8 @@ public class ExchangeServiceTest
 
     @Test
     public void testFindItem()
-        throws UnsupportedEncodingException, XmlException, 
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, 
+               IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(findItemsRequest).getBytes("UTF-8"))
@@ -162,8 +162,8 @@ public class ExchangeServiceTest
 
     @Test
     public void testGetItem()
-        throws UnsupportedEncodingException, XmlException,
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, 
+               IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
