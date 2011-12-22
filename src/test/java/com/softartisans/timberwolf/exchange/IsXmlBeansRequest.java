@@ -6,17 +6,23 @@ import org.mockito.ArgumentMatcher;
 import static org.mockito.Mockito.argThat;
 
 /**
- * An ArgumentMatcher for
+ * An ArgumentMatcher for XmlBeans generated xml objects as arguments to mocked
+ * methods, because those don't generate an equals() method.
  */
 public class IsXmlBeansRequest<T extends BaseRequestType> extends ArgumentMatcher<T>
 {
     final T expected;
 
+    /**
+     * Creates a new XmlBeans argument matcher
+     * @param expected the expected xml block
+     */
     public IsXmlBeansRequest(T expected)
     {
         this.expected = expected;
     }
 
+    /** A Helper method to make the when calls cleaner */
     public static <T extends BaseRequestType> T LikeThis(
             T expected)
     {
