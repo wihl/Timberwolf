@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 final class App
 {
-    private static final LOG = LoggerFactory.getLogger(App.class);
+    private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor "
