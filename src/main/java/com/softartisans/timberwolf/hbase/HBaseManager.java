@@ -212,8 +212,9 @@ public class HBaseManager
      * underlying collection.
      * @param tableName The name of the table.
      * @param columnFamilies A list of column family names.
+     * @return The created IHBaseTable or null if failed.
      */
-    public final void createTable(final String tableName,
+    public final IHBaseTable createTable(final String tableName,
                                   final List<String> columnFamilies)
     {
         if (canRemote())
@@ -237,13 +238,16 @@ public class HBaseManager
                     hbase.createTable(tableDescriptor);
                 }
                 HTableInterface table = new HTable(configuration, tableName);
-                addTable(new HBaseTable(table));
+                IHBaseTable hbaseTable = new HBaseTable(table);
+                addTable(hbaseTable);
+                return hbaseTable;
             }
             catch (IOException e)
             {
                 logger.error("Error creating table " + tableName + "!");
             }
         }
+        return null;
     }
 
     /**
