@@ -108,7 +108,8 @@ public class IntegrationTestProperties implements TestRule
     @Override
     public Statement apply(Statement statement, Description description)
     {
-        return new IntegrationPropertiesStatement(description.getDisplayName(), requiredProperties, statement);
+        return new IntegrationPropertiesStatement(description.getClassName() + "." + description.getMethodName(),
+                                                  requiredProperties, statement);
     }
 
     private class IntegrationPropertiesStatement extends Statement
@@ -130,6 +131,7 @@ public class IntegrationTestProperties implements TestRule
         {
             ignoreIfMissingProperties();
             statement.evaluate();
+            ignoreIfMissingProperties();
         }
 
         /**
@@ -151,7 +153,9 @@ public class IntegrationTestProperties implements TestRule
             if (ignoreTest)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.append("The properties: ");
+                sb.append(" * Ignored Test: ");
+                sb.append(testName);
+                sb.append("\n *     Requires the properties: ");
                 sb.append('\"');
                 sb.append(propertyNames[0]);
                 sb.append('\"');
@@ -164,11 +168,11 @@ public class IntegrationTestProperties implements TestRule
                 }
                 sb.append(", and \"");
                 sb.append(propertyNames[1]);
-                sb.append("\" must be specified in \"");
+                sb.append("\"\n *     Specified in the file: ");
                 sb.append(path);
-                sb.append("\" in order for ");
-                sb.append(testName);
-                sb.append(" to run");
+                // Ideally we would be able to just put a message in, but
+                // surefire does not respect the ignored message, so we
+                // have to print to stderr for the user to see it at all
                 System.err.println(sb);
                 Assume.assumeTrue(!ignoreTest);
             }
