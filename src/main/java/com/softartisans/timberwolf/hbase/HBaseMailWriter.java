@@ -11,8 +11,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 /**
  * This class writes a list of MailboxItems to an IHBaseTable.
  */
