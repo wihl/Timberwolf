@@ -108,7 +108,8 @@ public class HBaseIntegrated
     }
 
     /**
-     *  Tests that our Put operation doesn't error.
+     *  Tests a remote put operation and compares the values from an HBase
+     *  get operation.
      */
     @Test
     public void testRemotePut()
