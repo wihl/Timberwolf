@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf;
+package com.softartisans.timberwolf.integrated;
 
 import org.junit.Assume;
 import org.junit.rules.TestName;

@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf.integrated;
 
-import com.softartisans.timberwolf.PropertiesForTests;
 import com.softartisans.timberwolf.hbase.HBaseManager;
 import com.softartisans.timberwolf.hbase.IHBaseTable;
 import org.junit.AfterClass;
