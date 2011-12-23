@@ -148,8 +148,10 @@ public class HBaseIntegrated
         {
             Assert.fail("Exception getting our record: " + e.getMessage());
         }
-
-        deleteTable(tableName);
+        finally
+        {
+            deleteTable(tableName);
+        }
     }
 
 }
