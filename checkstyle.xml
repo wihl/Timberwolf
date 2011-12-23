@@ -118,6 +118,9 @@
     <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
+    <module name="ImportOrder">
+      <property name="separated" value="true" />
+    </module>
 
 
     <!-- Checks for Size Violations.          -->
@@ -126,6 +129,7 @@
       <!-- "^import" relaxes the restriction in import statments.
            "^ \* " relaxes the restriction in javadoc bodies. -->
       <property name="ignorePattern" value="^(import)|( \* )" />
+      <property name="max" value="120" />
     </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>

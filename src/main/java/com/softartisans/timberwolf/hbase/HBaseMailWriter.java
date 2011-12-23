@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * This class writes a list of MailboxItems to an IHBaseTable.
  */
-public class HBaseMailWriter implements MailWriter
+public final class HBaseMailWriter implements MailWriter
 {
     /** Our general purpose logger. */
     private static Logger logger =
@@ -35,13 +35,13 @@ public class HBaseMailWriter implements MailWriter
     /** The default header, whose value will be used as a rowkey. */
     private static final String DEFAULT_KEY_HEADER = "Item ID";
 
-    private HBaseMailWriter(final IHBaseTable mailTable,
-                            final String keyHeader,
-                            final String columnFamily)
+    private HBaseMailWriter(final IHBaseTable table,
+                            final String mailboxItemKeyHeader,
+                            final String hbaseColumnFamily)
     {
-        this.mailTable = mailTable;
-        this.keyHeader = keyHeader;
-        this.columnFamily = Bytes.toBytes(columnFamily);
+        this.mailTable = table;
+        this.keyHeader = mailboxItemKeyHeader;
+        this.columnFamily = Bytes.toBytes(hbaseColumnFamily);
     }
 
     /**
@@ -56,23 +56,20 @@ public class HBaseMailWriter implements MailWriter
      * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static HBaseMailWriter create(final String quorum,
+    public static MailWriter create(final String quorum,
                                          final String clientPort,
                                          final String tableName,
                                          final String keyHeader,
                                          final String columnFamily)
     {
-        Configuration configuration =
-                HBaseConfigurator.createConfiguration(quorum,
-                        clientPort);
-        HBaseManager hbase = new HBaseManager(configuration);
+        HBaseManager hbase = new HBaseManager(quorum, clientPort);
 
-        List<String> cfs = new ArrayList<String>();
-        cfs.add(columnFamily);
+        List<String> columnFamilies = new ArrayList<String>();
+        columnFamilies.add(columnFamily);
 
-        if (! hbase.tableExists(tableName))
+        if (!hbase.tableExists(tableName))
         {
-            hbase.createTable(tableName,cfs);
+            hbase.createTable(tableName, columnFamilies);
         }
 
         IHBaseTable table = hbase.getTable(tableName);
@@ -86,7 +83,7 @@ public class HBaseMailWriter implements MailWriter
      * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static HBaseMailWriter create(final IHBaseTable table,
+    public static MailWriter create(final IHBaseTable table,
                                          final String keyHeader,
                                          final String columnFamily)
     {
@@ -98,7 +95,7 @@ public class HBaseMailWriter implements MailWriter
      * @param mails The iterable list of MailBoxItems.
      */
     @Override
-    public final void write(final Iterable<MailboxItem> mails)
+    public void write(final Iterable<MailboxItem> mails)
     {
         for (MailboxItem mailboxItem : mails)
         {
