@@ -112,7 +112,7 @@
             <goals>
               <goal>xmlbeans</goal>
             </goals>
-          </execution>          
+          </execution>
         </executions>
         <inherited>true</inherited>
         <configuration>
@@ -125,7 +125,7 @@
         <directory>target/generated-sources/xmlbeans</directory>
         <filtering>false</filtering>
       </resource>
-    </resources>    
+    </resources>
   </build>
 
   <reporting>

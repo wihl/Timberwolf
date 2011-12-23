@@ -2,15 +2,15 @@ package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticationException;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
-
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+
+import java.io.IOException;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * Driver class to grab emails and put them in HBase.
