@@ -136,7 +136,6 @@ public class IntegrationTestProperties implements TestRule
         {
             ignoreIfMissingProperties();
             statement.evaluate();
-            ignoreIfMissingProperties();
         }
 
         /**
