@@ -1,22 +1,24 @@
 package com.softartisans.timberwolf.integrated;
 
+import com.softartisans.timberwolf.PropertiesForTests;
 import com.softartisans.timberwolf.hbase.HBaseManager;
 import com.softartisans.timberwolf.hbase.IHBaseTable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HBaseIntegrated
+public class TestHBaseIntegration
 {
 
     private static HBaseManager hBaseManager;
     private static final String tableName = "testTable";
+    private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
+    private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
 
     private static void createTable(String tableName)
     {
@@ -38,9 +40,17 @@ public class HBaseIntegrated
     @BeforeClass
     public static void setUp()
     {
-        hBaseManager = new HBaseManager(
-                IntegrationSettings.ZooKeeperQuorum,
-                IntegrationSettings.ZooKeeperClientPort);
+        String zooKeeperQuorum = PropertiesForTests.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME);
+        String zooKeeperClientPort = PropertiesForTests.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
+        if (zooKeeperQuorum != null && zooKeeperClientPort != null)
+        {
+            hBaseManager = new HBaseManager(zooKeeperQuorum, zooKeeperClientPort);
+        }
+    }
+
+    @Before
+    public void setUpJustOne()
+    {
     }
 
     /**
@@ -49,7 +59,10 @@ public class HBaseIntegrated
     @AfterClass
     public static void tearDown()
     {
-        hBaseManager.close();
+        if (hBaseManager != null)
+        {
+            hBaseManager.close();
+        }
     }
 
     /**
@@ -58,6 +71,7 @@ public class HBaseIntegrated
     @Test
     public void testRemoteCreateDeleteTable()
     {
+        PropertiesForTests.Assume(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
         String tableName = "HBaseIntegratedtestRemoteConnection";
 
         createTable(tableName);
