@@ -1,10 +1,14 @@
 package com.softartisans.timberwolf;
 
+import com.cloudera.alfredo.client.AuthenticationException;
+import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+
+import java.io.IOException;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,22 +17,24 @@ import org.slf4j.LoggerFactory;
  */
 final class App
 {
+    private static final Logger LOG = LoggerFactory.getLogger(App.class);
+
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor "
                   + "example: https://example.contoso.com/ews/exchange.asmx")
     private String exchangeUrl;
 
-    @Option(required = true, name = "--exchange-user",
+    @Option(required = false, name = "--exchange-user",
             usage = "The username that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangeUser;
 
-    @Option(required = true, name = "--exchange-password",
+    @Option(required = false, name = "--exchange-password",
             usage = "The password that will be used to authenticate with "
                   + "Exchange Web Services.")
     private String exchangePassword;
 
-    @Option(required = true, name = "--get-email-for",
+    @Option(required = false, name = "--get-email-for",
             usage = "The user for whom to retrieve email.")
     private String targetUser;
 
@@ -60,29 +66,30 @@ final class App
     }
 
     public static void main(final String[] args)
+            throws IOException, AuthenticationException
     {
         new App().run(args);
     }
 
     private void run(final String[] args)
+            throws IOException, AuthenticationException
     {
         CmdLineParser parser = new CmdLineParser(this);
 
         try
         {
             parser.parseArgument(args);
-            Logger log = LoggerFactory.getLogger(App.class);
 
-            log.info("Timberwolf invoked with the following arguments:");
-            log.info("Exchange URL: {}", exchangeUrl);
-            log.info("Exchange User: {}", exchangeUser);
-            log.info("Exchange Password: {}", exchangePassword);
-            log.info("Target User: {}", targetUser);
-            log.info("HBase ZooKeeper Quorum: {}", hbaseQuorum);
-            log.info("HBase ZooKeeper Client Port: {}", hbaseclientPort);
-            log.info("HBase Table Name: {}", hbaseTableName);
-            log.info("HBase Key Header: {}", hbaseKeyHeader);
-            log.info("HBase Column Family: {}", hbaseColumnFamily);
+            LOG.debug("Timberwolf invoked with the following arguments:");
+            LOG.debug("Exchange URL: {}", exchangeUrl);
+            LOG.debug("Exchange User: {}", exchangeUser);
+            LOG.debug("Exchange Password: {}", exchangePassword);
+            LOG.debug("Target User: {}", targetUser);
+            LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+            LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
+            LOG.debug("HBase Table Name: {}", hbaseTableName);
+            LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
+            LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
 
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbaseclientPort == null
@@ -91,28 +98,30 @@ final class App
                     hbaseQuorum != null && hbaseclientPort != null
                     && hbaseTableName != null;
 
-            // if no HBase args, write to console (for debugging).
-            // Else, write to HBase
-            if (noHBaseArgs)
-            {
-                ConsoleMailWriter consoleMailWriter = new ConsoleMailWriter();
-                // .write goes here.
-            }
-            else
-            {
-                MailWriter mailWriter = HBaseMailWriter.create(hbaseQuorum,
-                        hbaseclientPort, hbaseTableName, hbaseKeyHeader,
-                        hbaseColumnFamily);
-                // .write goes here.
-            }
-
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser,
-                        "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, "
-                        + "and HBase Table Name must all be specified if at"
-                        + "least one is specified");
+                                           "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, "
+                                           + "and HBase Table Name must all be specified if at"
+                                           + "least one is specified");
             }
+
+            // if no HBase args, write to console (for debugging).
+            // Else, write to HBase
+            MailWriter mailWriter;
+            if (noHBaseArgs)
+            {
+                mailWriter = new ConsoleMailWriter();
+            }
+            else
+            {
+                mailWriter = HBaseMailWriter.create(hbaseQuorum,
+                        hbaseclientPort, hbaseTableName, hbaseKeyHeader,
+                        hbaseColumnFamily);
+            }
+
+            ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
+            mailWriter.write(mailStore.getMail());
         }
         catch (CmdLineException e)
         {
@@ -122,5 +131,6 @@ final class App
             System.err.println();
             return;
         }
+
     }
 }

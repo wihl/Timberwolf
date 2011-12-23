@@ -1,6 +1,8 @@
 package com.softartisans.timberwolf;
 
-import java.util.Iterator;
+import com.cloudera.alfredo.client.AuthenticationException;
+
+import java.io.IOException;
 
 /**
  * MailStore represents a repository, either local or remote, of mail.
@@ -8,5 +10,6 @@ import java.util.Iterator;
 public interface MailStore
 {
     /** Returns some mail for the given user. */
-    Iterator<MailboxItem> getMail(String user);
+    Iterable<MailboxItem> getMail()
+            throws IOException, AuthenticationException;
 }

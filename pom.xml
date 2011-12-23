@@ -23,7 +23,7 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
-          <compilerArgument>-Xlint:all</compilerArgument>
+          <compilerArgument>-Xlint:-path</compilerArgument>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
         </configuration>
@@ -108,10 +108,26 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xmlbeans-maven-plugin</artifactId>
+        <version>2.3.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>xmlbeans</goal>
+            </goals>
+          </execution>
+        </executions>
+        <inherited>true</inherited>
+        <configuration>
+          <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
-        <directory>target/generated-sources/axis2/wsdl2code/resources</directory>
+        <directory>target/generated-sources/xmlbeans</directory>
         <filtering>false</filtering>
       </resource>
     </resources>
@@ -205,6 +221,16 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.6.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cloudera.alfredo</groupId>
+      <artifactId>alfredo</artifactId>
+      <version>0.1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+      <version>2.3.0</version>
     </dependency>
   </dependencies>
 
