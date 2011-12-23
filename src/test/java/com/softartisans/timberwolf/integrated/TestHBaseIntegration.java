@@ -14,7 +14,6 @@ import java.util.List;
 
 public class TestHBaseIntegration
 {
-
     private static HBaseManager hBaseManager;
     private static final String tableName = "testTable";
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
@@ -24,7 +23,7 @@ public class TestHBaseIntegration
     {
         List<String> cfs = new ArrayList<String>();
         cfs.add("cf");
-        hBaseManager.createTable(tableName,cfs);
+        hBaseManager.createTable(tableName, cfs);
         Assert.assertTrue(hBaseManager.tableExists(tableName));
     }
 
@@ -38,7 +37,7 @@ public class TestHBaseIntegration
      * Fixture setup.
      */
     @BeforeClass
-    public static void setUp()
+    public static void classSetUp()
     {
         String zooKeeperQuorum = PropertiesForTests.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME);
         String zooKeeperClientPort = PropertiesForTests.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
@@ -49,8 +48,9 @@ public class TestHBaseIntegration
     }
 
     @Before
-    public void setUpJustOne()
+    public void setUp()
     {
+        PropertiesForTests.assume(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
     }
 
     /**
@@ -71,7 +71,6 @@ public class TestHBaseIntegration
     @Test
     public void testRemoteCreateDeleteTable()
     {
-        PropertiesForTests.Assume(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
         String tableName = "HBaseIntegratedtestRemoteConnection";
 
         createTable(tableName);
