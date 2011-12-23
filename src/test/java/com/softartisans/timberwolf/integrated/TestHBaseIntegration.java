@@ -7,13 +7,17 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestHBaseIntegration
 {
+    @Rule
+    public TestName name = new TestName();
     private static HBaseManager hBaseManager;
     private static final String tableName = "testTable";
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
@@ -50,7 +54,7 @@ public class TestHBaseIntegration
     @Before
     public void setUp()
     {
-        PropertiesForTests.assume(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
+        PropertiesForTests.assume(name, ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
     }
 
     /**

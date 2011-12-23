@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf;
 
 import org.junit.Assume;
+import org.junit.rules.TestName;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -82,12 +83,26 @@ public class PropertiesForTests
         }
     }
 
+    /**
+     * Returns the testing property
+     * @param name the name of the property
+     * @return the value of the property or null if the property is not set
+     */
     public static String getProperty(String name)
     {
         return properties.getProperty(name);
     }
 
-    public static void assume(String... propertyNames)
+    /**
+     * Ignores the test (by calling JUnit's Assume methods) if any of the
+     * properties is undefined and list the necessary properties in System.err
+     *
+     * This must be called in the test itself or the @Before method, calling it
+     * in the @BeforeClass method will cause an error
+     * @param name
+     * @param propertyNames a list of properties to check to make sure they are
+     */
+    public static void assume(TestName name, String... propertyNames)
     {
         boolean ignoreTest = false;
         for (String property : propertyNames)
@@ -116,7 +131,9 @@ public class PropertiesForTests
             sb.append(propertyNames[1]);
             sb.append("\" must be specified in \"");
             sb.append(path);
-            sb.append("\" in order for this test to run");
+            sb.append("\" in order for ");
+            sb.append(name.getMethodName());
+            sb.append(" to run");
             System.err.println(sb);
             Assume.assumeTrue(!ignoreTest);
         }
