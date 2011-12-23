@@ -13,13 +13,14 @@ import java.util.List;
 
 public class TestHBaseIntegration
 {
-    @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
-                                                                        ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
     private static HBaseManager hBaseManager;
     private static final String tableName = "testTable";
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
     private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
+    
+    @Rule
+    public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
+                                                                                ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
 
     private static void createTable(String tableName)
     {

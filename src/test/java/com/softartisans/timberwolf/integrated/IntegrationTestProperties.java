@@ -90,6 +90,11 @@ public class IntegrationTestProperties implements TestRule
         }
     }
 
+    /**
+     * Creates a new rule with a set of required properties
+     * @param propertyNames the properties that must be set, or the test will
+     * be ignored
+     */
     public IntegrationTestProperties(String... propertyNames)
     {
         requiredProperties = propertyNames;
