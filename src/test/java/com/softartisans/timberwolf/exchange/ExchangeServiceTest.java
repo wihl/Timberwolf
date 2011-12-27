@@ -179,4 +179,30 @@ public class ExchangeServiceTest
 
         assertEquals(expected.toString(), response.toString());
     }
+
+    @Test
+    public void testResponseCodeException()
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+               HttpErrorException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        stub(conn.getResponseCode()).toThrow(new IOException("Cannot read code."));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8")))
+            .thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {        
+            assertEquals("Error getting HTTP status code.", e.getMessage());
+            assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
+        }
+    }
 }
