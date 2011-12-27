@@ -80,11 +80,11 @@ public class ExchangeMailStore implements MailStore
 
     /**
      * Creates a new ExchangeMailStore for getting mail.
-     * @param exchangeService The exchange service to use
+     * @param service The exchange service to use
      */
-    ExchangeMailStore(ExchangeService exchangeService)
+    ExchangeMailStore(final ExchangeService service)
     {
-        this.exchangeService = exchangeService;
+        this.exchangeService = service;
     }
 
     /**

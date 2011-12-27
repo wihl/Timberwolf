@@ -57,7 +57,7 @@ public class HBaseManager
     }
 
     /**
-     * Constructor for creating a manager for an HBase configuration.
+     * Constructor for creating a manager for a specific HBase configuration.
      */
     public HBaseManager(final Configuration hbaseConfiguration)
     {
@@ -75,6 +75,16 @@ public class HBaseManager
         {
             logger.error("Unable to connect to ZooKeeper!");
         }
+    }
+
+    /**
+     * Constructor for creating a manager for a specific HBase instance.
+     * @param quorum The ZooKeeper quorum.
+     * @param clientPort The ZooKeeper client port.
+     */
+    public HBaseManager(final String quorum, final String clientPort)
+    {
+        this(HBaseConfigurator.createConfiguration(quorum, clientPort));
     }
 
     /**
@@ -161,7 +171,7 @@ public class HBaseManager
                 HTableInterface table;
                 try
                 {
-                    table = new HTable(tableName);
+                    table = new HTable(configuration, tableName);
                     return new HBaseTable(table);
                 }
                 catch (IOException e)
@@ -202,8 +212,9 @@ public class HBaseManager
      * underlying collection.
      * @param tableName The name of the table.
      * @param columnFamilies A list of column family names.
+     * @return The created IHBaseTable or null if failed.
      */
-    public final void createTable(final String tableName,
+    public final IHBaseTable createTable(final String tableName,
                                   final List<String> columnFamilies)
     {
         if (canRemote())
@@ -226,14 +237,17 @@ public class HBaseManager
                 {
                     hbase.createTable(tableDescriptor);
                 }
-                HTableInterface table = new HTable(tableName);
-                addTable(new HBaseTable(table));
+                HTableInterface table = new HTable(configuration, tableName);
+                IHBaseTable hbaseTable = new HBaseTable(table);
+                addTable(hbaseTable);
+                return hbaseTable;
             }
             catch (IOException e)
             {
                 logger.error("Error creating table " + tableName + "!");
             }
         }
+        return null;
     }
 
     /**
