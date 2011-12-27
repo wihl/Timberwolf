@@ -4,6 +4,8 @@ import com.cloudera.alfredo.client.AuthenticationException;
 
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.exchange.ExchangeRuntimeException;
+import com.softartisans.timberwolf.exchange.HttpErrorException;
+import com.softartisans.timberwolf.exchange.ServiceCallException;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 
 import java.io.IOException;
@@ -142,8 +144,46 @@ final class App
         }
         catch (ExchangeRuntimeException e)
         {
-            System.err.println(
-                "There was an error downloading messages from the Exchange server.  See log for details.");
+            Throwable inner = e.getCause();
+            if (inner instanceof HttpErrorException)
+            {
+                HttpErrorException httpError = (HttpErrorException)inner;
+                if (httpError.getErrorCode() == 401)
+                {
+                    System.out.println("There was an authentication error connecting to Exchange or HBase.  " +
+                                       "See the log for more details.");
+                }
+                else
+                {
+                    System.out.println("There was an HTTP " + httpError.getErrorCode() +
+                                       " error connection to either Exchange or HBase.  " +
+                                       "See the log for more details.");
+                }
+            }
+            else if (inner instanceof ServiceCallException)
+            {
+                ServiceCallException serviceError = (ServiceCallException)inner;
+                if (serviceError.getReason() == ServiceCallException.Reason.AUTHENTICATION)
+                {
+                    System.out.println("There was an authentication error connecting to Exchange or HBase.  " +
+                                       "See the log for more details.");
+                }
+                else if (serviceError.getReason() == ServiceCallException.Reason.SOAP)
+                {
+                    System.out.println("There was a SOAP error connecting to Exchange: " + 
+                                       serviceError.getSoapError().toString() + "  See the log for more details.");
+                }
+                else
+                {
+                    System.out.println("There was an unknown error connecting to Exchange or HBase.  " +
+                                       "See the log for more details.");
+                }
+            }
+            else
+            {
+                System.out.println("There was an unknown error connection to Exchange or HBase.  " +
+                                   "See the log for more details.");
+            }
         }
     }
 }
