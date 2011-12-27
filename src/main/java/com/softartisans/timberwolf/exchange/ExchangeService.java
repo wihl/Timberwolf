@@ -4,9 +4,6 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseTy
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-import org.apache.xmlbeans.XmlException;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -15,6 +12,10 @@ import java.util.Scanner;
 import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.apache.xmlbeans.XmlException;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 /**
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,
@@ -31,7 +32,7 @@ public class ExchangeService
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory;
 
-    public ExchangeService(String url, HttpUrlConnectionFactory factory)
+    public ExchangeService(final String url, final HttpUrlConnectionFactory factory)
     {
         endpoint = url;
         connectionFactory = factory;
@@ -40,7 +41,7 @@ public class ExchangeService
     /**
      * Creates a new ExchangeService that talks to the given Exchange server.
      */
-    public ExchangeService(String url)
+    public ExchangeService(final String url)
     {
         this(url, new AlfredoHttpUrlConnectionFactory());
     }

@@ -247,7 +247,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems0to1()
-        throws ServiceCallException, HttpErrorException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -269,7 +269,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems3to4()
-        throws ServiceCallException, HttpErrorException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -291,8 +291,8 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems2to3Return0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -313,7 +313,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems2to93()
-        throws ServiceCallException, HttpErrorException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(100);
         for (int i = 0; i < 100; i++)
@@ -352,7 +352,7 @@ public class ExchangeMailStoreTest
     }
 
     private ExchangeService mockGetItem(MessageType[] messages, List<String> requestedList)
-        throws ServiceCallException, HttpErrorException
+        throws ServiceCallException, HttpErrorException, HttpErrorException, XmlException, IOException
     {
         ExchangeService service = mock(ExchangeService.class);
         mockGetItem(messages, requestedList, service);
@@ -361,7 +361,7 @@ public class ExchangeMailStoreTest
 
     private void mockGetItem(MessageType[] messages, List<String> requestedList,
                              ExchangeService service)
-            throws XmlException, HttpUrlConnectionCreationException, IOException
+            throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         GetItemType getItem =
                 ExchangeMailStore.getGetItemsRequest(requestedList);
@@ -377,8 +377,8 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetMailFind0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
@@ -392,8 +392,8 @@ public class ExchangeMailStoreTest
     @Test
     @Ignore("HAM-33 - I really have to stop writing negative tests")
     public void testGetMailGet0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 0 mail even though you asked for some mail
         int count = 100;
@@ -411,8 +411,8 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetMail30()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 30 in FindItems and 30 in GetItems
         int count = 30;

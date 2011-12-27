@@ -142,7 +142,7 @@ public class ExchangeServiceTest
 
     @Test
     public void testFindItem()
-        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, 
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
                IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
@@ -162,7 +162,7 @@ public class ExchangeServiceTest
 
     @Test
     public void testGetItem()
-        throws UnsupportedEncodingException, XmlException, HttpUrlConnectionCreationException, 
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
                IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();

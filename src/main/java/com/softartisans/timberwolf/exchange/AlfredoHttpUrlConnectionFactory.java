@@ -13,6 +13,9 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A HttpUrlConnectionFactory that works with Alfredo.
+ */
 public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
     private static final Logger LOG = LoggerFactory.getLogger(AlfredoHttpUrlConnectionFactory.class);
