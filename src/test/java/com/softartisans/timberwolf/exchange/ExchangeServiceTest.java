@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import org.apache.xmlbeans.XmlException;
 
 import java.util.regex.Pattern;
@@ -230,6 +231,55 @@ public class ExchangeServiceTest
             assertEquals("Error getting input stream.", e.getMessage());
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }            
+    }
+
+    @Test
+    public void testEmptyResponse()
+        throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { }));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Response has empty body.", e.getMessage());
+        }
+    }
+
+    @Test public void testAvailableException()
+        throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        InputStream response = mock(InputStream.class);
+        stub(response.available()).toThrow(new IOException());
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(conn.getInputStream()).thenReturn(response);
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error reading available bytes.", e.getMessage());
+        }
     }
 
     @Test

@@ -13,6 +13,12 @@ public class ServiceCallException extends Exception
     private Reason errorReason;
     private ResponseCodeType.Enum soapErrorClass;
 
+    public ServiceCallException(Reason reason, String message)
+    {
+        super(message);
+        errorReason = reason;
+    }
+
     public ServiceCallException(Reason reason, String message, Throwable cause)
     {
         super(message, cause);

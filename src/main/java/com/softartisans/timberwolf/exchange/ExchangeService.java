@@ -83,8 +83,31 @@ public class ExchangeService
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
         }
         
+
         if (code == HttpURLConnection.HTTP_OK)
         {
+            int amtAvailable;
+            try
+            {
+                amtAvailable = responseData.available();
+            }
+            catch (IOException e)
+            {
+                LOG.error("Cannot determine the number of available bytes in the response.");
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading available bytes.");
+            }
+
+            if (amtAvailable == 0)
+            {
+                LOG.error("HTTP response was successful, but has no data.");
+                if (!LOG.isTraceEnabled())
+                {
+                    LOG.debug("Request that generated the empty response:");
+                    LOG.debug(request);
+                }
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Response has empty body.");
+            }
+
             EnvelopeDocument response;
             try
             {
