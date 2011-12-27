@@ -83,20 +83,20 @@ public class ExchangeService
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
         }
         
+        int amtAvailable;
+        try
+        {
+            amtAvailable = responseData.available();
+        }
+        catch (IOException e)
+        {
+            LOG.error("Cannot determine the number of available bytes in the response.");
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading available bytes.");
+        }
+
 
         if (code == HttpURLConnection.HTTP_OK)
         {
-            int amtAvailable;
-            try
-            {
-                amtAvailable = responseData.available();
-            }
-            catch (IOException e)
-            {
-                LOG.error("Cannot determine the number of available bytes in the response.");
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading available bytes.");
-            }
-
             if (amtAvailable == 0)
             {
                 LOG.error("HTTP response was successful, but has no data.");
@@ -140,9 +140,13 @@ public class ExchangeService
                 LOG.debug(request);
             }
             
-            LOG.debug("Error response body:");
-            // Why this works: http://stackoverflow.com/questions/309424/in-java-how-do-i-read-convert-an-inputstream-to-a-string#5445161
-            LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());            
+            if (amtAvailable > 0)
+            {
+                LOG.debug("Error response body:");
+                // Why this works: http://stackoverflow.com/questions/309424/in-java-how-do-i-read-convert-an-inputstream-to-a-string#5445161
+                LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());            
+            }
+            
             throw new HttpErrorException(code);
         }
     }
