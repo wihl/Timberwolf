@@ -205,4 +205,30 @@ public class ExchangeServiceTest
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }
     }
+
+    @Test
+    public void TestInputStreamException()
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+               HttpErrorException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        stub(conn.getInputStream()).toThrow(new IOException("Cannot read code."));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8")))
+            .thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {        
+            assertEquals("Error getting input stream.", e.getMessage());
+            assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
+        }            
+    }
 }
