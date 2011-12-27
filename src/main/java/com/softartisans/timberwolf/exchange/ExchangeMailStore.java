@@ -14,6 +14,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
 
@@ -126,7 +127,13 @@ public class ExchangeMailStore implements MailStore
         Vector<String> items = new Vector<String>();
         for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
         {
-            LOG.debug(message.getResponseCode().toString());
+            ResponseCodeType.Enum errorCode = message.getResponseCode();            
+            if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
+            {
+                LOG.debug(errorCode.toString());
+                throw new ServiceCallException(errorCode, "SOAP response contained an error.");
+            }
+            
             for (MessageType item : message.getRootFolder().getItems().getMessageArray())
             {
                 items.add(item.getItemId().getId());
@@ -189,6 +196,13 @@ public class ExchangeMailStore implements MailStore
         Vector<MailboxItem> items = new Vector<MailboxItem>();
         for (ItemInfoResponseMessageType message : array)
         {
+            ResponseCodeType.Enum errorCode = message.getResponseCode();            
+            if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
+            {
+                LOG.debug(errorCode.toString());
+                throw new ServiceCallException(errorCode, "SOAP response contained an error.");
+            }
+
             for (MessageType item : message.getItems().getMessageArray())
             {
                 items.add(new ExchangeEmail(item));
