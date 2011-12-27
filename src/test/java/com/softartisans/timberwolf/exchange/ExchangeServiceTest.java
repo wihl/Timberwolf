@@ -231,4 +231,25 @@ public class ExchangeServiceTest
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }            
     }
+
+    @Test
+    public void testUnparsableResponse()
+        throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, soap("Not a real response").getBytes("UTF-8"));
+        
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
 }
