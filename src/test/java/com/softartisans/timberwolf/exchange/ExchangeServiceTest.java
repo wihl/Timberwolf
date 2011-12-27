@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 import java.net.HttpURLConnection;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import org.apache.xmlbeans.XmlException;
 
 import java.util.regex.Pattern;
@@ -214,8 +215,7 @@ public class ExchangeServiceTest
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
         HttpURLConnection conn = mock(HttpURLConnection.class);
         stub(conn.getInputStream()).toThrow(new IOException("Cannot read code."));
-        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8")))
-            .thenReturn(conn);
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(url, factory);
         FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
@@ -250,6 +250,30 @@ public class ExchangeServiceTest
         catch (ServiceCallException e)
         {
             assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testHttpErrorResponse()
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { 64, 64, 64 }));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (HttpErrorException e)
+        {
+            assertEquals("There was an HTTP 500 error while sending a request.", e.getMessage());
         }
     }
 }
