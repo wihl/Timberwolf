@@ -1,14 +1,21 @@
 package com.softartisans.timberwolf;
 
 import com.cloudera.alfredo.client.AuthenticationException;
+
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
+import com.softartisans.timberwolf.exchange.ExchangeRuntimeException;
+import com.softartisans.timberwolf.exchange.HttpErrorException;
+import com.softartisans.timberwolf.exchange.ServiceCallException;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 
 import java.io.IOException;
 
+import java.net.HttpURLConnection;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,5 +139,53 @@ final class App
             return;
         }
 
+        ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
+        try
+        {
+            new ConsoleMailWriter().write(mailStore.getMail());
+        }
+        catch (ExchangeRuntimeException e)
+        {
+            Throwable inner = e.getCause();
+            if (inner instanceof HttpErrorException)
+            {
+                HttpErrorException httpError = (HttpErrorException) inner;
+                if (httpError.getErrorCode() == HttpURLConnection.HTTP_UNAUTHORIZED)
+                {
+                    System.out.println("There was an authentication error connecting to Exchange or HBase.  "
+                                       + "See the log for more details.");
+                }
+                else
+                {
+                    System.out.println("There was an HTTP " + httpError.getErrorCode()
+                                       + " error connection to either Exchange or HBase.  "
+                                       + "See the log for more details.");
+                }
+            }
+            else if (inner instanceof ServiceCallException)
+            {
+                ServiceCallException serviceError = (ServiceCallException) inner;
+                if (serviceError.getReason() == ServiceCallException.Reason.AUTHENTICATION)
+                {
+                    System.out.println("There was an authentication error connecting to Exchange or HBase.  "
+                                       + "See the log for more details.");
+                }
+                else if (serviceError.getReason() == ServiceCallException.Reason.SOAP)
+                {
+                    System.out.println("There was a SOAP error connecting to Exchange: "
+                                       + serviceError.getSoapError().toString() + "  See the log for more details.");
+                }
+                else
+                {
+                    System.out.println("There was an unknown error connecting to Exchange or HBase.  "
+                                       + "See the log for more details.");
+                }
+            }
+            else
+            {
+                System.out.println("There was an unknown error connection to Exchange or HBase.  "
+                                   + "See the log for more details.");
+            }
+        }
     }
 }

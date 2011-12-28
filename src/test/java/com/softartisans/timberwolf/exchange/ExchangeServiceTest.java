@@ -20,6 +20,8 @@ import static org.mockito.Mockito.*;
 import java.net.HttpURLConnection;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import org.apache.xmlbeans.XmlException;
 
 import java.util.regex.Pattern;
@@ -142,8 +144,8 @@ public class ExchangeServiceTest
 
     @Test
     public void testFindItem()
-        throws UnsupportedEncodingException, XmlException, 
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
+               IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(findItemsRequest).getBytes("UTF-8"))
@@ -162,8 +164,8 @@ public class ExchangeServiceTest
 
     @Test
     public void testGetItem()
-        throws UnsupportedEncodingException, XmlException,
-               HttpUrlConnectionCreationException, IOException
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
+               IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
@@ -178,5 +180,151 @@ public class ExchangeServiceTest
                                        .getEnvelope().getBody().getGetItemResponse();
 
         assertEquals(expected.toString(), response.toString());
+    }
+
+    @Test
+    public void testResponseCodeException()
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+               HttpErrorException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        stub(conn.getResponseCode()).toThrow(new IOException("Cannot read code."));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8")))
+            .thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {        
+            assertEquals("Error getting HTTP status code.", e.getMessage());
+            assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
+        }
+    }
+
+    @Test
+    public void TestInputStreamException()
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+               HttpErrorException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        stub(conn.getInputStream()).toThrow(new IOException("Cannot read code."));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {        
+            assertEquals("Error getting input stream.", e.getMessage());
+            assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
+        }            
+    }
+
+    @Test
+    public void testEmptyResponse()
+        throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { }));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Response has empty body.", e.getMessage());
+        }
+    }
+
+    @Test 
+    public void testAvailableException()
+        throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        InputStream response = mock(InputStream.class);
+        stub(response.available()).toThrow(new IOException());
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(conn.getInputStream()).thenReturn(response);
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error reading available bytes.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUnparsableResponse()
+        throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, soap("Not a real response").getBytes("UTF-8"));
+        
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testHttpErrorResponse()
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { 64, 64, 64 }));
+        when(factory.newInstance(url, soap(findItemsRequest).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
+
+        try
+        {
+            service.findItem(findReq);
+            fail("No exception was thrown.");
+        }
+        catch (HttpErrorException e)
+        {
+            assertEquals("There was an HTTP 500 error while sending a request.", e.getMessage());
+        }
     }
 }

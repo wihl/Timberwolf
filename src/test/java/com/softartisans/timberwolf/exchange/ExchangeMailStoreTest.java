@@ -34,6 +34,7 @@ import java.util.Vector;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -91,24 +92,29 @@ public class ExchangeMailStoreTest
                                       .xmlText());
     }
 
-    @Test
-    @Ignore("HAM-33 - I really have to stop writing negative tests")
+    @Test    
     public void testFindItemsInboxRespondNull()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
-        Vector<String> items = ExchangeMailStore.findItems(service);
-        assertEquals(0, items.size());
+
+        try
+        {
+            Vector<String> items = ExchangeMailStore.findItems(service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Null response from Exchange service.", e.getMessage());
+        }
     }
 
     @Test
     public void testFindItemsItemsRespond0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
@@ -118,8 +124,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testFindItemsItemsRespond1()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException
     {
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
@@ -132,8 +137,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testFindItemsItemsRespond100()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException
     {
         int count = 100;
         MessageType[] messages = new MessageType[count];
@@ -152,7 +156,7 @@ public class ExchangeMailStoreTest
     }
 
     private ExchangeService mockFindItem(MessageType[] messages)
-            throws XmlException, HttpUrlConnectionCreationException, IOException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
@@ -175,8 +179,6 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I'm not sure what the exchange response here would be "
-            + "but I can't get it because ExchangeService doesn't handle it.")
     public void testGetGetItemsRequestNull()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
@@ -190,8 +192,6 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I'm not sure what the exchange response here would be "
-            + "but I can't get it because ExchangeService doesn't handle it.")
     public void testGetGetItemsRequest0()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
@@ -240,8 +240,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         Vector<String> list = new Vector<String>();
@@ -252,8 +251,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems0to1()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -275,8 +273,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems3to4()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -298,8 +295,8 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems2to3Return0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         Vector<String> wholeList = new Vector<String>(5);
         for (int i = 0; i < 5; i++)
@@ -320,8 +317,7 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetItems2to93()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+        throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         Vector<String> wholeList = new Vector<String>(100);
         for (int i = 0; i < 100; i++)
@@ -359,9 +355,8 @@ public class ExchangeMailStoreTest
         return mockedMessage;
     }
 
-    private ExchangeService mockGetItem(MessageType[] messages,
-                                        List<String> requestedList)
-            throws XmlException, HttpUrlConnectionCreationException, IOException
+    private ExchangeService mockGetItem(MessageType[] messages, List<String> requestedList)
+        throws ServiceCallException, HttpErrorException, HttpErrorException, XmlException, IOException
     {
         ExchangeService service = mock(ExchangeService.class);
         mockGetItem(messages, requestedList, service);
@@ -370,7 +365,7 @@ public class ExchangeMailStoreTest
 
     private void mockGetItem(MessageType[] messages, List<String> requestedList,
                              ExchangeService service)
-            throws XmlException, HttpUrlConnectionCreationException, IOException
+            throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         GetItemType getItem =
                 ExchangeMailStore.getGetItemsRequest(requestedList);
@@ -386,8 +381,8 @@ public class ExchangeMailStoreTest
 
     @Test
     public void testGetMailFind0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
@@ -399,10 +394,9 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I really have to stop writing negative tests")
     public void testGetMailGet0()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 0 mail even though you asked for some mail
         int count = 100;
@@ -412,16 +406,21 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+
+        try
         {
-            fail("There shouldn't be any mailBoxItems");
+            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail();
+        }
+        catch (ExchangeRuntimeException e)
+        {
+            assertEquals("Failed to get item details.", e.getMessage());
         }
     }
 
     @Test
     public void testGetMail30()
-            throws XmlException, IOException,
-                   HttpUrlConnectionCreationException, AuthenticationException
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
     {
         // Exchange returns 30 in FindItems and 30 in GetItems
         int count = 30;
@@ -450,4 +449,59 @@ public class ExchangeMailStoreTest
         }
     }
 
+    @Test
+    public void testGetItemsWithErrorResponse()
+        throws ServiceCallException, HttpErrorException
+    {
+        ItemInfoResponseMessageType infoMessage = mock(ItemInfoResponseMessageType.class);
+        when(infoMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
+        ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
+        when(responseArr.getGetItemResponseMessageArray())
+            .thenReturn(new ItemInfoResponseMessageType[] { infoMessage });
+        GetItemResponseType getResponse = mock(GetItemResponseType.class);
+        when(getResponse.getResponseMessages()).thenReturn(responseArr);
+        ExchangeService service = mock(ExchangeService.class);
+        when(service.getItem(any(GetItemType.class))).thenReturn(getResponse);
+
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        Vector<String> ids = new Vector<String>();
+        ids.add("abcd");
+
+        try
+        {
+            mailstore.getItems(1, 0, ids, service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response contained an error.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testFindItemsWithErrorResponse()
+        throws ServiceCallException, HttpErrorException
+    {
+        FindItemResponseMessageType findMessage = mock(FindItemResponseMessageType.class);
+        when(findMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
+        ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
+        when(responseArr.getFindItemResponseMessageArray())
+            .thenReturn(new FindItemResponseMessageType[] { findMessage });
+        FindItemResponseType findResponse = mock(FindItemResponseType.class);
+        when(findResponse.getResponseMessages()).thenReturn(responseArr);
+        ExchangeService service = mock(ExchangeService.class);
+        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+
+        try
+        {
+            mailstore.findItems(service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response contained an error.", e.getMessage());
+        }
+    }
 }

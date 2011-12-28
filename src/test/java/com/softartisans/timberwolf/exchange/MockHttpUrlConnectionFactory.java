@@ -23,8 +23,7 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         return new MockRequest(address, request);
     }
 
-    public HttpURLConnection newInstance(String address, byte[] request)
-        throws HttpUrlConnectionCreationException
+    public HttpURLConnection newInstance(String address, byte[] request) throws ServiceCallException
     {
         try
         {
@@ -43,11 +42,11 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         }
         catch(IOException e)
         {
-            throw new HttpUrlConnectionCreationException(
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
                 "There was an IO exception while mocking the request.", null);
         }
 
-        throw new HttpUrlConnectionCreationException(
+        throw new ServiceCallException(ServiceCallException.Reason.OTHER,
             "There was no mocked request matching the given url and data.", null);
     }
 

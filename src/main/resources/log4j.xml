@@ -14,4 +14,10 @@
         <appender-ref ref="console" />
     </root>
 
+    <!-- uncomment the following to see all exchange http traffic -->
+    <!-- 
+    <logger name="com.softartisans.timberwolf.exchange.ExchangeService">
+      <level value="trace" />
+    </logger> -->
+
 </log4j:configuration>
