@@ -257,7 +257,8 @@ public class ExchangeServiceTest
         }
     }
 
-    @Test public void testAvailableException()
+    @Test 
+    public void testAvailableException()
         throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
     {
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);

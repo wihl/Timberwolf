@@ -34,6 +34,7 @@ import java.util.Vector;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -441,4 +442,59 @@ public class ExchangeMailStoreTest
         }
     }
 
+    @Test
+    public void testGetItemsWithErrorResponse()
+        throws ServiceCallException, HttpErrorException
+    {
+        ItemInfoResponseMessageType infoMessage = mock(ItemInfoResponseMessageType.class);
+        when(infoMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
+        ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
+        when(responseArr.getGetItemResponseMessageArray())
+            .thenReturn(new ItemInfoResponseMessageType[] { infoMessage });
+        GetItemResponseType getResponse = mock(GetItemResponseType.class);
+        when(getResponse.getResponseMessages()).thenReturn(responseArr);
+        ExchangeService service = mock(ExchangeService.class);
+        when(service.getItem(any(GetItemType.class))).thenReturn(getResponse);
+
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        Vector<String> ids = new Vector<String>();
+        ids.add("abcd");
+
+        try
+        {
+            mailstore.getItems(1, 0, ids, service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response contained an error.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testFindItemsWithErrorResponse()
+        throws ServiceCallException, HttpErrorException
+    {
+        FindItemResponseMessageType findMessage = mock(FindItemResponseMessageType.class);
+        when(findMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
+        ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
+        when(responseArr.getFindItemResponseMessageArray())
+            .thenReturn(new FindItemResponseMessageType[] { findMessage });
+        FindItemResponseType findResponse = mock(FindItemResponseType.class);
+        when(findResponse.getResponseMessages()).thenReturn(responseArr);
+        ExchangeService service = mock(ExchangeService.class);
+        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+
+        try
+        {
+            mailstore.findItems(service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response contained an error.", e.getMessage());
+        }
+    }
 }
