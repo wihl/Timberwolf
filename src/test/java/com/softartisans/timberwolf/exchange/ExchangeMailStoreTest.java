@@ -92,8 +92,7 @@ public class ExchangeMailStoreTest
                                       .xmlText());
     }
 
-    @Test
-    @Ignore("HAM-33 - I really have to stop writing negative tests")
+    @Test    
     public void testFindItemsInboxRespondNull()
         throws ServiceCallException, HttpErrorException
     {
@@ -101,8 +100,16 @@ public class ExchangeMailStoreTest
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
-        Vector<String> items = ExchangeMailStore.findItems(service);
-        assertEquals(0, items.size());
+
+        try
+        {
+            Vector<String> items = ExchangeMailStore.findItems(service);
+            fail("No exception was thrown.");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Null response from Exchange service.", e.getMessage());
+        }
     }
 
     @Test
@@ -172,8 +179,6 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I'm not sure what the exchange response here would be "
-            + "but I can't get it because ExchangeService doesn't handle it.")
     public void testGetGetItemsRequestNull()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
@@ -187,8 +192,6 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I'm not sure what the exchange response here would be "
-            + "but I can't get it because ExchangeService doesn't handle it.")
     public void testGetGetItemsRequest0()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
@@ -391,7 +394,6 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    @Ignore("HAM-33 - I really have to stop writing negative tests")
     public void testGetMailGet0()
             throws XmlException, IOException, HttpErrorException,
                    ServiceCallException, AuthenticationException
@@ -404,9 +406,14 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+
+        try
         {
-            fail("There shouldn't be any mailBoxItems");
+            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail();
+        }
+        catch (ExchangeRuntimeException e)
+        {
+            assertEquals("Failed to get item details.", e.getMessage());
         }
     }
 

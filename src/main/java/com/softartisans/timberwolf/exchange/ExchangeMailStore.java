@@ -125,6 +125,13 @@ public class ExchangeMailStore implements MailStore
     {
         FindItemResponseType response =
             exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
+
+        if (response == null)
+        {
+            LOG.debug("Exchange service returned null find item response.");
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
+        }
+
         ArrayOfResponseMessagesType array = response.getResponseMessages();
         Vector<String> items = new Vector<String>();
         for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
@@ -194,6 +201,13 @@ public class ExchangeMailStore implements MailStore
             return new Vector<MailboxItem>();
         }
         GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)));
+
+        if (response == null)
+        {
+            LOG.debug("Exchange service returned null get item response.");
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
+        }
+
         ItemInfoResponseMessageType[] array = response.getResponseMessages().getGetItemResponseMessageArray();
         Vector<MailboxItem> items = new Vector<MailboxItem>();
         for (ItemInfoResponseMessageType message : array)
