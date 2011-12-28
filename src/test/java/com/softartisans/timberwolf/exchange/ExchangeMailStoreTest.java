@@ -69,12 +69,10 @@ public class ExchangeMailStoreTest
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId =
-                findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
+        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.INBOX);
         assertEquals(findItem.xmlText(),
-                     ExchangeMailStore.getFindItemsRequest(
-                             DistinguishedFolderIdNameType.INBOX).xmlText());
+                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX).xmlText());
     }
 
     @Test
@@ -83,22 +81,18 @@ public class ExchangeMailStoreTest
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId =
-                findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
+        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
         assertEquals(findItem.xmlText(),
-                     ExchangeMailStore.getFindItemsRequest(
-                             DistinguishedFolderIdNameType.DELETEDITEMS)
-                                      .xmlText());
+                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS).xmlText());
     }
 
-    @Test    
+    @Test
     public void testFindItemsInboxRespondNull()
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore
-                .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
 
         try
@@ -159,20 +153,14 @@ public class ExchangeMailStoreTest
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore
-                .getFindItemsRequest(
-                        DistinguishedFolderIdNameType.INBOX);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
-        when(findItemResponse.getResponseMessages()).thenReturn(
-                arrayOfResponseMessages);
+        when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-                .thenReturn(new FindItemResponseMessageType[]{
-                        findItemResponseMessage});
-        when(findItemResponseMessage.getRootFolder())
-                .thenReturn(findItemParent);
+            .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });
+        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
         // For logging right now, might actually be checked later
-        when(findItemResponseMessage.getResponseCode()).thenReturn(
-                ResponseCodeType.NO_ERROR);
+        when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
         return service;
@@ -182,48 +170,37 @@ public class ExchangeMailStoreTest
     public void testGetGetItemsRequestNull()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
-        getItem.addNewItemShape()
-               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        assertEquals(getItem.xmlText(),
-                     ExchangeMailStore
-                             .getGetItemsRequest(null)
-                             .xmlText());
+        assertEquals(getItem.xmlText(), ExchangeMailStore.getGetItemsRequest(null).xmlText());
     }
 
     @Test
     public void testGetGetItemsRequest0()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
-        getItem.addNewItemShape()
-               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        assertEquals(getItem.xmlText(),
-                     ExchangeMailStore
-                             .getGetItemsRequest(new ArrayList<String>())
-                             .xmlText());
+        assertEquals(getItem.xmlText(), ExchangeMailStore.getGetItemsRequest(new ArrayList<String>()).xmlText());
     }
 
     @Test
     public void testGetGetItemsRequest1()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
-        getItem.addNewItemShape()
-               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
         items.addNewItemId().setId("idNumber0");
         ArrayList<String> ids = new ArrayList<String>();
         ids.add("idNumber0");
-        assertEquals(getItem.xmlText(),
-                     ExchangeMailStore.getGetItemsRequest(ids).xmlText());
+        assertEquals(getItem.xmlText(), ExchangeMailStore.getGetItemsRequest(ids).xmlText());
     }
 
     @Test
     public void testGetGetItemsRequest100()
     {
         GetItemType getItem = GetItemType.Factory.newInstance();
-        getItem.addNewItemShape()
-               .setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
         for (int i = 0; i < 100; i++)
         {
@@ -234,8 +211,7 @@ public class ExchangeMailStoreTest
         {
             ids.add("idNumber" + i);
         }
-        assertEquals(getItem.xmlText(),
-                     ExchangeMailStore.getGetItemsRequest(ids).xmlText());
+        assertEquals(getItem.xmlText(), ExchangeMailStore.getGetItemsRequest(ids).xmlText());
     }
 
     @Test
@@ -244,8 +220,7 @@ public class ExchangeMailStoreTest
     {
         ExchangeService service = mock(ExchangeService.class);
         Vector<String> list = new Vector<String>();
-        Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(0, 0, list, service);
+        Vector<MailboxItem> items = ExchangeMailStore.getItems(0, 0, list, service);
         assertEquals(0, items.size());
     }
 
@@ -262,11 +237,8 @@ public class ExchangeMailStoreTest
         String idValue = "id1";
         wholeList.set(0, idValue);
         requestedList.add(idValue);
-        ExchangeService service =
-                mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
-                            requestedList);
-        Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 0, wholeList, service);
+        ExchangeService service = mockGetItem(new MessageType[]{mockMessageItemId(idValue)}, requestedList);
+        Vector<MailboxItem> items = ExchangeMailStore.getItems(1, 0, wholeList, service);
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -284,11 +256,8 @@ public class ExchangeMailStoreTest
         String idValue = "id1";
         wholeList.set(3, idValue);
         requestedList.add(idValue);
-        ExchangeService service =
-                mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
-                            requestedList);
-        Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+        ExchangeService service = mockGetItem(new MessageType[]{mockMessageItemId(idValue)}, requestedList);
+        Vector<MailboxItem> items = ExchangeMailStore.getItems(1, 3, wholeList, service);
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -307,11 +276,8 @@ public class ExchangeMailStoreTest
         String idValue = "id1";
         wholeList.set(3, idValue);
         requestedList.add(idValue);
-        ExchangeService service =
-                mockGetItem(new MessageType[0],
-                            requestedList);
-        Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+        ExchangeService service = mockGetItem(new MessageType[0], requestedList);
+        Vector<MailboxItem> items = ExchangeMailStore.getItems(1, 3, wholeList, service);
         assertEquals(0, items.size());
     }
 
@@ -334,13 +300,11 @@ public class ExchangeMailStoreTest
             messages[i - 2] = mockMessageItemId(id);
         }
         ExchangeService service = mockGetItem(messages, requestedList);
-        Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(91, 2, wholeList, service);
+        Vector<MailboxItem> items = ExchangeMailStore.getItems(91, 2, wholeList, service);
         assertEquals(requestedList.size(), items.size());
         for (int i = 0; i < requestedList.size(); i++)
         {
-            assertEquals(requestedList.get(i),
-                         items.get(i).getHeader(idHeaderKey));
+            assertEquals(requestedList.get(i), items.get(i).getHeader(idHeaderKey));
         }
     }
 
@@ -367,14 +331,11 @@ public class ExchangeMailStoreTest
                              ExchangeService service)
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
-        GetItemType getItem =
-                ExchangeMailStore.getGetItemsRequest(requestedList);
+        GetItemType getItem = ExchangeMailStore.getGetItemsRequest(requestedList);
         when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
-        when(getItemResponse.getResponseMessages())
-                .thenReturn(arrayOfResponseMessages);
+        when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())
-                .thenReturn(new ItemInfoResponseMessageType[]{
-                        itemInfoResponseMessage});
+                .thenReturn(new ItemInfoResponseMessageType[]{ itemInfoResponseMessage });
         when(itemInfoResponseMessage.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
     }
@@ -439,8 +400,7 @@ public class ExchangeMailStoreTest
         int i = 0;
         for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
         {
-            assertEquals(requestedList.get(i),
-                         mailboxItem.getHeader(idHeaderKey));
+            assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
         }
         if (i < requestedList.size())
