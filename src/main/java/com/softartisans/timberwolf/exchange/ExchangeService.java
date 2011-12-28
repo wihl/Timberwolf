@@ -6,14 +6,18 @@ import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseTyp
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.util.Scanner;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+
+import java.net.HttpURLConnection;
+
+import java.util.Scanner;
+
+import org.apache.xmlbeans.XmlException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.xmlbeans.XmlException;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
@@ -47,7 +51,7 @@ public class ExchangeService
     }
 
     /** Sends a SOAP envelope request and returns the response. */
-    private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
+    private EnvelopeDocument sendRequest(final EnvelopeDocument envelope)
         throws HttpErrorException, ServiceCallException
     {
         String request = DECLARATION + envelope.xmlText();
@@ -75,14 +79,14 @@ public class ExchangeService
         InputStream responseData;
         try
         {
-           responseData = conn.getInputStream(); 
+           responseData = conn.getInputStream();
         }
         catch (IOException e)
         {
             LOG.error("There was an error getting the input stream for the response.", e);
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
         }
-        
+
         int amtAvailable;
         try
         {
@@ -122,11 +126,11 @@ public class ExchangeService
             {
                 LOG.error("There was an error parsing the SOAP response from Exchange.");
                 LOG.debug("Response body:");
-                // Why this works: http://stackoverflow.com/questions/309424/in-java-how-do-i-read-convert-an-inputstream-to-a-string#5445161
+                // Why this works: http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
                 LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());
                 throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
             }
-            
+
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
             LOG.trace(response.xmlText());
             return response;
@@ -139,20 +143,20 @@ public class ExchangeService
                 LOG.debug("Request that generated the error:");
                 LOG.debug(request);
             }
-            
+
             if (amtAvailable > 0)
             {
                 LOG.debug("Error response body:");
-                // Why this works: http://stackoverflow.com/questions/309424/in-java-how-do-i-read-convert-an-inputstream-to-a-string#5445161
-                LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());            
+                // Why this works: http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
+                LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());
             }
-            
+
             throw new HttpErrorException(code);
         }
     }
 
     /** Returns the results of a find item request. */
-    public FindItemResponseType findItem(FindItemType findItem)
+    public FindItemResponseType findItem(final FindItemType findItem)
         throws ServiceCallException, HttpErrorException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
@@ -164,7 +168,7 @@ public class ExchangeService
     }
 
     /** Returns the results of a get item request. */
-    public GetItemResponseType getItem(GetItemType getItem)
+    public GetItemResponseType getItem(final GetItemType getItem)
         throws ServiceCallException, HttpErrorException
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();

@@ -26,7 +26,7 @@ public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
     private static final String SOAP_CONTENT_TYPE = "text/xml";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
-    public HttpURLConnection newInstance(String address, byte[] request) throws ServiceCallException
+    public HttpURLConnection newInstance(final String address, final byte[] request) throws ServiceCallException
     {
         try
         {

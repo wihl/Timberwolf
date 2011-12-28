@@ -1,8 +1,9 @@
 package com.softartisans.timberwolf.exchange;
 
+/** Non-checked exception thrown by ExchangeMailStore iterator. */
 public class ExchangeRuntimeException extends RuntimeException
 {
-    public ExchangeRuntimeException(String message, Throwable cause)
+    public ExchangeRuntimeException(final String message, final Throwable cause)
     {
         super(message, cause);
     }

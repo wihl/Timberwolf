@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf.exchange;
 
 import com.cloudera.alfredo.client.AuthenticationException;
+
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
@@ -8,22 +9,23 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
 
 import java.io.IOException;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,19 +123,19 @@ public class ExchangeMailStore implements MailStore
     static Vector<String> findItems(final ExchangeService exchangeService)
             throws ServiceCallException, HttpErrorException
     {
-        FindItemResponseType response = 
+        FindItemResponseType response =
             exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
         ArrayOfResponseMessagesType array = response.getResponseMessages();
         Vector<String> items = new Vector<String>();
         for (FindItemResponseMessageType message : array.getFindItemResponseMessageArray())
         {
-            ResponseCodeType.Enum errorCode = message.getResponseCode();            
+            ResponseCodeType.Enum errorCode = message.getResponseCode();
             if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
             {
                 LOG.debug(errorCode.toString());
                 throw new ServiceCallException(errorCode, "SOAP response contained an error.");
             }
-            
+
             for (MessageType item : message.getRootFolder().getItems().getMessageArray())
             {
                 items.add(item.getItemId().getId());
@@ -196,7 +198,7 @@ public class ExchangeMailStore implements MailStore
         Vector<MailboxItem> items = new Vector<MailboxItem>();
         for (ItemInfoResponseMessageType message : array)
         {
-            ResponseCodeType.Enum errorCode = message.getResponseCode();            
+            ResponseCodeType.Enum errorCode = message.getResponseCode();
             if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
             {
                 LOG.debug(errorCode.toString());
@@ -255,7 +257,7 @@ public class ExchangeMailStore implements MailStore
                     currentIdIndex = 0;
                     currentIds = findItems(exchangeService);
                     LOG.debug("Got " + currentIds.size() + " email ids");
-                }                
+                }
                 catch (ServiceCallException e)
                 {
                     LOG.error("Failed to find item ids.", e);
@@ -280,7 +282,7 @@ public class ExchangeMailStore implements MailStore
                     mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
                     LOG.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
-                }                
+                }
                 catch (ServiceCallException e)
                 {
                     LOG.error("Failed to get item details.", e);
