@@ -50,7 +50,6 @@ public class ExchangeMailStore implements MailStore
      * This is the side of the search results to start paging at.
      * I'm not sure which one is the earliest or latest yet, but the options
      * are "beginning" or "end"
-     * TODO change this to an actual enum from our xml binding
      */
     private static final IndexBasePointType.Enum FIND_ITEMS_BASE_POINT = IndexBasePointType.BEGINNING;
 
