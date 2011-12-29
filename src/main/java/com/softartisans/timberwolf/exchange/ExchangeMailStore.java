@@ -100,7 +100,8 @@ public class ExchangeMailStore implements MailStore
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(maxEntries);
+        // Asking for negative or zero max items is nonsensical.
+        index.setMaxEntriesReturned(Math.max(maxEntries, 1));
         index.setBasePoint(FIND_ITEMS_BASE_POINT);
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
