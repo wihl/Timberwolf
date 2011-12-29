@@ -78,7 +78,7 @@ public class ExchangeMailStoreTest
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         assertEquals(findItem.xmlText(),
-                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0).xmlText());
+                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ExchangeMailStoreTest
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         assertEquals(findItem.xmlText(),
-                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0).xmlText());
+                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0, 1000).xmlText());
     }
 
     @Test
@@ -102,12 +102,12 @@ public class ExchangeMailStoreTest
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
 
         try
         {
-            Vector<String> items = ExchangeMailStore.findItems(service, 0);
+            Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -122,7 +122,7 @@ public class ExchangeMailStoreTest
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0);
+        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
         assertEquals(0, items.size());
     }
 
@@ -133,7 +133,7 @@ public class ExchangeMailStoreTest
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0);
+        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -150,7 +150,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0);
+        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -163,7 +163,7 @@ public class ExchangeMailStoreTest
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -466,7 +466,7 @@ public class ExchangeMailStoreTest
 
         try
         {
-            mailstore.findItems(service, 0);
+            mailstore.findItems(service, 0, 1000);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)

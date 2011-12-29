@@ -91,7 +91,8 @@ public class ExchangeMailStore implements MailStore
      * @param folder the folder from which to get ids
      * @return the FindItemType necessary to request the ids
      */
-    static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder, final int offset)
+    static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder, final int offset,
+                                            final int maxEntries)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -99,7 +100,7 @@ public class ExchangeMailStore implements MailStore
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(MAX_FIND_ITEMS_ENTRIES);
+        index.setMaxEntriesReturned(maxEntries);
         index.setBasePoint(FIND_ITEMS_BASE_POINT);
         index.setOffset(offset);
 
@@ -118,11 +119,11 @@ public class ExchangeMailStore implements MailStore
      * @throws HttpUrlConnectionCreationException if it failed to create a
      * connection to the service
      */
-    static Vector<String> findItems(final ExchangeService exchangeService, final int offset)
+    static Vector<String> findItems(final ExchangeService exchangeService, final int offset, final int maxEntries)
             throws ServiceCallException, HttpErrorException
     {
         FindItemResponseType response =
-            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, offset));
+            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, offset, maxEntries));
 
         if (response == null)
         {
@@ -265,7 +266,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                currentIds = findItems(exchangeService, findItemsOffset);
+                currentIds = findItems(exchangeService, findItemsOffset, MAX_FIND_ITEMS_ENTRIES);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());
             }
