@@ -474,4 +474,24 @@ public class ExchangeMailStoreTest
             assertEquals("SOAP response contained an error.", e.getMessage());
         }
     }
+
+    @Test
+    public void testGetFindItemsRequestOffset()
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
+
+        FindItemType request = mailstore.getFindItemsRequest(folder, 3, 10);
+        assertEquals(3, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, 13, 10);
+        assertEquals(13, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, 0, 10);
+        assertEquals(0, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, -1, 10);
+        assertEquals(0, request.getIndexedPageItemView().getOffset());
+    }
 }

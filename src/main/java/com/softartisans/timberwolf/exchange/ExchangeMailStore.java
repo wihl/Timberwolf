@@ -102,7 +102,8 @@ public class ExchangeMailStore implements MailStore
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
         index.setMaxEntriesReturned(maxEntries);
         index.setBasePoint(FIND_ITEMS_BASE_POINT);
-        index.setOffset(offset);
+        // Negative offsets are nonsensical.
+        index.setOffset(Math.max(offset, 0));
 
         return findItem;
     }
