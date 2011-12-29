@@ -13,6 +13,8 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
+import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
@@ -38,26 +40,19 @@ public class ExchangeMailStore implements MailStore
 {
     private static final Logger LOG = LoggerFactory.getLogger(ExchangeMailStore.class);
     /*
-     * I'm leaving this here for when we get to doing paging. If we decide
-     * not to do paging these variables and notes should probably be removed
-     *
-     *
-     *
-     *
      * When FindItems is run, you can limit the number of items to get at a time
      * and page, starting with 1000, but we'll probably want to profile this a
      * bit to figure out if we want more or less
-     *
-     private static final int MaxFindItemEntries = 1000;
+     */
+    private static final int MAX_FIND_ITEMS_ENTRIES = 1000;
 
      /**
      * This is the side of the search results to start paging at.
      * I'm not sure which one is the earliest or latest yet, but the options
      * are "beginning" or "end"
      * TODO change this to an actual enum from our xml binding
-     *
-     private static final String FindItemsBasePoint = "Beginning";
      */
+    private static final IndexBasePointType.Enum FIND_ITEMS_BASE_POINT = IndexBasePointType.BEGINNING;
 
     /**
      * GetItems takes multiple ids, but we don't want to call GetItems on all
@@ -97,14 +92,18 @@ public class ExchangeMailStore implements MailStore
      * @param folder the folder from which to get ids
      * @return the FindItemType necessary to request the ids
      */
-    static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder)
+    static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder, final int offset)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
-        // TODO paging - put off until HAM-78
+        IndexedPageViewType index = findItem.addNewIndexedPageItemView();
+        index.setMaxEntriesReturned(MAX_FIND_ITEMS_ENTRIES);
+        index.setBasePoint(FIND_ITEMS_BASE_POINT);
+        index.setOffset(offset);
+
         return findItem;
     }
 
@@ -120,11 +119,11 @@ public class ExchangeMailStore implements MailStore
      * @throws HttpUrlConnectionCreationException if it failed to create a
      * connection to the service
      */
-    static Vector<String> findItems(final ExchangeService exchangeService)
+    static Vector<String> findItems(final ExchangeService exchangeService, final int offset)
             throws ServiceCallException, HttpErrorException
     {
         FindItemResponseType response =
-            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
+            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, offset));
 
         if (response == null)
         {
@@ -250,81 +249,99 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private int currentIdIndex = 0;
         private int findItemsOffset = 0;
-        private Vector<MailboxItem> mailBoxItems;
+        private Vector<MailboxItem> mailboxItems;
         private int currentMailboxItemIndex = 0;
         private final ExchangeService exchangeService;
 
         private EmailIterator(final ExchangeService service)
         {
             this.exchangeService = service;
+            freshenIds();
+            freshenMailboxItems();
         }
 
+        private void freshenIds()
+        {
+            try
+            {
+                currentMailboxItemIndex = 0;
+                currentIdIndex = 0;
+                currentIds = findItems(exchangeService, findItemsOffset);
+                findItemsOffset += currentIds.size();
+                LOG.debug("Got {} email ids.", currentIds.size());
+            }
+            catch (ServiceCallException e)
+            {
+                LOG.error("Failed to find item ids.", e);
+                throw new ExchangeRuntimeException("Failed to find item ids.", e);
+            }
+            catch (HttpErrorException e)
+            {
+                LOG.error("Failed to find item ids.", e);
+                throw new ExchangeRuntimeException("Failed to find item ids.", e);
+            }
+        }
+
+        private void freshenMailboxItems()
+        {
+            try
+            {
+                currentMailboxItemIndex = 0;
+                mailboxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
+                currentIdIndex += mailboxItems.size();
+                LOG.debug("Got {} emails.", mailboxItems.size());
+            }
+            catch (ServiceCallException e)
+            {
+                LOG.error("Failed to get item details.", e);
+                throw new ExchangeRuntimeException("Failed to get item details.", e);
+            }
+            catch (HttpErrorException e)
+            {
+                LOG.error("Failed to get item details.", e);
+                throw new ExchangeRuntimeException("Failed to get item details.", e);
+            }
+        }
+
+        private boolean moreIdsAvailable()
+        {
+            return currentIds.size() == MAX_FIND_ITEMS_ENTRIES;
+        }
+
+        private MailboxItem advance()
+        {
+            MailboxItem item = mailboxItems.get(currentMailboxItemIndex);
+            currentMailboxItemIndex++;
+            return item;
+        }
 
         @Override
         public boolean hasNext()
         {
-            if (currentIds == null)
-            {
-                try
-                {
-                    currentMailboxItemIndex = 0;
-                    currentIdIndex = 0;
-                    currentIds = findItems(exchangeService);
-                    LOG.debug("Got " + currentIds.size() + " email ids");
-                }
-                catch (ServiceCallException e)
-                {
-                    LOG.error("Failed to find item ids.", e);
-                    throw new ExchangeRuntimeException("Failed to find item ids.", e);
-                }
-                catch (HttpErrorException e)
-                {
-                    LOG.error("Failed to find item ids.", e);
-                    throw new ExchangeRuntimeException("Failed to find item ids.", e);
-                }
-            }
-            // TODO paging here
-            if (currentIdIndex >= currentIds.size())
-            {
-                return false;
-            }
-            if (mailBoxItems == null)
-            {
-                try
-                {
-                    currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
-                    LOG.debug("Got " + mailBoxItems.size() + " emails");
-                    return currentMailboxItemIndex < mailBoxItems.size();
-                }
-                catch (ServiceCallException e)
-                {
-                    LOG.error("Failed to get item details.", e);
-                    throw new ExchangeRuntimeException("Failed to get item details.", e);
-                }
-                catch (HttpErrorException e)
-                {
-                    LOG.error("Failed to get item details.", e);
-                    throw new ExchangeRuntimeException("Failed to get item details.", e);
-                }
-            }
-            // TODO call getItems more than once
-            return currentMailboxItemIndex < mailBoxItems.size();
+            return moreIdsAvailable() || (currentMailboxItemIndex < mailboxItems.size());
         }
 
         @Override
         public MailboxItem next()
         {
-            if (currentMailboxItemIndex < mailBoxItems.size())
+            if (currentMailboxItemIndex < mailboxItems.size())
             {
-                MailboxItem item = mailBoxItems.get(currentMailboxItemIndex);
-                currentMailboxItemIndex++;
-                return item;
+                return advance();
+            }
+            else if (currentIdIndex < currentIds.size())
+            {
+                freshenMailboxItems();
+                return advance();
+            }
+            else if (moreIdsAvailable())
+            {
+                freshenIds();
+                freshenMailboxItems();
+                return advance();
             }
             else
             {
-                LOG.debug("All done, " + currentMailboxItemIndex + " >= "
-                          + mailBoxItems.size());
+                LOG.debug("All done, " + currentMailboxItemIndex + " >= " + mailboxItems.size());
                 return null;
             }
         }
@@ -332,6 +349,7 @@ public class ExchangeMailStore implements MailStore
         @Override
         public void remove()
         {
+            throw new UnsupportedOperationException();
         }
     }
 }
