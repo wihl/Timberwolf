@@ -511,4 +511,30 @@ public class ExchangeMailStoreTest
         request = mailstore.getFindItemsRequest(folder, 5, 0);
         assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
     }
+
+    @Test
+    public void testFindMailOneIdPageTwoItemPages() throws IOException, AuthenticationException
+    {
+        MessageType[] messages = new MessageType[75];
+        for (int i = 0; i < 75; i++)
+        {
+            MessageType mockedMessage = mock(MessageType.class);
+            ItemIdType mockedId = mock(ItemIdType.class);
+            when(mockedMessage.isSetItemId()).thenReturn(true);
+            when(mockedMessage.getItemId()).thenReturn(mockedId);
+            when(mockedId.getId()).thenReturn("item " + i);
+            messages[i] = mockedMessage;
+        }
+
+        ExchangeService service = new MockPagingExchangeService(messages);
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+
+        int count = 0;
+        for (MailboxItem item : mailstore.getMail())
+        {
+            assertEquals("item " + count, item.getHeader("Item ID"));
+            count++;
+        }
+        assertEquals(75, count);
+    }
 }
