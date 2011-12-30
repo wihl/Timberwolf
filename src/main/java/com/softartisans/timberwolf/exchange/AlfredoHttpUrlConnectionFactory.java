@@ -10,6 +10,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+/**
+ * A HttpUrlConnectionFactory that works with Alfredo.
+ */
 public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
     private static final String HTTP_METHOD = "POST";
@@ -18,7 +21,7 @@ public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
     private static final String SOAP_CONTENT_TYPE = "text/xml";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
-    public HttpURLConnection newInstance(String address, byte[] request)
+    public HttpURLConnection newInstance(final String address, final byte[] request)
         throws HttpUrlConnectionCreationException
     {
         try

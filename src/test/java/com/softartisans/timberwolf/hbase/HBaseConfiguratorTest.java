@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf.hbase;
 
-import com.softartisans.timberwolf.integrated.IntegrationSettings;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.*;
 

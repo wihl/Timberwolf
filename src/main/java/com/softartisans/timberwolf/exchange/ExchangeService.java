@@ -4,13 +4,14 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseTy
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-import org.apache.xmlbeans.XmlException;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+
+import org.apache.xmlbeans.XmlException;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
 /**
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,
@@ -26,7 +27,7 @@ public class ExchangeService
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory;
 
-    public ExchangeService(String url, HttpUrlConnectionFactory factory)
+    public ExchangeService(final String url, final HttpUrlConnectionFactory factory)
     {
         endpoint = url;
         connectionFactory = factory;
@@ -35,13 +36,13 @@ public class ExchangeService
     /**
      * Creates a new ExchangeService that talks to the given Exchange server.
      */
-    public ExchangeService(String url)
+    public ExchangeService(final String url)
     {
         this(url, new AlfredoHttpUrlConnectionFactory());
     }
 
     /** Sends a SOAP envelope request and returns the response. */
-    private EnvelopeDocument sendRequest(EnvelopeDocument envelope)
+    private EnvelopeDocument sendRequest(final EnvelopeDocument envelope)
         throws UnsupportedEncodingException, XmlException,
                HttpUrlConnectionCreationException, IOException
     {
@@ -66,7 +67,7 @@ public class ExchangeService
     }
 
     /** Returns the results of a find item request. */
-    public FindItemResponseType findItem(FindItemType findItem)
+    public FindItemResponseType findItem(final FindItemType findItem)
         throws UnsupportedEncodingException, XmlException,
                HttpUrlConnectionCreationException, IOException
     {
@@ -79,7 +80,7 @@ public class ExchangeService
     }
 
     /** Returns the results of a get item request. */
-    public GetItemResponseType getItem(GetItemType getItem)
+    public GetItemResponseType getItem(final GetItemType getItem)
         throws UnsupportedEncodingException, XmlException,
                HttpUrlConnectionCreationException, IOException
     {
