@@ -305,7 +305,7 @@ public class ExchangeMailStore implements MailStore
             }
         }
 
-        private boolean moreIdsAvailable()
+        private boolean moreIdsOnServer()
         {
             return currentIds.size() == MAX_FIND_ITEMS_ENTRIES;
         }
@@ -320,7 +320,7 @@ public class ExchangeMailStore implements MailStore
         @Override
         public boolean hasNext()
         {
-            return moreIdsAvailable() || (currentMailboxItemIndex < mailboxItems.size());
+            return moreIdsOnServer() || (currentMailboxItemIndex < mailboxItems.size());
         }
 
         @Override
@@ -335,7 +335,7 @@ public class ExchangeMailStore implements MailStore
                 freshenMailboxItems();
                 return advance();
             }
-            else if (moreIdsAvailable())
+            else if (moreIdsOnServer())
             {
                 freshenIds();
                 freshenMailboxItems();
