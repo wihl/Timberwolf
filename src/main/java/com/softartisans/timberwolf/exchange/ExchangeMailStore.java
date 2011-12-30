@@ -312,7 +312,7 @@ public class ExchangeMailStore implements MailStore
 
         private boolean moreItemsOnServer()
         {
-            return currentIdIndex < currendIds.size();
+            return currentIdIndex < currentIds.size();
         }
 
         private boolean moreItemsLocally()
@@ -330,7 +330,7 @@ public class ExchangeMailStore implements MailStore
         @Override
         public boolean hasNext()
         {
-            return moreIdsOnServer() || moreItemsLocally();
+            return moreItemsLocally() || moreItemsOnServer() || moreIdsOnServer();
         }
 
         @Override
