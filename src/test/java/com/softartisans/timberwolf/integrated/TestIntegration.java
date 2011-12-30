@@ -16,6 +16,7 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,6 +28,13 @@ import java.util.ListIterator;
  * Overall integration testing for timberwolf.
  */
 public class TestIntegration {
+
+    private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
+    private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
+
+    @Rule
+    public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
+            ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -45,8 +53,8 @@ public class TestIntegration {
         String columnFamily = "h";
         String keyHeader = "Item ID";
 
-        HBaseManager hbase = new HBaseManager(IntegrationSettings.ZooKeeperQuorum,
-                IntegrationSettings.ZooKeeperClientPort);
+        HBaseManager hbase = new HBaseManager(properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
+                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
 
         List<String> columnFamilies = new ArrayList<String>();
         columnFamilies.add(columnFamily);
@@ -74,8 +82,9 @@ public class TestIntegration {
 
         // Now prove that everything is in HBase.
 
-        Configuration configuration = HBaseConfigurator.createConfiguration(IntegrationSettings.ZooKeeperQuorum,
-                IntegrationSettings.ZooKeeperClientPort);
+        Configuration configuration = HBaseConfigurator.createConfiguration(
+                properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
+                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
         try
         {
             HTableInterface hTable = new HTable(configuration, tableName);
