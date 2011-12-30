@@ -512,11 +512,10 @@ public class ExchangeMailStoreTest
         assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
-    @Test
-    public void testFindMailOneIdPageTwoItemPages() throws IOException, AuthenticationException
+    private void assertPagesThroughItems(int itemCount) throws IOException, AuthenticationException
     {
-        MessageType[] messages = new MessageType[75];
-        for (int i = 0; i < 75; i++)
+        MessageType[] messages = new MessageType[itemCount];
+        for (int i = 0; i < itemCount; i++)
         {
             MessageType mockedMessage = mock(MessageType.class);
             ItemIdType mockedId = mock(ItemIdType.class);
@@ -535,6 +534,24 @@ public class ExchangeMailStoreTest
             assertEquals("item " + count, item.getHeader("Item ID"));
             count++;
         }
-        assertEquals(75, count);
+        assertEquals(itemCount, count);
+    }
+
+    @Test
+    public void testFindMailOneIdPageTwoItemPages() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(75);
+    }
+
+    @Test
+    public void testFindMailOneIdPageFiveItemPages() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(260);
+    }
+
+    @Test
+    public void testFindMailTwoIdPages22ItemPages() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(1110);
     }
 }
