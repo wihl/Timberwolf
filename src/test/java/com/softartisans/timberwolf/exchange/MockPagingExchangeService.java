@@ -20,9 +20,12 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalTyp
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 
+import java.util.HashMap;
+
 public class MockPagingExchangeService extends ExchangeService
 {
     private MessageType[] messages;
+    HashMap<String, MessageType> messageHash = new HashMap<String, MessageType>();
 
     public MockPagingExchangeService(final MessageType[] msgs)
     {
@@ -30,6 +33,10 @@ public class MockPagingExchangeService extends ExchangeService
         // constructor doesn't really matter here.
         super("https://fake.com/ews/exchange.asmx");
         messages = msgs;
+        for (MessageType msg : messages)
+        {
+            messageHash.put(msg.getItemId().getId(), msg);
+        }
     }
 
     @Override
@@ -63,20 +70,12 @@ public class MockPagingExchangeService extends ExchangeService
         getMsg.setResponseCode(ResponseCodeType.NO_ERROR);
         ArrayOfRealItemsType itemsArr = getMsg.addNewItems();
 
-        // This is very slow.  Deal.
         NonEmptyArrayOfBaseItemIdsType ids = getItem.getItemIds();
         for (ItemIdType idType : ids.getItemIdArray())
         {
             String id = idType.getId();
-            for (MessageType msg : messages)
-            {
-                if (msg.getItemId().getId() == id)
-                {
-                    MessageType newMsg = itemsArr.addNewMessage();
-                    newMsg.addNewItemId().setId(id);
-                    break;
-                }
-            }
+            MessageType newMsg = itemsArr.addNewMessage();
+            newMsg.addNewItemId().setId(messageHash.get(id).getItemId().getId());
         }
 
         msgArr.setGetItemResponseMessageArray(new ItemInfoResponseMessageType[] { getMsg });
