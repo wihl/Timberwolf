@@ -65,20 +65,9 @@ public class TestIntegration {
         MailStore mailStore = new ExchangeMailStore(exchangeURL);
         MailWriter mailWriter = HBaseMailWriter.create(table, keyHeader, columnFamily);
 
-        try
-        {
-            Iterable<MailboxItem> mailboxItems = mailStore.getMail();
-            Assert.assertTrue(mailboxItems.iterator().hasNext());
-            mailWriter.write(mailboxItems);
-        }
-        catch (IOException e)
-        {
-            Assert.fail("Error writing mail!");
-        }
-        catch (AuthenticationException e)
-        {
-            Assert.fail("Error authenticating to Exchange");
-        }
+        Iterable<MailboxItem> mailboxItems = mailStore.getMail();
+        Assert.assertTrue(mailboxItems.iterator().hasNext());
+        mailWriter.write(mailboxItems);
 
         // Now prove that everything is in HBase.
 

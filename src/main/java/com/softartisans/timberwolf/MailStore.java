@@ -10,6 +10,5 @@ import java.io.IOException;
 public interface MailStore
 {
     /** Returns some mail for the given user. */
-    Iterable<MailboxItem> getMail()
-            throws IOException, AuthenticationException;
+    Iterable<MailboxItem> getMail();
 }
