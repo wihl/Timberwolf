@@ -29,7 +29,7 @@ public class HBaseTable implements IHBaseTable
     /**
      * Adds a put to the underlying buffer to our HTable. It will not be added
      * to the HTable until flush is called.
-     * @param put
+     * @param put The Put to put to the underlying HTable.
      */
     @Override
     public final void put(final Put put)
@@ -72,6 +72,7 @@ public class HBaseTable implements IHBaseTable
     {
         try
         {
+            flush();
             table.close();
         }
         catch (IOException e)

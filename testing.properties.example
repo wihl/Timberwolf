@@ -1,0 +1,14 @@
+###############################################################
+## An example configuration, you can copy this to
+## testing.properties in the current directory where you're
+## running the tests, most likely the same directory as the
+## pom.xml file.
+###############################################################
+
+###############################################################
+## Necessary for the integration tests that hit an actual hbase
+###############################################################
+## The ZooKeeper quorum used to connect to HBase.
+# ZooKeeperQuorum = hdhbase01.int.softartisans.com
+## The ZooKeeper client port used to connect to HBase.
+# ZooKeeperClientPort = 2181
