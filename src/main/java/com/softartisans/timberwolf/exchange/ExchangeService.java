@@ -1,9 +1,6 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -177,5 +174,17 @@ public class ExchangeService
 
         EnvelopeDocument response = sendRequest(request);
         return response.getEnvelope().getBody().getGetItemResponse();
+    }
+
+    /** Returns the results of a find folder request */
+    public FindFolderResponseType findFolder(final FindFolderType findFolder)
+        throws ServiceCallException, HttpErrorException
+    {
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
+        envelope.addNewBody().setFindFolder(findFolder);
+
+        EnvelopeDocument response = sendRequest(request);
+        return response.getEnvelope().getBody().getFindFolderResponse();
     }
 }
