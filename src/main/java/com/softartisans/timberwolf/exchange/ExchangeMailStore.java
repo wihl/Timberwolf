@@ -310,6 +310,16 @@ public class ExchangeMailStore implements MailStore
             return currentIds.size() == MAX_FIND_ITEMS_ENTRIES;
         }
 
+        private boolean moreItemsOnServer()
+        {
+            return currentIdIndex < currendIds.size();
+        }
+
+        private boolean moreItemsLocally()
+        {
+            return currentMailboxItemIndex < mailboxItems.size();
+        }
+
         private MailboxItem advance()
         {
             MailboxItem item = mailboxItems.get(currentMailboxItemIndex);
@@ -320,17 +330,17 @@ public class ExchangeMailStore implements MailStore
         @Override
         public boolean hasNext()
         {
-            return moreIdsOnServer() || (currentMailboxItemIndex < mailboxItems.size());
+            return moreIdsOnServer() || moreItemsLocally();
         }
 
         @Override
         public MailboxItem next()
         {
-            if (currentMailboxItemIndex < mailboxItems.size())
+            if (moreItemsLocally())
             {
                 return advance();
             }
-            else if (currentIdIndex < currentIds.size())
+            else if (moreItemsOnServer())
             {
                 freshenMailboxItems();
                 return advance();
