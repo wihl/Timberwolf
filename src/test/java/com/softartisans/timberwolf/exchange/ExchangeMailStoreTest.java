@@ -70,7 +70,7 @@ public class ExchangeMailStoreTest
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.INBOX);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
@@ -86,7 +86,7 @@ public class ExchangeMailStoreTest
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();

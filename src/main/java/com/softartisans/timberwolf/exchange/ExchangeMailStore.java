@@ -10,14 +10,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseTyp
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
-import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.microsoft.schemas.exchange.services.x2006.types.*;
 
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
@@ -87,19 +80,54 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
-     * Creates a FindItemType to request all the ids for the given folder.
+     * Creates a FindItemType to request all the ids for the given distinguished folder.
      *
-     * @param folder the folder from which to get ids
+     * @param folder the distinguished folder from which to get ids
+     * @param offset the number of entries to start from
+     * @param maxEntries the maximum number of ids to grab with this request
      * @return the FindItemType necessary to request the ids
      */
     static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder, final int offset,
                                             final int maxEntries)
     {
-        FindItemType findItem = FindItemType.Factory.newInstance();
-        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        FindItemType findItem = getPagingFindItemType(offset, maxEntries);
+
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
+
+        return findItem;
+    }
+
+    /**
+     * Creates a FindItemType to request all the ids for the given folder.
+     *
+     * @param folderId the folder from which to get ids
+     * @param offset the number of entries to start from
+     * @param maxEntries the maximum number of ids to grab with this request
+     * @return the FindItemType necessary to request the ids
+     */
+    static FindItemType getFindItemsRequest(final String folderId, final int offset, final int maxEntries)
+    {
+        FindItemType findItem = getPagingFindItemType(offset, maxEntries);
+
+        FolderIdType folder = findItem.addNewParentFolderIds().addNewFolderId();
+        folder.setId(folderId);
+
+        return findItem;
+    }
+
+    /**
+     * Creates a FindItemType with a default behavior and preset for specified paging properties.
+     * @param offset the number of entries to start from
+     * @param maxEntries the maximum number of ids to grab with this request
+     * @return a FindItemType with the specified attributes
+     */
+    private static final FindItemType getPagingFindItemType(final int offset, final int maxEntries)
+    {
+        FindItemType findItem = FindItemType.Factory.newInstance();
+        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
         // Asking for negative or zero max items is nonsensical.
         index.setMaxEntriesReturned(Math.max(maxEntries, 1));
