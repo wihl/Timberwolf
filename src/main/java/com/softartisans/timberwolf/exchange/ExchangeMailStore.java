@@ -1,7 +1,5 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.cloudera.alfredo.client.AuthenticationException;
-
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
@@ -19,8 +17,6 @@ import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseIt
 
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
-
-import java.io.IOException;
 
 import java.util.Iterator;
 import java.util.List;
