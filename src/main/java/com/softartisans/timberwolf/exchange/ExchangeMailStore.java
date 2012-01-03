@@ -142,19 +142,68 @@ public class ExchangeMailStore implements MailStore
      * Gets a list of ids for the inbox for the current user.
      *
      * @param exchangeService the actual service to use when requesting ids
+     * @param offset the number of items to offset for paging
+     * @param maxEntries the maximum number of entries to add
      * @return a list of exchange ids
-     * @throws AuthenticationException If we can't authenticate to the
-     * exchange service
-     * @throws IOException If we can't connect to the exchange service
-     * @throws XmlException If the response cannot be parsed
-     * @throws HttpUrlConnectionCreationException if it failed to create a
-     * connection to the service
+     * @throws ServiceCallException If we can't connect to the exchange service
+     * @throws HttpErrorException If the response cannot be parsed
      */
     static Vector<String> findItems(final ExchangeService exchangeService, final int offset, final int maxEntries)
             throws ServiceCallException, HttpErrorException
     {
+        return findItems(exchangeService, DistinguishedFolderIdNameType.INBOX, offset, maxEntries);
+    }
+
+    /**
+     * Gets a list of ids from a specified distinguished folder for the current user.
+     *
+     * @param exchangeService the actual service to use when requesting ids
+     * @param folder the distinguished folder to obtain ids for
+     * @param offset the number of items to offset for paging
+     * @param maxEntries the maximum number of entries to add
+     * @return a list of exchange ids
+     * @throws ServiceCallException If we can't connect to the exchange service
+     * @throws HttpErrorException If the response cannot be parsed
+     */
+    static Vector<String> findItems(final ExchangeService exchangeService, DistinguishedFolderIdNameType.Enum folder,
+                                    final int offset, final int maxEntries)
+            throws ServiceCallException, HttpErrorException
+    {
+        return findItems(exchangeService, getFindItemsRequest(folder, offset, maxEntries));
+    }
+
+    /**
+     * Gets a list of ids for a specified folder by folder id for the current user.
+     *
+     * @param exchangeService the actual service to use when requesting ids
+     * @param folderId the folder id to look inside
+     * @param offset the number of items to offset for paging
+     * @param maxEntries the maximum number of entries to add
+     * @return a list of exchange ids
+     * @throws ServiceCallException If we can't connect to the exchange service
+     * @throws HttpErrorException If the response cannot be parsed
+     */
+    static Vector<String> findItems(final ExchangeService exchangeService, String folderId, final int offset,
+                                    final int maxEntries)
+            throws ServiceCallException, HttpErrorException
+    {
+        return findItems(exchangeService, getFindItemsRequest(folderId, offset, maxEntries));
+    }
+
+    /**
+     * Gets a list of ids for a specified folder by folder id for the current user.
+     *
+     * @param exchangeService the actual service to use when requesting ids
+     * @param findItem the FindItemType to use for the request
+     * @return a list of exchange ids
+     * @throws ServiceCallException If we can't connect to the exchange service
+     * @throws HttpErrorException If the response cannot be parsed
+     */
+    private static Vector<String> findItems(final ExchangeService exchangeService, FindItemType findItem)
+            throws ServiceCallException, HttpErrorException
+    {
         FindItemResponseType response =
-            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, offset, maxEntries));
+                exchangeService.findItem(findItem);
 
         if (response == null)
         {
