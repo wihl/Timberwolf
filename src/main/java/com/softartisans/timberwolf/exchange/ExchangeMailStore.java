@@ -24,9 +24,7 @@ import com.softartisans.timberwolf.MailboxItem;
 
 import java.io.IOException;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +61,9 @@ public class ExchangeMailStore implements MailStore
 
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
+
+    /** A Queue for managing the folder id's encountered during traversal. */
+    private final Queue<String> folderQueue = new LinkedList<String>();
 
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
