@@ -72,8 +72,8 @@ public class TestIntegration
         // Now prove that everything is in HBase.
 
         Configuration configuration = HBaseConfigurator.createConfiguration(
-                properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
+                IntegrationTestProperties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
+                IntegrationTestProperties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
         try
         {
             HTableInterface hTable = new HTable(configuration, tableName);
