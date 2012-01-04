@@ -1,7 +1,5 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.cloudera.alfredo.client.AuthenticationException;
-
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
@@ -21,8 +19,6 @@ import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseIt
 
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
-
-import java.io.IOException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -88,8 +84,8 @@ public class ExchangeMailStore implements MailStore
     /**
      * Creates a FindItemType to request all the ids for the given folder.
      *
-     * @param folder the folder from which to get ids
-     * @return the FindItemType necessary to request the ids
+     * @param folder The folder from which to get ids
+     * @return The FindItemType necessary to request the ids
      */
     static FindItemType getFindItemsRequest(final DistinguishedFolderIdNameType.Enum folder, final int offset,
                                             final int maxEntries)
@@ -112,14 +108,12 @@ public class ExchangeMailStore implements MailStore
     /**
      * Gets a list of ids for the inbox for the current user.
      *
-     * @param exchangeService the actual service to use when requesting ids
-     * @return a list of exchange ids
-     * @throws AuthenticationException If we can't authenticate to the
-     * exchange service
-     * @throws IOException If we can't connect to the exchange service
-     * @throws XmlException If the response cannot be parsed
-     * @throws HttpUrlConnectionCreationException if it failed to create a
-     * connection to the service
+     * @param exchangeService The service to use when requesting ids.
+     * @return A list of exchange ids
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error making the Exchange
+     *                              request, or if the SOAP find item response has a message
+     *                              with a response code other than "No Error".
      */
     static Vector<String> findItems(final ExchangeService exchangeService, final int offset, final int maxEntries)
             throws ServiceCallException, HttpErrorException
@@ -155,8 +149,8 @@ public class ExchangeMailStore implements MailStore
     /**
      * Creates a GetItemType to request the info for the given ids.
      *
-     * @param ids the ids to request
-     * @return the GetItemType necessary to request the info for those ids
+     * @param ids The ids to request
+     * @return The GetItemType necessary to request the info for those ids
      */
     static GetItemType getGetItemsRequest(final List<String> ids)
     {
@@ -176,21 +170,17 @@ public class ExchangeMailStore implements MailStore
     /**
      * Get a list of items from the server.
      *
-     * @param count the number of items to get.
-     * if startIndex+count > ids.size() then only ids.size()-startIndex
+     * @param count The number of items to get.
+     * @param startIndex The index in ids of the first item to get
+     * @param ids A list of ids to get
+     * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
      * items will be returned
-     * @param startIndex the index in ids of the first item to get
-     * @param ids a list of ids to get
-     * @param exchangeService the backend service used for contacting
-     * exchange
-     * @return a list of mailbox items that correspond to the ids in the
-     *         In the list of ids
-     * @throws AuthenticationException If we can't authenticate to the
-     * exchange service
-     * @throws IOException If we can't connect to the exchange service
-     * @throws XmlException If the response cannot be parsed
-     * @throws HttpUrlConnectionCreationException If it failed to connect
-     * to the service
+     * @param exchangeService The backend service used for contacting Exchange.
+     * @return A list of mailbox items that correspond to the given ids.
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error making the Exchange
+     *                              request, or if the SOAP find item response has a message
+     *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService)
@@ -230,7 +220,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail() throws IOException, AuthenticationException
+    public final Iterable<MailboxItem> getMail()
     {
         return new Iterable<MailboxItem>()
         {
@@ -331,6 +321,10 @@ public class ExchangeMailStore implements MailStore
             return item;
         }
 
+        /**
+         * @throws ExchangeRuntimeException If there was a ServiceCallException or
+         *                                  HttpErrorException when getting data from Exchange.
+         */
         @Override
         public boolean hasNext()
         {
