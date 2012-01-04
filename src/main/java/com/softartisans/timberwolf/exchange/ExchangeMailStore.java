@@ -59,6 +59,8 @@ public class ExchangeMailStore implements MailStore
 
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
+    private final int maxFindItemsEntries;
+    private final int maxGetItemsEntries;
 
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
@@ -69,7 +71,7 @@ public class ExchangeMailStore implements MailStore
      */
     public ExchangeMailStore(final String exchangeUrl)
     {
-        exchangeService = new ExchangeService(exchangeUrl);
+        this(new ExchangeService(exchangeUrl), MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
     }
 
     /**
@@ -78,7 +80,14 @@ public class ExchangeMailStore implements MailStore
      */
     ExchangeMailStore(final ExchangeService service)
     {
-        this.exchangeService = service;
+        this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+    }
+
+    public ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    {
+        exchangeService = service;
+        maxFindItemsEntries = findItemPageSize;
+        maxGetItemsEntries = getItemPageSize;
     }
 
     /**
@@ -227,7 +236,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeService, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+                return new EmailIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries);
             }
         };
     }
