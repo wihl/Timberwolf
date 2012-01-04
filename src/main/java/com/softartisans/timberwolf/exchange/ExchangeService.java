@@ -22,6 +22,8 @@ import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,
  * sending them off to the Exchange server and then returning the xmlbeans
  * objects that come back.
+ *
+ * Note that all the service calls are performed synchronously.
  */
 public class ExchangeService
 {
@@ -41,13 +43,23 @@ public class ExchangeService
 
     /**
      * Creates a new ExchangeService that talks to the given Exchange server.
+     *
+     * @param url A string representing the URL of the service endpoint for the Exchange server.
      */
     public ExchangeService(final String url)
     {
         this(url, new AlfredoHttpUrlConnectionFactory());
     }
 
-    /** Sends a SOAP envelope request and returns the response. */
+    /**
+     * Sends a SOAP envelope request and returns the response.
+     *
+     * @param envelope An EnvelopeDocument with the SOAP envelope to send to Exchange.
+     * @return An EnvelopeDocuemnt containing the SOAP envelope with Exchange's response.
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error sending the response,
+     *                              such as an improper encoding or IO error.
+     */
     private EnvelopeDocument sendRequest(final EnvelopeDocument envelope)
         throws HttpErrorException, ServiceCallException
     {
@@ -152,7 +164,16 @@ public class ExchangeService
         }
     }
 
-    /** Returns the results of a find item request. */
+    /**
+     * Returns the results of a find item request.
+     *
+     * @param findItem A FindItemType object that specifies the set of items to
+     *                 gather from the Exchange server.
+     * @return A FindItemResponseType object with the requested items.
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error sending the response,
+     *                              such as an improper encoding or IO error.
+     */
     public FindItemResponseType findItem(final FindItemType findItem)
         throws ServiceCallException, HttpErrorException
     {
@@ -164,7 +185,16 @@ public class ExchangeService
         return response.getEnvelope().getBody().getFindItemResponse();
     }
 
-    /** Returns the results of a get item request. */
+    /**
+     * Returns the results of a get item request.
+     *
+     * @param getItem A GetItemType object that specifies the set of items to
+     *                gather from the Exchange server.
+     * @return A GetItemResponseType object with the requested items.
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error sending the response,
+     *                              such as an improper encoding or IO error.
+     */
     public GetItemResponseType getItem(final GetItemType getItem)
         throws ServiceCallException, HttpErrorException
     {

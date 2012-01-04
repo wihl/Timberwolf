@@ -1,5 +1,6 @@
 package com.softartisans.timberwolf.exchange;
 
+
 import com.cloudera.alfredo.client.AuthenticationException;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.*;
@@ -315,8 +316,8 @@ public class ExchangeMailStore implements MailStore
     /**
      * Creates a GetItemType to request the info for the given ids.
      *
-     * @param ids the ids to request
-     * @return the GetItemType necessary to request the info for those ids
+     * @param ids The ids to request
+     * @return The GetItemType necessary to request the info for those ids
      */
     static GetItemType getGetItemsRequest(final List<String> ids)
     {
@@ -336,21 +337,17 @@ public class ExchangeMailStore implements MailStore
     /**
      * Get a list of items from the server.
      *
-     * @param count the number of items to get.
-     * if startIndex+count > ids.size() then only ids.size()-startIndex
+     * @param count The number of items to get.
+     * @param startIndex The index in ids of the first item to get
+     * @param ids A list of ids to get
+     * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
      * items will be returned
-     * @param startIndex the index in ids of the first item to get
-     * @param ids a list of ids to get
-     * @param exchangeService the backend service used for contacting
-     * exchange
-     * @return a list of mailbox items that correspond to the ids in the
-     *         In the list of ids
-     * @throws AuthenticationException If we can't authenticate to the
-     * exchange service
-     * @throws IOException If we can't connect to the exchange service
-     * @throws XmlException If the response cannot be parsed
-     * @throws HttpUrlConnectionCreationException If it failed to connect
-     * to the service
+     * @param exchangeService The backend service used for contacting Exchange.
+     * @return A list of mailbox items that correspond to the given ids.
+     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
+     * @throws ServiceCallException If there was a non-HTTP error making the Exchange
+     *                              request, or if the SOAP find item response has a message
+     *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService)
@@ -390,7 +387,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail() throws IOException, AuthenticationException
+    public final Iterable<MailboxItem> getMail()
     {
         return new Iterable<MailboxItem>()
         {
