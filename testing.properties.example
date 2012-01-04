@@ -12,5 +12,11 @@
 # ZooKeeperQuorum = hdhbase01.int.softartisans.com
 ## The ZooKeeper client port used to connect to HBase.
 # ZooKeeperClientPort = 2181
+
+
+###############################################################
+## Necessary for the integration tests that hit an actual
+## exchange server
+###############################################################
 ## The URI of the Exchange instance.
 # ExchangeURI = https://devexch01.int.tartarus.com/ews/exchange.asmx

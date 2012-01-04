@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf.integrated;
 
-import com.cloudera.alfredo.client.AuthenticationException;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
@@ -19,10 +18,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Overall integration testing for timberwolf.
@@ -31,10 +28,12 @@ public class TestIntegration
 {
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
     private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
+    private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
-                                                                                ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
+                                                                                ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME,
+                                                                                EXCHANGE_URI_PROPERTY_NAME);
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -60,7 +59,7 @@ public class TestIntegration
         columnFamilies.add(columnFamily);
         IHBaseTable table = hbase.createTable(tableName, columnFamilies);
 
-        String exchangeURL = "https://devexch01.int.tartarus.com/ews/exchange.asmx";
+        String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
 
         MailStore mailStore = new ExchangeMailStore(exchangeURL);
         MailWriter mailWriter = HBaseMailWriter.create(table, keyHeader, columnFamily);
