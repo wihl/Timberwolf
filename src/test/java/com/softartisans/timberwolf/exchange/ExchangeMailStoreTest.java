@@ -512,7 +512,7 @@ public class ExchangeMailStoreTest
         assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
-    private void assertPagesThroughItems(int itemCount) throws IOException, AuthenticationException
+    private void assertPagesThroughItems(int itemCount, int idPageSize, int itemPageSize) throws IOException, AuthenticationException
     {
         MessageType[] messages = new MessageType[itemCount];
         for (int i = 0; i < itemCount; i++)
@@ -526,11 +526,13 @@ public class ExchangeMailStoreTest
         }
 
         ExchangeService service = new MockPagingExchangeService(messages);
-        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        ExchangeMailStore.EmailIterator mailItor =
+            new ExchangeMailStore.EmailIterator(service, idPageSize, itemPageSize);
 
         int count = 0;
-        for (MailboxItem item : mailstore.getMail())
+        while (mailItor.hasNext())
         {
+            MailboxItem item = mailItor.next();
             assertEquals("item " + count, item.getHeader("Item ID"));
             count++;
         }
@@ -540,18 +542,24 @@ public class ExchangeMailStoreTest
     @Test
     public void testFindMailOneIdPageTwoItemPages() throws IOException, AuthenticationException
     {
-        assertPagesThroughItems(75);
+        assertPagesThroughItems(10, 11, 5);
     }
 
     @Test
     public void testFindMailOneIdPageFiveItemPages() throws IOException, AuthenticationException
     {
-        assertPagesThroughItems(260);
+        assertPagesThroughItems(24, 30, 5);
     }
 
     @Test
-    public void testFindMailTwoIdPages22ItemPages() throws IOException, AuthenticationException
+    public void testFindMailTwoIdPages10ItemPages() throws IOException, AuthenticationException
     {
-        assertPagesThroughItems(1110);
+        assertPagesThroughItems(50, 30, 5);
+    }
+
+    @Test
+    public void testFindMailFiveIdPages20ItemPages() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(100, 20, 5);
     }
 }

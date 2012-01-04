@@ -54,7 +54,7 @@ public class TestIntegration
         String keyHeader = "Item ID";
 
         HBaseManager hbase = new HBaseManager(IntegrationTestProperties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                IntegrationTestProperties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
+                                              IntegrationTestProperties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
 
         List<String> columnFamilies = new ArrayList<String>();
         columnFamilies.add(columnFamily);

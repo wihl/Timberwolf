@@ -48,6 +48,8 @@ public class ExchangeMailStore implements MailStore
 
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
+    private final int maxFindItemsEntries;
+    private final int maxGetItemsEntries;
 
     /** A Queue for managing the folder id's encountered during traversal. */
     private final Queue<String> folderQueue = new LinkedList<String>();
@@ -61,7 +63,7 @@ public class ExchangeMailStore implements MailStore
      */
     public ExchangeMailStore(final String exchangeUrl)
     {
-        exchangeService = new ExchangeService(exchangeUrl);
+        this(new ExchangeService(exchangeUrl), MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
     }
 
     /**
@@ -70,7 +72,14 @@ public class ExchangeMailStore implements MailStore
      */
     ExchangeMailStore(final ExchangeService service)
     {
-        this.exchangeService = service;
+        this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+    }
+
+    public ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    {
+        exchangeService = service;
+        maxFindItemsEntries = findItemPageSize;
+        maxGetItemsEntries = getItemPageSize;
     }
 
     /**
@@ -394,7 +403,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeService);
+                return new EmailIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries);
             }
         };
     }
@@ -403,18 +412,22 @@ public class ExchangeMailStore implements MailStore
      * This Iterator will request a list of all ids from the exchange service
      * and then get actual mail items for those ids.
      */
-    private static final class EmailIterator implements Iterator<MailboxItem>
+    static final class EmailIterator implements Iterator<MailboxItem>
     {
-        private Vector<String> currentIds;
+        private final ExchangeService exchangeService;
+        private int maxFindItemsEntries;
+        private int maxGetItemsEntries;
+        private int currentMailboxItemIndex = 0;
         private int currentIdIndex = 0;
         private int findItemsOffset = 0;
+        private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
-        private int currentMailboxItemIndex = 0;
-        private final ExchangeService exchangeService;
 
-        private EmailIterator(final ExchangeService service)
+        EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
         {
             this.exchangeService = service;
+            maxFindItemsEntries = idPageSize;
+            maxGetItemsEntries = itemPageSize;
             freshenIds();
             freshenMailboxItems();
         }
@@ -425,7 +438,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                currentIds = findItems(exchangeService, findItemsOffset, MAX_FIND_ITEMS_ENTRIES);
+                currentIds = findItems(exchangeService, findItemsOffset, maxFindItemsEntries);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());
             }
@@ -446,7 +459,7 @@ public class ExchangeMailStore implements MailStore
             try
             {
                 currentMailboxItemIndex = 0;
-                mailboxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
+                mailboxItems = getItems(maxGetItemsEntries, currentIdIndex, currentIds, exchangeService);
                 currentIdIndex += mailboxItems.size();
                 LOG.debug("Got {} emails.", mailboxItems.size());
             }
@@ -464,7 +477,7 @@ public class ExchangeMailStore implements MailStore
 
         private boolean moreIdsOnServer()
         {
-            return currentIds.size() == MAX_FIND_ITEMS_ENTRIES;
+            return currentIds.size() == maxFindItemsEntries;
         }
 
         private boolean moreItemsOnServer()
@@ -484,10 +497,31 @@ public class ExchangeMailStore implements MailStore
             return item;
         }
 
+        /**
+         * @throws ExchangeRuntimeException If there was a ServiceCallException or
+         *                                  HttpErrorException when getting data from Exchange.
+         */
         @Override
         public boolean hasNext()
         {
-            return moreItemsLocally() || moreItemsOnServer() || moreIdsOnServer();
+            boolean definitelyHasMoreItems = moreItemsLocally() || moreItemsOnServer();
+            if (definitelyHasMoreItems)
+            {
+                return true;
+            }
+
+            // The problem with moreIdsOnServer is that it fails if the id page size is a factor of the
+            // total number of emails.  In that case it'll return true (thinking there's another page
+            // on the server) when really it just got unlucky.
+            if (!moreIdsOnServer())
+            {
+                return false;
+            }
+
+            freshenIds();
+            freshenMailboxItems();
+
+            return mailboxItems.size() > 0;
         }
 
         @Override
