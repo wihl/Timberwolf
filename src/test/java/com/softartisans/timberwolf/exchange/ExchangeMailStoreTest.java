@@ -1,27 +1,11 @@
 package com.softartisans.timberwolf.exchange;
 
 import com.cloudera.alfredo.client.AuthenticationException;
-import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
-import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
-import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.microsoft.schemas.exchange.services.x2006.messages.*;
+import com.microsoft.schemas.exchange.services.x2006.types.*;
 import com.softartisans.timberwolf.MailboxItem;
 import org.apache.xmlbeans.XmlException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,10 +19,9 @@ import java.util.Vector;
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest
@@ -78,7 +61,7 @@ public class ExchangeMailStoreTest
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         assertEquals(findItem.xmlText(),
-                     ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
+                ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
     }
 
     @Test
@@ -561,5 +544,67 @@ public class ExchangeMailStoreTest
     public void testFindMailFiveIdPages20ItemPages() throws IOException, AuthenticationException
     {
         assertPagesThroughItems(100, 20, 5);
+    }
+
+    @Test
+    public void testGetFindFoldersRequestDistinguished()
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        ExchangeMailStore mail = new ExchangeMailStore(service);
+
+        FindFolderType findFolder = mail.getFindFoldersRequest(DistinguishedFolderIdNameType.INBOX);
+        assertEquals("AllProperties", findFolder.getFolderShape().getBaseShape().toString());
+        assertTrue(findFolder.getParentFolderIds().getDistinguishedFolderIdArray().length == 1);
+        assertEquals(DistinguishedFolderIdNameType.INBOX,
+                findFolder.getParentFolderIds().getDistinguishedFolderIdArray()[0].getId());
+    }
+
+    @Test
+    public void testGetFindFoldersRequest()
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        ExchangeMailStore mail = new ExchangeMailStore(service);
+        String folderId = "Totally Not A Legit Folder Id";
+
+        FindFolderType findFolder = mail.getFindFoldersRequest(folderId);
+        assertEquals("AllProperties", findFolder.getFolderShape().getBaseShape().toString());
+        assertTrue(findFolder.getParentFolderIds().getFolderIdArray().length == 1);
+        assertEquals(folderId, findFolder.getParentFolderIds().getFolderIdArray()[0].getId());
+    }
+
+    @Test
+    public void testFindFolders()
+    {
+        FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
+        int count = 10;
+
+        FolderType[] folders = new FolderType[count];
+
+        for( int i = 0; i < count; i++)
+        {
+            FolderType folder = FolderType.Factory.newInstance();
+            folder.setDisplayName("Folder Number " + i);
+            FolderIdType folderId = FolderIdType.Factory.newInstance();
+            folderId.setId("SADG345GFGFEFHGGFH454fgH56FDDGFNGGERTTGH%$466" + i);
+            folderId.setChangeKey("HHYtryyry==" + i);
+            folder.setFolderId(folderId);
+            folders[i] = folder;
+        }
+        MockPagingExchangeService service = new MockPagingExchangeService(rootFolder, folders);
+
+        try
+        {
+            Vector<String> foldersVec = ExchangeMailStore.findFolders(service, "TotallyUnimportantId");
+            int folderCount = 0;
+            for( String folder : foldersVec)
+            {
+                assertEquals(folders[folderCount].getFolderId().getId(), folder);
+                folderCount++;
+            }
+        }
+        catch(Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }
     }
 }
