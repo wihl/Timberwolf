@@ -556,4 +556,10 @@ public class ExchangeMailStoreTest
     {
         assertPagesThroughItems(50, 30, 5);
     }
+
+    @Test
+    public void testFindMailFiveIdPages20ItemPages() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(100, 20, 5);
+    }
 }

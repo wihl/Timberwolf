@@ -334,7 +334,24 @@ public class ExchangeMailStore implements MailStore
         @Override
         public boolean hasNext()
         {
-            return moreItemsLocally() || moreItemsOnServer() || moreIdsOnServer();
+            boolean definitelyHasMoreItems = moreItemsLocally() || moreItemsOnServer();
+            if (definitelyHasMoreItems)
+            {
+                return true;
+            }
+
+            // The problem with moreIdsOnServer is that it fails if the id page size is a factor of the
+            // total number of emails.  In that case it'll return true (thinking there's another page
+            // on the server) when really it just got unlucky.
+            if (!moreIdsOnServer())
+            {
+                return false;
+            }
+
+            freshenIds();
+            freshenMailboxItems();
+
+            return mailboxItems.size() > 0;
         }
 
         @Override
