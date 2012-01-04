@@ -237,7 +237,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeService);
+                return new EmailIterator(exchangeService, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
             }
         };
     }
@@ -248,16 +248,20 @@ public class ExchangeMailStore implements MailStore
      */
     private static final class EmailIterator implements Iterator<MailboxItem>
     {
-        private Vector<String> currentIds;
+        private final ExchangeService exchangeService;
+        private int maxFindItemsEntries;
+        private int maxGetItemsEntries;
+        private int currentMailboxItemIndex = 0;
         private int currentIdIndex = 0;
         private int findItemsOffset = 0;
+        private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
-        private int currentMailboxItemIndex = 0;
-        private final ExchangeService exchangeService;
 
-        private EmailIterator(final ExchangeService service)
+        private EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
         {
             this.exchangeService = service;
+            maxFindItemsEntries = idPageSize;
+            maxGetItemsEntries = itemPageSize;
             freshenIds();
             freshenMailboxItems();
         }
@@ -268,7 +272,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                currentIds = findItems(exchangeService, findItemsOffset, MAX_FIND_ITEMS_ENTRIES);
+                currentIds = findItems(exchangeService, findItemsOffset, maxFindItemsEntries);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());
             }
@@ -289,7 +293,7 @@ public class ExchangeMailStore implements MailStore
             try
             {
                 currentMailboxItemIndex = 0;
-                mailboxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
+                mailboxItems = getItems(maxGetItemsEntries, currentIdIndex, currentIds, exchangeService);
                 currentIdIndex += mailboxItems.size();
                 LOG.debug("Got {} emails.", mailboxItems.size());
             }
