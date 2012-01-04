@@ -246,7 +246,7 @@ public class ExchangeMailStore implements MailStore
      * This Iterator will request a list of all ids from the exchange service
      * and then get actual mail items for those ids.
      */
-    private static final class EmailIterator implements Iterator<MailboxItem>
+    static final class EmailIterator implements Iterator<MailboxItem>
     {
         private final ExchangeService exchangeService;
         private int maxFindItemsEntries;
@@ -257,7 +257,7 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
 
-        private EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
+        EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
         {
             this.exchangeService = service;
             maxFindItemsEntries = idPageSize;
@@ -311,7 +311,7 @@ public class ExchangeMailStore implements MailStore
 
         private boolean moreIdsOnServer()
         {
-            return currentIds.size() == MAX_FIND_ITEMS_ENTRIES;
+            return currentIds.size() == maxFindItemsEntries;
         }
 
         private boolean moreItemsOnServer()
