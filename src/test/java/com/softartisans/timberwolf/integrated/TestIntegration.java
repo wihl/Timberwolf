@@ -93,66 +93,66 @@ public class TestIntegration
 
         // Inbox
         requiredEmails.add()
-                      .Sender("tsender")
-                      .Subject("Leave it be")
-                      .BodyContains("love your inbox clean");
+                      .sender("tsender")
+                      .subject("Leave it be")
+                      .bodyContains("love your inbox clean");
         // child of Inbox
         requiredEmails.add()
-                      .Subject("To the child of inbox")
-                      .BodyContains("child of Inbox");
+                      .subject("To the child of inbox")
+                      .bodyContains("child of Inbox");
         // Inbox Jr
         requiredEmails.add()
-                      .Bcc("korganizer")
-                      .BodyContains("Inbox Jr")
-                      .BodyContains("is getting lonely");
-        requiredEmails.add().To("korganizer").BodyContains("InboxJr");
+                      .bcc("korganizer")
+                      .bodyContains("Inbox Jr")
+                      .bodyContains("is getting lonely");
+        requiredEmails.add().to("korganizer").bodyContains("InboxJr");
         // Drafts
-        requiredEmails.add().To("tsender").Subject("A draft");
+        requiredEmails.add().to("tsender").subject("A draft");
         // Sent Items
         requiredEmails.add()
-                      .Sender("korganizer")
-                      .To("abenjamin")
-                      .Subject("A message to someone else");
+                      .sender("korganizer")
+                      .to("abenjamin")
+                      .subject("A message to someone else");
         // Deleted Items
-        requiredEmails.add().Subject("Whoops").BodyContains("this is trash");
+        requiredEmails.add().subject("Whoops").bodyContains("this is trash");
         // Deleted Folder
-        requiredEmails.add().BodyContains("Deleted Folder");
+        requiredEmails.add().bodyContains("Deleted Folder");
         // Topper
         requiredEmails.add()
-                      .To("bkerr")
-                      .Cc("korganizer")
-                      .Subject("Hey hey Bobbie, throw it in the Topper");
+                      .to("bkerr")
+                      .cc("korganizer")
+                      .subject("Hey hey Bobbie, throw it in the Topper");
         // Middler
-        requiredEmails.add().BodyContains("away this should go into middler, placed neatly.");
-        requiredEmails.add().Subject("Another middler");
-        requiredEmails.add().Subject("Yet another in the middler");
+        requiredEmails.add().bodyContains("away this should go into middler, placed neatly.");
+        requiredEmails.add().subject("Another middler");
+        requiredEmails.add().subject("Yet another in the middler");
         // Middler Jr
-        requiredEmails.add().Subject("organize away in MJ").BodyContains("Middler Jr");
+        requiredEmails.add().subject("organize away in MJ").bodyContains("Middler Jr");
         // Middler II (0)
         // Middler III
-        requiredEmails.add().Subject("Forward to Middler III");
+        requiredEmails.add().subject("Forward to Middler III");
         // Middler IV (0)
         // Ms child
-        requiredEmails.add().BodyContains("Ms child").BodyContains("nicer than MJ");
+        requiredEmails.add().bodyContains("Ms child").bodyContains("nicer than MJ");
         requiredEmails.add()
-                      .Subject("Super nesting")
-                      .BodyContains("Ms child")
-                      .BodyContains("wants to be in the loop too.");
+                      .subject("Super nesting")
+                      .bodyContains("Ms child")
+                      .bodyContains("wants to be in the loop too.");
         // Page FindItems (29)
         for (int i = 1; i < 30; i++)
         {
             requiredEmails.add()
-                          .Subject("Page FindItems" + i)
-                          .BodyContains("Page FindItems")
-                          .BodyContains("#" + i);
+                          .subject("Page FindItems" + i)
+                          .bodyContains("Page FindItems")
+                          .bodyContains("#" + i);
         }
         // Page GetItems (11)
         for (int i = 1; i < 12; i++)
         {
             requiredEmails.add()
-                          .Subject("Page GetItems" + i)
-                          .BodyContains("Page GetItems")
-                          .BodyContains("#" + i);
+                          .subject("Page GetItems" + i)
+                          .bodyContains("Page GetItems")
+                          .bodyContains("#" + i);
         }
 
 

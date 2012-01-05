@@ -15,7 +15,7 @@ public class EmailMatcher
 
     public EmailMatcher(String columnFamily)
     {
-        matchers = new ArrayList();
+        matchers = new ArrayList<FieldMatcher>();
         this.family = columnFamily;
     }
 
@@ -42,7 +42,7 @@ public class EmailMatcher
      * @param alias the alias of the sender
      * @return this
      */
-    public EmailMatcher Sender(final String alias)
+    public EmailMatcher sender(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Sender", alias));
         return this;
@@ -53,7 +53,7 @@ public class EmailMatcher
      * @param alias the alias of the sender
      * @return this
      */
-    public EmailMatcher To(final String alias)
+    public EmailMatcher to(final String alias)
     {
         matchers.add(new EmailAddressMatcher("To", alias));
         return this;
@@ -64,7 +64,7 @@ public class EmailMatcher
      * @param alias the alias of the sender
      * @return this
      */
-    public EmailMatcher Cc(final String alias)
+    public EmailMatcher cc(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Cc", alias));
         return this;
@@ -75,7 +75,7 @@ public class EmailMatcher
      * @param alias the alias of the sender
      * @return this
      */
-    public EmailMatcher Bcc(final String alias)
+    public EmailMatcher bcc(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Bcc", alias));
         return this;
@@ -86,7 +86,7 @@ public class EmailMatcher
      * @param subject the expected subject
      * @return this
      */
-    public EmailMatcher Subject(final String subject)
+    public EmailMatcher subject(final String subject)
     {
         matchers.add(new FieldMatcher("Subject")
         {
@@ -104,7 +104,7 @@ public class EmailMatcher
      * @param contents some text that is expected in the body
      * @return this
      */
-    public EmailMatcher BodyContains(final String contents)
+    public EmailMatcher bodyContains(final String contents)
     {
         matchers.add(new FieldMatcher("Body")
         {
