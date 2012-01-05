@@ -1,10 +1,5 @@
 package com.softartisans.timberwolf.hbase;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -15,6 +10,11 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Manages the set of HBaseTables currently in use.
@@ -230,7 +230,7 @@ public class HBaseManager
             {
                 if (hbase.tableExists(tableName))
                 {
-                    logger.error("Cannot create table " + tableName + ", as "
+                    logger.info("Cannot create table " + tableName + ", as "
                         + "the table already exists!");
                 }
                 else

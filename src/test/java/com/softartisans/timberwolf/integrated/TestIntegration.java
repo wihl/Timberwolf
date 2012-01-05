@@ -4,14 +4,9 @@ import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
-import com.softartisans.timberwolf.hbase.HBaseConfigurator;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import com.softartisans.timberwolf.hbase.HBaseManager;
-import com.softartisans.timberwolf.hbase.IHBaseTable;
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -29,14 +24,13 @@ import java.util.List;
  */
 public class TestIntegration
 {
-    private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
-    private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
-                                                                                ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME,
-                                                                                EXCHANGE_URI_PROPERTY_NAME);
+    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
+
+    @Rule
+    public HTableResource hbase = new HTableResource();
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -205,12 +199,7 @@ public class TestIntegration
                  Body: *Page GetItems*#11
 
          */
-        String tableName = "testIntegrationNoCLI";
-        String columnFamily = "h";
         String keyHeader = "Item ID";
-
-        HBaseManager hbase = new HBaseManager(IntegrationTestProperties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                                              IntegrationTestProperties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
 
         List<EmailMatcher> requiredEmails = new ArrayList<EmailMatcher>();
         /*
@@ -218,17 +207,14 @@ public class TestIntegration
                  Subject: Leave it be
                  Body: *love your inbox clean*
          */
-        requiredEmails.add(new EmailMatcher(columnFamily).Sender("tsender")
-                                                         .Subject("Leave it be")
-                                                         .BodyContains("love your inbox clean"));
-        List<String> columnFamilies = new ArrayList<String>();
-        columnFamilies.add(columnFamily);
-        IHBaseTable table = hbase.createTable(tableName, columnFamilies);
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Sender("tsender")
+                                                              .Subject("Leave it be")
+                                                              .BodyContains("love your inbox clean"));
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
 
         MailStore mailStore = new ExchangeMailStore(exchangeURL);
-        MailWriter mailWriter = HBaseMailWriter.create(table, keyHeader, columnFamily);
+        MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
         Iterable<MailboxItem> mailboxItems = mailStore.getMail();
         Assert.assertTrue(mailboxItems.iterator().hasNext());
@@ -236,13 +222,10 @@ public class TestIntegration
 
         // Now prove that everything is in HBase.
 
-        Configuration configuration = HBaseConfigurator.createConfiguration(
-                properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
         try
         {
-            HTableInterface hTable = new HTable(configuration, tableName);
-            Scan scan = createScan(columnFamily, new String[] {"Subject", "Sender","Bcc","Cc","To","Body"});
+            HTableInterface hTable = hbase.getTestingTable();
+            Scan scan = createScan(hbase.getFamily(), new String[] {"Subject", "Sender","Bcc","Cc","To","Body"});
             ResultScanner scanner = hTable.getScanner(scan);
             OUTER: for (Result result = scanner.next(); result != null; result = scanner.next())
             {
@@ -264,12 +247,12 @@ public class TestIntegration
 
             for (MailboxItem mail : mails)
             {
-                Get get = createGet(mail.getHeader(keyHeader),columnFamily,mail.getHeaderKeys());
+                Get get = createGet(mail.getHeader(keyHeader),hbase.getFamily(),mail.getHeaderKeys());
                 System.err.println(StringUtils.join(mail.getHeaderKeys()));
                 Result result = hTable.get(get);
                 for(String header : mail.getHeaderKeys())
                 {
-                    String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(columnFamily),
+                    String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(hbase.getFamily()),
                             Bytes.toBytes(header)));
                     Assert.assertEquals(mail.getHeader(header),tableValue);
                 }
@@ -279,7 +262,5 @@ public class TestIntegration
         {
             Assert.fail("Error when attempting to compare.");
         }
-
-        hbase.deleteTable(tableName);
     }
 }
