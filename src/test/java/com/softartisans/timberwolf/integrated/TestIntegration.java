@@ -202,14 +202,36 @@ public class TestIntegration
         String keyHeader = "Item ID";
 
         List<EmailMatcher> requiredEmails = new ArrayList<EmailMatcher>();
-        /*
-         E: Sender: tsender@*
-                 Subject: Leave it be
-                 Body: *love your inbox clean*
-         */
+        // Inbox
         requiredEmails.add(new EmailMatcher(hbase.getFamily()).Sender("tsender")
                                                               .Subject("Leave it be")
                                                               .BodyContains("love your inbox clean"));
+        // child of Inbox
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Subject("To the child of inbox")
+                                                              .BodyContains("child of Inbox"));
+        // Inbox Jr
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Bcc("korganizer")
+                                                              .BodyContains("Inbox Jr")
+                                                              .BodyContains("is getting lonely"));
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("korganizer")
+                                                              .BodyContains("InboxJr"));
+        // Drafts
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("tsender")
+                                                              .Subject("A draft"));
+        // Sent Items
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Sender("korganizer")
+                                                              .To("abenjamin")
+                                                              .Subject("A message to someone else"));
+        // Deleted Items
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Subject("Whoops")
+                                                              .BodyContains("this is trash"));
+        // Deleted Folder
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).BodyContains("Deleted Folder"));
+        // Topper
+        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("bkerr")
+                                                              .Cc("korganizer")
+                                                              .Subject("Hey hey Bobbie, throw it in the Topper"));
+
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
 

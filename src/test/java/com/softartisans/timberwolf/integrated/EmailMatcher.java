@@ -44,6 +44,24 @@ public class EmailMatcher
         return this;
     }
 
+    public EmailMatcher To(final String alias)
+    {
+        matchers.add(new EmailAddressMatcher("To", alias));
+        return this;
+    }
+
+    public EmailMatcher Cc(final String alias)
+    {
+        matchers.add(new EmailAddressMatcher("Cc", alias));
+        return this;
+    }
+
+    public EmailMatcher Bcc(final String alias)
+    {
+        matchers.add(new EmailAddressMatcher("Bcc", alias));
+        return this;
+    }
+
     public EmailMatcher Subject(final String subject)
     {
         matchers.add(new FieldMatcher("Subject")
