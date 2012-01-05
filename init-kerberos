@@ -1,5 +1,0 @@
-#! /bin/sh
-
-# bkerr is the user we use for integration testing.
-# This script is only for Jenkins to run just before the build.
-echo pass@word1 | kinit bkerr@INT.TARTARUS.COM
