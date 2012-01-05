@@ -17,6 +17,8 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.microsoft.schemas.exchange.services.x2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services.x2006.types.EmailAddressType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 
 import static org.junit.Assert.*;
@@ -40,6 +42,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import org.apache.xmlbeans.XmlException;
+
+import com.softartisans.timberwolf.MailboxItem;
 
 import java.util.regex.Pattern;
 
@@ -95,6 +99,62 @@ public class EmailIteratorChainTest
         users.add("wgill@INT.TARTARUS.COM");
         EmailIteratorChain chain = new EmailIteratorChain(service, users);
 
+        assertFalse(chain.hasNext());
+        assertNull(chain.next());
+    }
+
+    @Test
+    public void testChainOneFullUser() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        FindItemResponseType response = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType findMsg = mock(FindItemResponseMessageType.class);
+        when(findMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        FindItemParentType rootFolder = mock(FindItemParentType.class);
+        ArrayOfRealItemsType items = mock(ArrayOfRealItemsType.class);
+        MessageType msg = mock(MessageType.class);
+        ItemIdType id = mock(ItemIdType.class);
+        when(id.getId()).thenReturn("item 0");
+        when(msg.getItemId()).thenReturn(id);
+        when(items.getMessageArray()).thenReturn(new MessageType[] { msg });
+        when(rootFolder.getItems()).thenReturn(items);
+        when(findMsg.getRootFolder()).thenReturn(rootFolder);;
+        when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { findMsg });
+        when(response.getResponseMessages()).thenReturn(msgArr);
+        when(service.findItem(any(FindItemType.class), eq("bkerr@INT.TARTARUS.COM"))).thenReturn(response);
+
+        GetItemResponseType getResponse = mock(GetItemResponseType.class);
+        ArrayOfResponseMessagesType getMsgArr = mock(ArrayOfResponseMessagesType.class);
+        ItemInfoResponseMessageType getMsg = mock(ItemInfoResponseMessageType.class);
+        when(getMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        ArrayOfRealItemsType getItems = mock(ArrayOfRealItemsType.class);
+        MessageType gotMsg = mock(MessageType.class);
+        when(gotMsg.isSetItemId()).thenReturn(true);
+        ItemIdType gotId = mock(ItemIdType.class);
+        when(gotId.getId()).thenReturn("item 0");
+        when(gotMsg.getItemId()).thenReturn(gotId);
+        when(gotMsg.isSetFrom()).thenReturn(true);
+        SingleRecipientType from = mock(SingleRecipientType.class);
+        EmailAddressType address = mock(EmailAddressType.class);
+        when(address.isSetEmailAddress()).thenReturn(true);
+        when(address.getEmailAddress()).thenReturn("bkerr@INT.TARTARUS.COM");
+        when(from.getMailbox()).thenReturn(address);
+        when(gotMsg.getFrom()).thenReturn(from);
+        when(getItems.getMessageArray()).thenReturn(new MessageType[] { gotMsg });
+        when(getMsg.getItems()).thenReturn(getItems);
+        when(getMsgArr.getGetItemResponseMessageArray()).thenReturn(new ItemInfoResponseMessageType[] { getMsg });
+        when(getResponse.getResponseMessages()).thenReturn(getMsgArr);
+        when(service.getItem(any(GetItemType.class), eq("bkerr@INT.TARTARUS.COM"))).thenReturn(getResponse);
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr@INT.TARTARUS.COM");
+        EmailIteratorChain chain = new EmailIteratorChain(service, users);
+
+        assertTrue(chain.hasNext());
+        MailboxItem item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("bkerr@INT.TARTARUS.COM", item.getHeader("Sender"));
         assertFalse(chain.hasNext());
         assertNull(chain.next());
     }
