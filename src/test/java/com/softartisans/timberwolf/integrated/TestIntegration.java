@@ -8,11 +8,14 @@ import com.softartisans.timberwolf.hbase.HBaseConfigurator;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.hbase.HBaseManager;
 import com.softartisans.timberwolf.hbase.IHBaseTable;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -43,6 +46,16 @@ public class TestIntegration
                 get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
             }
         return get;
+    }
+
+    private Scan createScan(String columnFamily, String[] headers)
+    {
+        Scan scan = new Scan();
+        for( String header : headers)
+        {
+            scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
+        }
+        return scan;
     }
 
     @Test
@@ -199,6 +212,15 @@ public class TestIntegration
         HBaseManager hbase = new HBaseManager(IntegrationTestProperties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
                                               IntegrationTestProperties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
 
+        List<EmailMatcher> requiredEmails = new ArrayList<EmailMatcher>();
+        /*
+         E: Sender: tsender@*
+                 Subject: Leave it be
+                 Body: *love your inbox clean*
+         */
+        requiredEmails.add(new EmailMatcher(columnFamily).Sender("tsender")
+                                                         .Subject("Leave it be")
+                                                         .BodyContains("love your inbox clean"));
         List<String> columnFamilies = new ArrayList<String>();
         columnFamilies.add(columnFamily);
         IHBaseTable table = hbase.createTable(tableName, columnFamilies);
@@ -220,11 +242,30 @@ public class TestIntegration
         try
         {
             HTableInterface hTable = new HTable(configuration, tableName);
+            Scan scan = createScan(columnFamily, new String[] {"Subject", "Sender","Bcc","Cc","To","Body"});
+            ResultScanner scanner = hTable.getScanner(scan);
+            OUTER: for (Result result = scanner.next(); result != null; result = scanner.next())
+            {
+                for (EmailMatcher matcher : requiredEmails)
+                {
+                    if (matcher.matches(result))
+                    {
+                        requiredEmails.remove(matcher);
+                        continue OUTER;
+                    }
+                }
+            }
+            if (requiredEmails.size() > 0)
+            {
+                Assert.fail("Missing " + requiredEmails.size() + " required emails");
+                // TODO: actually tell you something about what's missing
+            }
             Iterable<MailboxItem> mails = mailStore.getMail();
 
             for (MailboxItem mail : mails)
             {
                 Get get = createGet(mail.getHeader(keyHeader),columnFamily,mail.getHeaderKeys());
+                System.err.println(StringUtils.join(mail.getHeaderKeys()));
                 Result result = hTable.get(get);
                 for(String header : mail.getHeaderKeys())
                 {
