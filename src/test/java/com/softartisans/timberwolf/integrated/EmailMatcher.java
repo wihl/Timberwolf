@@ -3,6 +3,7 @@ package com.softartisans.timberwolf.integrated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,11 +13,12 @@ public class EmailMatcher
 {
     private List<FieldMatcher> matchers;
 
-    private String columnFamily;
+    private String family;
 
     public EmailMatcher(String columnFamily)
     {
-        this.columnFamily = columnFamily;
+        matchers = new ArrayList();
+        this.family = columnFamily;
     }
 
     /**
@@ -26,7 +28,14 @@ public class EmailMatcher
      */
     boolean matches(Result result)
     {
-        return false;
+        for (FieldMatcher matcher : matchers)
+        {
+            if (!matcher.matches(result))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public EmailMatcher Sender(final String alias)
@@ -72,7 +81,7 @@ public class EmailMatcher
 
         public boolean matches(Result result)
         {
-            String value = Bytes.toString(result.getValue(Bytes.toBytes(columnFamily),
+            String value = Bytes.toString(result.getValue(Bytes.toBytes(family),
                                                           Bytes.toBytes(columnName)));
             return value != null && matches(value);
         }
