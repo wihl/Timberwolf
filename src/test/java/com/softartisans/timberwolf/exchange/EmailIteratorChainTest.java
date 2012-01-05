@@ -49,13 +49,72 @@ import java.util.regex.Pattern;
 
 public class EmailIteratorChainTest
 {
-    private void addEmptyUserToMockService(ExchangeService mockService, String user) throws ServiceCallException, HttpErrorException
+    private void addEmptyUserToMockService(ExchangeService mockService, String user)
+        throws ServiceCallException, HttpErrorException
     {
         FindItemResponseType response = mock(FindItemResponseType.class);
         ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
         when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { });
         when(response.getResponseMessages()).thenReturn(msgArr);
         when(mockService.findItem(any(FindItemType.class), eq(user))).thenReturn(response);
+    }
+
+    private void addFullUserToMockService(ExchangeService mockService, String user, int messageCount)
+        throws ServiceCallException, HttpErrorException
+    {
+        FindItemResponseType response = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType findMsg = mock(FindItemResponseMessageType.class);
+        when(findMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        FindItemParentType rootFolder = mock(FindItemParentType.class);
+        ArrayOfRealItemsType items = mock(ArrayOfRealItemsType.class);
+
+        MessageType[] findMsgs = new MessageType[messageCount];
+        for (int i = 0; i < messageCount; i++)
+        {
+            MessageType foundMsg = mock(MessageType.class);
+            ItemIdType findId = mock(ItemIdType.class);
+            when(findId.getId()).thenReturn("item " + i);
+            when(foundMsg.getItemId()).thenReturn(findId);
+            findMsgs[i] = foundMsg;
+        }
+
+        when(items.getMessageArray()).thenReturn(findMsgs);
+        when(rootFolder.getItems()).thenReturn(items);
+        when(findMsg.getRootFolder()).thenReturn(rootFolder);;
+        when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { findMsg });
+        when(response.getResponseMessages()).thenReturn(msgArr);
+        when(mockService.findItem(any(FindItemType.class), eq(user))).thenReturn(response);
+
+        GetItemResponseType getResponse = mock(GetItemResponseType.class);
+        ArrayOfResponseMessagesType getMsgArr = mock(ArrayOfResponseMessagesType.class);
+        ItemInfoResponseMessageType getMsg = mock(ItemInfoResponseMessageType.class);
+        when(getMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        ArrayOfRealItemsType getItems = mock(ArrayOfRealItemsType.class);
+
+        MessageType[] getMsgs = new MessageType[messageCount];
+        for (int i = 0; i < messageCount; i++)
+        {
+            MessageType gotMsg = mock(MessageType.class);
+            when(gotMsg.isSetItemId()).thenReturn(true);
+            ItemIdType gotId = mock(ItemIdType.class);
+            when(gotId.getId()).thenReturn("item 0");
+            when(gotMsg.getItemId()).thenReturn(gotId);
+            when(gotMsg.isSetFrom()).thenReturn(true);
+            SingleRecipientType from = mock(SingleRecipientType.class);
+            EmailAddressType address = mock(EmailAddressType.class);
+            when(address.isSetEmailAddress()).thenReturn(true);
+            when(address.getEmailAddress()).thenReturn(user);
+            when(from.getMailbox()).thenReturn(address);
+            when(gotMsg.getFrom()).thenReturn(from);
+            getMsgs[i] = gotMsg;
+        }
+
+        when(getItems.getMessageArray()).thenReturn(getMsgs);
+        when(getMsg.getItems()).thenReturn(getItems);
+        when(getMsgArr.getGetItemResponseMessageArray()).thenReturn(new ItemInfoResponseMessageType[] { getMsg });
+        when(getResponse.getResponseMessages()).thenReturn(getMsgArr);
+        when(mockService.getItem(any(GetItemType.class), eq(user))).thenReturn(getResponse);
     }
 
     @Test
@@ -107,45 +166,7 @@ public class EmailIteratorChainTest
     public void testChainOneFullUser() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemResponseType response = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
-        FindItemResponseMessageType findMsg = mock(FindItemResponseMessageType.class);
-        when(findMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        FindItemParentType rootFolder = mock(FindItemParentType.class);
-        ArrayOfRealItemsType items = mock(ArrayOfRealItemsType.class);
-        MessageType msg = mock(MessageType.class);
-        ItemIdType id = mock(ItemIdType.class);
-        when(id.getId()).thenReturn("item 0");
-        when(msg.getItemId()).thenReturn(id);
-        when(items.getMessageArray()).thenReturn(new MessageType[] { msg });
-        when(rootFolder.getItems()).thenReturn(items);
-        when(findMsg.getRootFolder()).thenReturn(rootFolder);;
-        when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { findMsg });
-        when(response.getResponseMessages()).thenReturn(msgArr);
-        when(service.findItem(any(FindItemType.class), eq("bkerr@INT.TARTARUS.COM"))).thenReturn(response);
-
-        GetItemResponseType getResponse = mock(GetItemResponseType.class);
-        ArrayOfResponseMessagesType getMsgArr = mock(ArrayOfResponseMessagesType.class);
-        ItemInfoResponseMessageType getMsg = mock(ItemInfoResponseMessageType.class);
-        when(getMsg.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        ArrayOfRealItemsType getItems = mock(ArrayOfRealItemsType.class);
-        MessageType gotMsg = mock(MessageType.class);
-        when(gotMsg.isSetItemId()).thenReturn(true);
-        ItemIdType gotId = mock(ItemIdType.class);
-        when(gotId.getId()).thenReturn("item 0");
-        when(gotMsg.getItemId()).thenReturn(gotId);
-        when(gotMsg.isSetFrom()).thenReturn(true);
-        SingleRecipientType from = mock(SingleRecipientType.class);
-        EmailAddressType address = mock(EmailAddressType.class);
-        when(address.isSetEmailAddress()).thenReturn(true);
-        when(address.getEmailAddress()).thenReturn("bkerr@INT.TARTARUS.COM");
-        when(from.getMailbox()).thenReturn(address);
-        when(gotMsg.getFrom()).thenReturn(from);
-        when(getItems.getMessageArray()).thenReturn(new MessageType[] { gotMsg });
-        when(getMsg.getItems()).thenReturn(getItems);
-        when(getMsgArr.getGetItemResponseMessageArray()).thenReturn(new ItemInfoResponseMessageType[] { getMsg });
-        when(getResponse.getResponseMessages()).thenReturn(getMsgArr);
-        when(service.getItem(any(GetItemType.class), eq("bkerr@INT.TARTARUS.COM"))).thenReturn(getResponse);
+        addFullUserToMockService(service, "bkerr@INT.TARTARUS.COM", 1);
 
         ArrayList<String> users = new ArrayList<String>();
         users.add("bkerr@INT.TARTARUS.COM");
