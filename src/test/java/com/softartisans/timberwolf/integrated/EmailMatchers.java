@@ -13,12 +13,20 @@ public class EmailMatchers implements Iterable<EmailMatcher>
     private List<EmailMatcher> matchers;
     private String family;
 
+    /**
+     * Creates a new list of EmailMatchers
+     * @param columnFamily the column family for the table.
+     */
     public EmailMatchers(String columnFamily)
     {
         family = columnFamily;
         matchers = new ArrayList<EmailMatcher>();
     }
 
+    /**
+     * Add a new email matcher.
+     * @return the added email matcher
+     */
     public EmailMatcher add()
     {
         EmailMatcher matcher = new EmailMatcher(family);
@@ -26,6 +34,12 @@ public class EmailMatchers implements Iterable<EmailMatcher>
         return matcher;
     }
 
+    /**
+     * Match the given result against all the email matchers.
+     *
+     * If an emailMatcher matches, remove it from the list
+     * @param result a result from hbase that should contain a row with an email.
+     */
     public void match(Result result)
     {
         for (EmailMatcher matcher : matchers)
@@ -38,6 +52,9 @@ public class EmailMatchers implements Iterable<EmailMatcher>
         }
     }
 
+    /**
+     * Assert that all email matchers matched an email
+     */
     public void assertEmpty()
     {
         if (matchers.size() > 0)

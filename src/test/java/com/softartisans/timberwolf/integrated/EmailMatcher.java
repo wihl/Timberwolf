@@ -37,30 +37,55 @@ public class EmailMatcher
         return true;
     }
 
+    /**
+     * Require the sender to have the given alias
+     * @param alias the alias of the sender
+     * @return this
+     */
     public EmailMatcher Sender(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Sender", alias));
         return this;
     }
 
+    /**
+     * Require the to field to have the given alias
+     * @param alias the alias of the sender
+     * @return this
+     */
     public EmailMatcher To(final String alias)
     {
         matchers.add(new EmailAddressMatcher("To", alias));
         return this;
     }
 
+    /**
+     * Require the cc to have the given alias
+     * @param alias the alias of the sender
+     * @return this
+     */
     public EmailMatcher Cc(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Cc", alias));
         return this;
     }
 
+    /**
+     * Require the bcc to have the given alias
+     * @param alias the alias of the sender
+     * @return this
+     */
     public EmailMatcher Bcc(final String alias)
     {
         matchers.add(new EmailAddressMatcher("Bcc", alias));
         return this;
     }
 
+    /**
+     * Require the subject to be the given value
+     * @param subject the expected subject
+     * @return this
+     */
     public EmailMatcher Subject(final String subject)
     {
         matchers.add(new FieldMatcher("Subject")
@@ -74,6 +99,11 @@ public class EmailMatcher
         return this;
     }
 
+    /**
+     * Require the body to contain the given contents
+     * @param contents some text that is expected in the body
+     * @return this
+     */
     public EmailMatcher BodyContains(final String contents)
     {
         matchers.add(new FieldMatcher("Body")
@@ -87,6 +117,9 @@ public class EmailMatcher
         return this;
     }
 
+    /**
+     * Match a single field
+     */
     private abstract class FieldMatcher
     {
         private String columnName;
@@ -107,6 +140,9 @@ public class EmailMatcher
 
     }
 
+    /**
+     * Match an email address field, such as To or Sender
+     */
     private final class EmailAddressMatcher extends FieldMatcher
     {
         final String prefix;
