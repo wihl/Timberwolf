@@ -35,7 +35,7 @@ public class ExchangeServiceTest
         "<soapenv:Header>" +
         "<typ:ExchangeImpersonation xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">" +
         "<typ:ConnectingSID>" +
-        "<typ:PrimarySmtpAddress>bkerr</typ:PrimarySmtpAddress>" +
+        "<typ:PrincipalName>bkerr</typ:PrincipalName>" +
         "</typ:ConnectingSID>" +
         "</typ:ExchangeImpersonation>" +
         "</soapenv:Header>" +

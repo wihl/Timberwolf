@@ -183,7 +183,7 @@ public class ExchangeService
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
-        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrimarySmtpAddress(targetUser);
+        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
         envelope.addNewBody().setFindItem(findItem);
 
         EnvelopeDocument response = sendRequest(request);
@@ -206,7 +206,7 @@ public class ExchangeService
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
-        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrimarySmtpAddress(targetUser);
+        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
         envelope.addNewBody().setGetItem(getItem);
 
         EnvelopeDocument response = sendRequest(request);
