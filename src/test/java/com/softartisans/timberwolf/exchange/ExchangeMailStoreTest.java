@@ -43,6 +43,21 @@ public class ExchangeMailStoreTest
     private ItemInfoResponseMessageType itemInfoResponseMessage;
     private final String idHeaderKey = "Item ID";
 
+    @Mock
+    private FindFolderResponseType findFolderResponse;
+    @Mock
+    private ArrayOfResponseMessagesType findFolderArrayOfResponseMessages;
+    @Mock
+    private FindFolderResponseMessageType findFolderResponseMessage;
+    @Mock
+    private FindFolderParentType findFolderParent;
+    @Mock
+    private ArrayOfFoldersType findFolderArrayOfFolders;
+    @Mock
+    private FolderType folderType;
+    @Mock
+    private FolderIdType folderIdType;
+
     @Before
     public void setUp() throws Exception
     {
@@ -157,6 +172,19 @@ public class ExchangeMailStoreTest
         when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
+
+        FindFolderType findFolder =
+                ExchangeMailStore.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
+        when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
+                .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
+        when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
+        when(findFolderParent.getFolders()).thenReturn(findFolderArrayOfFolders);
+        when(findFolderArrayOfFolders.getFolderArray()).thenReturn(new FolderType[] {folderType});
+        when(folderType.getFolderId()).thenReturn(folderIdType);
+        when(folderIdType.getId()).thenReturn("ANAMAZINGLYENGLISH-LIKEGUID");
         return service;
     }
 

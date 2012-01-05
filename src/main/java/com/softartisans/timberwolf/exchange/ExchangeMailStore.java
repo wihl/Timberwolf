@@ -412,7 +412,8 @@ public class ExchangeMailStore implements MailStore
         private Vector<MailboxItem> mailboxItems;
 
         /** A Queue for managing the folder id's encountered during traversal. */
-        private final Queue<String> folderQueue = new LinkedList<String>();
+        private Queue<String> folderQueue;
+        private String currentFolder;
 
 
         EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
@@ -420,6 +421,24 @@ public class ExchangeMailStore implements MailStore
             this.exchangeService = service;
             maxFindItemsEntries = idPageSize;
             maxGetItemsEntries = itemPageSize;
+
+            try
+            {
+                folderQueue = findFolders(exchangeService,
+                        getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
+                currentFolder = folderQueue.poll();
+            }
+            catch (ServiceCallException e)
+            {
+                LOG.error("Failed to find folder ids.", e);
+                throw new ExchangeRuntimeException("Failed to find folder ids.", e);
+            }
+            catch (HttpErrorException e)
+            {
+                LOG.error("Failed to find folder ids.", e);
+                throw new ExchangeRuntimeException("Failed to find folder ids.", e);
+            }
+
             freshenIds();
             freshenMailboxItems();
         }
@@ -430,7 +449,6 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                //findFolders(exchangeService, getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
                 currentIds = findItems(exchangeService, findItemsOffset, maxFindItemsEntries);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());
