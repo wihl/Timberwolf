@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * This is basically a helper to make creating EmailMatchers easier
- */
+/** This is basically a helper to make creating EmailMatchers easier */
 public class EmailMatchers implements Iterable<EmailMatcher>
 {
     private List<EmailMatcher> matchers;

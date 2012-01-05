@@ -17,7 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Overall integration testing for timberwolf.
+ * Overall integration testing, from exchange server to hbase.
  */
 public class TestIntegration
 {
@@ -139,7 +139,7 @@ public class TestIntegration
                       .BodyContains("Ms child")
                       .BodyContains("wants to be in the loop too.");
         // Page FindItems (29)
-        for (int i=1; i<30; i++)
+        for (int i = 1; i < 30; i++)
         {
             requiredEmails.add()
                           .Subject("Page FindItems" + i)
@@ -147,7 +147,7 @@ public class TestIntegration
                           .BodyContains("#" + i);
         }
         // Page GetItems (11)
-        for (int i=1; i<12; i++)
+        for (int i = 1; i < 12; i++)
         {
             requiredEmails.add()
                           .Subject("Page GetItems" + i)
@@ -170,7 +170,7 @@ public class TestIntegration
         try
         {
             HTableInterface hTable = hbase.getTestingTable();
-            Scan scan = createScan(hbase.getFamily(), new String[] {"Subject", "Sender","Bcc","Cc","To","Body"});
+            Scan scan = createScan(hbase.getFamily(), new String[]{"Subject", "Sender", "Bcc", "Cc", "To", "Body"});
             ResultScanner scanner = hTable.getScanner(scan);
             for (Result result = scanner.next(); result != null; result = scanner.next())
             {
@@ -181,14 +181,14 @@ public class TestIntegration
 
             for (MailboxItem mail : mails)
             {
-                Get get = createGet(mail.getHeader(keyHeader),hbase.getFamily(),mail.getHeaderKeys());
+                Get get = createGet(mail.getHeader(keyHeader), hbase.getFamily(), mail.getHeaderKeys());
                 System.err.println(StringUtils.join(mail.getHeaderKeys()));
                 Result result = hTable.get(get);
-                for(String header : mail.getHeaderKeys())
+                for (String header : mail.getHeaderKeys())
                 {
                     String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(hbase.getFamily()),
-                            Bytes.toBytes(header)));
-                    Assert.assertEquals(mail.getHeader(header),tableValue);
+                                                                       Bytes.toBytes(header)));
+                    Assert.assertEquals(mail.getHeader(header), tableValue);
                 }
             }
         }

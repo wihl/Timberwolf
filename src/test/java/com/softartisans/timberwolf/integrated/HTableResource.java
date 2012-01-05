@@ -74,6 +74,7 @@ public class HTableResource extends IntegrationTestProperties
 
     /**
      * The column family for the table.
+     *
      * @return the column family for the created table
      */
     public String getFamily()
@@ -83,6 +84,7 @@ public class HTableResource extends IntegrationTestProperties
 
     /**
      * The table as created by our production code.
+     *
      * @return the table created by our production code
      */
     public IHBaseTable getTable()
@@ -93,6 +95,7 @@ public class HTableResource extends IntegrationTestProperties
     /**
      * The table created independently of our production code.
      * You should use this table to confirm the contents of the table
+     *
      * @return the table used for testing
      * @throws IOException if there was an error creating the table object
      */
