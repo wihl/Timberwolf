@@ -34,9 +34,11 @@ import java.util.Vector;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 
 /** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest
@@ -92,18 +94,18 @@ public class ExchangeMailStoreTest
                                       .xmlText());
     }
 
-    @Test    
+    @Test
     public void testFindItemsInboxRespondNull()
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(DistinguishedFolderIdNameType.INBOX);
-        when(service.findItem(LikeThis(findItem))).thenReturn(null);
+        when(service.findItem(LikeThis(findItem), eq("bkerr"))).thenReturn(null);
 
         try
         {
-            Vector<String> items = ExchangeMailStore.findItems(service);
+            Vector<String> items = ExchangeMailStore.findItems(service, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -118,7 +120,7 @@ public class ExchangeMailStoreTest
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service);
+        Vector<String> items = ExchangeMailStore.findItems(service, "bkerr");
         assertEquals(0, items.size());
     }
 
@@ -129,7 +131,7 @@ public class ExchangeMailStoreTest
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service);
+        Vector<String> items = ExchangeMailStore.findItems(service, "bkerr");
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -146,7 +148,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service);
+        Vector<String> items = ExchangeMailStore.findItems(service, "bkerr");
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -162,7 +164,7 @@ public class ExchangeMailStoreTest
         FindItemType findItem = ExchangeMailStore
                 .getFindItemsRequest(
                         DistinguishedFolderIdNameType.INBOX);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(LikeThis(findItem), eq("bkerr"))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(
                 arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -245,7 +247,7 @@ public class ExchangeMailStoreTest
         ExchangeService service = mock(ExchangeService.class);
         Vector<String> list = new Vector<String>();
         Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(0, 0, list, service);
+                items = ExchangeMailStore.getItems(0, 0, list, service, "bkerr");
         assertEquals(0, items.size());
     }
 
@@ -266,7 +268,7 @@ public class ExchangeMailStoreTest
                 mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
                             requestedList);
         Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 0, wholeList, service);
+                items = ExchangeMailStore.getItems(1, 0, wholeList, service, "bkerr");
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -288,7 +290,7 @@ public class ExchangeMailStoreTest
                 mockGetItem(new MessageType[]{mockMessageItemId(idValue)},
                             requestedList);
         Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+                items = ExchangeMailStore.getItems(1, 3, wholeList, service, "bkerr");
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -311,7 +313,7 @@ public class ExchangeMailStoreTest
                 mockGetItem(new MessageType[0],
                             requestedList);
         Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(1, 3, wholeList, service);
+                items = ExchangeMailStore.getItems(1, 3, wholeList, service, "bkerr");
         assertEquals(0, items.size());
     }
 
@@ -335,7 +337,7 @@ public class ExchangeMailStoreTest
         }
         ExchangeService service = mockGetItem(messages, requestedList);
         Vector<MailboxItem>
-                items = ExchangeMailStore.getItems(91, 2, wholeList, service);
+                items = ExchangeMailStore.getItems(91, 2, wholeList, service, "bkerr");
         assertEquals(requestedList.size(), items.size());
         for (int i = 0; i < requestedList.size(); i++)
         {
@@ -369,7 +371,7 @@ public class ExchangeMailStoreTest
     {
         GetItemType getItem =
                 ExchangeMailStore.getGetItemsRequest(requestedList);
-        when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
+        when(service.getItem(LikeThis(getItem), eq("bkerr"))).thenReturn(getItemResponse);
         when(getItemResponse.getResponseMessages())
                 .thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())
@@ -387,7 +389,10 @@ public class ExchangeMailStoreTest
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr");
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(users))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -407,9 +412,11 @@ public class ExchangeMailStoreTest
         }
         ExchangeService service = mockFindItem(messages);
 
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr");
         try
         {
-            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail();
+            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail(users);
         }
         catch (ExchangeRuntimeException e)
         {
@@ -436,8 +443,11 @@ public class ExchangeMailStoreTest
         }
         ExchangeService service = mockFindItem(findItems);
         mockGetItem(messages, requestedList, service);
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr");
         int i = 0;
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(users))
         {
             assertEquals(requestedList.get(i),
                          mailboxItem.getHeader(idHeaderKey));
@@ -461,7 +471,7 @@ public class ExchangeMailStoreTest
         GetItemResponseType getResponse = mock(GetItemResponseType.class);
         when(getResponse.getResponseMessages()).thenReturn(responseArr);
         ExchangeService service = mock(ExchangeService.class);
-        when(service.getItem(any(GetItemType.class))).thenReturn(getResponse);
+        when(service.getItem(any(GetItemType.class), eq("bkerr"))).thenReturn(getResponse);
 
         ExchangeMailStore mailstore = new ExchangeMailStore(service);
         Vector<String> ids = new Vector<String>();
@@ -469,7 +479,7 @@ public class ExchangeMailStoreTest
 
         try
         {
-            mailstore.getItems(1, 0, ids, service);
+            mailstore.getItems(1, 0, ids, service, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -490,13 +500,13 @@ public class ExchangeMailStoreTest
         FindItemResponseType findResponse = mock(FindItemResponseType.class);
         when(findResponse.getResponseMessages()).thenReturn(responseArr);
         ExchangeService service = mock(ExchangeService.class);
-        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+        when(service.findItem(any(FindItemType.class), eq("bkerr"))).thenReturn(findResponse);
 
         ExchangeMailStore mailstore = new ExchangeMailStore(service);
 
         try
         {
-            mailstore.findItems(service);
+            mailstore.findItems(service, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)

@@ -65,7 +65,11 @@ public class TestIntegration {
         MailStore mailStore = new ExchangeMailStore(exchangeURL);
         MailWriter mailWriter = HBaseMailWriter.create(table, keyHeader, columnFamily);
 
-        Iterable<MailboxItem> mailboxItems = mailStore.getMail();
+        // TODO: Put appropriate users here during integration test task.
+        // This is just to get it compiling for now.
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr");
+        Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
         Assert.assertTrue(mailboxItems.iterator().hasNext());
         mailWriter.write(mailboxItems);
 
@@ -77,7 +81,10 @@ public class TestIntegration {
         try
         {
             HTableInterface hTable = new HTable(configuration, tableName);
-            Iterable<MailboxItem> mails = mailStore.getMail();
+
+            // TODO: Put appropriate users here during integration test task.
+            // This is just to get it compiling for now.
+            Iterable<MailboxItem> mails = mailStore.getMail(users);
 
             for (MailboxItem mail : mails)
             {
