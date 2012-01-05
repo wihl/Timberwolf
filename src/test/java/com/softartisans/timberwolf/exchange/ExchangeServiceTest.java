@@ -131,6 +131,67 @@ public class ExchangeServiceTest
         "  </m:ResponseMessages>" +
         "</GetItemResponse>";
 
+    private final String findFolderRequest = "<mes:FindFolder Traversal=\"Shallow\" "
+    + "xmlns:mes=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+    + "xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+    + "<mes:FolderShape>"
+    + "<typ:BaseShape>AllProperties</typ:BaseShape>"
+    + "</mes:FolderShape>"
+    + "<mes:ParentFolderIds>"
+    + "<typ:DistinguishedFolderId Id=\"msgfolderroot\"/>"
+    + "</mes:ParentFolderIds>"
+    + "</mes:FindFolder>";
+
+    private final String findFolderResponse = "<m:FindFolderResponse "
+    + "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+    + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" "
+    + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    + "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">"
+    + "<m:ResponseMessages>"
+    + "<m:FindFolderResponseMessage ResponseClass=\"Success\">"
+    + "<m:ResponseCode>NoError</m:ResponseCode>"
+    + "<m:RootFolder TotalItemsInView=\"12\" IncludesLastItemInRange=\"true\">"
+    + "<t:Folders>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAb"
+    + "Ck8HJcmPEi9+6mY2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq3AAA\" "
+    + "ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbbf5\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6m"
+    + "Y2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Deleted Items</t:DisplayName>"
+    + "<t:TotalCount>0</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>0</t:UnreadCount>"
+    + "</t:Folder>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFFTo"
+    + "lzk2yM0Sg+YQ84AAAAGxq5AAA\" ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbbf9\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJ"
+    + "cmPEi9+6mY2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Drafts</t:DisplayName>"
+    + "<t:TotalCount>0</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>0</t:UnreadCount>"
+    + "</t:Folder>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFF"
+    + "Tolzk2yM0Sg+YQ84AAAAGxq2QAA\" ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbhaq\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFFT"
+    + "olzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Inbox</t:DisplayName>"
+    + "<t:TotalCount>101</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>100</t:UnreadCount>"
+    + "</t:Folder>"
+    + "</t:Folders>"
+    + "</m:RootFolder>"
+    + "</m:FindFolderResponseMessage>"
+    + "</m:ResponseMessages>"
+    + "</m:FindFolderResponse>";
+
     private static String soap(String body)
     {
         return soapPrelude + body + soapFinale;
@@ -176,24 +237,23 @@ public class ExchangeServiceTest
         assertEquals(expected.toString(), response.toString());
     }
 
-    // TODO: Take this out when a proper request and response string has been made.
-    private IntegrationTestProperties properties = new IntegrationTestProperties("ExchangeURI");
-
     @Test
     public void testFindFolder()
         throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException, HttpErrorException
     {
-        ExchangeService service = new ExchangeService(properties.getProperty("ExchangeURI"));
+       MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+       factory.forRequest(url, soap(findFolderRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, soap(findFolderResponse).getBytes("UTF-8"));
 
-        FindFolderType findFolder = FindFolderType.Factory.newInstance();
-        findFolder.setTraversal(FolderQueryTraversalType.SHALLOW);
-        findFolder.addNewFolderShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
-        DistinguishedFolderIdType folderId = findFolder.addNewParentFolderIds().addNewDistinguishedFolderId();
-        folderId.setId(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        FindFolderType findFolder = FindFolderDocument.Factory.parse(findFolderRequest).getFindFolder();
 
+        ExchangeService service = new ExchangeService(url, factory);
         FindFolderResponseType response = service.findFolder(findFolder);
 
-        assertTrue(true);
+        FindFolderResponseType expected = EnvelopeDocument.Factory.parse(soap(findFolderResponse))
+                .getEnvelope().getBody().getFindFolderResponse();
+
+        assertEquals(expected.toString(), response.toString());
     }
 
     @Test

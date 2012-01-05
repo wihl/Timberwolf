@@ -1,31 +1,18 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
-import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
-import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
+import com.microsoft.schemas.exchange.services.x2006.messages.*;
+import com.microsoft.schemas.exchange.services.x2006.types.*;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 public class MockPagingExchangeService extends ExchangeService
 {
     private MessageType[] messages;
     HashMap<String, MessageType> messageHash = new HashMap<String, MessageType>();
+
+    private FindFolderParentType rootFolder;
+    private FolderType[] folders;
 
     public MockPagingExchangeService(final MessageType[] msgs)
     {
@@ -37,6 +24,14 @@ public class MockPagingExchangeService extends ExchangeService
         {
             messageHash.put(msg.getItemId().getId(), msg);
         }
+    }
+
+    public MockPagingExchangeService(final FindFolderParentType rootFolder, final FolderType[] folders)
+    {
+        this(new MessageType[]{});
+
+        this.rootFolder = rootFolder;
+        this.folders = folders;
     }
 
     @Override
@@ -79,6 +74,21 @@ public class MockPagingExchangeService extends ExchangeService
         }
 
         msgArr.setGetItemResponseMessageArray(new ItemInfoResponseMessageType[] { getMsg });
+        return response;
+    }
+
+    @Override
+    public FindFolderResponseType findFolder(final FindFolderType findFolder)
+    {
+        FindFolderResponseType response = FindFolderResponseType.Factory.newInstance();
+        ArrayOfResponseMessagesType msgArr = response.addNewResponseMessages();
+        FindFolderResponseMessageType msg = FindFolderResponseMessageType.Factory.newInstance();
+        msg.setResponseCode(ResponseCodeType.NO_ERROR);
+        ArrayOfFoldersType foldersArr = rootFolder.addNewFolders();
+        foldersArr.setFolderArray(folders);
+        msg.setRootFolder(rootFolder);
+        msgArr.setFindFolderResponseMessageArray(new FindFolderResponseMessageType[] { msg });
+
         return response;
     }
 }
