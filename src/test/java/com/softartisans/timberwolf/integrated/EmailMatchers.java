@@ -59,8 +59,12 @@ public class EmailMatchers implements Iterable<EmailMatcher>
     {
         if (matchers.size() > 0)
         {
+            System.out.println("Missing the following emails:");
+            for (EmailMatcher matcher : matchers)
+            {
+                System.out.println("  " + matcher);
+            }
             Assert.fail("Missing " + matchers.size() + " required emails");
-            // TODO: actually tell you something about what's missing
         }
     }
 

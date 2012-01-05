@@ -95,6 +95,14 @@ public class EmailMatcher
             {
                 return subject.equals(s);
             }
+
+            @Override
+            public void appendToStringBuilder(StringBuilder sb)
+            {
+                sb.append("Subject is \"");
+                sb.append(subject);
+                sb.append("\"");
+            }
         });
         return this;
     }
@@ -113,8 +121,29 @@ public class EmailMatcher
             {
                 return s.contains(contents);
             }
+
+            @Override
+            public void appendToStringBuilder(StringBuilder sb)
+            {
+                sb.append("Body contains \"");
+                sb.append(contents);
+                sb.append("\"");
+            }
         });
         return this;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Email with: ");
+        for (FieldMatcher matcher : matchers)
+        {
+            matcher.appendToStringBuilder(sb);
+            sb.append(", ");
+        }
+        return sb.substring(0,sb.length()-2);
     }
 
     /**
@@ -122,7 +151,7 @@ public class EmailMatcher
      */
     private abstract class FieldMatcher
     {
-        private String columnName;
+        protected String columnName;
 
         protected FieldMatcher(String columnName)
         {
@@ -138,6 +167,7 @@ public class EmailMatcher
 
         protected abstract boolean matches(String s);
 
+        public abstract void appendToStringBuilder(StringBuilder sb);
     }
 
     /**
@@ -157,6 +187,16 @@ public class EmailMatcher
         protected boolean matches(String s)
         {
             return s.startsWith(prefix);
+        }
+
+        @Override
+        public void appendToStringBuilder(StringBuilder sb)
+        {
+            sb.append(columnName);
+            sb.append(" begins \"");
+            sb.append(prefix);
+            sb.append("\"");
+
         }
     }
 }
