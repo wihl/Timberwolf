@@ -71,8 +71,8 @@ public class TestIntegration
           korganizer@*
             Inbox
               child of Inbox
-k              Inbox jr
- k          Drafts
+              Inbox jr
+            Drafts
             Sent Items
             Deleted Items
               Deleted Folder
@@ -176,6 +176,7 @@ k              Inbox jr
             {
                 requiredEmails.match(result);
             }
+            requiredEmails.assertEmpty();
             Iterable<MailboxItem> mails = mailStore.getMail();
 
             for (MailboxItem mail : mails)
