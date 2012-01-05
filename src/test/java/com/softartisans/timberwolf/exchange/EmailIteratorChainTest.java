@@ -45,6 +45,15 @@ import java.util.regex.Pattern;
 
 public class EmailIteratorChainTest
 {
+    private void addEmptyUserToMockService(ExchangeService mockService, String user) throws ServiceCallException, HttpErrorException
+    {
+        FindItemResponseType response = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
+        when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { });
+        when(response.getResponseMessages()).thenReturn(msgArr);
+        when(mockService.findItem(any(FindItemType.class), eq(user))).thenReturn(response);
+    }
+
     @Test
     public void testChainNoUsers()
     {
@@ -60,14 +69,30 @@ public class EmailIteratorChainTest
     public void testChainOneEmptyUser() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemResponseType response = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType msgArr = mock(ArrayOfResponseMessagesType.class);
-        when(msgArr.getFindItemResponseMessageArray()).thenReturn(new FindItemResponseMessageType[] { });
-        when(response.getResponseMessages()).thenReturn(msgArr);
-        when(service.findItem(any(FindItemType.class), eq("bkerr@INT.TARTARUS.COM"))).thenReturn(response);
+        addEmptyUserToMockService(service, "bkerr@INT.TARTARUS.COM");
 
         ArrayList<String> users = new ArrayList<String>();
         users.add("bkerr@INT.TARTARUS.COM");
+        EmailIteratorChain chain = new EmailIteratorChain(service, users);
+
+        assertFalse(chain.hasNext());
+        assertNull(chain.next());
+    }
+
+    @Test
+    public void testChainManyEmptyUsers() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        addEmptyUserToMockService(service, "bkerr@INT.TARTARUS.COM");
+        addEmptyUserToMockService(service, "abenjamin@INT.TARTARUS.COM");
+        addEmptyUserToMockService(service, "dkramer@INT.TARTARUS.COM");
+        addEmptyUserToMockService(service, "wgill@INT.TARTARUS.COM");
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("abenjamin@INT.TARTARUS.COM");
+        users.add("dkramer@INT.TARTARUS.COM");
+        users.add("bkerr@INT.TARTARUS.COM");
+        users.add("wgill@INT.TARTARUS.COM");
         EmailIteratorChain chain = new EmailIteratorChain(service, users);
 
         assertFalse(chain.hasNext());
