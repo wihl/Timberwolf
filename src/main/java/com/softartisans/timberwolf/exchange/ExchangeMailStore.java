@@ -108,17 +108,18 @@ public class ExchangeMailStore implements MailStore
      * Gets a list of ids for the inbox for the current user.
      *
      * @param exchangeService The service to use when requesting ids.
+     * @param targetUser The SMTP address (as a String) of the user to find items for.
      * @return A list of exchange ids
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error making the Exchange
      *                              request, or if the SOAP find item response has a message
      *                              with a response code other than "No Error".
      */
-    static Vector<String> findItems(final ExchangeService exchangeService)
+    static Vector<String> findItems(final ExchangeService exchangeService, final String targetUser)
             throws ServiceCallException, HttpErrorException
     {
         FindItemResponseType response =
-            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX));
+            exchangeService.findItem(getFindItemsRequest(DistinguishedFolderIdNameType.INBOX), targetUser);
 
         if (response == null)
         {
@@ -175,6 +176,7 @@ public class ExchangeMailStore implements MailStore
      * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
      * items will be returned
      * @param exchangeService The backend service used for contacting Exchange.
+     * @param targetUser The SMTP address (as a String) of the user to get items for.
      * @return A list of mailbox items that correspond to the given ids.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error making the Exchange
@@ -182,7 +184,7 @@ public class ExchangeMailStore implements MailStore
      *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
-                                        final ExchangeService exchangeService)
+                                        final ExchangeService exchangeService, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
         int max = Math.min(startIndex + count, ids.size());
@@ -190,7 +192,8 @@ public class ExchangeMailStore implements MailStore
         {
             return new Vector<MailboxItem>();
         }
-        GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)));
+        GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)),
+                                                               targetUser);
 
         if (response == null)
         {
@@ -219,14 +222,14 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail()
+    public final Iterable<MailboxItem> getMail(final Iterable<String> targetUsers)
     {
         return new Iterable<MailboxItem>()
         {
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeService);
+                return new EmailIteratorChain(exchangeService, targetUsers);
             }
         };
     }
@@ -235,7 +238,7 @@ public class ExchangeMailStore implements MailStore
      * This Iterator will request a list of all ids from the exchange service
      * and then get actual mail items for those ids.
      */
-    private static final class EmailIterator implements Iterator<MailboxItem>
+    static final class EmailIterator implements Iterator<MailboxItem>
     {
         private Vector<String> currentIds;
         private int currentIdIndex = 0;
@@ -243,12 +246,13 @@ public class ExchangeMailStore implements MailStore
         private Vector<MailboxItem> mailBoxItems;
         private int currentMailboxItemIndex = 0;
         private final ExchangeService exchangeService;
+        private final String targetUser;
 
-        private EmailIterator(final ExchangeService service)
+        EmailIterator(final ExchangeService service, final String user)
         {
             this.exchangeService = service;
+            targetUser = user;
         }
-
 
         /**
          * @throws ExchangeRuntimeException If there was a ServiceCallException or
@@ -263,7 +267,7 @@ public class ExchangeMailStore implements MailStore
                 {
                     currentMailboxItemIndex = 0;
                     currentIdIndex = 0;
-                    currentIds = findItems(exchangeService);
+                    currentIds = findItems(exchangeService, targetUser);
                     LOG.debug("Got " + currentIds.size() + " email ids");
                 }
                 catch (ServiceCallException e)
@@ -287,7 +291,8 @@ public class ExchangeMailStore implements MailStore
                 try
                 {
                     currentMailboxItemIndex = 0;
-                    mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService);
+                    mailBoxItems = getItems(MAX_GET_ITEMS_ENTRIES, currentIdIndex, currentIds, exchangeService,
+                                            targetUser);
                     LOG.debug("Got " + mailBoxItems.size() + " emails");
                     return currentMailboxItemIndex < mailBoxItems.size();
                 }
