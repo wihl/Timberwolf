@@ -16,9 +16,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Overall integration testing for timberwolf.
  */
@@ -201,36 +198,34 @@ public class TestIntegration
          */
         String keyHeader = "Item ID";
 
-        List<EmailMatcher> requiredEmails = new ArrayList<EmailMatcher>();
+        EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
+
         // Inbox
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Sender("tsender")
-                                                              .Subject("Leave it be")
-                                                              .BodyContains("love your inbox clean"));
+        requiredEmails.add().Sender("tsender")
+                      .Subject("Leave it be")
+                      .BodyContains("love your inbox clean");
         // child of Inbox
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Subject("To the child of inbox")
-                                                              .BodyContains("child of Inbox"));
+        requiredEmails.add().Subject("To the child of inbox")
+                      .BodyContains("child of Inbox");
         // Inbox Jr
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Bcc("korganizer")
-                                                              .BodyContains("Inbox Jr")
-                                                              .BodyContains("is getting lonely"));
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("korganizer")
-                                                              .BodyContains("InboxJr"));
+        requiredEmails.add().Bcc("korganizer")
+                      .BodyContains("Inbox Jr")
+                      .BodyContains("is getting lonely");
+        requiredEmails.add().To("korganizer").BodyContains("InboxJr");
         // Drafts
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("tsender")
-                                                              .Subject("A draft"));
+        requiredEmails.add().To("tsender").Subject("A draft");
         // Sent Items
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Sender("korganizer")
-                                                              .To("abenjamin")
-                                                              .Subject("A message to someone else"));
+        requiredEmails.add().Sender("korganizer")
+                      .To("abenjamin")
+                      .Subject("A message to someone else");
         // Deleted Items
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).Subject("Whoops")
-                                                              .BodyContains("this is trash"));
+        requiredEmails.add().Subject("Whoops").BodyContains("this is trash");
         // Deleted Folder
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).BodyContains("Deleted Folder"));
+        requiredEmails.add().BodyContains("Deleted Folder");
         // Topper
-        requiredEmails.add(new EmailMatcher(hbase.getFamily()).To("bkerr")
-                                                              .Cc("korganizer")
-                                                              .Subject("Hey hey Bobbie, throw it in the Topper"));
+        requiredEmails.add().To("bkerr")
+                      .Cc("korganizer")
+                      .Subject("Hey hey Bobbie, throw it in the Topper");
 
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
@@ -249,21 +244,9 @@ public class TestIntegration
             HTableInterface hTable = hbase.getTestingTable();
             Scan scan = createScan(hbase.getFamily(), new String[] {"Subject", "Sender","Bcc","Cc","To","Body"});
             ResultScanner scanner = hTable.getScanner(scan);
-            OUTER: for (Result result = scanner.next(); result != null; result = scanner.next())
+            for (Result result = scanner.next(); result != null; result = scanner.next())
             {
-                for (EmailMatcher matcher : requiredEmails)
-                {
-                    if (matcher.matches(result))
-                    {
-                        requiredEmails.remove(matcher);
-                        continue OUTER;
-                    }
-                }
-            }
-            if (requiredEmails.size() > 0)
-            {
-                Assert.fail("Missing " + requiredEmails.size() + " required emails");
-                // TODO: actually tell you something about what's missing
+                requiredEmails.match(result);
             }
             Iterable<MailboxItem> mails = mailStore.getMail();
 
