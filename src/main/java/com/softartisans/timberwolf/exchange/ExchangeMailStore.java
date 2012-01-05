@@ -49,9 +49,6 @@ public class ExchangeMailStore implements MailStore
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
 
-    /** A Queue for managing the folder id's encountered during traversal. */
-    private final Queue<String> folderQueue = new LinkedList<String>();
-
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
      * server at the provided url.
@@ -268,7 +265,7 @@ public class ExchangeMailStore implements MailStore
         return findFolder;
     }
 
-    static Vector<String> findFolders(final ExchangeService exchangeService, String folderId)
+    static Queue<String> findFolders(final ExchangeService exchangeService, String folderId)
             throws ServiceCallException, HttpErrorException
     {
         return findFolders(exchangeService, getFindFoldersRequest(folderId));
@@ -279,11 +276,11 @@ public class ExchangeMailStore implements MailStore
      *
      * @param exchangeService The Exchange service to use.
      * @param findFolder The FindFolder request to use.
-     * @return A list of all immediate child folders.
+     * @return A queue of all child folders.
      * @throws ServiceCallException If the Exchange service could not be connected to.
      * @throws HttpErrorException If the response could not be parsed.
      */
-    private static Vector<String> findFolders(final ExchangeService exchangeService, FindFolderType findFolder)
+    private static Queue<String> findFolders(final ExchangeService exchangeService, FindFolderType findFolder)
             throws ServiceCallException, HttpErrorException
     {
         FindFolderResponseType response = exchangeService.findFolder(findFolder);
@@ -295,7 +292,7 @@ public class ExchangeMailStore implements MailStore
         }
 
         ArrayOfResponseMessagesType array = response.getResponseMessages();
-        Vector<String> folders = new Vector<String>();
+        Queue<String> folders = new LinkedList<String>();
         for (FindFolderResponseMessageType message :array.getFindFolderResponseMessageArray())
         {
             ResponseCodeType.Enum errorCode = message.getResponseCode();
@@ -414,6 +411,10 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
 
+        /** A Queue for managing the folder id's encountered during traversal. */
+        private final Queue<String> folderQueue = new LinkedList<String>();
+
+
         EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
         {
             this.exchangeService = service;
@@ -429,6 +430,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
+                //findFolders(exchangeService, getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
                 currentIds = findItems(exchangeService, findItemsOffset, maxFindItemsEntries);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());

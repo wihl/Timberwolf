@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Vector;
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
@@ -594,7 +595,7 @@ public class ExchangeMailStoreTest
 
         try
         {
-            Vector<String> foldersVec = ExchangeMailStore.findFolders(service, "TotallyUnimportantId");
+            Queue<String> foldersVec = ExchangeMailStore.findFolders(service, "TotallyUnimportantId");
             int folderCount = 0;
             for( String folder : foldersVec)
             {
