@@ -2,22 +2,17 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class writes a list of MailboxItems to an IHBaseTable.
  */
 public final class HBaseMailWriter implements MailWriter
 {
-    /** Our general purpose logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseMailWriter.class);
 
     /** The HTableInterface to store MailboxItems into. */
     private IHBaseTable mailTable;
@@ -29,10 +24,10 @@ public final class HBaseMailWriter implements MailWriter
     private byte[] columnFamily;
 
     /** The default column family to use if left unspecified. */
-    private static final String DEFAULT_COLUMN_FAMILY = "h";
+    public static final String DEFAULT_COLUMN_FAMILY = "h";
 
     /** The default header, whose value will be used as a rowkey. */
-    private static final String DEFAULT_KEY_HEADER = "Item ID";
+    public static final String DEFAULT_KEY_HEADER = "Item ID";
 
     private HBaseMailWriter(final IHBaseTable table,
                             final String mailboxItemKeyHeader,
