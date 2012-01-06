@@ -308,6 +308,12 @@ public class ExchangeMailStore implements MailStore
             }
         }
 
+        /**
+         * This will be wrong in one specific case.  If the page size is a factor of
+         * the number of emails on the server, then this check will return true
+         * (meaning there are more ids) when in fact we've read to the end of the
+         * data, we just can't tell.
+         */
         private boolean moreIdsOnServer()
         {
             return currentIds.size() == maxFindItemsEntries;
@@ -343,9 +349,6 @@ public class ExchangeMailStore implements MailStore
                 return true;
             }
 
-            // The problem with moreIdsOnServer is that it fails if the id page size is a factor of the
-            // total number of emails.  In that case it'll return true (thinking there's another page
-            // on the server) when really it just got unlucky.
             if (!moreIdsOnServer())
             {
                 return false;
@@ -366,12 +369,6 @@ public class ExchangeMailStore implements MailStore
             }
             else if (moreItemsOnServer())
             {
-                downloadMoreMailboxItems();
-                return advanceLocally();
-            }
-            else if (moreIdsOnServer())
-            {
-                downloadMoreIds();
                 downloadMoreMailboxItems();
                 return advanceLocally();
             }
