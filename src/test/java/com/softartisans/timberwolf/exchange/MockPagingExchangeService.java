@@ -6,6 +6,8 @@ import com.microsoft.schemas.exchange.services.x2006.types.*;
 import java.util.HashMap;
 import java.util.Vector;
 
+import static org.mockito.Mockito.*;
+
 public class MockPagingExchangeService extends ExchangeService
 {
     private MessageType[] messages;
@@ -14,24 +16,22 @@ public class MockPagingExchangeService extends ExchangeService
     private FindFolderParentType rootFolder;
     private FolderType[] folders;
 
-    public MockPagingExchangeService(final MessageType[] msgs)
+    public MockPagingExchangeService(final MessageType[] msgs,
+                                     final FindFolderParentType rootFolder, final FolderType[] folders)
     {
         // Since we're overriding all the public methods, the super
         // constructor doesn't really matter here.
         super("https://fake.com/ews/exchange.asmx");
+
+        this.rootFolder = rootFolder;
+        this.folders = folders;
+
         messages = msgs;
+
         for (MessageType msg : messages)
         {
             messageHash.put(msg.getItemId().getId(), msg);
         }
-    }
-
-    public MockPagingExchangeService(final FindFolderParentType rootFolder, final FolderType[] folders)
-    {
-        this(new MessageType[]{});
-
-        this.rootFolder = rootFolder;
-        this.folders = folders;
     }
 
     @Override

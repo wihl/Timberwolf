@@ -43,6 +43,23 @@ public class ExchangeMailStoreTest
     private ItemInfoResponseMessageType itemInfoResponseMessage;
     private final String idHeaderKey = "Item ID";
 
+    @Mock
+    private FindFolderResponseType findFolderResponse;
+    @Mock
+    private ArrayOfResponseMessagesType findFolderArrayOfResponseMessages;
+    @Mock
+    private FindFolderResponseMessageType findFolderResponseMessage;
+    @Mock
+    private FindFolderParentType findFolderParent;
+    @Mock
+    private ArrayOfFoldersType findFolderArrayOfFolders;
+    @Mock
+    private FolderType folderType;
+    @Mock
+    private FolderIdType folderIdType;
+
+    /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
+    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
     @Before
     public void setUp() throws Exception
     {
@@ -106,7 +123,7 @@ public class ExchangeMailStoreTest
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         assertEquals(0, items.size());
     }
 
@@ -117,7 +134,7 @@ public class ExchangeMailStoreTest
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -134,7 +151,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -147,7 +164,7 @@ public class ExchangeMailStoreTest
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(defaultFolderId, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -157,6 +174,19 @@ public class ExchangeMailStoreTest
         when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
+
+        FindFolderType findFolder =
+                ExchangeMailStore.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
+        when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
+                .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
+        when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
+        when(findFolderParent.getFolders()).thenReturn(findFolderArrayOfFolders);
+        when(findFolderArrayOfFolders.getFolderArray()).thenReturn(new FolderType[] {folderType});
+        when(folderType.getFolderId()).thenReturn(folderIdType);
+        when(folderIdType.getId()).thenReturn(defaultFolderId);
         return service;
     }
 
@@ -508,8 +538,12 @@ public class ExchangeMailStoreTest
             when(mockedId.getId()).thenReturn("item " + i);
             messages[i] = mockedMessage;
         }
+        FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
+        FolderType folder = FolderType.Factory.newInstance();
+        folder.addNewFolderId().setId("ANARBITRARYID");
+        FolderType[] folders = new FolderType[]{folder};
 
-        ExchangeService service = new MockPagingExchangeService(messages);
+        ExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
         ExchangeMailStore.EmailIterator mailItor =
             new ExchangeMailStore.EmailIterator(service, idPageSize, itemPageSize);
 
@@ -591,7 +625,8 @@ public class ExchangeMailStoreTest
             folder.setFolderId(folderId);
             folders[i] = folder;
         }
-        MockPagingExchangeService service = new MockPagingExchangeService(rootFolder, folders);
+        MessageType[] messages = new MessageType[]{};
+        MockPagingExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
 
         try
         {
