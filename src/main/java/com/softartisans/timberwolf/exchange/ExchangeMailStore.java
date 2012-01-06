@@ -261,11 +261,11 @@ public class ExchangeMailStore implements MailStore
             this.exchangeService = service;
             maxFindItemsEntries = idPageSize;
             maxGetItemsEntries = itemPageSize;
-            freshenIds();
-            freshenMailboxItems();
+            downloadMoreIds();
+            downloadMoreMailboxItems();
         }
 
-        private void freshenIds()
+        private void downloadMoreIds()
         {
             try
             {
@@ -287,7 +287,7 @@ public class ExchangeMailStore implements MailStore
             }
         }
 
-        private void freshenMailboxItems()
+        private void downloadMoreMailboxItems()
         {
             try
             {
@@ -351,8 +351,8 @@ public class ExchangeMailStore implements MailStore
                 return false;
             }
 
-            freshenIds();
-            freshenMailboxItems();
+            downloadMoreIds();
+            downloadMoreMailboxItems();
 
             return mailboxItems.size() > 0;
         }
@@ -366,13 +366,13 @@ public class ExchangeMailStore implements MailStore
             }
             else if (moreItemsOnServer())
             {
-                freshenMailboxItems();
+                downloadMoreMailboxItems();
                 return advance();
             }
             else if (moreIdsOnServer())
             {
-                freshenIds();
-                freshenMailboxItems();
+                downloadMoreIds();
+                downloadMoreMailboxItems();
                 return advance();
             }
             else
