@@ -105,7 +105,7 @@ public class TestIntegration
                       .bcc("korganizer")
                       .bodyContains("Inbox Jr")
                       .bodyContains("is getting lonely");
-        requiredEmails.add().to("korganizer").bodyContains("InboxJr");
+        requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
         // Drafts
         requiredEmails.add().to("tsender").subject("A draft");
         // Sent Items
@@ -127,7 +127,7 @@ public class TestIntegration
         requiredEmails.add().subject("Another middler");
         requiredEmails.add().subject("Yet another in the middler");
         // Middler Jr
-        requiredEmails.add().subject("organize away in MJ").bodyContains("Middler Jr");
+        requiredEmails.add().subject("organize away to MJ").bodyContains("Middler Jr");
         // Middler II (0)
         // Middler III
         requiredEmails.add().subject("Forward to Middler III");
