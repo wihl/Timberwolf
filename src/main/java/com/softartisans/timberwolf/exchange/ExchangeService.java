@@ -1,6 +1,11 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.microsoft.schemas.exchange.services.x2006.messages.*;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -206,7 +211,13 @@ public class ExchangeService
         return response.getEnvelope().getBody().getGetItemResponse();
     }
 
-    /** Returns the results of a find folder request */
+    /**
+     * Returns the response of a FindFolder request.
+     * @param findFolder The FindFolder request,
+     * @return The response.
+     * @throws ServiceCallException A non-HTTP error has occurred during the request.
+     * @throws HttpErrorException A HTTP error has occurred during the request.
+     */
     public FindFolderResponseType findFolder(final FindFolderType findFolder)
         throws ServiceCallException, HttpErrorException
     {
