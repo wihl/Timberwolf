@@ -58,6 +58,8 @@ public class ExchangeMailStoreTest
     @Mock
     private FolderIdType folderIdType;
 
+    /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
+    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
     @Before
     public void setUp() throws Exception
     {
@@ -121,7 +123,7 @@ public class ExchangeMailStoreTest
     {
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         assertEquals(0, items.size());
     }
 
@@ -132,7 +134,7 @@ public class ExchangeMailStoreTest
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -149,7 +151,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
-        Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+        Vector<String> items = ExchangeMailStore.findItems(service, defaultFolderId, 0, 1000);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -162,7 +164,7 @@ public class ExchangeMailStoreTest
         throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
+        FindItemType findItem = ExchangeMailStore.getFindItemsRequest(defaultFolderId, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -184,7 +186,7 @@ public class ExchangeMailStoreTest
         when(findFolderParent.getFolders()).thenReturn(findFolderArrayOfFolders);
         when(findFolderArrayOfFolders.getFolderArray()).thenReturn(new FolderType[] {folderType});
         when(folderType.getFolderId()).thenReturn(folderIdType);
-        when(folderIdType.getId()).thenReturn("ANAMAZINGLYENGLISH-LIKEGUID");
+        when(folderIdType.getId()).thenReturn(defaultFolderId);
         return service;
     }
 

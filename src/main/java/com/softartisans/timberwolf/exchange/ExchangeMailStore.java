@@ -449,7 +449,7 @@ public class ExchangeMailStore implements MailStore
             {
                 currentMailboxItemIndex = 0;
                 currentIdIndex = 0;
-                currentIds = findItems(exchangeService, findItemsOffset, maxFindItemsEntries);
+                currentIds = findItems(exchangeService, currentFolder, findItemsOffset, maxFindItemsEntries);
                 findItemsOffset += currentIds.size();
                 LOG.debug("Got {} email ids.", currentIds.size());
             }
@@ -522,9 +522,23 @@ public class ExchangeMailStore implements MailStore
             // on the server) when really it just got unlucky.
             if (!moreIdsOnServer())
             {
-                return false;
+                if (folderQueue.size() > 0)
+                {
+                    currentFolder = folderQueue.poll();
+                    findItemsOffset = 0;
+                    freshenIds();
+                    freshenMailboxItems();
+                    return hasNext();
+                }
+                else
+                {
+                    return false;
+                }
             }
 
+            // This really goes with the above comment about moreIdsOnServer. Basically, we're going to attempt
+            // to get the final page. If we really were unlucky then the evaluation will fail. Otherwise, everything
+            // can proceed smoothly.
             freshenIds();
             freshenMailboxItems();
 
