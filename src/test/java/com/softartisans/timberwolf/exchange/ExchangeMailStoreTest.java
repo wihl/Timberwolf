@@ -115,6 +115,9 @@ public class ExchangeMailStoreTest
 
         request = mailstore.getFindItemsRequest(folder, -1, 10);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, 1, 10);
+        assertEquals(1, request.getIndexedPageItemView().getOffset());
     }
 
     @Test
@@ -131,6 +134,9 @@ public class ExchangeMailStoreTest
         assertEquals(3, request.getIndexedPageItemView().getMaxEntriesReturned());
 
         request = mailstore.getFindItemsRequest(folder, 5, 0);
+        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
+
+        request = mailstore.getFindItemsRequest(folder, 5, 1);
         assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
