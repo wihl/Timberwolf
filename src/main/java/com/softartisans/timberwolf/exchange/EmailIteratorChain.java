@@ -38,7 +38,13 @@ public class EmailIteratorChain implements Iterator<MailboxItem>
 
     public boolean hasNext()
     {
-        return users.hasNext() || (currentIterator != null && currentIterator.hasNext());
+        if (currentIterator != null && currentIterator.hasNext())
+        {
+            return true;
+        }
+
+        currentIterator = nextViableIterator();
+        return currentIterator != null && currentIterator.hasNext();
     }
 
     public MailboxItem next()
