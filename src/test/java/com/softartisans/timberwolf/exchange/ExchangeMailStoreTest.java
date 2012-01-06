@@ -568,4 +568,10 @@ public class ExchangeMailStoreTest
     {
         assertPagesThroughItems(100, 20, 5);
     }
+
+    @Test
+    public void testFindMailItemPageLargerThanIdPage() throws IOException, AuthenticationException
+    {
+        assertPagesThroughItems(20, 5, 10);
+    }
 }
