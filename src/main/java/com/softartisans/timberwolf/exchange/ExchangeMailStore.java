@@ -256,7 +256,8 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
 
-        EmailIterator(final ExchangeService service, final int maximumFindItemsEntries, final int maximumGetItemsEntries)
+        EmailIterator(final ExchangeService service, final int maximumFindItemsEntries,
+                      final int maximumGetItemsEntries)
         {
             this.exchangeService = service;
             maxFindItemsEntries = maximumFindItemsEntries;
