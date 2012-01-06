@@ -536,8 +536,12 @@ public class ExchangeMailStoreTest
             when(mockedId.getId()).thenReturn("item " + i);
             messages[i] = mockedMessage;
         }
+        FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
+        FolderType folder = FolderType.Factory.newInstance();
+        folder.addNewFolderId().setId("ANARBITRARYID");
+        FolderType[] folders = new FolderType[]{folder};
 
-        ExchangeService service = new MockPagingExchangeService(messages);
+        ExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
         ExchangeMailStore.EmailIterator mailItor =
             new ExchangeMailStore.EmailIterator(service, idPageSize, itemPageSize);
 
@@ -619,7 +623,8 @@ public class ExchangeMailStoreTest
             folder.setFolderId(folderId);
             folders[i] = folder;
         }
-        MockPagingExchangeService service = new MockPagingExchangeService(rootFolder, folders);
+        MessageType[] messages = new MessageType[]{};
+        MockPagingExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
 
         try
         {
