@@ -49,7 +49,7 @@ public class EmailIteratorChain implements Iterator<MailboxItem>
         }
 
         // By short-circuiting on hasNext(), we know that this condition implies users.hasNext().
-        if (currentIterator == null)
+        if (currentIterator == null || !currentIterator.hasNext())
         {
             currentIterator = nextViableIterator();
         }

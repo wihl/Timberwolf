@@ -228,7 +228,7 @@ public class EmailIteratorChainTest
 
         assertTrue(chain.hasNext());
         item = chain.next();
-        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("item 2", item.getHeader("Item ID"));
         assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
 
         assertFalse(chain.hasNext());
