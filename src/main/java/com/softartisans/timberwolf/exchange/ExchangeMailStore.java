@@ -66,6 +66,8 @@ public class ExchangeMailStore implements MailStore
 
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
+    private final int maxFindItemsEntries;
+    private final int maxGetItemsEntries;
 
     /**
      * Creates a new ExchangeMailStore for getting mail from the exchange
@@ -76,7 +78,7 @@ public class ExchangeMailStore implements MailStore
      */
     public ExchangeMailStore(final String exchangeUrl)
     {
-        exchangeService = new ExchangeService(exchangeUrl);
+        this(new ExchangeService(exchangeUrl), MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
     }
 
     /**
@@ -85,7 +87,14 @@ public class ExchangeMailStore implements MailStore
      */
     ExchangeMailStore(final ExchangeService service)
     {
-        this.exchangeService = service;
+        this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+    }
+
+    public ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    {
+        exchangeService = service;
+        maxFindItemsEntries = findItemPageSize;
+        maxGetItemsEntries = getItemPageSize;
     }
 
     /**
@@ -410,7 +419,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new EmailIterator(exchangeService, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+                return new EmailIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries);
             }
         };
     }
@@ -430,16 +439,17 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
 
-        /** A Queue for managing the folder id's encountered during traversal. */
         private Queue<String> folderQueue;
         private String currentFolder;
 
 
-        EmailIterator(final ExchangeService service, final int idPageSize, final int itemPageSize)
+        /** A Queue for managing the folder id's encountered during traversal. */
+        EmailIterator(final ExchangeService service, final int maximumFindItemsEntries,
+                      final int maximumGetItemsEntries)
         {
             this.exchangeService = service;
-            maxFindItemsEntries = idPageSize;
-            maxGetItemsEntries = itemPageSize;
+            maxFindItemsEntries = maximumFindItemsEntries;
+            maxGetItemsEntries = maximumGetItemsEntries;
 
             try
             {
@@ -458,11 +468,11 @@ public class ExchangeMailStore implements MailStore
                 throw new ExchangeRuntimeException("Failed to find folder ids.", e);
             }
 
-            freshenIds();
-            freshenMailboxItems();
+            downloadMoreIds();
+            downloadMoreMailboxItems();
         }
 
-        private void freshenIds()
+        private void downloadMoreIds()
         {
             try
             {
@@ -484,7 +494,7 @@ public class ExchangeMailStore implements MailStore
             }
         }
 
-        private void freshenMailboxItems()
+        private void downloadMoreMailboxItems()
         {
             try
             {
@@ -505,6 +515,12 @@ public class ExchangeMailStore implements MailStore
             }
         }
 
+        /**
+         * This will be wrong in one specific case.  If the page size is a factor of
+         * the number of emails on the server, then this check will return true
+         * (meaning there are more ids) when in fact we've read to the end of the
+         * data, we just can't tell.
+         */
         private boolean moreIdsOnServer()
         {
             return currentIds.size() == maxFindItemsEntries;
@@ -520,7 +536,7 @@ public class ExchangeMailStore implements MailStore
             return currentMailboxItemIndex < mailboxItems.size();
         }
 
-        private MailboxItem advance()
+        private MailboxItem advanceLocally()
         {
             MailboxItem item = mailboxItems.get(currentMailboxItemIndex);
             currentMailboxItemIndex++;
@@ -536,17 +552,14 @@ public class ExchangeMailStore implements MailStore
                 return true;
             }
 
-            // The problem with moreIdsOnServer is that it fails if the id page size is a factor of the
-            // total number of emails.  In that case it'll return true (thinking there's another page
-            // on the server) when really it just got unlucky.
             if (!moreIdsOnServer())
             {
                 if (folderQueue.size() > 0)
                 {
                     currentFolder = folderQueue.poll();
                     findItemsOffset = 0;
-                    freshenIds();
-                    freshenMailboxItems();
+                    downloadMoreIds();
+                    downloadMoreMailboxItems();
                     return hasNext();
                 }
                 else
@@ -555,11 +568,12 @@ public class ExchangeMailStore implements MailStore
                 }
             }
 
-            // This really goes with the above comment about moreIdsOnServer. Basically, we're going to attempt
+            // This really goes with the javadocs for moreIdsOnServer. Basically, we're going to attempt
             // to get the final page. If we really were unlucky then the evaluation will fail. Otherwise, everything
             // can proceed smoothly.
-            freshenIds();
-            freshenMailboxItems();
+
+            downloadMoreIds();
+            downloadMoreMailboxItems();
 
             return mailboxItems.size() > 0;
         }
@@ -569,18 +583,12 @@ public class ExchangeMailStore implements MailStore
         {
             if (moreItemsLocally())
             {
-                return advance();
+                return advanceLocally();
             }
             else if (moreItemsOnServer())
             {
-                freshenMailboxItems();
-                return advance();
-            }
-            else if (moreIdsOnServer())
-            {
-                freshenIds();
-                freshenMailboxItems();
-                return advance();
+                downloadMoreMailboxItems();
+                return advanceLocally();
             }
             else
             {
