@@ -98,6 +98,43 @@ public class ExchangeMailStoreTest
     }
 
     @Test
+    public void testGetFindItemsRequestOffset()
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
+
+        FindItemType request = mailstore.getFindItemsRequest(folder, 3, 10);
+        assertEquals(3, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, 13, 10);
+        assertEquals(13, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, 0, 10);
+        assertEquals(0, request.getIndexedPageItemView().getOffset());
+
+        request = mailstore.getFindItemsRequest(folder, -1, 10);
+        assertEquals(0, request.getIndexedPageItemView().getOffset());
+    }
+
+    @Test
+    public void testGetFindItemsRequestMaxEntries()
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        ExchangeMailStore mailstore = new ExchangeMailStore(service);
+        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
+
+        FindItemType request = mailstore.getFindItemsRequest(folder, 5, 10);
+        assertEquals(10, request.getIndexedPageItemView().getMaxEntriesReturned());
+
+        request = mailstore.getFindItemsRequest(folder, 5, 3);
+        assertEquals(3, request.getIndexedPageItemView().getMaxEntriesReturned());
+
+        request = mailstore.getFindItemsRequest(folder, 5, 0);
+        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
+    }
+
+    @Test
     public void testFindItemsInboxRespondNull()
         throws ServiceCallException, HttpErrorException
     {
@@ -473,43 +510,6 @@ public class ExchangeMailStoreTest
         {
             assertEquals("SOAP response contained an error.", e.getMessage());
         }
-    }
-
-    @Test
-    public void testGetFindItemsRequestOffset()
-    {
-        ExchangeService service = mock(ExchangeService.class);
-        ExchangeMailStore mailstore = new ExchangeMailStore(service);
-        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
-
-        FindItemType request = mailstore.getFindItemsRequest(folder, 3, 10);
-        assertEquals(3, request.getIndexedPageItemView().getOffset());
-
-        request = mailstore.getFindItemsRequest(folder, 13, 10);
-        assertEquals(13, request.getIndexedPageItemView().getOffset());
-
-        request = mailstore.getFindItemsRequest(folder, 0, 10);
-        assertEquals(0, request.getIndexedPageItemView().getOffset());
-
-        request = mailstore.getFindItemsRequest(folder, -1, 10);
-        assertEquals(0, request.getIndexedPageItemView().getOffset());
-    }
-
-    @Test
-    public void testGetFindItemsRequestMaxEntries()
-    {
-        ExchangeService service = mock(ExchangeService.class);
-        ExchangeMailStore mailstore = new ExchangeMailStore(service);
-        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
-
-        FindItemType request = mailstore.getFindItemsRequest(folder, 5, 10);
-        assertEquals(10, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = mailstore.getFindItemsRequest(folder, 5, 3);
-        assertEquals(3, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = mailstore.getFindItemsRequest(folder, 5, 0);
-        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
     private void assertPagesThroughItems(int itemCount, int idPageSize, int itemPageSize) throws IOException, AuthenticationException
