@@ -5,7 +5,6 @@ import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
@@ -102,7 +101,6 @@ public class TestIntegration
                       .bodyContains("child of Inbox");
         // Inbox Jr
         requiredEmails.add()
-                      .bcc("korganizer")
                       .bodyContains("Inbox Jr")
                       .bodyContains("is getting lonely");
         requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
@@ -113,6 +111,10 @@ public class TestIntegration
                       .sender("korganizer")
                       .to("abenjamin")
                       .subject("A message to someone else");
+        requiredEmails.add()
+                      .bcc("tsender")
+                      .to("bkerr")
+                      .subject("to whom");
         // Deleted Items
         requiredEmails.add().subject("Whoops").bodyContains("this is trash");
         // Deleted Folder
@@ -182,7 +184,6 @@ public class TestIntegration
             for (MailboxItem mail : mails)
             {
                 Get get = createGet(mail.getHeader(keyHeader), hbase.getFamily(), mail.getHeaderKeys());
-                System.err.println(StringUtils.join(mail.getHeaderKeys()));
                 Result result = hTable.get(get);
                 for (String header : mail.getHeaderKeys())
                 {
