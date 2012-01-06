@@ -323,7 +323,7 @@ public class ExchangeMailStore implements MailStore
             return currentMailboxItemIndex < mailboxItems.size();
         }
 
-        private MailboxItem advance()
+        private MailboxItem advanceLocally()
         {
             MailboxItem item = mailboxItems.get(currentMailboxItemIndex);
             currentMailboxItemIndex++;
@@ -362,18 +362,18 @@ public class ExchangeMailStore implements MailStore
         {
             if (moreItemsLocally())
             {
-                return advance();
+                return advanceLocally();
             }
             else if (moreItemsOnServer())
             {
                 downloadMoreMailboxItems();
-                return advance();
+                return advanceLocally();
             }
             else if (moreIdsOnServer())
             {
                 downloadMoreIds();
                 downloadMoreMailboxItems();
-                return advance();
+                return advanceLocally();
             }
             else
             {
