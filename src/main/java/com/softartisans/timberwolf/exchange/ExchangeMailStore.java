@@ -78,7 +78,19 @@ public class ExchangeMailStore implements MailStore
      */
     public ExchangeMailStore(final String exchangeUrl)
     {
-        this(new ExchangeService(exchangeUrl), MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+        this(exchangeUrl, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+    }
+
+    /**
+     * Creates an ExchangeMailStore with custom page size.
+     * @param exchangeUrl the url to the exchange web service such as
+     * https://devexch01.int.tartarus.com/ews/exchange.asmx.
+     * @param findItemPageSize the number of ids to request at a time.
+     * @param getItemPageSize the number of actual emails to request at a time.
+     */
+    public ExchangeMailStore(final String exchangeUrl, final int findItemPageSize, final int getItemPageSize)
+    {
+        this(new ExchangeService(exchangeUrl), findItemPageSize, getItemPageSize);
     }
 
     /**
@@ -90,7 +102,7 @@ public class ExchangeMailStore implements MailStore
         this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
     }
 
-    public ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    private ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
     {
         exchangeService = service;
         maxFindItemsEntries = findItemPageSize;
