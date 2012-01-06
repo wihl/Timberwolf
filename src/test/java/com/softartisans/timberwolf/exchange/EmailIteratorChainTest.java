@@ -98,7 +98,7 @@ public class EmailIteratorChainTest
             MessageType gotMsg = mock(MessageType.class);
             when(gotMsg.isSetItemId()).thenReturn(true);
             ItemIdType gotId = mock(ItemIdType.class);
-            when(gotId.getId()).thenReturn("item 0");
+            when(gotId.getId()).thenReturn("item " + i);
             when(gotMsg.getItemId()).thenReturn(gotId);
             when(gotMsg.isSetFrom()).thenReturn(true);
             SingleRecipientType from = mock(SingleRecipientType.class);
@@ -176,6 +176,117 @@ public class EmailIteratorChainTest
         MailboxItem item = chain.next();
         assertEquals("item 0", item.getHeader("Item ID"));
         assertEquals("bkerr@INT.TARTARUS.COM", item.getHeader("Sender"));
+        assertFalse(chain.hasNext());
+        assertNull(chain.next());
+    }
+
+    @Test
+    public void testChainManyFullUsers() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        addFullUserToMockService(service, "bkerr@INT.TARTARUS.COM", 1);
+        addFullUserToMockService(service, "abenjamin@INT.TARTARUS.COM", 2);
+        addFullUserToMockService(service, "dkramer@INT.TARTARUS.COM", 3);
+        addFullUserToMockService(service, "wgill@INT.TARTARUS.COM", 1);
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("abenjamin@INT.TARTARUS.COM");
+        users.add("bkerr@INT.TARTARUS.COM");
+        users.add("wgill@INT.TARTARUS.COM");
+        users.add("dkramer@INT.TARTARUS.COM");
+        EmailIteratorChain chain = new EmailIteratorChain(service, users);
+
+        assertTrue(chain.hasNext());
+        MailboxItem item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("abenjamin@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("abenjamin@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("bkerr@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("wgill@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertFalse(chain.hasNext());
+        assertNull(chain.next());
+    }
+
+    @Test
+    public void testChainManyMixedUsers() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        addEmptyUserToMockService(service, "bkerr@INT.TARTARUS.COM");
+        addFullUserToMockService(service, "abenjamin@INT.TARTARUS.COM", 2);
+        addFullUserToMockService(service, "dkramer@INT.TARTARUS.COM", 3);
+        addEmptyUserToMockService(service, "wgill@INT.TARTARUS.COM");
+        addFullUserToMockService(service, "mprince@INT.TARTARUS.COM", 1);
+        addEmptyUserToMockService(service, "korganizer@INT.TARTARUS.COM");
+        addEmptyUserToMockService(service, "tsender@INT.TARTARUS.COM");
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("abenjamin@INT.TARTARUS.COM");
+        users.add("bkerr@INT.TARTARUS.COM");
+        users.add("dkramer@INT.TARTARUS.COM");
+        users.add("korganizer@INT.TARTARUS.COM");
+        users.add("mprince@INT.TARTARUS.COM");
+        users.add("tsender@INT.TARTARUS.COM");
+        users.add("wgill@INT.TARTARUS.COM");
+        EmailIteratorChain chain = new EmailIteratorChain(service, users);
+
+        assertTrue(chain.hasNext());
+        MailboxItem item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("abenjamin@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("abenjamin@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 1", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 2", item.getHeader("Item ID"));
+        assertEquals("dkramer@INT.TARTARUS.COM", item.getHeader("Sender"));
+
+        assertTrue(chain.hasNext());
+        item = chain.next();
+        assertEquals("item 0", item.getHeader("Item ID"));
+        assertEquals("mprince@INT.TARTARUS.COM", item.getHeader("Sender"));
+
         assertFalse(chain.hasNext());
         assertNull(chain.next());
     }
