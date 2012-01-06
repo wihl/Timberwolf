@@ -35,6 +35,7 @@ public class HTableResource extends IntegrationTestProperties
     private String name;
     private HBaseManager hbaseManager;
     private IHBaseTable table;
+    private HTable testingTable;
 
     /** Create a new htable resource */
     public HTableResource()
@@ -57,19 +58,49 @@ public class HTableResource extends IntegrationTestProperties
                 hbaseManager = new HBaseManager(getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
                                                 getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
 
-                List<String> columnFamilies = new ArrayList<String>();
-                columnFamilies.add(COLUMN_FAMILY);
-                table = hbaseManager.createTable(name, columnFamilies);
+                table = createTable();
                 try
                 {
                     inner.evaluate();
                 }
                 finally
                 {
-                    hbaseManager.deleteTable(name);
+                    try
+                    {
+                        closeTables();
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            hbaseManager.deleteTable(name);
+                        }
+                        finally
+                        {
+                            hbaseManager.close();
+                        }
+                    }
                 }
             }
         };
+    }
+
+    private void closeTables() throws IOException
+    {
+        try
+        {
+            if (table != null)
+            {
+                table.close();
+            }
+        }
+        finally
+        {
+            if (testingTable != null)
+            {
+                testingTable.close();
+            }
+        }
     }
 
     /**
@@ -93,18 +124,75 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
+     * Closes the current table and regets the table from hbase
+     * @return a new instance of the table
+     * @throws IOException if there was a problem closing or getting the table
+     */
+    public IHBaseTable regetTable() throws IOException
+    {
+        closeTables();
+        table = hbaseManager.getTable(name);
+        return table;
+    }
+
+    /**
+     * Creates a randomly named table for testing.
+     * <b>Note:</b> This won't create multiple tables if called more than once.
+     * To have multiple tables, use multiple HTableResources
+     *
+     * @return the table created
+     */
+    private IHBaseTable createTable()
+    {
+        if (table == null)
+        {
+            List<String> columnFamilies = new ArrayList<String>();
+            columnFamilies.add(COLUMN_FAMILY);
+            table = hbaseManager.createTable(name, columnFamilies);
+        }
+        return table;
+    }
+
+    /**
+     * returns whether or not the table exists
+     * @return true if the table exists
+     */
+    public boolean exists()
+    {
+        return hbaseManager.tableExists(getName());
+    }
+
+    /**
+     * Returns the name of the table.
+     * @return the name of the table
+     */
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
      * The table created independently of our production code.
-     * You should use this table to confirm the contents of the table
+     * You should use this table to confirm the contents of the table.
+     * Calling this method will close and nullify the regular table,
+     * because hbase client doesn't handle multiple references to the
+     * same table.
+     * <br/>
+     *
+     * <b>NOTE:</b>You are responsible for closing the returned htable.
+     *
      *
      * @return the table used for testing
      * @throws IOException if there was an error creating the table object
      */
     public HTable getTestingTable() throws IOException
     {
+        closeTables();
+        table = null;
         Configuration configuration = HBaseConfigurator.createConfiguration(
                 getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
                 getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
-        return new HTable(configuration, name);
+        testingTable = new HTable(configuration, name);
+        return testingTable;
     }
-
 }
