@@ -1,6 +1,9 @@
 package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.UserTimeUpdater;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -18,6 +21,7 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     private IHBaseTable table;
 
     private final String TIME_COLUMN_FAMILY = "t";
+    private final String TIME_COLUMN_QUALIFIER = "d";
 
     /**
      * Constructs a HBaseUserTimeUpdater from a HBaseManager and a given table name.
@@ -29,21 +33,26 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
         manager = hBaseManager;
 
         List<String> columnFamilies = new ArrayList<String>();
-        columnFamilies.add(TIME_COLUMN_FAMILY)
+        columnFamilies.add(TIME_COLUMN_FAMILY);
 
         /** If the table already exists it will be simply grabbed not recreated. */
-        table = hBaseManager.createTable(updateTable, columnFamilies);  
+        table = hBaseManager.createTable(updateTable, columnFamilies);
     }
 
     @Override
     public DateTime LastUpdated(String user)
     {
-        return null;
+        Get get = new Get(Bytes.toBytes(user));
+        Result result = table.get(get);
+        long timeLong = Bytes.toLong(result.getValue(Bytes.toBytes(TIME_COLUMN_FAMILY),
+                Bytes.toBytes(TIME_COLUMN_QUALIFIER)));
+        DateTime time = new DateTime(timeLong);
+        return time;
     }
 
     @Override
     public void Updated(String user, DateTime dateTime)
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 }

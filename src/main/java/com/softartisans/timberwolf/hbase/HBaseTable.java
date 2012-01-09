@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,22 @@ public class HBaseTable implements IHBaseTable
     public final void put(final Put put)
     {
         puts.add(put);
+    }
+
+    @Override
+    public final Result get(final Get get)
+    {
+        Result result = null;
+        try
+        {
+            result = table.get(get);
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not get from HBase!");
+            throw new HBaseRuntimeException("Could not get from HBase.",e);
+        }
+        return result;
     }
 
     /**

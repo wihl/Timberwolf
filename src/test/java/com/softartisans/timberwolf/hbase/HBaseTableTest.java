@@ -1,6 +1,8 @@
 package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MockHTable;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
 import org.junit.*;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -11,6 +13,9 @@ import static org.mockito.Mockito.*;
  */
 public class HBaseTableTest
 {
+    private final String defaultColumnFamily = "f";
+    private final String defaultColumnQualifier = "q";
+
     /**
      * Default constructor test.
      */
@@ -81,6 +86,32 @@ public class HBaseTableTest
             table.put(put);
         }
         table.flush();
+    }
+
+    /**
+     * Simple get.
+     */
+    @Test
+    public void testGet()
+    {
+        String rowKey = "row";
+        IHBaseTable table = new HBaseTable(MockHTable.create());
+        for (int i = 0; i < 10; i++)
+        {
+            Put put = new Put(Bytes.toBytes(rowKey + i));
+            put.add(Bytes.toBytes(defaultColumnFamily), Bytes.toBytes(defaultColumnQualifier), Bytes.toBytes(i));
+            table.put(put);
+        }
+        table.flush();
+
+        for (int i = 0; i < 10; i++)
+        {
+            Get get = new Get(Bytes.toBytes(rowKey + i));
+            Result result = table.get(get);
+            int value = Bytes.toInt(result.getValue(Bytes.toBytes(defaultColumnFamily),
+                    Bytes.toBytes(defaultColumnQualifier)));
+            Assert.assertEquals(i,value);
+        }
     }
 
 }
