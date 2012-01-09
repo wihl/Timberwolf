@@ -144,7 +144,7 @@ public class ExchangeMailStore implements MailStore
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
 
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
         // Asking for negative or zero max items is nonsensical.

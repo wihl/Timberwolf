@@ -620,7 +620,7 @@ public class ExchangeMailStoreTest
         ExchangeMailStore mail = new ExchangeMailStore(service);
 
         FindFolderType findFolder = mail.getFindFoldersRequest(DistinguishedFolderIdNameType.INBOX);
-        assertEquals("AllProperties", findFolder.getFolderShape().getBaseShape().toString());
+        assertEquals("IdOnly", findFolder.getFolderShape().getBaseShape().toString());
         assertTrue(findFolder.getParentFolderIds().getDistinguishedFolderIdArray().length == 1);
         assertEquals(DistinguishedFolderIdNameType.INBOX,
                 findFolder.getParentFolderIds().getDistinguishedFolderIdArray()[0].getId());
@@ -634,7 +634,7 @@ public class ExchangeMailStoreTest
         String folderId = "Totally Not A Legit Folder Id";
 
         FindFolderType findFolder = mail.getFindFoldersRequest(folderId);
-        assertEquals("AllProperties", findFolder.getFolderShape().getBaseShape().toString());
+        assertEquals("IdOnly", findFolder.getFolderShape().getBaseShape().toString());
         assertTrue(findFolder.getParentFolderIds().getFolderIdArray().length == 1);
         assertEquals(folderId, findFolder.getParentFolderIds().getFolderIdArray()[0].getId());
     }
