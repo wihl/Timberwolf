@@ -10,6 +10,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ExchangeImpersonationType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 
 import static org.junit.Assert.*;
@@ -333,5 +334,22 @@ public class ExchangeServiceTest
         {
             assertEquals("There was an HTTP 500 error while sending a request.", e.getMessage());
         }
+    }
+
+    @Test
+    public void testRequestBase()
+    {
+        ExchangeService service = new ExchangeService(url);
+
+        EnvelopeDocument request = service.requestBase("bkerr@INT.TARTARUS.COM");
+        assertTrue(request.getEnvelope().isSetHeader());
+        assertTrue(request.getEnvelope().getHeader().isSetExchangeImpersonation());
+        ExchangeImpersonationType impersonation = request.getEnvelope().getHeader().getExchangeImpersonation();
+        assertTrue(impersonation.getConnectingSID().isSetPrincipalName());
+        assertEquals("bkerr@INT.TARTARUS.COM", impersonation.getConnectingSID().getPrincipalName());
+
+        request = service.requestBase("korganizer@INT.TARTARUS.COM");
+        assertEquals("korganizer@INT.TARTARUS.COM", request.getEnvelope().getHeader().getExchangeImpersonation()
+                                                           .getConnectingSID().getPrincipalName());
     }
 }
