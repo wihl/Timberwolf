@@ -91,6 +91,7 @@ public class LdapFetcher implements PrincipalFetcher {
     private static String getProviderDiscoveryURL(String domainName)
     {
         StringBuilder userDNBuilder = new StringBuilder();
+        userDNBuilder.append("ldap:///");
         String[] bits = domainName.split("\\.");
         boolean firstBit = true;
         for (String bit : bits)
