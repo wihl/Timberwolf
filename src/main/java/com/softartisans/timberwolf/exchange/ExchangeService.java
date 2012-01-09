@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.util.NoSuchElementException;
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
@@ -52,13 +53,14 @@ public class ExchangeService
     /**
      * Sends a SOAP envelope request and returns the response.
      *
+     *
      * @param envelope An EnvelopeDocument with the SOAP envelope to send to Exchange.
-     * @return An EnvelopeDocuemnt containing the SOAP envelope with Exchange's response.
+     * @return An SOAP body from the Exchange's response.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error sending the response,
      *                              such as an improper encoding or IO error.
      */
-    private EnvelopeDocument sendRequest(final EnvelopeDocument envelope)
+    private BodyType sendRequest(final EnvelopeDocument envelope)
         throws HttpErrorException, ServiceCallException
     {
         String request = DECLARATION + envelope.xmlText();
@@ -147,7 +149,21 @@ public class ExchangeService
             }
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
             LOG.trace(response.xmlText());
-            return response;
+            try {
+                BodyType body = response.getEnvelope().getBody();
+                if (body != null)
+                {
+                    return body;
+                }
+                else
+                {
+                    return ThrowNoBodyException(response);
+                }
+            }
+            catch (NoSuchElementException e)
+            {
+                return ThrowNoBodyException(response);
+            }
         }
         else
         {
@@ -179,6 +195,26 @@ public class ExchangeService
     }
 
     /**
+     * Throws an excpetion for when there's no body. You must return this
+     * method call. This does not check the contents of the response
+     * @param response the response that has no envelope or body
+     * @return This never returns, but java doesn't have that kind of logic,
+     * so it returns a "BodyType"
+     * @throws ServiceCallException always
+     */
+    private BodyType ThrowNoBodyException(EnvelopeDocument response) throws ServiceCallException
+    {
+        LOG.error("SOAP envelope did not contain a valid body");
+        if (!LOG.isTraceEnabled())
+        {
+            LOG.error("SOAP envelope:");
+            LOG.error(response.xmlText());
+        }
+        throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                       "SOAP response did not contain a body.");
+    }
+
+    /**
      * Returns the results of a find item request.
      *
      * @param findItem A FindItemType object that specifies the set of items to
@@ -195,8 +231,7 @@ public class ExchangeService
         EnvelopeType envelope = request.addNewEnvelope();
         envelope.addNewBody().setFindItem(findItem);
 
-        EnvelopeDocument response = sendRequest(request);
-        return response.getEnvelope().getBody().getFindItemResponse();
+        return sendRequest(request).getFindItemResponse();
     }
 
     /**
@@ -216,7 +251,6 @@ public class ExchangeService
         EnvelopeType envelope = request.addNewEnvelope();
         envelope.addNewBody().setGetItem(getItem);
 
-        EnvelopeDocument response = sendRequest(request);
-        return response.getEnvelope().getBody().getGetItemResponse();
+        return sendRequest(request).getGetItemResponse();
     }
 }
