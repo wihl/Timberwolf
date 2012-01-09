@@ -46,11 +46,11 @@ final class App
 
     @Option(name = "--hbase-key-header.",
             usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
-    private String hbaseKeyHeader = "Item ID";
+    private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
     @Option(name = "--hbase-column-family.",
             usage = "The column family for the imported email data.  Default family is 'h'.")
-    private String hbaseColumnFamily = "h";
+    private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
     {
