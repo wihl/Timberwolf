@@ -67,35 +67,122 @@ public class ExchangeService
         LOG.trace("Sending SOAP request to {}.  SOAP envelope:", endpoint);
         LOG.trace(request);
 
-        HttpURLConnection conn;
-        int code;
+        HttpURLConnection conn = createConnection(request);
+        int code = getResponseCode(conn);
+
+        InputStream responseData = getInputStream(conn);
+
+        int amtAvailable = getAmountAvailable(responseData);
+
+        if (code == HttpURLConnection.HTTP_OK)
+        {
+            checkNonEmptyResponse(request, amtAvailable);
+
+            EnvelopeDocument response = parseResponse(responseData);
+            LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
+            LOG.trace(response.xmlText());
+            return getSoapBody(response);
+        }
+        else
+        {
+            return logAndThrowHttpErrorCode(request, code, responseData, amtAvailable);
+        }
+    }
+
+    private BodyType logAndThrowHttpErrorCode(String request, int code, InputStream responseData, int amtAvailable)
+            throws ServiceCallException, HttpErrorException
+    {
+        LOG.error("Server responded with HTTP error code {}.", code);
+        if (!LOG.isTraceEnabled())
+        {
+            LOG.debug("Request that generated the error:");
+            LOG.debug(request);
+        }
+
+        if (amtAvailable > 0)
+        {
+            LOG.debug("Error response body:");
+            try
+            {
+                LOG.debug(inputStreamToString(responseData));
+            }
+            catch (IOException ioe)
+            {
+                LOG.error("There was an error reading from the response stream.", ioe);
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                               "Error reading response stream.", ioe);
+            }
+        }
+
+        throw new HttpErrorException(code);
+    }
+
+    private BodyType getSoapBody(EnvelopeDocument response) throws ServiceCallException
+    {
+        try {
+            BodyType body = response.getEnvelope().getBody();
+            if (body != null)
+            {
+                return body;
+            }
+            else
+            {
+                return throwNoBodyException(response);
+            }
+        }
+        catch (NoSuchElementException e)
+        {
+            return throwNoBodyException(response);
+        }
+    }
+
+    private void checkNonEmptyResponse(String request, int amtAvailable) throws ServiceCallException
+    {
+        if (amtAvailable == 0)
+        {
+            LOG.error("HTTP response was successful, but has no data.");
+            if (!LOG.isTraceEnabled())
+            {
+                LOG.debug("Request that generated the empty response:");
+                LOG.debug(request);
+            }
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Response has empty body.");
+        }
+    }
+
+    private EnvelopeDocument parseResponse(InputStream responseData) throws ServiceCallException
+    {
+        EnvelopeDocument response;
         try
         {
-            conn = connectionFactory.newInstance(endpoint, request.getBytes(SOAP_ENCODING));
-            code = conn.getResponseCode();
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            LOG.error("Request body could not be encoded into " + SOAP_ENCODING, e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error encoding request body.", e);
+            response = EnvelopeDocument.Factory.parse(responseData);
         }
         catch (IOException e)
         {
-            LOG.error("There was an error getting the HTTP status code for the response.", e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting HTTP status code.", e);
+            LOG.error("There was an error reading from the response stream.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading response stream.", e);
         }
-
-        InputStream responseData;
-        try
+        catch (XmlException e)
         {
-           responseData = conn.getInputStream();
+            LOG.error("There was an error parsing the SOAP response from Exchange.");
+            LOG.debug("Response body:");
+            try
+            {
+                LOG.debug(inputStreamToString(responseData));
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
+            }
+            catch (IOException ioe)
+            {
+                LOG.error("There was an error reading from the response stream.", ioe);
+                throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                               "Error reading response stream.", ioe);
+            }
         }
-        catch (IOException e)
-        {
-            LOG.error("There was an error getting the input stream for the response.", e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
-        }
+        return response;
+    }
 
+    private int getAmountAvailable(InputStream responseData) throws ServiceCallException
+    {
         int amtAvailable;
         try
         {
@@ -106,92 +193,52 @@ public class ExchangeService
             LOG.error("Cannot determine the number of available bytes in the response.");
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading available bytes.");
         }
+        return amtAvailable;
+    }
 
-
-        if (code == HttpURLConnection.HTTP_OK)
+    private InputStream getInputStream(HttpURLConnection conn) throws ServiceCallException
+    {
+        InputStream responseData;
+        try
         {
-            if (amtAvailable == 0)
-            {
-                LOG.error("HTTP response was successful, but has no data.");
-                if (!LOG.isTraceEnabled())
-                {
-                    LOG.debug("Request that generated the empty response:");
-                    LOG.debug(request);
-                }
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Response has empty body.");
-            }
-
-            EnvelopeDocument response;
-            try
-            {
-                response = EnvelopeDocument.Factory.parse(responseData);
-            }
-            catch (IOException e)
-            {
-                LOG.error("There was an error reading from the response stream.", e);
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading response stream.", e);
-            }
-            catch (XmlException e)
-            {
-                LOG.error("There was an error parsing the SOAP response from Exchange.");
-                LOG.debug("Response body:");
-                try
-                {
-                    LOG.debug(inputStreamToString(responseData));
-                    throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
-                }
-                catch (IOException ioe)
-                {
-                    LOG.error("There was an error reading from the response stream.", ioe);
-                    throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                                                   "Error reading response stream.", ioe);
-                }
-            }
-            LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
-            LOG.trace(response.xmlText());
-            try {
-                BodyType body = response.getEnvelope().getBody();
-                if (body != null)
-                {
-                    return body;
-                }
-                else
-                {
-                    return ThrowNoBodyException(response);
-                }
-            }
-            catch (NoSuchElementException e)
-            {
-                return ThrowNoBodyException(response);
-            }
+           responseData = conn.getInputStream();
         }
-        else
+        catch (IOException e)
         {
-            LOG.error("Server responded with HTTP error code {}.", code);
-            if (!LOG.isTraceEnabled())
-            {
-                LOG.debug("Request that generated the error:");
-                LOG.debug(request);
-            }
-
-            if (amtAvailable > 0)
-            {
-                LOG.debug("Error response body:");
-                // Why this works: http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
-                try
-                {
-                    LOG.debug(inputStreamToString(responseData));
-                }
-                catch (IOException ioe)
-                {
-                    LOG.error("There was an error reading from the response stream.", ioe);
-                    throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                                                   "Error reading response stream.", ioe);
-                }
-            }
-
-            throw new HttpErrorException(code);
+            LOG.error("There was an error getting the input stream for the response.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
         }
+        return responseData;
+    }
+
+    private int getResponseCode(HttpURLConnection conn) throws ServiceCallException
+    {
+        int code;
+        try
+        {
+            code = conn.getResponseCode();
+        }
+        catch (IOException e)
+        {
+            LOG.error("There was an error getting the HTTP status code for the response.", e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting HTTP status code.", e);
+        }
+        return code;
+    }
+
+    private HttpURLConnection createConnection(String request) throws ServiceCallException
+    {
+        HttpURLConnection conn;
+        try
+        {
+            conn = connectionFactory.newInstance(endpoint, request.getBytes(SOAP_ENCODING));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOG.error("Request body could not be encoded into " + SOAP_ENCODING, e);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error encoding request body.", e);
+        }
+        return conn;
     }
 
     /**
@@ -202,7 +249,7 @@ public class ExchangeService
      * so it returns a "BodyType"
      * @throws ServiceCallException always
      */
-    private BodyType ThrowNoBodyException(EnvelopeDocument response) throws ServiceCallException
+    private BodyType throwNoBodyException(EnvelopeDocument response) throws ServiceCallException
     {
         LOG.error("SOAP envelope did not contain a valid body");
         if (!LOG.isTraceEnabled())
