@@ -13,15 +13,16 @@ import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Vector;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains helper methods for FindItems requests.
  */
-public class FindItemHelper
+public final class FindItemHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(FindItemHelper.class);
 
@@ -31,6 +32,14 @@ public class FindItemHelper
      * are "beginning" or "end"
      */
     private static final IndexBasePointType.Enum FIND_ITEMS_BASE_POINT = IndexBasePointType.BEGINNING;
+
+    /**
+     * Enforces not being able to create an instance.
+     */
+    private FindItemHelper()
+    {
+
+    }
 
     /**
      * Creates a FindItemType to request all the ids for the given distinguished folder.

@@ -2,12 +2,15 @@ package com.softartisans.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.softartisans.timberwolf.MailboxItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.Vector;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 /**
  * This Iterator will request a list of all ids from the exchange service

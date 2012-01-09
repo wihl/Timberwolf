@@ -11,18 +11,28 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Contains helper methods for FindFolder requests.
  */
-public class FindFolderHelper {
+public final class FindFolderHelper
+{
 
     private static final Logger LOG = LoggerFactory.getLogger(FindFolderHelper.class);
+
+    /**
+     * Enforces not being able to create an instance.
+     */
+    private FindFolderHelper()
+    {
+
+    }
 
     /**
      * Creates a FindFolderType for the given distinguished folder.
