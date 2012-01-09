@@ -167,6 +167,14 @@ public class ExchangeService
         }
     }
 
+    EnvelopeDocument requestBase(final String targetUser)
+    {
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
+        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
+        return request;
+    }
+
     /**
      * Returns the results of a find item request.
      *
@@ -181,9 +189,8 @@ public class ExchangeService
     public FindItemResponseType findItem(final FindItemType findItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
-        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
+        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setFindItem(findItem);
 
         EnvelopeDocument response = sendRequest(request);
@@ -204,9 +211,8 @@ public class ExchangeService
     public GetItemResponseType getItem(final GetItemType getItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
-        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
+        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setGetItem(getItem);
 
         EnvelopeDocument response = sendRequest(request);
