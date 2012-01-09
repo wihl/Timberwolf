@@ -1,8 +1,32 @@
 package com.softartisans.timberwolf.exchange;
 
 import com.cloudera.alfredo.client.AuthenticationException;
-import com.microsoft.schemas.exchange.services.x2006.messages.*;
-import com.microsoft.schemas.exchange.services.x2006.types.*;
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
+import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
+import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
+import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
+import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.softartisans.timberwolf.MailboxItem;
 import org.apache.xmlbeans.XmlException;
 import org.junit.Assert;
@@ -22,7 +46,9 @@ import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest
@@ -71,7 +97,7 @@ public class ExchangeMailStoreTest
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.INBOX);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
@@ -87,7 +113,7 @@ public class ExchangeMailStoreTest
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
@@ -151,7 +177,7 @@ public class ExchangeMailStoreTest
 
         try
         {
-            Vector<String> items = ExchangeMailStore.findItems(service, 0, 1000);
+            Vector<String> items = ExchangeMailStore.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -523,7 +549,7 @@ public class ExchangeMailStoreTest
 
         try
         {
-            mailstore.findItems(service, 0, 1000);
+            mailstore.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -636,7 +662,8 @@ public class ExchangeMailStoreTest
 
         try
         {
-            Queue<String> foldersVec = ExchangeMailStore.findFolders(service, "TotallyUnimportantId");
+            Queue<String> foldersVec = ExchangeMailStore.findFolders(service,
+                    ExchangeMailStore.getFindFoldersRequest("TotallyUnimportantId"));
             int folderCount = 0;
             for( String folder : foldersVec)
             {

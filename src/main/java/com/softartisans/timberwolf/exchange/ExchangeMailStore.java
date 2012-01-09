@@ -157,22 +157,6 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
-     * Gets a list of ids for the inbox for the current user.
-     *
-     * @param exchangeService the actual service to use when requesting ids
-     * @param offset the number of items to offset for paging
-     * @param maxEntries the maximum number of entries to add
-     * @return a list of exchange ids
-     * @throws ServiceCallException If we can't connect to the exchange service
-     * @throws HttpErrorException If the response cannot be parsed
-     */
-    static Vector<String> findItems(final ExchangeService exchangeService, final int offset, final int maxEntries)
-            throws ServiceCallException, HttpErrorException
-    {
-        return findItems(exchangeService, DistinguishedFolderIdNameType.INBOX, offset, maxEntries);
-    }
-
-    /**
      * Gets a list of ids from a specified distinguished folder for the current user.
      *
      * @param exchangeService the actual service to use when requesting ids
@@ -210,7 +194,7 @@ public class ExchangeMailStore implements MailStore
     }
 
     /**
-     * Gets a list of ids for a specified folder by folder id for the current user.
+     * Gets a list of ids for a specified folder by FindItemType for the current user.
      *
      * @param exchangeService the actual service to use when requesting ids
      * @param findItem the FindItemType to use for the request
@@ -288,15 +272,9 @@ public class ExchangeMailStore implements MailStore
     {
         FindFolderType findFolder = FindFolderType.Factory.newInstance();
         findFolder.setTraversal(FolderQueryTraversalType.DEEP);
-        findFolder.addNewFolderShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
+        findFolder.addNewFolderShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
 
         return findFolder;
-    }
-
-    static Queue<String> findFolders(final ExchangeService exchangeService, final String folderId)
-            throws ServiceCallException, HttpErrorException
-    {
-        return findFolders(exchangeService, getFindFoldersRequest(folderId));
     }
 
     /**
@@ -308,7 +286,7 @@ public class ExchangeMailStore implements MailStore
      * @throws ServiceCallException If the Exchange service could not be connected to.
      * @throws HttpErrorException If the response could not be parsed.
      */
-    private static Queue<String> findFolders(final ExchangeService exchangeService, final FindFolderType findFolder)
+    static Queue<String> findFolders(final ExchangeService exchangeService, final FindFolderType findFolder)
             throws ServiceCallException, HttpErrorException
     {
         FindFolderResponseType response = exchangeService.findFolder(findFolder);
@@ -439,11 +417,10 @@ public class ExchangeMailStore implements MailStore
         private Vector<String> currentIds;
         private Vector<MailboxItem> mailboxItems;
 
+        /** A Queue for managing the folder id's encountered during traversal. */
         private Queue<String> folderQueue;
         private String currentFolder;
 
-
-        /** A Queue for managing the folder id's encountered during traversal. */
         EmailIterator(final ExchangeService service, final int maximumFindItemsEntries,
                       final int maximumGetItemsEntries)
         {
