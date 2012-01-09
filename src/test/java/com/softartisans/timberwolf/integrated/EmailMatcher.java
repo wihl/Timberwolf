@@ -6,7 +6,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.util.ArrayList;
 import java.util.List;
 
-/** An class for validating emails in an hbase result. */
+/** A class for validating emails in an hbase result. */
 public class EmailMatcher
 {
     private List<FieldMatcher> matchers;
