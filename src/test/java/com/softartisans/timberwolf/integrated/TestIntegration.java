@@ -160,7 +160,7 @@ public class TestIntegration
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
 
-        MailStore mailStore = new ExchangeMailStore(exchangeURL, 4, 12);
+        MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
         MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
         Iterable<MailboxItem> mailboxItems = mailStore.getMail();
