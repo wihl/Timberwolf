@@ -4,17 +4,12 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseTy
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-
+import static com.softartisans.timberwolf.Utilities.inputStreamToString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
 import java.net.HttpURLConnection;
-
-import java.util.Scanner;
-
 import org.apache.xmlbeans.XmlException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,11 +133,18 @@ public class ExchangeService
             {
                 LOG.error("There was an error parsing the SOAP response from Exchange.");
                 LOG.debug("Response body:");
-                // Why this works: http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
-                LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
+                try
+                {
+                    LOG.debug(inputStreamToString(responseData));
+                    throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
+                }
+                catch (IOException ioe)
+                {
+                    LOG.error("There was an error reading from the response stream.", ioe);
+                    throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                                   "Error reading response stream.", ioe);
+                }
             }
-
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
             LOG.trace(response.xmlText());
             return response;
@@ -160,7 +162,16 @@ public class ExchangeService
             {
                 LOG.debug("Error response body:");
                 // Why this works: http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
-                LOG.debug(new Scanner(responseData).useDelimiter("\\A").next());
+                try
+                {
+                    LOG.debug(inputStreamToString(responseData));
+                }
+                catch (IOException ioe)
+                {
+                    LOG.error("There was an error reading from the response stream.", ioe);
+                    throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                                   "Error reading response stream.", ioe);
+                }
             }
 
             throw new HttpErrorException(code);
