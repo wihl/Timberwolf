@@ -1,11 +1,5 @@
 package com.softartisans.timberwolf.exchange.ldap;
 
-import javax.naming.*;
-import javax.naming.directory.*;
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
-
 import com.softartisans.timberwolf.exchange.PrincipalFetchException;
 import com.softartisans.timberwolf.exchange.PrincipalFetcher;
 import com.sun.security.auth.callback.TextCallbackHandler;
@@ -16,28 +10,47 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<String>> {
-    final String _domainName;
-    final String _configurationEntry;
-    PrincipalFetchException fail;
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
-    public LdapFetcher(String domainName, String configurationEntry)
+/**
+ * This class fetches a list of principals through LDAP.
+ * It tries to return as many as possible.
+ */
+public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<String>>
+{
+    private final String domainName;
+    private final String configurationEntry;
+    private PrincipalFetchException fail;
+
+    public LdapFetcher(final String aDomainName, final String aConfigurationEntry)
     {
-        if (domainName == null || domainName.length() == 0)
+        if (aDomainName == null || aDomainName.length() == 0)
         {
             throw new IllegalArgumentException("domainName cannot be empty");
         }
-        if (configurationEntry == null || configurationEntry.length() == 0)
+        if (aConfigurationEntry == null || aConfigurationEntry.length() == 0)
         {
             throw new IllegalArgumentException("configurationEntry cannot be empty");
         }
-        _domainName = domainName;
-        _configurationEntry = configurationEntry;
+        domainName = aDomainName;
+        configurationEntry = aConfigurationEntry;
     }
 
     public Iterable<String> getPrincipals() throws PrincipalFetchException
     {
-        LoginContext lc = loginAsDev(_configurationEntry);
+        LoginContext lc = loginAsDev(configurationEntry);
         Subject sbj = lc.getSubject();
 
         Iterable<String> rtn = Subject.doAs(sbj, this);
@@ -49,25 +62,32 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
     }
 
     @Override
-    public Iterable<String> run() {
+    public Iterable<String> run()
+    {
         Hashtable<String, String> defEnv = defaultEnvironment();
         List<String> rtnList = new LinkedList<String>();
-        try {
+        try
+        {
             DirContext context = new InitialDirContext(defEnv);
 
             String wantedAttribute = "userPrincipalName";
             SearchControls ctrl = new SearchControls();
-            String[] attributeFilter = { wantedAttribute };
+            String[] attributeFilter = {
+                    wantedAttribute
+            };
             ctrl.setReturningAttributes(attributeFilter);
             ctrl.setSearchScope(SearchControls.SUBTREE_SCOPE);
             NamingEnumeration<?> enumeration = context.search("CN=Users", "(objectClass=person)", ctrl);
-            while (enumeration.hasMore()) {
+            while (enumeration.hasMore())
+            {
                 SearchResult result = (SearchResult) enumeration.next();
                 Attributes attribs = result.getAttributes();
                 stringifyAttributes(attribs, wantedAttribute, rtnList);
             }
 
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             e.printStackTrace();
             fail = new PrincipalFetchException(e);
         }
@@ -76,7 +96,7 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
 
     private Hashtable<String, String> defaultEnvironment()
     {
-        Hashtable<String, String> env = new Hashtable<String, String>();
+        final Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         // The secrets about this PROVIDER_URL are contained within:
         // http://docs.oracle.com/javase/6/docs/technotes/guides/jndi/jndi-ldap.html
@@ -87,16 +107,19 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         return env;
     }
 
-    private static LoginContext loginAsDev(String configurationEntry) throws PrincipalFetchException
+    private static LoginContext loginAsDev(final String configurationEntry) throws PrincipalFetchException
     {
         LoginContext lc = null;
-        try {
+        try
+        {
             lc = new LoginContext(configurationEntry, new TextCallbackHandler());
             // Attempt authentication
             // We might want to do this in a "for" loop to give
             // user more than one chance to enter correct username/password
             lc.login();
-        } catch (LoginException le) {
+        }
+        catch (LoginException le)
+        {
             System.err.println("Authentication attempt failed: " + le);
             throw new PrincipalFetchException(le);
         }
@@ -104,12 +127,16 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         return lc;
     }
 
-    private static void stringifyAttributes(Attributes attribs, String wantedAttribute, Collection<String> collector) throws NamingException
+    private static void stringifyAttributes(final Attributes attribs,
+                                            final String wantedAttribute,
+                                            final Collection<String> collector) throws NamingException
     {
         Attribute attrib = attribs.get(wantedAttribute);
-        if (attrib != null) {
-            NamingEnumeration<?> values = ((BasicAttribute)attrib).getAll();
-            while (values.hasMore()) {
+        if (attrib != null)
+        {
+            NamingEnumeration<?> values = ((BasicAttribute) attrib).getAll();
+            while (values.hasMore())
+            {
                 collector.add(values.next().toString());
             }
         }
@@ -123,7 +150,7 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
     {
         StringBuilder userDNBuilder = new StringBuilder();
         userDNBuilder.append("ldap:///");
-        String[] bits = _domainName.split("\\.");
+        String[] bits = domainName.split("\\.");
         boolean firstBit = true;
         for (String bit : bits)
         {
@@ -148,8 +175,10 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
      * @return An iterable listing all supported authentication methods.
      * @throws PrincipalFetchException
      */
-    public Iterable<String> getSecurityMechanisms() throws PrincipalFetchException {
-        try {
+    public Iterable<String> getSecurityMechanisms() throws PrincipalFetchException
+    {
+        try
+        {
             Hashtable<String, String> defEnv = defaultEnvironment();
             DirContext ctx = new InitialDirContext(defEnv);
 
@@ -159,7 +188,9 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
             stringifyAttributes(attrs, "supportedSASLMechanisms", rtnList);
             return rtnList;
 
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             throw new PrincipalFetchException(e);
         }
     }
