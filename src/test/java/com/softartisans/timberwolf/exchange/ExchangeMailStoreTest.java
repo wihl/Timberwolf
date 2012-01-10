@@ -253,7 +253,7 @@ public class ExchangeMailStoreTest
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-            .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });
+            .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
         when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(true);
         when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
@@ -263,6 +263,7 @@ public class ExchangeMailStoreTest
 
         FolderType folderType = mock(FolderType.class);
         FolderIdType folderIdType = mock(FolderIdType.class);
+        when(folderType.isSetFolderId()).thenReturn(true);
         when(folderType.getFolderId()).thenReturn(folderIdType);
         when(folderIdType.getId()).thenReturn(defaultFolderId);
         mockFindFolders(service, new FolderType[]{folderType});
@@ -279,7 +280,9 @@ public class ExchangeMailStoreTest
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
         when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(findFolderResponseMessage.isSetRootFolder()).thenReturn(true);
         when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
+        when(findFolderParent.isSetFolders()).thenReturn(true);
         when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
         when(arrayOfFolders.getFolderArray()).thenReturn(folders);
     }
@@ -476,6 +479,21 @@ public class ExchangeMailStoreTest
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
+        {
+            fail("There shouldn't be any mailBoxItems");
+        }
+    }
+
+    @Test
+    public void testGetMailFind0Folders()
+            throws XmlException, IOException, HttpErrorException,
+                   ServiceCallException, AuthenticationException
+    {
+        // Exchange returns 0 mail when findItem is called
+        MessageType[] messages = new MessageType[0];
+        ExchangeService service = mock(ExchangeService.class);
+        mockFindFolders(service, new FolderType[0]);
         for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
         {
             fail("There shouldn't be any mailBoxItems");
@@ -747,6 +765,7 @@ public class ExchangeMailStoreTest
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
         when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findFolderResponseMessage.isSetRootFolder()).thenReturn(false);
+        FindFolderHelper.findFolders(service, findFolder);
     }
 
     @Test
@@ -763,6 +782,7 @@ public class ExchangeMailStoreTest
         when(findFolderResponseMessage.isSetRootFolder()).thenReturn(true);
         when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
         when(findFolderParent.isSetFolders()).thenReturn(false);
+        FindFolderHelper.findFolders(service, findFolder);
     }
 
     @Test
