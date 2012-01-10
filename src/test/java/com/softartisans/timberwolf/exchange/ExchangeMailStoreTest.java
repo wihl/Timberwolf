@@ -75,11 +75,7 @@ public class ExchangeMailStoreTest
     @Mock
     private FindFolderParentType findFolderParent;
     @Mock
-    private ArrayOfFoldersType findFolderArrayOfFolders;
-    @Mock
-    private FolderType folderType;
-    @Mock
-    private FolderIdType folderIdType;
+    private ArrayOfFoldersType arrayOfFolders;
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
     private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
@@ -237,7 +233,6 @@ public class ExchangeMailStoreTest
         }
 
         messages[unset] = mock(MessageType.class);
-        ItemIdType mockedId = mock(ItemIdType.class);
         when(messages[unset].isSetItemId()).thenReturn(false);
         ExchangeService service = mockFindItem(messages);
         Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
@@ -266,6 +261,17 @@ public class ExchangeMailStoreTest
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
 
+        FolderType folderType = mock(FolderType.class);
+        FolderIdType folderIdType = mock(FolderIdType.class);
+        when(folderType.getFolderId()).thenReturn(folderIdType);
+        when(folderIdType.getId()).thenReturn(defaultFolderId);
+        mockFindFolders(service, new FolderType[]{folderType});
+        return service;
+    }
+
+    private void mockFindFolders(ExchangeService service, FolderType[] folders)
+            throws ServiceCallException, HttpErrorException
+    {
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
         when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
@@ -274,11 +280,8 @@ public class ExchangeMailStoreTest
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
         when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
-        when(findFolderParent.getFolders()).thenReturn(findFolderArrayOfFolders);
-        when(findFolderArrayOfFolders.getFolderArray()).thenReturn(new FolderType[] {folderType});
-        when(folderType.getFolderId()).thenReturn(folderIdType);
-        when(folderIdType.getId()).thenReturn(defaultFolderId);
-        return service;
+        when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
+        when(arrayOfFolders.getFolderArray()).thenReturn(folders);
     }
 
     @Test
@@ -432,6 +435,16 @@ public class ExchangeMailStoreTest
         when(mockedMessage.getItemId()).thenReturn(mockedId);
         when(mockedId.getId()).thenReturn(itemId);
         return mockedMessage;
+    }
+
+    private FolderType mockFolderType(String folderId)
+    {
+        FolderType folder = mock(FolderType.class);
+        FolderIdType folderIdHolder = mock(FolderIdType.class);
+        when(folder.isSetFolderId()).thenReturn(true);
+        when(folder.getFolderId()).thenReturn(folderIdHolder);
+        when(folderIdHolder.getId()).thenReturn(folderId);
+        return folder;
     }
 
     private ExchangeService mockGetItem(MessageType[] messages, List<String> requestedList)
@@ -720,6 +733,62 @@ public class ExchangeMailStoreTest
         {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testFindFoldersNoRootFolder() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        FindFolderType findFolder =
+                FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
+        when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
+                .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
+        when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(findFolderResponseMessage.isSetRootFolder()).thenReturn(false);
+    }
+
+    @Test
+    public void testFindFoldersNoFolders() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+        FindFolderType findFolder =
+                FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
+        when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
+                .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
+        when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(findFolderResponseMessage.isSetRootFolder()).thenReturn(true);
+        when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
+        when(findFolderParent.isSetFolders()).thenReturn(false);
+    }
+
+    @Test
+    public void testFindFoldersNoFolderId() throws ServiceCallException, HttpErrorException
+    {
+        int count = 3;
+        int unset = 1;
+        FolderType[] messages = new FolderType[count];
+        for (int i = 0; i < count; i++)
+        {
+            messages[i] = mockFolderType("the" + i + "id");
+        }
+
+        messages[unset] = mock(FolderType.class);
+        when(messages[unset].isSetFolderId()).thenReturn(false);
+        ExchangeService service = mock(ExchangeService.class);
+        mockFindFolders(service, messages);
+        Queue<String> items = FindFolderHelper.findFolders(
+                service, FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
+        Vector<String> expected = new Vector<String>(count);
+        for (int i = 0; i < count; i++)
+        {
+            expected.add("the" + i + "id");
+        }
+        expected.remove(1);
+        assertEquals(expected, items);
     }
 
     @Test
