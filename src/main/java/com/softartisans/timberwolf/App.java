@@ -27,8 +27,8 @@ final class App
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
     @Option(required = true, name = "--exchange-url",
-            usage = "The URL of your Exchange Web Services endpoint.\nFor example: " +
-                    "https://example.contoso.com/ews/exchange.asmx")
+            usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+                    + "https://example.contoso.com/ews/exchange.asmx")
     private String exchangeUrl;
 
     @Option(name = "--hbase-quorum",
@@ -87,8 +87,8 @@ final class App
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
-                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase " +
-                                           "Table Name must all be specified if at least one is specified");
+                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                                           + "Table Name must all be specified if at least one is specified");
             }
 
             useHBase = allHBaseArgs;

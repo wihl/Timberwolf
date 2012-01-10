@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory;
 public final class HBaseMailWriter implements MailWriter
 {
     /** Our general purpose logger. */
-    private static Logger logger =
-            LoggerFactory.getLogger(HBaseMailWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseMailWriter.class);
 
     /** The HTableInterface to store MailboxItems into. */
     private IHBaseTable mailTable;
