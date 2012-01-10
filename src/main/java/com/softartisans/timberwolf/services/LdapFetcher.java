@@ -1,7 +1,5 @@
-package com.softartisans.timberwolf.exchange.ldap;
+package com.softartisans.timberwolf.services;
 
-import com.softartisans.timberwolf.exchange.PrincipalFetchException;
-import com.softartisans.timberwolf.exchange.PrincipalFetcher;
 import com.sun.security.auth.callback.TextCallbackHandler;
 
 import java.security.PrivilegedAction;

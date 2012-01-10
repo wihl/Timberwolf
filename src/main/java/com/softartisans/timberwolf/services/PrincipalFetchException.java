@@ -1,7 +1,7 @@
-package com.softartisans.timberwolf.exchange;
+package com.softartisans.timberwolf.services;
 
 /**
- * This or a derivitive of this is thrown should an error occur fetching
+ * This or a derivative of this is thrown should an error occur fetching
  * a complete list of principals from whatever derives PrincipalFetcher.
  */
 public class PrincipalFetchException extends Exception

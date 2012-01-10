@@ -1,11 +1,9 @@
-package com.softartisans.timberwolf.exchange.ldap;
+package com.softartisans.timberwolf.services;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.*;
-
-import com.softartisans.timberwolf.exchange.PrincipalFetchException;
+import junit.framework.Assert;
 
 import org.junit.Test;
 

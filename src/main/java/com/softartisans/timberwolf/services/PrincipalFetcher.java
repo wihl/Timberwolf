@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf.exchange;
+package com.softartisans.timberwolf.services;
 
 /** This class will return a list of principals we should fetch emails for. */
 public interface PrincipalFetcher
