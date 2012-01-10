@@ -44,8 +44,12 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     {
         Get get = new Get(Bytes.toBytes(user));
         Result result = table.get(get);
-        long timeLong = Bytes.toLong(result.getValue(Bytes.toBytes(TIME_COLUMN_FAMILY),
-                Bytes.toBytes(TIME_COLUMN_QUALIFIER)));
+        long timeLong = 0;
+        if (!result.isEmpty())
+        {
+            timeLong = Bytes.toLong(result.getValue(Bytes.toBytes(TIME_COLUMN_FAMILY),
+                    Bytes.toBytes(TIME_COLUMN_QUALIFIER)));
+        }
         DateTime time = new DateTime(timeLong);
         return time;
     }

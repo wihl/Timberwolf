@@ -247,6 +247,10 @@ public class HBaseManager
                 logger.error("Error creating table " + tableName + "!");
             }
         }
+        if (tables.containsKey(tableName))
+        {
+            return tables.get(tableName);
+        }
         return null;
     }
 
