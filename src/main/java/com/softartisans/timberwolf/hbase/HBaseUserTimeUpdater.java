@@ -28,7 +28,8 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     /**
      * Constructs a HBaseUserTimeUpdater from a HBaseManager and a given table name.
      * @param hBaseManager The HBaseManager to use to store our timings.
-     * @param updateTable
+     * @param updateTable The table name to use. If the table does not exist it will be created.
+     *                    Note that tables that were not created by this utility make poor storage sites.
      */
     public HBaseUserTimeUpdater(final HBaseManager hBaseManager, final String updateTable)
     {
@@ -41,6 +42,11 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
         table = hBaseManager.createTable(updateTable, columnFamilies);
     }
 
+    /**
+     * Determines when this user was last updated.
+     * @param user The username.
+     * @return When the user was last updated.
+     */
     @Override
     public DateTime lastUpdated(final String user)
     {
@@ -56,6 +62,11 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
         return time;
     }
 
+    /**
+     * Sets the update time for a given user.
+     * @param user The user who is being updated.
+     * @param dateTime The datetime of the update.
+     */
     @Override
     public void updated(final String user, final DateTime dateTime)
     {

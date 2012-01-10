@@ -5,19 +5,26 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class HBaseUserTimeUpdaterTest
 {
+    private HBaseManager manager = new HBaseManager();
+
+    private IHBaseTable mockTable(HBaseManager manager, String tableName)
+    {
+        MockHTable table = MockHTable.create(tableName);
+        IHBaseTable hbaseTable = new HBaseTable(table);
+        manager.addTable(hbaseTable);
+        return hbaseTable;
+    }
 
     @Test
     public void testLastUpdated()
     {
-        String userTableName = "userTable";
-        HBaseManager manager = new HBaseManager();
-        MockHTable table = MockHTable.create(userTableName);
-        IHBaseTable hbaseTable = new HBaseTable(table);
-        manager.addTable(hbaseTable);
+        String tableName = "testLastUpdated";
+        IHBaseTable hbaseTable = mockTable(manager, tableName);
 
         String userName = "Robert the User";
         Put put = new Put(Bytes.toBytes(userName));
@@ -26,7 +33,7 @@ public class HBaseUserTimeUpdaterTest
         hbaseTable.put(put);
         hbaseTable.flush();
 
-        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
         DateTime date = updates.lastUpdated(userName);
         Assert.assertEquals(time, date.getMillis());
     }
@@ -34,13 +41,10 @@ public class HBaseUserTimeUpdaterTest
     @Test
     public void testLastUpdatedNoUser()
     {
-        String userTableName = "userTable";
-        HBaseManager manager = new HBaseManager();
-        MockHTable table = MockHTable.create(userTableName);
-        IHBaseTable hbaseTable = new HBaseTable(table);
-        manager.addTable(hbaseTable);
+        String tableName = "testLastUpdatedNoUser";
+        IHBaseTable hbaseTable = mockTable(manager, tableName);
 
-        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
         DateTime date = updates.lastUpdated("not actually a username");
         Assert.assertEquals(0L, date.getMillis());
     }
@@ -48,15 +52,12 @@ public class HBaseUserTimeUpdaterTest
     @Test
     public void testUpdateUser()
     {
-        String userTableName = "userTable";
-        HBaseManager manager = new HBaseManager();
-        MockHTable table = MockHTable.create(userTableName);
-        IHBaseTable hbaseTable = new HBaseTable(table);
-        manager.addTable(hbaseTable);
+        String tableName = "testUpdateUser";
+        IHBaseTable hbaseTable = mockTable(manager, tableName);
 
-        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
-        long time = 23488902348L;
-        String userName = "Robert the Bruce";
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
+        long time = 1234355L;
+        String userName = "A Generic Username";
         updates.updated(userName, new DateTime(time));
         Assert.assertEquals(time, updates.lastUpdated(userName).getMillis());
     }
@@ -64,15 +65,12 @@ public class HBaseUserTimeUpdaterTest
     @Test
     public void testUpdateExistingUser()
     {
-        String userTableName = "userTable";
-        HBaseManager manager = new HBaseManager();
-        MockHTable table = MockHTable.create(userTableName);
-        IHBaseTable hbaseTable = new HBaseTable(table);
-        manager.addTable(hbaseTable);
+        String tableName = "testUpdateExistingUser";
+        IHBaseTable hbaseTable = mockTable(manager, tableName);
 
-        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
-        long time = 23488902348L;
-        String userName = "Robert the Bruce";
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
+        long time = 3425322L;
+        String userName = "Some other username";
         updates.updated(userName, new DateTime(time));
         updates.updated(userName, new DateTime(2 * time));
         Assert.assertEquals(2*time, updates.lastUpdated(userName).getMillis());
