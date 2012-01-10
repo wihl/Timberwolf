@@ -630,7 +630,7 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindFolders()
+    public void testFindFolders() throws ServiceCallException, HttpErrorException
     {
         FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
         int count = 10;
@@ -648,7 +648,16 @@ public class ExchangeMailStoreTest
             folders[i] = folder;
         }
         MessageType[] messages = new MessageType[]{};
-        MockPagingExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
+        ExchangeService service = mock(ExchangeService.class);
+        FindFolderResponseType response = FindFolderResponseType.Factory.newInstance();
+        ArrayOfResponseMessagesType msgArr = response.addNewResponseMessages();
+        FindFolderResponseMessageType msg = FindFolderResponseMessageType.Factory.newInstance();
+        msg.setResponseCode(ResponseCodeType.NO_ERROR);
+        ArrayOfFoldersType foldersArr = rootFolder.addNewFolders();
+        foldersArr.setFolderArray(folders);
+        msg.setRootFolder(rootFolder);
+        msgArr.setFindFolderResponseMessageArray(new FindFolderResponseMessageType[] { msg });
+        when(service.findFolder(any(FindFolderType.class))).thenReturn(response);
 
         try
         {
