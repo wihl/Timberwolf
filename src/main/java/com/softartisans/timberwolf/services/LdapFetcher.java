@@ -48,7 +48,7 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
 
     public Iterable<String> getPrincipals() throws PrincipalFetchException
     {
-        LoginContext lc = loginAsDev(configurationEntry);
+        LoginContext lc = login(configurationEntry);
         Subject sbj = lc.getSubject();
 
         Iterable<String> rtn = Subject.doAs(sbj, this);
@@ -59,6 +59,16 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         return rtn;
     }
 
+    /**
+     * This will make the actual LDAP call. This is the run function of the
+     * privileged action, so it assumes that all authentication has already
+     * been taken care of through SASL. This should not be called directly,
+     * it's called by Subject.doAs(). You should call getPrincipals, which
+     * takes care of logging in. If you're already logged in? Then then this
+     * class needs to be touched up to remove all the login stuff.
+     *
+     * @return A list of principals to get emails for.
+     */
     @Override
     public Iterable<String> run()
     {
@@ -80,7 +90,16 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
             {
                 SearchResult result = (SearchResult) enumeration.next();
                 Attributes attribs = result.getAttributes();
-                stringifyAttributes(attribs, wantedAttribute, rtnList);
+                Attribute attrib = attribs.get(wantedAttribute);
+                if (attrib != null)
+                {
+                    NamingEnumeration<?> values =
+                        ((BasicAttribute) attrib).getAll();
+                    while (values.hasMore())
+                    {
+                        rtnList.add(values.next().toString());
+                    }
+                }
             }
 
         }
@@ -105,7 +124,12 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         return env;
     }
 
-    private static LoginContext loginAsDev(final String configurationEntry) throws PrincipalFetchException
+    /**
+     * This will likely be removed down the line once SASL authentication
+     * is global to the entire process.
+     */
+    private static LoginContext login(final String configurationEntry)
+        throws PrincipalFetchException
     {
         LoginContext lc = null;
         try
@@ -123,21 +147,6 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         }
 
         return lc;
-    }
-
-    private static void stringifyAttributes(final Attributes attribs,
-                                            final String wantedAttribute,
-                                            final Collection<String> collector) throws NamingException
-    {
-        Attribute attrib = attribs.get(wantedAttribute);
-        if (attrib != null)
-        {
-            NamingEnumeration<?> values = ((BasicAttribute) attrib).getAll();
-            while (values.hasMore())
-            {
-                collector.add(values.next().toString());
-            }
-        }
     }
 
     /**
@@ -183,7 +192,16 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
             Attributes attrs = ctx.getAttributes(getProviderDiscoveryURL(),
                                                  new String[]{"supportedSASLMechanisms"});
             List<String> rtnList = new LinkedList<String>();
-            stringifyAttributes(attrs, "supportedSASLMechanisms", rtnList);
+            Attribute attrib = attrs.get("supportedSASLMechanisms");
+            if (attrib != null)
+            {
+                NamingEnumeration<?> values =
+                    ((BasicAttribute) attrib).getAll();
+                while (values.hasMore())
+                {
+                    rtnList.add(values.next().toString());
+                }
+            }
             return rtnList;
 
         }
