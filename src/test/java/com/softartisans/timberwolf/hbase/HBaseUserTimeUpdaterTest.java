@@ -44,4 +44,37 @@ public class HBaseUserTimeUpdaterTest
         DateTime date = updates.LastUpdated("not actually a username");
         Assert.assertEquals(0L, date.getMillis());
     }
+
+    @Test
+    public void testUpdateUser()
+    {
+        String userTableName = "userTable";
+        HBaseManager manager = new HBaseManager();
+        MockHTable table = MockHTable.create(userTableName);
+        IHBaseTable hbaseTable = new HBaseTable(table);
+        manager.addTable(hbaseTable);
+
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
+        long time = 23488902348L;
+        String userName = "Robert the Bruce";
+        updates.Updated(userName, new DateTime(time));
+        Assert.assertEquals(time, updates.LastUpdated(userName).getMillis());
+    }
+
+    @Test
+    public void testUpdateExistingUser()
+    {
+        String userTableName = "userTable";
+        HBaseManager manager = new HBaseManager();
+        MockHTable table = MockHTable.create(userTableName);
+        IHBaseTable hbaseTable = new HBaseTable(table);
+        manager.addTable(hbaseTable);
+
+        HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, userTableName);
+        long time = 23488902348L;
+        String userName = "Robert the Bruce";
+        updates.Updated(userName, new DateTime(time));
+        updates.Updated(userName, new DateTime(2*time));
+        Assert.assertEquals(2*time, updates.LastUpdated(userName).getMillis());
+    }
 }

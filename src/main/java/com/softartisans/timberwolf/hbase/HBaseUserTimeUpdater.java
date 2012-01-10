@@ -2,6 +2,7 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.UserTimeUpdater;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.joda.time.DateTime;
@@ -57,6 +58,11 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     @Override
     public void Updated(String user, DateTime dateTime)
     {
+        Put put = new Put(Bytes.toBytes(user));
+        put.add(Bytes.toBytes(TIME_COLUMN_FAMILY), Bytes.toBytes(TIME_COLUMN_QUALIFIER),
+                Bytes.toBytes(dateTime.getMillis()));
 
+        table.put(put);
+        table.flush();
     }
 }
