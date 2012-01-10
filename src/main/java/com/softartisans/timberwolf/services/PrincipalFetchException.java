@@ -11,4 +11,8 @@ public class PrincipalFetchException extends Exception
         super(innerException);
     }
 
+    public PrincipalFetchException(String message, final Exception innerException)
+    {
+        super(message, innerException);
+    }
 }

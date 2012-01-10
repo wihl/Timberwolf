@@ -3,7 +3,6 @@ package com.softartisans.timberwolf.services;
 import com.sun.security.auth.callback.TextCallbackHandler;
 
 import java.security.PrivilegedAction;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,19 +75,19 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
         List<String> rtnList = new LinkedList<String>();
         try
         {
-            DirContext context = new InitialDirContext(defEnv);
-
             String wantedAttribute = "userPrincipalName";
-            SearchControls ctrl = new SearchControls();
             String[] attributeFilter = {
                     wantedAttribute
             };
+            SearchControls ctrl = new SearchControls();
+            DirContext context = getInitialContext(defEnv);
             ctrl.setReturningAttributes(attributeFilter);
             ctrl.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            NamingEnumeration<?> enumeration = context.search("CN=Users", "(objectClass=person)", ctrl);
+            NamingEnumeration<SearchResult> enumeration =
+                    context.search("CN=Users", "(objectClass=person)", ctrl);
             while (enumeration.hasMore())
             {
-                SearchResult result = (SearchResult) enumeration.next();
+                SearchResult result = enumeration.next();
                 Attributes attribs = result.getAttributes();
                 Attribute attrib = attribs.get(wantedAttribute);
                 if (attrib != null)
@@ -109,6 +108,15 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
             fail = new PrincipalFetchException(e);
         }
         return rtnList;
+    }
+
+    /**
+     * This is just pulled out so it can be overridden for testing and
+     * a mock object can be returned.
+     */
+    DirContext getInitialContext(final Hashtable<String, String> environment) throws NamingException
+    {
+        return new InitialDirContext(environment);
     }
 
     private Hashtable<String, String> defaultEnvironment()
