@@ -114,5 +114,18 @@ public class HBaseTableTest
         }
     }
 
+    /**
+     * Get with no result.
+     */
+    @Test
+    public void testGetNoResult()
+    {
+        IHBaseTable table = new HBaseTable(MockHTable.create());
+
+        Get get = new Get(Bytes.toBytes("totallyArbitraryRowKey"));
+        Result result = table.get(get);
+        Assert.assertTrue(result.isEmpty());
+    }
+
 }
 
