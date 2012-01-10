@@ -1,4 +1,4 @@
-package com.softartisans.timberwolf.exchange.iterators;
+package com.softartisans.timberwolf.exchange;
 
 import java.util.Iterator;
 
