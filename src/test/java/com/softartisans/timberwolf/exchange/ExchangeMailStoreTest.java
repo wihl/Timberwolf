@@ -127,7 +127,6 @@ public class ExchangeMailStoreTest
     @Test
     public void testGetFindItemsRequestOffset()
     {
-        ExchangeService service = mock(ExchangeService.class);
         DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
 
         FindItemType request = FindItemHelper.getFindItemsRequest(folder, 3, 10);
@@ -149,7 +148,6 @@ public class ExchangeMailStoreTest
     @Test
     public void testGetFindItemsRequestMaxEntries()
     {
-        ExchangeService service = mock(ExchangeService.class);
         DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
 
         FindItemType request = FindItemHelper.getFindItemsRequest(folder, 5, 10);
@@ -401,7 +399,6 @@ public class ExchangeMailStoreTest
 
     private MessageType mockMessageItemId(String itemId)
     {
-
         MessageType mockedMessage = mock(MessageType.class);
         ItemIdType mockedId = mock(ItemIdType.class);
         when(mockedMessage.isSetItemId()).thenReturn(true);
