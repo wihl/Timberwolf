@@ -1,14 +1,15 @@
 package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.UserTimeUpdater;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.joda.time.DateTime;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An implementation of a UserTimeUpdater which stores the appropriate timings in HBase.
@@ -21,8 +22,8 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     /** The table wherein our timings are stored. */
     private IHBaseTable table;
 
-    private final String TIME_COLUMN_FAMILY = "t";
-    private final String TIME_COLUMN_QUALIFIER = "d";
+    private static final String TIME_COLUMN_FAMILY = "t";
+    private static final String TIME_COLUMN_QUALIFIER = "d";
 
     /**
      * Constructs a HBaseUserTimeUpdater from a HBaseManager and a given table name.
@@ -41,7 +42,7 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     }
 
     @Override
-    public DateTime LastUpdated(String user)
+    public DateTime lastUpdated(final String user)
     {
         Get get = new Get(Bytes.toBytes(user));
         Result result = table.get(get);
@@ -56,7 +57,7 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
     }
 
     @Override
-    public void Updated(String user, DateTime dateTime)
+    public void updated(final String user, final DateTime dateTime)
     {
         Put put = new Put(Bytes.toBytes(user));
         put.add(Bytes.toBytes(TIME_COLUMN_FAMILY), Bytes.toBytes(TIME_COLUMN_QUALIFIER),

@@ -50,7 +50,7 @@ public class HBaseTable implements IHBaseTable
         catch (IOException e)
         {
             logger.error("Could not get from HBase!");
-            throw new HBaseRuntimeException("Could not get from HBase.",e);
+            throw new HBaseRuntimeException("Could not get from HBase.", e);
         }
         return result;
     }

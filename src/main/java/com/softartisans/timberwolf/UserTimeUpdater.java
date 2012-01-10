@@ -11,12 +11,12 @@ public interface UserTimeUpdater
      * Determines when the given user was last updated.
      * @return When the user was last updated.
      */
-    DateTime LastUpdated(String user);
+    DateTime lastUpdated(String user);
 
     /**
      * Sets that the user has been updated at this datetime.
      * @param user The user who has been updated.
      * @param dateTime The datetime of the update.
      */
-    void Updated(String user, DateTime dateTime);
+    void updated(String user, DateTime dateTime);
 }
