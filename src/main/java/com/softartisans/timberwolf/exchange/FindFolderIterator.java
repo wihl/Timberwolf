@@ -27,7 +27,8 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
         try
         {
             folderQueue = FindFolderHelper.findFolders(exchangeService,
-                                                       FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
+                                                       FindFolderHelper.getFindFoldersRequest(
+                                                               DistinguishedFolderIdNameType.MSGFOLDERROOT));
         }
         catch (ServiceCallException e)
         {
