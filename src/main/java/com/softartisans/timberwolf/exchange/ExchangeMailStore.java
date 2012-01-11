@@ -65,7 +65,7 @@ public class ExchangeMailStore implements MailStore
         this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
     }
 
-    private ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
     {
         exchangeService = service;
         maxFindItemsEntries = findItemPageSize;

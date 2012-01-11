@@ -681,4 +681,54 @@ public class ExchangeMailStoreTest
     {
         assertPagesThroughItems(20, 5, 10);
     }
+
+    @Test
+    public void testGetMailWithPagingAndFolders() throws ServiceCallException, HttpErrorException
+    {
+        ExchangeService service = mock(ExchangeService.class);
+
+        FindFolderResponseType folderResponse = mock(FindFolderResponseType.class);
+        ArrayOfResponseMessagesType folderArr = mock(ArrayOfResponseMessagesType.class);
+        FindFolderResponseMessageType folderMsgs = mock(FindFolderResponseMessageType.class);
+        when(folderMsgs.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        FindFolderParentType parent = mock(FindFolderParentType.class);
+        ArrayOfFoldersType folders = mock(ArrayOfFoldersType.class);
+
+        FolderType folderOne = mock(FolderType.class);
+        FolderIdType folderOneId = mock(FolderIdType.class);
+        when(folderOneId.getId()).thenReturn("FOLDER-ONE-ID");
+        when(folderOne.getFolderId()).thenReturn(folderOneId);
+
+        FolderType folderTwo = mock(FolderType.class);
+        FolderIdType folderTwoId = mock(FolderIdType.class);
+        when(folderTwoId.getId()).thenReturn("FOLDER-TWO-ID");
+        when(folderTwo.getFolderId()).thenReturn(folderTwoId);
+
+        FolderType folderThree = mock(FolderType.class);
+        FolderIdType folderThreeId = mock(FolderIdType.class);
+        when(folderThreeId.getId()).thenReturn("FOLDER-THREE-ID");
+        when(folderThree.getFolderId()).thenReturn(folderThreeId);
+
+        when(folders.getFolderArray()).thenReturn(new FolderType[] { folderOne, folderTwo, folderThree });
+        when(parent.getFolders()).thenReturn(folders);
+        when(folderMsgs.getRootFolder()).thenReturn(parent);
+        FindFolderResponseMessageType[] fFRMT = new FindFolderResponseMessageType[] { folderMsgs };
+        when(folderArr.getFindFolderResponseMessageArray()).thenReturn(fFRMT);
+        when(folderResponse.getResponseMessages()).thenReturn(folderArr);
+
+        FindFolderResponseType emptyFolderResponse = mock(FindFolderResponseType.class);
+        ArrayOfResponseMessagesType emptyResponseArr = mock(ArrayOfResponseMessagesType.class);
+        when(emptyResponseArr.getFindFolderResponseMessageArray()).thenReturn(new FindFolderResponseMessageType[] { });
+        when(emptyFolderResponse.getResponseMessages()).thenReturn(emptyResponseArr);
+
+        when(service.findFolder(any(FindFolderType.class))).thenReturn(emptyFolderResponse);
+        when(service.findFolder(LikeThis(FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT))))
+            .thenReturn(folderResponse);
+
+        ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
+        for (MailboxItem item : store.getMail())
+        {
+            // pass
+        }
+    }
 }
