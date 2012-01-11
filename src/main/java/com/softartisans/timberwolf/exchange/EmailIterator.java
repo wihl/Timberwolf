@@ -44,6 +44,13 @@ public final class EmailIterator implements Iterator<MailboxItem>
         {
             folderQueue = FindFolderHelper.findFolders(exchangeService,
                     FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
+            if (folderQueue.size() == 0)
+            {
+                LOG.info("Did not find any folders.");
+                mailboxItems = new Vector<MailboxItem>(0);
+                currentIds = new Vector<String>(0);
+                return;
+            }
             currentFolder = folderQueue.poll();
         }
         catch (ServiceCallException e)
