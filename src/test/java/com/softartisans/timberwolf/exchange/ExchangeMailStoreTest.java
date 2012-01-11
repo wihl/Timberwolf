@@ -808,9 +808,37 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindMailFiveIdPages20ItemPages() throws IOException, AuthenticationException
+    public void testFindMailFiveIdPages20ItemPages()
+            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
-        assertPagesThroughItems(100, 20, 5);
+
+        int itemsInExchange = 100;
+        int idPageSize = 20;
+        int itemPageSize = 5;
+        ExchangeService service = mock(ExchangeService.class);
+        defaultMockFindFolders(service);
+        for (int i = 0; i < 5; i++)
+        {
+            MessageType[] findResults = mockFindItem(service, defaultFolderId, i*idPageSize, idPageSize, idPageSize);
+            for (int j = 0; j < 4; j++)
+            {
+                mockGetItem(findResults, idPageSize*i, itemPageSize, j, itemsInExchange, service);
+            }
+        }
+        // because the idPageSize evenly divides the number of emails
+        mockFindItem(service, defaultFolderId, itemsInExchange,idPageSize,0);
+
+        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
+
+        int index = 0;
+        List<String> ids = generateIds(0, itemsInExchange);
+        while (mailItor.hasNext())
+        {
+            MailboxItem item = mailItor.next();
+            assertEquals(ids.get(index), item.getHeader("Item ID"));
+            index++;
+        }
+        assertEquals(itemsInExchange, index);
     }
 
     @Test
