@@ -5,7 +5,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.joda.time.DateTime;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 
 public class HBaseUserTimeUpdaterTest
@@ -58,7 +57,7 @@ public class HBaseUserTimeUpdaterTest
         HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
         long time = 1234355L;
         String userName = "A Generic Username";
-        updates.updated(userName, new DateTime(time));
+        updates.setUpdateTime(userName, new DateTime(time));
         Assert.assertEquals(time, updates.lastUpdated(userName).getMillis());
     }
 
@@ -71,8 +70,8 @@ public class HBaseUserTimeUpdaterTest
         HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
         long time = 3425322L;
         String userName = "Some other username";
-        updates.updated(userName, new DateTime(time));
-        updates.updated(userName, new DateTime(2 * time));
+        updates.setUpdateTime(userName, new DateTime(time));
+        updates.setUpdateTime(userName, new DateTime(2 * time));
         Assert.assertEquals(2*time, updates.lastUpdated(userName).getMillis());
     }
 }

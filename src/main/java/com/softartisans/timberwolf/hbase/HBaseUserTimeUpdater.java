@@ -68,7 +68,7 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
      * @param dateTime The datetime of the update.
      */
     @Override
-    public void updated(final String user, final DateTime dateTime)
+    public void setUpdateTime(final String user, final DateTime dateTime)
     {
         Put put = new Put(Bytes.toBytes(user));
         put.add(Bytes.toBytes(TIME_COLUMN_FAMILY), Bytes.toBytes(TIME_COLUMN_QUALIFIER),
