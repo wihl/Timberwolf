@@ -31,9 +31,11 @@ import com.softartisans.timberwolf.MailboxItem;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
+import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -42,7 +44,6 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Matchers.any;
-import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
@@ -50,32 +51,7 @@ import org.mockito.MockitoAnnotations;
 /** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest
 {
-    @Mock
-    private FindItemResponseType findItemResponse;
-    @Mock
-    private ArrayOfResponseMessagesType arrayOfResponseMessages;
-    @Mock
-    private FindItemResponseMessageType findItemResponseMessage;
-    @Mock
-    private FindItemParentType findItemParent;
-    @Mock
-    private ArrayOfRealItemsType arrayOfRealItems;
-    @Mock
-    private GetItemResponseType getItemResponse;
-    @Mock
-    private ItemInfoResponseMessageType itemInfoResponseMessage;
     private final String idHeaderKey = "Item ID";
-
-    @Mock
-    private FindFolderResponseType findFolderResponse;
-    @Mock
-    private ArrayOfResponseMessagesType findFolderArrayOfResponseMessages;
-    @Mock
-    private FindFolderResponseMessageType findFolderResponseMessage;
-    @Mock
-    private FindFolderParentType findFolderParent;
-    @Mock
-    private ArrayOfFoldersType arrayOfFolders;
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
     private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
@@ -258,6 +234,11 @@ public class ExchangeMailStoreTest
     {
         ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(folder, offset,  maxIds);
+        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
+        FindItemParentType findItemParent = mock(FindItemParentType.class);
+        ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -287,6 +268,12 @@ public class ExchangeMailStoreTest
     {
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        FindFolderResponseType findFolderResponse = mock(FindFolderResponseType.class);
+        ArrayOfResponseMessagesType findFolderArrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
+        FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
+        ArrayOfFoldersType arrayOfFolders = mock(ArrayOfFoldersType.class);
+        when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
         when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
@@ -475,6 +462,10 @@ public class ExchangeMailStoreTest
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         GetItemType getItem = GetItemHelper.getGetItemsRequest(requestedList);
+        GetItemResponseType getItemResponse = mock(GetItemResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        ItemInfoResponseMessageType itemInfoResponseMessage = mock(ItemInfoResponseMessageType.class);
+        ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
         when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
         when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())
@@ -627,6 +618,10 @@ public class ExchangeMailStoreTest
     public void testFindItemsNoRootFolder() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
+        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
+        FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
@@ -641,6 +636,10 @@ public class ExchangeMailStoreTest
     public void testFindItemsNoId() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
+        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
+        FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
@@ -773,6 +772,9 @@ public class ExchangeMailStoreTest
     public void testFindFoldersNoRootFolder() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
+        FindFolderResponseType findFolderResponse = mock(FindFolderResponseType.class);
+        ArrayOfResponseMessagesType findFolderArrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
         when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
@@ -788,6 +790,10 @@ public class ExchangeMailStoreTest
     public void testFindFoldersNoFolders() throws ServiceCallException, HttpErrorException
     {
         ExchangeService service = mock(ExchangeService.class);
+        FindFolderResponseType findFolderResponse = mock(FindFolderResponseType.class);
+        ArrayOfResponseMessagesType findFolderArrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
+        FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
         when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
