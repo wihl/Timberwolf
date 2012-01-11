@@ -7,6 +7,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
@@ -18,8 +21,11 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.apache.xmlbeans.XmlException;
 import org.junit.Before;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
@@ -136,5 +142,31 @@ public class ExchangeTestBase
         when(mockedMessage.getItemId()).thenReturn(mockedId);
         when(mockedId.getId()).thenReturn(itemId);
         return mockedMessage;
+    }
+
+    protected void mockGetItem(MessageType[] findResults, int initialOffset, int pageSize,
+                               int pageIndex, int max, String folder)
+            throws XmlException, ServiceCallException, IOException, HttpErrorException
+    {
+        int start = pageSize * pageIndex;
+        max = Math.min(max, start + pageSize);
+        mockGetItem(Arrays.copyOfRange(findResults, start, max),
+                    generateIds(initialOffset + start, max - start, folder));
+    }
+
+    protected void mockGetItem(MessageType[] messages, List<String> requestedList)
+            throws XmlException, ServiceCallException, IOException, HttpErrorException
+    {
+        GetItemType getItem = GetItemHelper.getGetItemsRequest(requestedList);
+        GetItemResponseType getItemResponse = mock(GetItemResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        ItemInfoResponseMessageType itemInfoResponseMessage = mock(ItemInfoResponseMessageType.class);
+        ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
+        when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
+        when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getGetItemResponseMessageArray())
+                .thenReturn(new ItemInfoResponseMessageType[]{itemInfoResponseMessage});
+        when(itemInfoResponseMessage.getItems()).thenReturn(arrayOfRealItems);
+        when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
     }
 }
