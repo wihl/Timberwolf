@@ -725,10 +725,8 @@ public class ExchangeMailStoreTest
         ExchangeService service = mock(ExchangeService.class);
         defaultMockFindFolders(service);
         MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, idPageSize, itemsInExchange);
-        mockGetItem(Arrays.copyOfRange(findResults, 0, itemPageSize),
-                    generateIds(0, itemPageSize), service);
-        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize, itemPageSize * 2),
-                    generateIds(itemPageSize, itemPageSize), service);
+        mockGetItem(findResults, 0, itemPageSize, 0, itemsInExchange, service);
+        mockGetItem(findResults, 0, itemPageSize, 1, itemsInExchange, service);
 
         FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
 
@@ -753,16 +751,11 @@ public class ExchangeMailStoreTest
         ExchangeService service = mock(ExchangeService.class);
         defaultMockFindFolders(service);
         MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, idPageSize, itemsInExchange);
-        mockGetItem(Arrays.copyOfRange(findResults, 0, itemPageSize),
-                    generateIds(0, itemPageSize), service);
-        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize, itemPageSize * 2),
-                    generateIds(itemPageSize, itemPageSize), service);
-        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 2, itemPageSize * 3),
-                    generateIds(itemPageSize * 2, itemPageSize), service);
-        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 3, itemPageSize * 4),
-                    generateIds(itemPageSize * 3, itemPageSize), service);
-        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 4, itemsInExchange),
-                    generateIds(itemPageSize * 4, itemsInExchange - itemPageSize * 4), service);
+        mockGetItem(findResults, 0, itemPageSize, 0, itemsInExchange, service);
+        mockGetItem(findResults, 0, itemPageSize, 1, itemsInExchange, service);
+        mockGetItem(findResults, 0, itemPageSize, 2, itemsInExchange, service);
+        mockGetItem(findResults, 0, itemPageSize, 3, itemsInExchange, service);
+        mockGetItem(findResults, 0, itemPageSize, 4, itemsInExchange, service);
 
         FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
 
