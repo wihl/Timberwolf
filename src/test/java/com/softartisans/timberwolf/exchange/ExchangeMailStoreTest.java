@@ -735,7 +735,34 @@ public class ExchangeMailStoreTest
     public void testFindMailOneIdPageFiveItemPages()
             throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
-        assertPagesThroughItems(24, 30, 5);
+        int itemsInExchange = 24;
+        int idPageSize = 30;
+        int itemPageSize = 5;
+        ExchangeService service = mock(ExchangeService.class);
+        defaultMockFindFolders(service);
+        MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, idPageSize, itemsInExchange);
+        mockGetItem(Arrays.copyOfRange(findResults, 0, itemPageSize),
+                    generateIds(0, itemPageSize), service);
+        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize, itemPageSize * 2),
+                    generateIds(itemPageSize, itemPageSize), service);
+        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 2, itemPageSize * 3),
+                    generateIds(itemPageSize * 2, itemPageSize), service);
+        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 3, itemPageSize * 4),
+                    generateIds(itemPageSize * 3, itemPageSize), service);
+        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize * 4, itemsInExchange),
+                    generateIds(itemPageSize * 4, itemsInExchange - itemPageSize * 4), service);
+
+        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
+
+        int index = 0;
+        List<String> ids = generateIds(0, itemsInExchange);
+        while (mailItor.hasNext())
+        {
+            MailboxItem item = mailItor.next();
+            assertEquals(ids.get(index), item.getHeader("Item ID"));
+            index++;
+        }
+        assertEquals(itemsInExchange, index);
     }
 
     @Test
