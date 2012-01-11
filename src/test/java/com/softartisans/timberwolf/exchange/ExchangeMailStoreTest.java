@@ -98,7 +98,7 @@ public class ExchangeMailStoreTest
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         assertEquals(findItem.xmlText(),
-                FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
+                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ExchangeMailStoreTest
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         assertEquals(findItem.xmlText(),
-                FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0, 1000).xmlText());
+                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0, 1000).xmlText());
     }
 
     @Test
@@ -478,7 +478,7 @@ public class ExchangeMailStoreTest
         when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
         when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())
-                .thenReturn(new ItemInfoResponseMessageType[]{ itemInfoResponseMessage });
+                .thenReturn(new ItemInfoResponseMessageType[]{itemInfoResponseMessage});
         when(itemInfoResponseMessage.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
     }
@@ -663,14 +663,15 @@ public class ExchangeMailStoreTest
             when(mockedId.getId()).thenReturn("item " + i);
             messages[i] = mockedMessage;
         }
+        // TODO: we don't really need this at all, but MockPagingExchangeService is being removed in another
+        // task, so remove the folder stuff in that task
         FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
         FolderType folder = FolderType.Factory.newInstance();
         folder.addNewFolderId().setId("ANARBITRARYID");
         FolderType[] folders = new FolderType[]{folder};
 
         ExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
-        EmailIterator mailItor =
-            new EmailIterator(service, idPageSize, itemPageSize);
+        FindItemIterator mailItor = new FindItemIterator(service, "ANARBITRARYID", idPageSize, itemPageSize);
 
         int count = 0;
         while (mailItor.hasNext())
