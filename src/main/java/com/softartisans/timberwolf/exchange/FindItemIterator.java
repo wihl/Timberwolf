@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Iterates over find item calls
+ * Runs a GetItemIterator over many ids, retrieved more efficiently with findItems.
+ *
+ * This class pages the calls to findItems.
  */
 public class FindItemIterator extends BaseChainIterator<MailboxItem>
 {
@@ -23,8 +25,8 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
      */
     private boolean definitelyExhausted;
 
-    public FindItemIterator(ExchangeService exchangeService, String folderId,
-                            int idsPageSize, int itemsPageSize)
+    public FindItemIterator(final ExchangeService exchangeService, final String folderId,
+                            final int idsPageSize, final int itemsPageSize)
     {
         service = exchangeService;
         pageSize = idsPageSize;

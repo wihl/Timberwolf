@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An iterator that calls getItem to get a list of items
+ * An iterator that calls getItem to get a list of the actual items for
+ * the given list of ids.
+ *
+ * This class pages the calls to getItems.
  */
 public class GetItemIterator extends BaseChainIterator<MailboxItem>
 {
@@ -18,7 +21,8 @@ public class GetItemIterator extends BaseChainIterator<MailboxItem>
     private int currentStart;
     private int pageSize;
 
-    public GetItemIterator(ExchangeService exchangeService, Vector<String> messageIds, int itemsPageSize)
+    public GetItemIterator(final ExchangeService exchangeService, final Vector<String> messageIds,
+                           final int itemsPageSize)
     {
         service = exchangeService;
         ids = messageIds;

@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Iterates over find folder calls
+ * Runs a FindItemIterator for each folder found with findFolders.
  */
 public class FindFolderIterator extends BaseChainIterator<MailboxItem>
 {
@@ -18,7 +18,7 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
     private int getItemsPageSize;
     private Queue<String> folderQueue;
 
-    public FindFolderIterator(ExchangeService exchangeService, int idsPageSize, int itemsPageSize)
+    public FindFolderIterator(final ExchangeService exchangeService, final int idsPageSize, final int itemsPageSize)
     {
         service = exchangeService;
         findItemPageSize = idsPageSize;
@@ -49,6 +49,6 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
         {
             return null;
         }
-        return new FindItemIterator(service,folderQueue.poll(), findItemPageSize, getItemsPageSize);
+        return new FindItemIterator(service, folderQueue.poll(), findItemPageSize, getItemsPageSize);
     }
 }

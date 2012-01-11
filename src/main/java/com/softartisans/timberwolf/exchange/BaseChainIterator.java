@@ -3,7 +3,10 @@ package com.softartisans.timberwolf.exchange;
 import java.util.Iterator;
 
 /**
- * Base iterator class
+ * Base iterator class for wrapping a series of iterators into one iterator.
+ *
+ * @param <T> the type being iterated over. This will be the most inner link
+ * in the chain
  */
 public abstract class BaseChainIterator<T> implements Iterator<T>
 {
