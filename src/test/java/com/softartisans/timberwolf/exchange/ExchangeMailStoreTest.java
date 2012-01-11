@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 import org.apache.xmlbeans.XmlException;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -599,7 +598,7 @@ public class ExchangeMailStoreTest
         when(infoMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
         ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
         when(responseArr.getGetItemResponseMessageArray())
-            .thenReturn(new ItemInfoResponseMessageType[] { infoMessage });
+            .thenReturn(new ItemInfoResponseMessageType[]{infoMessage});
         GetItemResponseType getResponse = mock(GetItemResponseType.class);
         when(getResponse.getResponseMessages()).thenReturn(responseArr);
         ExchangeService service = mock(ExchangeService.class);
@@ -860,9 +859,8 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindFolders()
+    public void testFindFolders() throws ServiceCallException, HttpErrorException
     {
-        FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
         int count = 10;
 
         List<String> ids = new ArrayList<String>(count);
@@ -872,31 +870,19 @@ public class ExchangeMailStoreTest
         {
             String id = "SADG345GFGFEFHGGFH454fgH56FDDGFNGGERTTGH%$466" + i;
             ids.add(id);
-            FolderType folder = FolderType.Factory.newInstance();
-            folder.setDisplayName("Folder Number " + i);
-            FolderIdType folderId = FolderIdType.Factory.newInstance();
-            folderId.setId(id);
-            folderId.setChangeKey("HHYtryyry==" + i);
-            folder.setFolderId(folderId);
-            folders[i] = folder;
+            folders[i] = mockFolderType(id);
         }
-        MessageType[] messages = new MessageType[]{};
-        MockPagingExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
+        ExchangeService service = mock(ExchangeService.class);
+        mockFindFolders(service,folders);
 
-        try
+        FindFolderType findFoldersRequest = FindFolderHelper.getFindFoldersRequest(
+                DistinguishedFolderIdNameType.MSGFOLDERROOT);
+        Queue<String> foldersVec = FindFolderHelper.findFolders(service, findFoldersRequest);
+        int folderCount = 0;
+        for (String folder : foldersVec)
         {
-            Queue<String> foldersVec = FindFolderHelper.findFolders(service,
-                    FindFolderHelper.getFindFoldersRequest("TotallyUnimportantId"));
-            int folderCount = 0;
-            for( String folder : foldersVec)
-            {
-                assertEquals(ids.get(folderCount), folder);
-                folderCount++;
-            }
-        }
-        catch(Exception e)
-        {
-            Assert.fail(e.getMessage());
+            assertEquals(ids.get(folderCount), folder);
+            folderCount++;
         }
     }
 
