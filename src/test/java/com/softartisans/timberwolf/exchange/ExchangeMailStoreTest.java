@@ -5,26 +5,17 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMes
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
+import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
-import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.softartisans.timberwolf.MailboxItem;
@@ -50,249 +41,6 @@ import static org.mockito.Mockito.when;
 public class ExchangeMailStoreTest extends ExchangeTestBase
 {
     private final String idHeaderKey = "Item ID";
-
-    /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
-    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
-
-    @Test
-    public void testGetFindItemsRequestInbox()
-    {
-        FindItemType findItem = FindItemType.Factory.newInstance();
-        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
-        folderId.setId(DistinguishedFolderIdNameType.INBOX);
-        IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(1000);
-        index.setBasePoint(IndexBasePointType.BEGINNING);
-        index.setOffset(0);
-        assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
-    }
-
-    @Test
-    public void testGetFindItemsRequestDeletedItems()
-    {
-        FindItemType findItem = FindItemType.Factory.newInstance();
-        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
-        folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
-        IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(1000);
-        index.setBasePoint(IndexBasePointType.BEGINNING);
-        index.setOffset(0);
-        assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0, 1000).xmlText());
-    }
-
-    @Test
-    public void testGetFindItemsRequestOffset()
-    {
-        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
-
-        FindItemType request = FindItemHelper.getFindItemsRequest(folder, 3, 10);
-        assertEquals(3, request.getIndexedPageItemView().getOffset());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 13, 10);
-        assertEquals(13, request.getIndexedPageItemView().getOffset());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 0, 10);
-        assertEquals(0, request.getIndexedPageItemView().getOffset());
-
-        request = FindItemHelper.getFindItemsRequest(folder, -1, 10);
-        assertEquals(0, request.getIndexedPageItemView().getOffset());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 1, 10);
-        assertEquals(1, request.getIndexedPageItemView().getOffset());
-    }
-
-    @Test
-    public void testGetFindItemsRequestMaxEntries()
-    {
-        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
-
-        FindItemType request = FindItemHelper.getFindItemsRequest(folder, 5, 10);
-        assertEquals(10, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 3);
-        assertEquals(3, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 0);
-        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 1);
-        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
-    }
-
-    @Test
-    public void testFindItemsInboxRespondNull()
-        throws ServiceCallException, HttpErrorException
-    {
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(null);
-
-        try
-        {
-            Vector<String> items = FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
-            fail("No exception was thrown.");
-        }
-        catch (ServiceCallException e)
-        {
-            assertEquals("Null response from Exchange service.", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testFindItemsItemsRespond0()
-        throws ServiceCallException, HttpErrorException
-    {
-        MessageType[] messages = new MessageType[0];
-        mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
-        assertEquals(0, items.size());
-    }
-
-    @Test
-    public void testFindItemsItemsRespond1()
-        throws ServiceCallException, HttpErrorException
-    {
-        MessageType message = mockMessageItemId("foobar27");
-        MessageType[] messages = new MessageType[]{message};
-        mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
-        Vector<String> expected = new Vector<String>(1);
-        expected.add("foobar27");
-        assertEquals(expected, items);
-    }
-
-    @Test
-    public void testFindItemsItemsRespond100()
-        throws ServiceCallException, HttpErrorException
-    {
-        int count = 100;
-        MessageType[] messages = new MessageType[count];
-        for (int i = 0; i < count; i++)
-        {
-            messages[i] = mockMessageItemId("the" + i + "id");
-        }
-        mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
-        Vector<String> expected = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
-        {
-            expected.add("the" + i + "id");
-        }
-        assertEquals(expected, items);
-    }
-
-    @Test
-    public void testFindItemsItemsMissingId()
-            throws ServiceCallException, HttpErrorException
-    {
-        int count = 3;
-        int unset = 1;
-        MessageType[] messages = new MessageType[count];
-        for (int i = 0; i < count; i++)
-        {
-            messages[i] = mockMessageItemId("the" + i + "id");
-        }
-
-        messages[unset] = mock(MessageType.class);
-        when(messages[unset].isSetItemId()).thenReturn(false);
-        mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
-        Vector<String> expected = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
-        {
-            expected.add("the" + i + "id");
-        }
-        expected.remove(1);
-        assertEquals(expected, items);
-    }
-
-    private void mockFindItem(MessageType[] messages)
-        throws ServiceCallException, HttpErrorException
-    {
-        mockFindItem(messages, defaultFolderId, 0, 1000);
-    }
-
-    private List<String> generateIds(int offset, int count, String folder)
-    {
-        List<String> ids = new ArrayList<String>(count);
-        for (int i = offset; i < offset + count; i++)
-        {
-            ids.add(folder + ":the #" + i + " id");
-        }
-        return ids;
-    }
-
-    private MessageType[] mockFindItem(String folder, int offset, int maxIds, int count)
-            throws ServiceCallException, HttpErrorException
-    {
-        MessageType[] findItems = new MessageType[count];
-        List<String> ids = generateIds(offset, count, folder);
-        for (int i=0; i<count; i++)
-        {
-            findItems[i] = mockMessageItemId(ids.get(i));
-        }
-        mockFindItem(findItems, folder, offset, maxIds);
-        return findItems;
-    }
-
-    private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds)
-        throws ServiceCallException, HttpErrorException
-    {
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(folder, offset, maxIds);
-        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
-        FindItemParentType findItemParent = mock(FindItemParentType.class);
-        ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
-        when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
-        when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-            .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
-        when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        when(findItemResponseMessage.isSetRootFolder()).thenReturn(true);
-        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
-        when(findItemParent.isSetItems()).thenReturn(true);
-        when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
-        when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
-    }
-
-    private void defaultMockFindFolders() throws ServiceCallException, HttpErrorException
-    {
-        FolderType folderType = mock(FolderType.class);
-        FolderIdType folderIdType = mock(FolderIdType.class);
-        when(folderType.isSetFolderId()).thenReturn(true);
-        when(folderType.getFolderId()).thenReturn(folderIdType);
-        when(folderIdType.getId()).thenReturn(defaultFolderId);
-        mockFindFolders(new FolderType[]{folderType});
-    }
-
-    private void mockFindFolders(FolderType[] folders)
-            throws ServiceCallException, HttpErrorException
-    {
-        FindFolderType findFolder =
-                FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        FindFolderResponseType findFolderResponse = mock(FindFolderResponseType.class);
-        ArrayOfResponseMessagesType findFolderArrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
-        FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
-        ArrayOfFoldersType arrayOfFolders = mock(ArrayOfFoldersType.class);
-        when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
-        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
-        when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
-        when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
-                .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
-        when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        when(findFolderResponseMessage.isSetRootFolder()).thenReturn(true);
-        when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
-        when(findFolderParent.isSetFolders()).thenReturn(true);
-        when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
-        when(arrayOfFolders.getFolderArray()).thenReturn(folders);
-    }
 
     @Test
     public void testGetGetItemsRequestNull()
@@ -433,16 +181,6 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         {
             assertEquals(requestedList.get(i), items.get(i).getHeader(idHeaderKey));
         }
-    }
-
-    private MessageType mockMessageItemId(String itemId)
-    {
-        MessageType mockedMessage = mock(MessageType.class);
-        ItemIdType mockedId = mock(ItemIdType.class);
-        when(mockedMessage.isSetItemId()).thenReturn(true);
-        when(mockedMessage.getItemId()).thenReturn(mockedId);
-        when(mockedId.getId()).thenReturn(itemId);
-        return mockedMessage;
     }
 
     private FolderType mockFolderType(String folderId)
@@ -592,64 +330,6 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         {
             assertEquals("SOAP response contained an error.", e.getMessage());
         }
-    }
-
-    @Test
-    public void testFindItemsWithErrorResponse()
-        throws ServiceCallException, HttpErrorException
-    {
-        FindItemResponseMessageType findMessage = mock(FindItemResponseMessageType.class);
-        when(findMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
-        ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
-        when(responseArr.getFindItemResponseMessageArray())
-            .thenReturn(new FindItemResponseMessageType[]{findMessage});
-        FindItemResponseType findResponse = mock(FindItemResponseType.class);
-        when(findResponse.getResponseMessages()).thenReturn(responseArr);
-        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
-
-        try
-        {
-            FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
-            fail("No exception was thrown.");
-        }
-        catch (ServiceCallException e)
-        {
-            assertEquals("SOAP response contained an error.", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testFindItemsNoRootFolder() throws ServiceCallException, HttpErrorException
-    {
-        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
-        FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
-        when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
-        when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-                .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
-        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
-        when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);
-    }
-
-    @Test
-    public void testFindItemsNoId() throws ServiceCallException, HttpErrorException
-    {
-        FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
-        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
-        FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
-        when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
-        when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-                .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });
-        when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
-        when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
-        when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);
     }
 
     @Test
