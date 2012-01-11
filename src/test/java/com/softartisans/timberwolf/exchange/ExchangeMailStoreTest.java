@@ -707,29 +707,33 @@ public class ExchangeMailStoreTest
     public void testFindMailOneIdPageTwoItemPages()
             throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
+        int itemsInExchange = 10;
+        int idPageSize = 11;
+        int itemPageSize = 5;
         ExchangeService service = mock(ExchangeService.class);
         defaultMockFindFolders(service);
-        MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, 11, 10);
-        mockGetItem(Arrays.copyOfRange(findResults, 0, 5), generateIds(0, 5), service);
-        mockGetItem(Arrays.copyOfRange(findResults, 5, 10), generateIds(5, 5), service);
+        MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, idPageSize, itemsInExchange);
+        mockGetItem(Arrays.copyOfRange(findResults, 0, itemPageSize),
+                    generateIds(0, itemPageSize), service);
+        mockGetItem(Arrays.copyOfRange(findResults, itemPageSize, itemPageSize * 2),
+                    generateIds(itemPageSize, itemPageSize), service);
 
-        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, 11, 5);
+        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
 
         int index = 0;
-        List<String> ids = generateIds(0, 10);
+        List<String> ids = generateIds(0, itemsInExchange);
         while (mailItor.hasNext())
         {
             MailboxItem item = mailItor.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
         }
-        assertEquals(10, index);
-
-//        assertPagesThroughItems(10, 11, 5);
+        assertEquals(itemsInExchange, index);
     }
 
     @Test
-    public void testFindMailOneIdPageFiveItemPages() throws IOException, AuthenticationException
+    public void testFindMailOneIdPageFiveItemPages()
+            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
         assertPagesThroughItems(24, 30, 5);
     }
