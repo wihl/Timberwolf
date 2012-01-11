@@ -73,6 +73,7 @@ public final class GetItemHelper
         {
             return new Vector<MailboxItem>();
         }
+        LOG.trace("Making request:\n" + getGetItemsRequest(ids.subList(startIndex, max)).toString());
         GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)));
 
         if (response == null)

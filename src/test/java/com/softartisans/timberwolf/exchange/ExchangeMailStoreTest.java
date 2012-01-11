@@ -232,7 +232,7 @@ public class ExchangeMailStoreTest
     private List<String> generateIds(int offset, int count)
     {
         List<String> ids = new ArrayList<String>(count);
-        for (int i = offset; i < count; i++)
+        for (int i = offset; i < offset + count; i++)
         {
             ids.add("the #" + i + " id");
         }
