@@ -680,38 +680,6 @@ public class ExchangeMailStoreTest
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);
     }
 
-    private void assertPagesThroughItems(int itemCount, int idPageSize, int itemPageSize) throws IOException, AuthenticationException
-    {
-        MessageType[] messages = new MessageType[itemCount];
-        for (int i = 0; i < itemCount; i++)
-        {
-            MessageType mockedMessage = mock(MessageType.class);
-            ItemIdType mockedId = mock(ItemIdType.class);
-            when(mockedMessage.isSetItemId()).thenReturn(true);
-            when(mockedMessage.getItemId()).thenReturn(mockedId);
-            when(mockedId.getId()).thenReturn("item " + i);
-            messages[i] = mockedMessage;
-        }
-        // TODO: we don't really need this at all, but MockPagingExchangeService is being removed in another
-        // task, so remove the folder stuff in that task
-        FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
-        FolderType folder = FolderType.Factory.newInstance();
-        folder.addNewFolderId().setId("ANARBITRARYID");
-        FolderType[] folders = new FolderType[]{folder};
-
-        ExchangeService service = new MockPagingExchangeService(messages, rootFolder, folders);
-        FindItemIterator mailItor = new FindItemIterator(service, "ANARBITRARYID", idPageSize, itemPageSize);
-
-        int count = 0;
-        while (mailItor.hasNext())
-        {
-            MailboxItem item = mailItor.next();
-            assertEquals("item " + count, item.getHeader("Item ID"));
-            count++;
-        }
-        assertEquals(itemCount, count);
-    }
-
     @Test
     public void testFindMailOneIdPageTwoItemPages()
             throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
