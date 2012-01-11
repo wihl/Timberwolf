@@ -41,31 +41,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
-import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Matchers.any;
-import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import org.mockito.MockitoAnnotations;
 
 /** Test for ExchangeMailStore, uses mock exchange service */
-public class ExchangeMailStoreTest
+public class ExchangeMailStoreTest extends ExchangeTestBase
 {
     private final String idHeaderKey = "Item ID";
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
     private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
-
-    @Mock
-    public ExchangeService service;
-
-    @Before
-    public void setUp() throws Exception
-    {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testGetFindItemsRequestInbox()
