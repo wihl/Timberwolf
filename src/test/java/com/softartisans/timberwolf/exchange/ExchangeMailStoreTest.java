@@ -865,14 +865,17 @@ public class ExchangeMailStoreTest
         FindFolderParentType rootFolder = FindFolderParentType.Factory.newInstance();
         int count = 10;
 
+        List<String> ids = new ArrayList<String>(count);
         FolderType[] folders = new FolderType[count];
 
         for( int i = 0; i < count; i++)
         {
+            String id = "SADG345GFGFEFHGGFH454fgH56FDDGFNGGERTTGH%$466" + i;
+            ids.add(id);
             FolderType folder = FolderType.Factory.newInstance();
             folder.setDisplayName("Folder Number " + i);
             FolderIdType folderId = FolderIdType.Factory.newInstance();
-            folderId.setId("SADG345GFGFEFHGGFH454fgH56FDDGFNGGERTTGH%$466" + i);
+            folderId.setId(id);
             folderId.setChangeKey("HHYtryyry==" + i);
             folder.setFolderId(folderId);
             folders[i] = folder;
@@ -887,7 +890,7 @@ public class ExchangeMailStoreTest
             int folderCount = 0;
             for( String folder : foldersVec)
             {
-                assertEquals(folders[folderCount].getFolderId().getId(), folder);
+                assertEquals(ids.get(folderCount), folder);
                 folderCount++;
             }
         }
