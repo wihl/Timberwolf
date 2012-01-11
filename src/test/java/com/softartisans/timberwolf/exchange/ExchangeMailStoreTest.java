@@ -261,13 +261,17 @@ public class ExchangeMailStoreTest
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
 
+        return service;
+    }
+
+    private void defaultMockFindFolders(ExchangeService service) throws ServiceCallException, HttpErrorException
+    {
         FolderType folderType = mock(FolderType.class);
         FolderIdType folderIdType = mock(FolderIdType.class);
         when(folderType.isSetFolderId()).thenReturn(true);
         when(folderType.getFolderId()).thenReturn(folderIdType);
         when(folderIdType.getId()).thenReturn(defaultFolderId);
         mockFindFolders(service, new FolderType[]{folderType});
-        return service;
     }
 
     private void mockFindFolders(ExchangeService service, FolderType[] folders)
@@ -479,6 +483,7 @@ public class ExchangeMailStoreTest
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
         ExchangeService service = mockFindItem(messages);
+        defaultMockFindFolders(service);
         for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
         {
             fail("There shouldn't be any mailBoxItems");
@@ -513,6 +518,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         ExchangeService service = mockFindItem(messages);
+        defaultMockFindFolders(service);
 
         try
         {
@@ -542,6 +548,7 @@ public class ExchangeMailStoreTest
             messages[i] = mockMessageItemId(id);
         }
         ExchangeService service = mockFindItem(findItems);
+        defaultMockFindFolders(service);
         mockGetItem(messages, requestedList, service);
         int i = 0;
         for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail())
@@ -591,7 +598,7 @@ public class ExchangeMailStoreTest
         when(findMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
         ArrayOfResponseMessagesType responseArr = mock(ArrayOfResponseMessagesType.class);
         when(responseArr.getFindItemResponseMessageArray())
-            .thenReturn(new FindItemResponseMessageType[] { findMessage });
+            .thenReturn(new FindItemResponseMessageType[]{findMessage});
         FindItemResponseType findResponse = mock(FindItemResponseType.class);
         when(findResponse.getResponseMessages()).thenReturn(responseArr);
         ExchangeService service = mock(ExchangeService.class);
@@ -700,7 +707,7 @@ public class ExchangeMailStoreTest
         assertEquals("IdOnly", findFolder.getFolderShape().getBaseShape().toString());
         assertTrue(findFolder.getParentFolderIds().getDistinguishedFolderIdArray().length == 1);
         assertEquals(DistinguishedFolderIdNameType.INBOX,
-                findFolder.getParentFolderIds().getDistinguishedFolderIdArray()[0].getId());
+                     findFolder.getParentFolderIds().getDistinguishedFolderIdArray()[0].getId());
     }
 
     @Test
