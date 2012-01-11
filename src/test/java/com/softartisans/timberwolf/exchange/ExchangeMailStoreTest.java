@@ -46,6 +46,7 @@ import org.junit.Test;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import org.mockito.MockitoAnnotations;
 
 /** Test for ExchangeMailStore, uses mock exchange service */
@@ -886,7 +887,7 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testGetMailWithPagingAndFolders() throws ServiceCallException, HttpErrorException
+    public void testGetMailWithPagingAndFolders() throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
         ExchangeService service = mock(ExchangeService.class);
 
@@ -895,26 +896,31 @@ public class ExchangeMailStoreTest
         FindFolderResponseMessageType folderMsgs = mock(FindFolderResponseMessageType.class);
         when(folderMsgs.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         FindFolderParentType parent = mock(FindFolderParentType.class);
+        when(parent.isSetFolders()).thenReturn(true);
         ArrayOfFoldersType folders = mock(ArrayOfFoldersType.class);
 
         FolderType folderOne = mock(FolderType.class);
         FolderIdType folderOneId = mock(FolderIdType.class);
+        when(folderOne.isSetFolderId()).thenReturn(true);
         when(folderOneId.getId()).thenReturn("FOLDER-ONE-ID");
         when(folderOne.getFolderId()).thenReturn(folderOneId);
 
         FolderType folderTwo = mock(FolderType.class);
         FolderIdType folderTwoId = mock(FolderIdType.class);
+        when(folderTwo.isSetFolderId()).thenReturn(true);
         when(folderTwoId.getId()).thenReturn("FOLDER-TWO-ID");
         when(folderTwo.getFolderId()).thenReturn(folderTwoId);
 
         FolderType folderThree = mock(FolderType.class);
         FolderIdType folderThreeId = mock(FolderIdType.class);
+        when(folderThree.isSetFolderId()).thenReturn(true);
         when(folderThreeId.getId()).thenReturn("FOLDER-THREE-ID");
         when(folderThree.getFolderId()).thenReturn(folderThreeId);
 
-        when(folders.getFolderArray()).thenReturn(new FolderType[] { folderOne, folderTwo, folderThree });
+        when(folders.getFolderArray()).thenReturn(new FolderType[] { folderOne });
         when(parent.getFolders()).thenReturn(folders);
         when(folderMsgs.getRootFolder()).thenReturn(parent);
+        when(folderMsgs.isSetRootFolder()).thenReturn(true);
         FindFolderResponseMessageType[] fFRMT = new FindFolderResponseMessageType[] { folderMsgs };
         when(folderArr.getFindFolderResponseMessageArray()).thenReturn(fFRMT);
         when(folderResponse.getResponseMessages()).thenReturn(folderArr);
@@ -924,14 +930,21 @@ public class ExchangeMailStoreTest
         when(emptyResponseArr.getFindFolderResponseMessageArray()).thenReturn(new FindFolderResponseMessageType[] { });
         when(emptyFolderResponse.getResponseMessages()).thenReturn(emptyResponseArr);
 
-        when(service.findFolder(any(FindFolderType.class))).thenReturn(emptyFolderResponse);
+        //when(service.findFolder(any(FindFolderType.class))).thenReturn(emptyFolderResponse);
         when(service.findFolder(LikeThis(FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT))))
             .thenReturn(folderResponse);
 
+        mockFindItem(service, "FOLDER-ONE-ID", 0, 10, 2);
+        mockGetItem(new MessageType[] { mockMessageItemId("the #0 id"), mockMessageItemId("the #1 id") }, generateIds(0, 2), service);
+
         ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
+        int count = 0;
         for (MailboxItem item : store.getMail())
         {
-            // pass
+            assertEquals("the #" + count + " id", item.getHeader("Item ID"));
+            count++;
         }
+
+        assertEquals(2, count);
     }
 }
