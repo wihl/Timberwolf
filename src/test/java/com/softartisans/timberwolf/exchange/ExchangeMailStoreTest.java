@@ -225,11 +225,15 @@ public class ExchangeMailStoreTest
         assertEquals(expected, items);
     }
 
-    private ExchangeService mockFindItem(MessageType[] messages)
+    private ExchangeService mockFindItem(MessageType[] messages) throws ServiceCallException, HttpErrorException
+    {
+        return mockFindItem(messages, mock(ExchangeService.class), 0, 1000);
+    }
+
+    private ExchangeService mockFindItem(MessageType[] messages, ExchangeService service, int offset, int maxItems)
         throws ServiceCallException, HttpErrorException
     {
-        ExchangeService service = mock(ExchangeService.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, offset, maxItems);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
