@@ -33,10 +33,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Created by IntelliJ IDEA.
- * User: scottd
- * Date: 1/11/12
- * Time: 4:11 PM
+ * Base class for fixtures that need to mock out Exchange services.
  */
 public class ExchangeTestBase
 {

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
  */
 public class FindItemTest extends ExchangeTestBase
 {
-
     @Test
     public void testGetFindItemsRequestInbox()
     {
