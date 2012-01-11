@@ -224,15 +224,38 @@ public class ExchangeMailStoreTest
     private ExchangeService mockFindItem(MessageType[] messages)
         throws ServiceCallException, HttpErrorException
     {
-        return mockFindItem(messages, defaultFolderId, 0, 1000);
+        ExchangeService service = mock(ExchangeService.class);
+        mockFindItem(service, messages, defaultFolderId, 0, 1000);
+        return service;
     }
 
-    private ExchangeService mockFindItem(
-            MessageType[] messages, String folder, int offset,
-            int maxIds)
+    private List<String> generateIds(int offset, int count)
+    {
+        List<String> ids = new ArrayList<String>(count);
+        for (int i = offset; i < count; i++)
+        {
+            ids.add("the #" + i + " id");
+        }
+        return ids;
+    }
+
+    private MessageType[] mockFindItem(ExchangeService service, String folder, int offset, int maxIds, int count)
+            throws ServiceCallException, HttpErrorException
+    {
+        MessageType[] findItems = new MessageType[count];
+        List<String> ids = generateIds(offset, count);
+        for (int i=0; i<count; i++)
+        {
+            findItems[i] = mockMessageItemId(ids.get(i));
+        }
+        System.err.println(StringUtils.join(ids.toArray()));
+        mockFindItem(service, findItems, folder, offset, maxIds);
+        return findItems;
+    }
+
+    private void mockFindItem(ExchangeService service, MessageType[] messages, String folder, int offset, int maxIds)
         throws ServiceCallException, HttpErrorException
     {
-        ExchangeService service = mock(ExchangeService.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(folder, offset,  maxIds);
         FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
@@ -249,8 +272,6 @@ public class ExchangeMailStoreTest
         when(findItemParent.isSetItems()).thenReturn(true);
         when(findItemParent.getItems()).thenReturn(arrayOfRealItems);
         when(arrayOfRealItems.getMessageArray()).thenReturn(messages);
-
-        return service;
     }
 
     private void defaultMockFindFolders(ExchangeService service) throws ServiceCallException, HttpErrorException
@@ -683,9 +704,28 @@ public class ExchangeMailStoreTest
     }
 
     @Test
-    public void testFindMailOneIdPageTwoItemPages() throws IOException, AuthenticationException
+    public void testFindMailOneIdPageTwoItemPages()
+            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
-        assertPagesThroughItems(10, 11, 5);
+        ExchangeService service = mock(ExchangeService.class);
+        defaultMockFindFolders(service);
+        MessageType[] findResults = mockFindItem(service, defaultFolderId, 0, 11, 10);
+        mockGetItem(Arrays.copyOfRange(findResults, 0, 5), generateIds(0, 5), service);
+        mockGetItem(Arrays.copyOfRange(findResults, 5, 10), generateIds(5, 5), service);
+
+        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, 11, 5);
+
+        int index = 0;
+        List<String> ids = generateIds(0, 10);
+        while (mailItor.hasNext())
+        {
+            MailboxItem item = mailItor.next();
+            assertEquals(ids.get(index), item.getHeader("Item ID"));
+            index++;
+        }
+        assertEquals(10, index);
+
+//        assertPagesThroughItems(10, 11, 5);
     }
 
     @Test
