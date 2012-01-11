@@ -91,17 +91,16 @@ public class LdapFetcherTest {
         try
         {
             final TestEnumerator<SearchResult> resultEnum = new TestEnumerator<SearchResult>();
-            //NamingEnumeration<SearchResult> resultEnum = NamingEnumeration.<SearchResult>()
-            when(context.search(eq("CN=Users"), eq("(objectClass=person)"), any(SearchControls.class))).thenReturn(resultEnum);
+            when(context.search(eq("CN=Users"), eq("(objectClass=person)"), Mockito. any(SearchControls.class))).thenReturn(resultEnum);
             for (String[] currentResultArray : results)
             {
                 SearchResult mockResult = mock(SearchResult.class);
-                resultEnum.add(mockResult);
                 Attributes mockAttributes = mock(Attributes.class);
-                when(mockResult.getAttributes()).thenReturn(mockAttributes);
                 BasicAttribute mockAttribute = mock(BasicAttribute.class);
-                when(mockAttributes.get(expectedAttribute)).thenReturn(mockAttribute);
                 TestEnumerator smallBitEnum = new TestEnumerator();
+                resultEnum.add(mockResult);
+                when(mockResult.getAttributes()).thenReturn(mockAttributes);
+                when(mockAttributes.get(expectedAttribute)).thenReturn(mockAttribute);
                 when(mockAttribute.getAll()).thenReturn(smallBitEnum);
                 for (String currentResult : currentResultArray)
                 {
