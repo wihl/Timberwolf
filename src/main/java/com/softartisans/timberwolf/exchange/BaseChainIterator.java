@@ -11,7 +11,6 @@ public abstract class BaseChainIterator<T> implements Iterator<T>
 
     public BaseChainIterator()
     {
-        currentIterator = nextViableIterator();
     }
 
     /**
@@ -49,12 +48,12 @@ public abstract class BaseChainIterator<T> implements Iterator<T>
     @Override
     public boolean hasNext()
     {
+        // always return false if currentIterator is null
         if (currentIterator != null && currentIterator.hasNext())
         {
             return true;
         }
         currentIterator = nextViableIterator();
-        // return false if currentIterator is null
         return currentIterator != null;
     }
 
