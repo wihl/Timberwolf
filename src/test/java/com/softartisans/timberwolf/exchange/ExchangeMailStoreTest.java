@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
-import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -248,7 +247,6 @@ public class ExchangeMailStoreTest
         {
             findItems[i] = mockMessageItemId(ids.get(i));
         }
-        System.err.println(StringUtils.join(ids.toArray()));
         mockFindItem(service, findItems, folder, offset, maxIds);
         return findItems;
     }
@@ -477,7 +475,6 @@ public class ExchangeMailStoreTest
     {
         int start = pageSize * pageIndex;
         max = Math.min(max, start + pageSize);
-        System.err.println("mocking: " + start + " - " + max);
         mockGetItem(Arrays.copyOfRange(findResults, start, max),
                     generateIds(initialOffset + start, max - start), service);
     }
@@ -811,7 +808,6 @@ public class ExchangeMailStoreTest
     public void testFindMailFiveIdPages20ItemPages()
             throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
     {
-
         int itemsInExchange = 100;
         int idPageSize = 20;
         int itemPageSize = 5;
@@ -824,6 +820,36 @@ public class ExchangeMailStoreTest
             {
                 mockGetItem(findResults, idPageSize*i, itemPageSize, j, itemsInExchange, service);
             }
+        }
+        // because the idPageSize evenly divides the number of emails
+        mockFindItem(service, defaultFolderId, itemsInExchange,idPageSize,0);
+
+        FindItemIterator mailItor = new FindItemIterator(service, defaultFolderId, idPageSize, itemPageSize);
+
+        int index = 0;
+        List<String> ids = generateIds(0, itemsInExchange);
+        while (mailItor.hasNext())
+        {
+            MailboxItem item = mailItor.next();
+            assertEquals(ids.get(index), item.getHeader("Item ID"));
+            index++;
+        }
+        assertEquals(itemsInExchange, index);
+    }
+
+    @Test
+    public void testFindMailItemPageLargerThanIdPage()
+            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+    {
+        int itemsInExchange = 20;
+        int idPageSize = 5;
+        int itemPageSize = 10;
+        ExchangeService service = mock(ExchangeService.class);
+        defaultMockFindFolders(service);
+        for (int i = 0; i < 4; i++)
+        {
+            MessageType[] findResults = mockFindItem(service, defaultFolderId, i*idPageSize, idPageSize, idPageSize);
+            mockGetItem(findResults, idPageSize*i, idPageSize, 0, itemsInExchange, service);
         }
         // because the idPageSize evenly divides the number of emails
         mockFindItem(service, defaultFolderId, itemsInExchange,idPageSize,0);
@@ -966,11 +992,5 @@ public class ExchangeMailStoreTest
         }
         expected.remove(1);
         assertEquals(expected, items);
-    }
-
-    @Test
-    public void testFindMailItemPageLargerThanIdPage() throws IOException, AuthenticationException
-    {
-        assertPagesThroughItems(20, 5, 10);
     }
 }
