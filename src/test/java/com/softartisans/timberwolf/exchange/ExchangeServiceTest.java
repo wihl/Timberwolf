@@ -1,30 +1,27 @@
 package com.softartisans.timberwolf.exchange;
 
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
-import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
-import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
-import java.net.HttpURLConnection;
-import java.io.UnsupportedEncodingException;
-import java.io.IOException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import org.apache.xmlbeans.XmlException;
-
-import java.util.regex.Pattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.when;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 
 public class ExchangeServiceTest
 {
@@ -47,7 +44,7 @@ public class ExchangeServiceTest
         "        <t:DistinguishedFolderId Id=\"inbox\"/>" +
         "      </ParentFolderIds>" +
         "    </FindItem>";
-    private static final String findItemResponse =        
+    private static final String findItemResponse =
         "    <m:FindItemResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" " +
         "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" " +
         "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\">\n" +
@@ -136,7 +133,68 @@ public class ExchangeServiceTest
         "    </m:GetItemResponseMessage>" +
         "  </m:ResponseMessages>" +
         "</GetItemResponse>";
-    
+
+    private final String findFolderRequest = "<mes:FindFolder Traversal=\"Shallow\" "
+    + "xmlns:mes=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+    + "xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+    + "<mes:FolderShape>"
+    + "<typ:BaseShape>AllProperties</typ:BaseShape>"
+    + "</mes:FolderShape>"
+    + "<mes:ParentFolderIds>"
+    + "<typ:DistinguishedFolderId Id=\"msgfolderroot\"/>"
+    + "</mes:ParentFolderIds>"
+    + "</mes:FindFolder>";
+
+    private final String findFolderResponse = "<m:FindFolderResponse "
+    + "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+    + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" "
+    + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    + "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">"
+    + "<m:ResponseMessages>"
+    + "<m:FindFolderResponseMessage ResponseClass=\"Success\">"
+    + "<m:ResponseCode>NoError</m:ResponseCode>"
+    + "<m:RootFolder TotalItemsInView=\"12\" IncludesLastItemInRange=\"true\">"
+    + "<t:Folders>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAb"
+    + "Ck8HJcmPEi9+6mY2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq3AAA\" "
+    + "ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbbf5\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6m"
+    + "Y2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Deleted Items</t:DisplayName>"
+    + "<t:TotalCount>0</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>0</t:UnreadCount>"
+    + "</t:Folder>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFFTo"
+    + "lzk2yM0Sg+YQ84AAAAGxq5AAA\" ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbbf9\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJ"
+    + "cmPEi9+6mY2w+80AEA+aDFFTolzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Drafts</t:DisplayName>"
+    + "<t:TotalCount>0</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>0</t:UnreadCount>"
+    + "</t:Folder>"
+    + "<t:Folder>"
+    + "<t:FolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFF"
+    + "Tolzk2yM0Sg+YQ84AAAAGxq2QAA\" ChangeKey=\"AQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbhaq\"/>"
+    + "<t:ParentFolderId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ALgAAAAAAbCk8HJcmPEi9+6mY2w+80AEA+aDFFT"
+    + "olzk2yM0Sg+YQ84AAAAGxq1gAA\" ChangeKey=\"AQAAAA==\"/>"
+    + "<t:FolderClass>IPF.Note</t:FolderClass>"
+    + "<t:DisplayName>Inbox</t:DisplayName>"
+    + "<t:TotalCount>101</t:TotalCount>"
+    + "<t:ChildFolderCount>0</t:ChildFolderCount>"
+    + "<t:UnreadCount>100</t:UnreadCount>"
+    + "</t:Folder>"
+    + "</t:Folders>"
+    + "</m:RootFolder>"
+    + "</m:FindFolderResponseMessage>"
+    + "</m:ResponseMessages>"
+    + "</m:FindFolderResponse>";
+
     private static String soap(String body)
     {
         return soapPrelude + body + soapFinale;
@@ -144,18 +202,18 @@ public class ExchangeServiceTest
 
     @Test
     public void testFindItem()
-        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
+        throws UnsupportedEncodingException, XmlException, ServiceCallException,
                IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(findItemsRequest).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, soap(findItemResponse).getBytes("UTF-8"));
-        
+
         FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
 
         ExchangeService service = new ExchangeService(url, factory);
         FindItemResponseType response = service.findItem(findReq);
-                
+
         FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(findItemResponse))
                                         .getEnvelope().getBody().getFindItemResponse();
 
@@ -164,13 +222,13 @@ public class ExchangeServiceTest
 
     @Test
     public void testGetItem()
-        throws UnsupportedEncodingException, XmlException, ServiceCallException, 
+        throws UnsupportedEncodingException, XmlException, ServiceCallException,
                IOException, HttpErrorException
     {
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, soap(getItemResponse).getBytes("UTF-8"));
-        
+
         GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
 
         ExchangeService service = new ExchangeService(url, factory);
@@ -183,8 +241,27 @@ public class ExchangeServiceTest
     }
 
     @Test
+    public void testFindFolder()
+        throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException, HttpErrorException
+    {
+       MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+       factory.forRequest(url, soap(findFolderRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, soap(findFolderResponse).getBytes("UTF-8"));
+
+        FindFolderType findFolder = FindFolderDocument.Factory.parse(findFolderRequest).getFindFolder();
+
+        ExchangeService service = new ExchangeService(url, factory);
+        FindFolderResponseType response = service.findFolder(findFolder);
+
+        FindFolderResponseType expected = EnvelopeDocument.Factory.parse(soap(findFolderResponse))
+                .getEnvelope().getBody().getFindFolderResponse();
+
+        assertEquals(expected.toString(), response.toString());
+    }
+
+    @Test
     public void testResponseCodeException()
-        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException,
                HttpErrorException, IOException
     {
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
@@ -202,7 +279,7 @@ public class ExchangeServiceTest
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
-        {        
+        {
             assertEquals("Error getting HTTP status code.", e.getMessage());
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }
@@ -210,7 +287,7 @@ public class ExchangeServiceTest
 
     @Test
     public void TestInputStreamException()
-        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException, 
+        throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException,
                HttpErrorException, IOException
     {
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
@@ -227,10 +304,10 @@ public class ExchangeServiceTest
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
-        {        
+        {
             assertEquals("Error getting input stream.", e.getMessage());
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
-        }            
+        }
     }
 
     @Test
@@ -257,7 +334,7 @@ public class ExchangeServiceTest
         }
     }
 
-    @Test 
+    @Test
     public void testAvailableException()
         throws IOException, UnsupportedEncodingException, ServiceCallException, XmlException, HttpErrorException
     {
@@ -290,7 +367,8 @@ public class ExchangeServiceTest
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, soap("Not a real response").getBytes("UTF-8"));
-        
+
+
         GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
         ExchangeService service = new ExchangeService(url, factory);
 
@@ -301,6 +379,52 @@ public class ExchangeServiceTest
         catch (ServiceCallException e)
         {
             assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoEnvelopeResponse()
+            throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK,
+                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>".getBytes("UTF-8"));
+
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoBodyResponse()
+            throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, (
+                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                       "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                       "</soapenv:Envelope>").getBytes("UTF-8"));
+
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response did not contain a body.", e.getMessage());
         }
     }
 

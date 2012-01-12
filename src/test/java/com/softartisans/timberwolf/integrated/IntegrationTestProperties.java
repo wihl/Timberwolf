@@ -170,9 +170,13 @@ public class IntegrationTestProperties implements TestRule
                     sb.append(propertyNames[i]);
                     sb.append('\"');
                 }
-                sb.append(", and \"");
-                sb.append(propertyNames[1]);
-                sb.append("\"\n *     Specified in the file: ");
+                if (propertyNames.length > 1)
+                {
+                    sb.append(", and \"");
+                    sb.append(propertyNames[1]);
+                    sb.append("\"");
+                }
+                sb.append("\n *     Specified in the file: ");
                 sb.append(path);
                 // Ideally we would be able to just put a message in, but
                 // surefire does not respect the ignored message, so we

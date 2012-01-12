@@ -16,33 +16,36 @@ import org.junit.Before;
 public class ConsoleTestBase
 {
     private final ByteArrayOutputStream toBeTested = new ByteArrayOutputStream();
-    
+
+    private PrintStream originalOut;
+
     @Before
     public void setUpStreams()
     {
+        originalOut = System.out;
         System.setOut(new PrintStream(toBeTested));
     }
-    
+
     @After
     public void cleanUpStreams()
     {
-        System.setOut(null);
+        System.setOut(originalOut);
     }
-    
+
 
     protected void assertConsoleOutput(String[] lines) throws IOException
     {
         String consoleOutput = toBeTested.toString();
         String newline = System.getProperty("line.separator");
         assertTrue(consoleOutput.endsWith(newline));
-        
+
         BufferedReader reader = new BufferedReader(new StringReader(consoleOutput));
         for (String expectedLine : lines)
         {
             String actualLine = reader.readLine();
             assertEquals(expectedLine, actualLine);
         }
-        
+
         assertNull("More lines in console than expected", reader.readLine());
     }
 }

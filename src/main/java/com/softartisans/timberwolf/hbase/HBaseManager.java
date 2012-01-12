@@ -230,7 +230,7 @@ public class HBaseManager
             {
                 if (hbase.tableExists(tableName))
                 {
-                    logger.error("Cannot create table " + tableName + ", as "
+                    logger.info("Cannot create table " + tableName + ", as "
                         + "the table already exists!");
                 }
                 else

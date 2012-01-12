@@ -1,40 +1,32 @@
 package com.softartisans.timberwolf.integrated;
 
-import com.cloudera.alfredo.client.AuthenticationException;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
-import com.softartisans.timberwolf.hbase.HBaseConfigurator;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import com.softartisans.timberwolf.hbase.HBaseManager;
-import com.softartisans.timberwolf.hbase.IHBaseTable;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
 /**
- * Overall integration testing for timberwolf.
+ * Overall integration testing, from exchange server to hbase.
  */
-public class TestIntegration {
-
-    private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
-    private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
+public class TestIntegration
+{
+    private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(ZOO_KEEPER_QUORUM_PROPERTY_NAME,
-            ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
+    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
+
+    @Rule
+    public HTableResource hbase = new HTableResource();
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -46,24 +38,130 @@ public class TestIntegration {
         return get;
     }
 
+    private Scan createScan(String columnFamily, String[] headers)
+    {
+        Scan scan = new Scan();
+        for( String header : headers)
+        {
+            scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
+        }
+        return scan;
+    }
+
     @Test
     public void testIntegrationNoCLI()
     {
-        String tableName = "testIntegrationNoCLI";
-        String columnFamily = "h";
+        /*
+        This test tests getting emails from an exchange server, and the breadth
+        of what that entails, and then putting it all in Exchange. It does so by
+        assuming a certain structure of emails on the exchange server, and then
+        asserting that those emails are in the hbase table afterwards. If you're
+        recreating this structure, avoid putting the text that we check in
+        multiple emails, except the sender, that's fine.
+
+        Below is the required structure; identation denotes the heirarchy.
+        Some of the folders have a required count, that's
+        denoted by having the count in parentheses after the folder name.
+        The contents of the emails are defined in the actual code, by adding
+        EmailMatchers to requiredEmails.
+        Note that if you put html tags in the body (such as changing formatting),
+        that is considered text:
+
+          korganizer@*
+            Inbox
+              child of Inbox
+              Inbox jr
+            Drafts
+            Sent Items
+            Deleted Items
+              Deleted Folder
+            Topper
+              Middler
+                Middler Jr
+                  Middler II (0)
+                    Middler III
+                      Middler IV (0)
+                Ms child
+            Page FindItems (29)
+            Page GetItems (11)
+
+         */
         String keyHeader = "Item ID";
 
-        HBaseManager hbase = new HBaseManager(properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
+        EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
 
-        List<String> columnFamilies = new ArrayList<String>();
-        columnFamilies.add(columnFamily);
-        IHBaseTable table = hbase.createTable(tableName, columnFamilies);
+        // Inbox
+        requiredEmails.add()
+                      .sender("tsender")
+                      .subject("Leave it be")
+                      .bodyContains("love your inbox clean");
+        // child of Inbox
+        requiredEmails.add()
+                      .subject("To the child of inbox")
+                      .bodyContains("child of Inbox");
+        // Inbox Jr
+        requiredEmails.add()
+                      .bodyContains("Inbox Jr")
+                      .bodyContains("is getting lonely");
+        requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
+        // Drafts
+        requiredEmails.add().to("tsender").subject("A draft");
+        // Sent Items
+        requiredEmails.add()
+                      .sender("korganizer")
+                      .to("abenjamin")
+                      .subject("A message to someone else");
+        requiredEmails.add()
+                      .bcc("tsender")
+                      .to("bkerr")
+                      .subject("to whom");
+        // Deleted Items
+        requiredEmails.add().subject("Whoops").bodyContains("this is trash");
+        // Deleted Folder
+        requiredEmails.add().bodyContains("Deleted Folder");
+        // Topper
+        requiredEmails.add()
+                      .to("bkerr")
+                      .cc("korganizer")
+                      .subject("Hey hey Bobbie, throw it in the Topper");
+        // Middler
+        requiredEmails.add().bodyContains("away this should go into middler, placed neatly.");
+        requiredEmails.add().subject("Another middler");
+        requiredEmails.add().subject("Yet another in the middler");
+        // Middler Jr
+        requiredEmails.add().subject("organize away to MJ").bodyContains("Middler Jr");
+        // Middler II (0)
+        // Middler III
+        requiredEmails.add().subject("Forward to Middler III");
+        // Middler IV (0)
+        // Ms child
+        requiredEmails.add().bodyContains("Ms child").bodyContains("nicer than MJ");
+        requiredEmails.add()
+                      .subject("Super nesting")
+                      .bodyContains("Ms child")
+                      .bodyContains("wants to be in the loop too.");
+        // Page FindItems (29)
+        for (int i = 1; i < 30; i++)
+        {
+            requiredEmails.add()
+                          .subject("Page FindItems" + i)
+                          .bodyContains("Page FindItems")
+                          .bodyContains("#" + i);
+        }
+        // Page GetItems (11)
+        for (int i = 1; i < 12; i++)
+        {
+            requiredEmails.add()
+                          .subject("Page GetItems" + i)
+                          .bodyContains("Page GetItems")
+                          .bodyContains("#" + i);
+        }
 
-        String exchangeURL = "https://devexch01.int.tartarus.com/ews/exchange.asmx";
 
-        MailStore mailStore = new ExchangeMailStore(exchangeURL);
-        MailWriter mailWriter = HBaseMailWriter.create(table, keyHeader, columnFamily);
+        String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+
+        MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
+        MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
         Iterable<MailboxItem> mailboxItems = mailStore.getMail();
         Assert.assertTrue(mailboxItems.iterator().hasNext());
@@ -71,23 +169,27 @@ public class TestIntegration {
 
         // Now prove that everything is in HBase.
 
-        Configuration configuration = HBaseConfigurator.createConfiguration(
-                properties.getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                properties.getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
         try
         {
-            HTableInterface hTable = new HTable(configuration, tableName);
+            HTableInterface hTable = hbase.getTestingTable();
+            Scan scan = createScan(hbase.getFamily(), new String[]{"Subject", "Sender", "Bcc", "Cc", "To", "Body"});
+            ResultScanner scanner = hTable.getScanner(scan);
+            for (Result result = scanner.next(); result != null; result = scanner.next())
+            {
+                requiredEmails.match(result);
+            }
+            requiredEmails.assertEmpty();
             Iterable<MailboxItem> mails = mailStore.getMail();
 
             for (MailboxItem mail : mails)
             {
-                Get get = createGet(mail.getHeader(keyHeader),columnFamily,mail.getHeaderKeys());
+                Get get = createGet(mail.getHeader(keyHeader), hbase.getFamily(), mail.getHeaderKeys());
                 Result result = hTable.get(get);
-                for(String header : mail.getHeaderKeys())
+                for (String header : mail.getHeaderKeys())
                 {
-                    String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(columnFamily),
-                            Bytes.toBytes(header)));
-                    Assert.assertEquals(mail.getHeader(header),tableValue);
+                    String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(hbase.getFamily()),
+                                                                       Bytes.toBytes(header)));
+                    Assert.assertEquals(mail.getHeader(header), tableValue);
                 }
             }
         }
@@ -95,7 +197,5 @@ public class TestIntegration {
         {
             Assert.fail("Error when attempting to compare.");
         }
-
-        hbase.deleteTable(tableName);
     }
 }
