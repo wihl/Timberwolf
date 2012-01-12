@@ -65,7 +65,28 @@ public class TestIntegration
         The contents of the emails are defined in the actual code, by adding
         EmailMatchers to requiredEmails.
         Note that if you put html tags in the body (such as changing formatting),
-        that is considered text:
+        that is considered text.
+        There are 5 users involved, some of which are in an impersonation group
+        (more on this below):
+          jclouseau - the user with impersonation rights for the group
+          korganizer - in the impersonation group, has a lot of folders and
+                       emails
+          aloner - another user in the impersonation group with just a few
+                   emails
+          marcher - a third user in the impersonation group, also has just a
+                    few emails
+          tsender - A helper user that is not in the impersonation group and
+                    does all of the sending
+
+          aloner@*
+            Inbox
+              Rebecca
+            Eduardo
+
+          marcher@*
+            Inbox
+              Anthony
+            Barbara
 
           korganizer@*
             Inbox
@@ -90,6 +111,41 @@ public class TestIntegration
 
         EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
 
+        /////////////
+        //  aloner
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                      .subject("Dear Alex")
+                      .bodyContains("leave this in your inbox");
+        // Rebecca
+        requiredEmails.add()
+                      .subject("About Rebecca")
+                      .bodyContains("She did something");
+        // Eduardo
+        requiredEmails.add()
+                      .subject("About Eduardo")
+                      .bodyContains("Something happened to him");
+
+        /////////////
+        // marcher
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                      .subject("Dear Mary")
+                      .bodyContains("Don't rearrange");
+        // Anthony
+        requiredEmails.add()
+                      .subject("About Anthony")
+                      .bodyContains("He did something");
+        // Barbara
+        requiredEmails.add()
+                      .subject("About Barbara")
+                      .bodyContains("Something happened to her");
+
+        /////////////
+        // korganizer
+        /////////////
         // Inbox
         requiredEmails.add()
                       .sender("tsender")
