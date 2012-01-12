@@ -59,15 +59,8 @@ public class TestIntegration
         recreating this structure, avoid putting the text that we check in
         multiple emails, except the sender, that's fine.
 
-        Below is the required structure; identation denotes the heirarchy.
-        Some of the folders have a required count, that's
-        denoted by having the count in parentheses after the folder name.
-        The contents of the emails are defined in the actual code, by adding
-        EmailMatchers to requiredEmails.
-        Note that if you put html tags in the body (such as changing formatting),
-        that is considered text.
-        There are 5 users involved, some of which are in an impersonation group
-        (more on this below):
+        There are 5 users involved, some of which are in a security group set
+        up for impersonation (more on this below):
           jclouseau - the user with impersonation rights for the group
           korganizer - in the impersonation group, has a lot of folders and
                        emails
@@ -77,6 +70,52 @@ public class TestIntegration
                     few emails
           tsender - A helper user that is not in the impersonation group and
                     does all of the sending
+
+        Before creating the security group for impersonation, create the user
+        mailboxes in exchanges.
+
+        In order to create a security group set up for impersonation:
+        One will have to log into our Exchange test server. From there,
+        open up the Exchange Management Console and select Recipient
+        Configuration and then Distribution Group. Right click inside the pane
+        and select New Distribution Group. On the first page, select new group.
+        On the second, one must specify the group type as security. Don't
+        specify an organization unit, and the names and aliases are arbitrary
+        but make them all the same. We will refer to this unique name as the
+        SecurityGroupName. On the last page simply press the New button and
+        the group should be created. It's not instantaneous, but should appear
+        within the list fairly quickly.
+
+        The users will then have to be added to the security group.
+        Right-click on the security group name and select Properties.
+        Under the members tab is a list of all the current members and an Add
+        button. Clicking the add button will bring up a list of members.
+        Multi-select the users that need to be in the impersonation group.
+
+        Once the members are added, create a ManagementScope. Open the Exchange
+        Management Shell. Then run the following to create a ManagementScope
+        with name "ScopeName" for the security group "SecurityGroupName"
+        (this should be on one line, but I wrapped it for readability):
+            New-ManagementScope -Name:ScopeName -RecipientRestrictionFilter
+            {MemberOfGroup -eq
+            "cn=SecurityGroupName,cn=Users,DC=int,DC=tartarus,DC=com"}
+        Then create a ManagementRoleAssignment for jclouseau. To create a
+        ManagementRoleAssignment named "ManagementRoleAssignmentName" over
+        scope "ScopeName" (again this is just one line):
+            New-ManagementRoleAssignment -Name:ManagementRoleAssignmentName
+            -Role:ApplicationImpersonation -User:jclouseau
+            -CustomRecipientWriteScope:ScopeName
+
+        Now jclouseau is set up to impersonate the other users.
+
+
+        Below is the required structure; identation denotes the heirarchy.
+        Some of the folders have a required count, that's
+        denoted by having the count in parentheses after the folder name.
+        The contents of the emails are defined in the actual code, by adding
+        EmailMatchers to requiredEmails.
+        Note that if you put html tags in the body (such as changing formatting),
+        that is considered text.
 
           aloner@*
             Inbox
