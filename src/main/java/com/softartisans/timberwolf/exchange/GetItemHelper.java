@@ -8,10 +8,8 @@ import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.softartisans.timberwolf.MailboxItem;
-
 import java.util.List;
 import java.util.Vector;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class GetItemHelper
 {
-    private static final Logger LOG = LoggerFactory.getLogger(FindItemHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetItemHelper.class);
 
     /**
      * Enforces not being able to create an instance.
@@ -75,6 +73,7 @@ public final class GetItemHelper
         {
             return new Vector<MailboxItem>();
         }
+        LOG.trace("Making request:\n" + getGetItemsRequest(ids.subList(startIndex, max)).toString());
         GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)));
 
         if (response == null)
