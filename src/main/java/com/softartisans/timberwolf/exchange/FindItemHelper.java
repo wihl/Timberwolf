@@ -168,16 +168,13 @@ public final class FindItemHelper
                 throw new ServiceCallException(errorCode, "SOAP response contained an error.");
             }
 
-            if (message.isSetRootFolder())
+            if (message.isSetRootFolder() && message.getRootFolder().isSetItems())
             {
-                if (message.getRootFolder().isSetItems())
+                for (MessageType item : message.getRootFolder().getItems().getMessageArray())
                 {
-                    for (MessageType item : message.getRootFolder().getItems().getMessageArray())
+                    if (item.isSetItemId())
                     {
-                        if (item.isSetItemId())
-                        {
-                            items.add(item.getItemId().getId());
-                        }
+                        items.add(item.getItemId().getId());
                     }
                 }
             }

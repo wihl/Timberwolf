@@ -110,16 +110,13 @@ public final class FindFolderHelper
                 throw new ServiceCallException(errorCode, "SOAP response contained an error.");
             }
 
-            if (message.isSetRootFolder())
+            if (message.isSetRootFolder() && message.getRootFolder().isSetFolders())
             {
-                if (message.getRootFolder().isSetFolders())
+                for (FolderType folder : message.getRootFolder().getFolders().getFolderArray())
                 {
-                    for (FolderType folder : message.getRootFolder().getFolders().getFolderArray())
+                    if (folder.isSetFolderId())
                     {
-                        if (folder.isSetFolderId())
-                        {
-                            folders.add(folder.getFolderId().getId());
-                        }
+                        folders.add(folder.getFolderId().getId());
                     }
                 }
             }
