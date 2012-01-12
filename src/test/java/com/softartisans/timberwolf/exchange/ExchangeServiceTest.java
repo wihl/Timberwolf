@@ -1,24 +1,27 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.microsoft.schemas.exchange.services.x2006.messages.*;
-import com.microsoft.schemas.exchange.services.x2006.types.*;
-import com.softartisans.timberwolf.integrated.IntegrationTestProperties;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
-import java.net.HttpURLConnection;
-import java.io.UnsupportedEncodingException;
-import java.io.IOException;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import org.apache.xmlbeans.XmlException;
-import sun.util.LocaleServiceProviderPool;
-
-import java.util.regex.Pattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.when;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 
 public class ExchangeServiceTest
 {
@@ -365,6 +368,7 @@ public class ExchangeServiceTest
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, soap("Not a real response").getBytes("UTF-8"));
 
+
         GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
         ExchangeService service = new ExchangeService(url, factory);
 
@@ -375,6 +379,52 @@ public class ExchangeServiceTest
         catch (ServiceCallException e)
         {
             assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoEnvelopeResponse()
+            throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK,
+                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>".getBytes("UTF-8"));
+
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("Error parsing SOAP response.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoBodyResponse()
+            throws UnsupportedEncodingException, XmlException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, (
+                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                       "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                       "</soapenv:Envelope>").getBytes("UTF-8"));
+
+        GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
+        ExchangeService service = new ExchangeService(url, factory);
+
+        try
+        {
+            GetItemResponseType response = service.getItem(getReq);
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response did not contain a body.", e.getMessage());
         }
     }
 

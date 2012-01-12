@@ -44,13 +44,12 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     @Override
-    public Statement apply(Statement base, final Description description)
+    public Statement apply(final Statement inner, final Description description)
     {
         name = description.getClassName() + "." + description.getMethodName()
                + (new BigInteger(130, new Random()).toString(32));
         LOG.debug("Using temporary table: " + name);
-        final Statement inner = super.apply(base, description);
-        return new Statement()
+        return super.apply(new Statement()
         {
             @Override
             public void evaluate() throws Throwable
@@ -82,7 +81,7 @@ public class HTableResource extends IntegrationTestProperties
                     }
                 }
             }
-        };
+        }, description);
     }
 
     private void closeTables() throws IOException
