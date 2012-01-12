@@ -39,8 +39,9 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(1000);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        Configuration config = new Configuration(1000, 0, DistinguishedFolderIdNameType.INBOX);
         assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000).xmlText());
+                     FindItemHelper.getFindItemsRequest(config, 0).xmlText());
     }
 
     @Test
@@ -55,59 +56,62 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(1000);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        Configuration config = new Configuration(1000, 0, DistinguishedFolderIdNameType.DELETEDITEMS);
         assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.DELETEDITEMS, 0, 1000).xmlText());
+                     FindItemHelper.getFindItemsRequest(config, 0).xmlText());
     }
 
     @Test
     public void testGetFindItemsRequestOffset()
     {
         DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
+        Configuration config = new Configuration(10, 0, folder);
 
-        FindItemType request = FindItemHelper.getFindItemsRequest(folder, 3, 10);
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, 3);
         assertEquals(3, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(folder, 13, 10);
+        request = FindItemHelper.getFindItemsRequest(config, 13);
         assertEquals(13, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(folder, 0, 10);
+        request = FindItemHelper.getFindItemsRequest(config, 0);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(folder, -1, 10);
+        request = FindItemHelper.getFindItemsRequest(config, -1);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(folder, 1, 10);
+        request = FindItemHelper.getFindItemsRequest(config, 1);
         assertEquals(1, request.getIndexedPageItemView().getOffset());
+    }
+
+    private void assertFindItemsRequestMaxEntries(int maxItems)
+    {
+        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
+
+        Configuration config = new Configuration(maxItems, 0, folder);
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, 5);
+        assertEquals(Math.max(1, maxItems), request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
     @Test
     public void testGetFindItemsRequestMaxEntries()
     {
-        DistinguishedFolderIdNameType.Enum folder = DistinguishedFolderIdNameType.INBOX;
-
-        FindItemType request = FindItemHelper.getFindItemsRequest(folder, 5, 10);
-        assertEquals(10, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 3);
-        assertEquals(3, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 0);
-        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
-
-        request = FindItemHelper.getFindItemsRequest(folder, 5, 1);
-        assertEquals(1, request.getIndexedPageItemView().getMaxEntriesReturned());
+        assertFindItemsRequestMaxEntries(10);
+        assertFindItemsRequestMaxEntries(3);
+        assertFindItemsRequestMaxEntries(0);
+        assertFindItemsRequestMaxEntries(1);
     }
 
     @Test
     public void testFindItemsInboxRespondNull()
             throws ServiceCallException, HttpErrorException
     {
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
+        Configuration config = new Configuration(1000, 0, DistinguishedFolderIdNameType.INBOX);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(config, 0);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
 
         try
         {
-            Vector<String> items = FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
+            Vector<String> items = FindItemHelper.findItems(service, config, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -122,7 +126,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, 0);
         assertEquals(0, items.size());
     }
 
@@ -133,7 +137,7 @@ public class FindItemTest extends ExchangeTestBase
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, 0);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -150,7 +154,7 @@ public class FindItemTest extends ExchangeTestBase
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, 0);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -174,7 +178,7 @@ public class FindItemTest extends ExchangeTestBase
         messages[unset] = mock(MessageType.class);
         when(messages[unset].isSetItemId()).thenReturn(false);
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, 0);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -199,7 +203,8 @@ public class FindItemTest extends ExchangeTestBase
 
         try
         {
-            FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
+            Configuration config = new Configuration(1000, 0, DistinguishedFolderIdNameType.INBOX);
+            FindItemHelper.findItems(service, config, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -215,7 +220,7 @@ public class FindItemTest extends ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, 0);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
@@ -232,7 +237,7 @@ public class FindItemTest extends ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, 0);
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())

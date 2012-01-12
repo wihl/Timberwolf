@@ -15,24 +15,20 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
 {
     private static final Logger LOG = LoggerFactory.getLogger(FindItemIterator.class);
     private ExchangeService service;
+    private Configuration config;
     private int currentStart;
-    private int pageSize;
-    private String folder;
-    private int getItemsPageSize;
     /**
      * If we ever make a call asking for pageSize items and get back less than that,
      * we know that there are no more messages to get, this is then set to true.
      */
     private boolean definitelyExhausted;
 
-    public FindItemIterator(final ExchangeService exchangeService, final String folderId,
-                            final int idsPageSize, final int itemsPageSize)
+    public FindItemIterator(final ExchangeService exchangeService,
+                            final Configuration configuration)
     {
         service = exchangeService;
-        pageSize = idsPageSize;
-        folder = folderId;
+        config = configuration;
         currentStart = 0;
-        getItemsPageSize = itemsPageSize;
     }
 
     @Override
@@ -44,7 +40,8 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             {
                 return null;
             }
-            Vector<String> messageIds = FindItemHelper.findItems(service, folder, currentStart, pageSize);
+            Vector<String> messageIds = FindItemHelper.findItems(service, config, currentStart);
+            int pageSize = config.getFindItemPageSize();
             currentStart += pageSize;
             LOG.debug("Got {} email ids.", messageIds.size());
             if (messageIds.size() < pageSize)
@@ -53,7 +50,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             }
             if (messageIds.size() > 0)
             {
-                return new GetItemIterator(service, messageIds, getItemsPageSize);
+                return new GetItemIterator(service, messageIds, config.getGetItemPageSize());
             }
             else
             {

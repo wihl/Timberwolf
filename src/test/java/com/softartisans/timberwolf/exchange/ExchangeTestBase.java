@@ -42,6 +42,9 @@ public class ExchangeTestBase
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
     protected String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
 
+    /** This configuration is used anytime we just need any standard configuration. */
+    protected Configuration defaultConfig = new Configuration(1000, 1000, defaultFolderId);
+
     @Before
     public void setUp() throws Exception
     {
@@ -80,7 +83,8 @@ public class ExchangeTestBase
     private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds)
         throws ServiceCallException, HttpErrorException
     {
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(folder, offset, maxIds);
+        Configuration config = new Configuration(maxIds, 0, folder);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(config, offset);
         FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);

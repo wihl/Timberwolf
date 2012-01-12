@@ -53,6 +53,9 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
         {
             return null;
         }
-        return new FindItemIterator(service, folderQueue.poll(), findItemPageSize, getItemsPageSize);
+        Configuration configuration = new Configuration(findItemPageSize,
+                                                        getItemsPageSize,
+                                                        folderQueue.poll());
+        return new FindItemIterator(service, configuration);
     }
 }
