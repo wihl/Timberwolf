@@ -309,11 +309,6 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         when(folderArr.getFindFolderResponseMessageArray()).thenReturn(fFRMT);
         when(folderResponse.getResponseMessages()).thenReturn(folderArr);
 
-        FindFolderResponseType emptyFolderResponse = mock(FindFolderResponseType.class);
-        ArrayOfResponseMessagesType emptyResponseArr = mock(ArrayOfResponseMessagesType.class);
-        when(emptyResponseArr.getFindFolderResponseMessageArray()).thenReturn(new FindFolderResponseMessageType[] { });
-        when(emptyFolderResponse.getResponseMessages()).thenReturn(emptyResponseArr);
-
         when(service.findFolder(LikeThis(FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT)), eq(defaultUser)))
             .thenReturn(folderResponse);
 
@@ -356,5 +351,11 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             }
         }
         assertFalse(mail.hasNext());
+    }
+
+    @Test
+    public void testGetMailMultipleUsers()
+    {
+
     }
 }
