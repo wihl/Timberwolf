@@ -129,7 +129,7 @@ public class ExchangeEmail implements MailboxItem
 
     public final String[] getHeaderKeys()
     {
-        return headers.keySet().toArray(new String[0]);
+        return headers.keySet().toArray(new String[headers.keySet().size()]);
     }
 
     public final boolean hasKey(final String key)

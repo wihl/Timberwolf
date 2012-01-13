@@ -7,7 +7,9 @@
 <!-- At the moment, this schema only supports a subset of the methods defined
      by EWS.  The operations this schema supports are:
         - FindItem request and response
-        - GetItem request and response -->
+        - GetItem request and response
+        - FindFolder request and response
+-->
 <xs:schema xmlns="http://schemas.xmlsoap.org/soap/envelope/"
            xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
            xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
@@ -48,6 +50,8 @@
       <xs:element ref="m:FindItemResponse" />
       <xs:element ref="m:GetItem" />
       <xs:element ref="m:GetItemResponse" />
+      <xs:element ref="m:FindFolder" />
+      <xs:element ref="m:FindFolderResponse" />
     </xs:choice>
   </xs:complexType>
 </xs:schema>
