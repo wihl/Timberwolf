@@ -52,6 +52,11 @@
       <xs:element ref="m:GetItemResponse" />
       <xs:element ref="m:FindFolder" />
       <xs:element ref="m:FindFolderResponse" />
+      <!-- The following are only used in testing -->
+      <xs:element ref="m:CreateFolder" />
+      <xs:element ref="m:CreateFolderResponse" />
+      <xs:element ref="m:CreateItem" />
+      <xs:element ref="m:CreateItemResponse" />
     </xs:choice>
   </xs:complexType>
 </xs:schema>
