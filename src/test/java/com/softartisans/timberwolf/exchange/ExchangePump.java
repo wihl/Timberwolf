@@ -6,6 +6,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponse
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfFoldersType;
+import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -30,17 +31,12 @@ public class ExchangePump
         endpoint = exchangeUrl;
     }
 
-    public List<String> createFolders(String parent, String... folders)
-    {
-        return null;
-    }
-
-    public List<String> createFolders(DistinguishedFolderIdNameType.Enum parent, String... folderNames)
+    private List<String> createFolders(TargetFolderIdType parentFolderId, String... folderNames)
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
         CreateFolderType createFolder = envelope.addNewBody().addNewCreateFolder();
-        createFolder.addNewParentFolderId().addNewDistinguishedFolderId().setId(parent);
+        createFolder.setParentFolderId(parentFolderId);
         NonEmptyArrayOfFoldersType requestedFolders = createFolder.addNewFolders();
         for (String folderName : folderNames)
         {
@@ -54,6 +50,20 @@ public class ExchangePump
             folderIds.add(folder.getFolderId().getId());
         }
         return folderIds;
+    }
+
+    public List<String> createFolders(String parent, String... folderNames)
+    {
+        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
+        parentFolder.addNewFolderId().setId(parent);
+        return createFolders(parentFolder, folderNames);
+    }
+
+    public List<String> createFolders(DistinguishedFolderIdNameType.Enum parent, String... folderNames)
+    {
+        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
+        parentFolder.addNewDistinguishedFolderId().setId(parent);
+        return createFolders(parentFolder, folderNames);
     }
 
     public List<String> createMessages(String folderId, Message... messages)
