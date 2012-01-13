@@ -167,7 +167,7 @@ public class TestIntegration
         // TODO: Put appropriate users here during integration test task.
         // This is just to get it compiling for now.
         ArrayList<String> users = new ArrayList<String>();
-        users.add("bkerr");
+        users.add("korganizer");
         Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
         Assert.assertTrue(mailboxItems.iterator().hasNext());
         mailWriter.write(mailboxItems);
