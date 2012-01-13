@@ -45,9 +45,12 @@ public class ExchangePump
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
         FolderInfoResponseMessageType[] array = response.getResponseMessages().getCreateFolderResponseMessageArray();
         List<String> folderIds = new ArrayList<String>();
-        for (FolderType folder : array[0].getFolders().getFolderArray())
+        for (FolderInfoResponseMessageType folderResponse : array)
         {
-            folderIds.add(folder.getFolderId().getId());
+            for (FolderType folder : folderResponse.getFolders().getFolderArray())
+            {
+                folderIds.add(folder.getFolderId().getId());
+            }
         }
         return folderIds;
     }
