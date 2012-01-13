@@ -354,8 +354,46 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetMailMultipleUsers()
+    public void testGetMailMultipleUsers() throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
+        FolderType aliceFolder = mock(FolderType.class);
+        FolderIdType aliceId = mock(FolderIdType.class);
+        when(aliceFolder.isSetFolderId()).thenReturn(true);
+        when(aliceFolder.getFolderId()).thenReturn(aliceId);
+        when(aliceId.getId()).thenReturn("ALICE-FOLDER");
 
+        FolderType bobFolder = mock(FolderType.class);
+        FolderIdType bobId = mock(FolderIdType.class);
+        when(bobFolder.isSetFolderId()).thenReturn(true);
+        when(bobFolder.getFolderId()).thenReturn(bobId);
+        when(bobId.getId()).thenReturn("BOB-FOLDER");
+
+        mockFindFolders(new FolderType[] { aliceFolder }, "alice");
+        mockFindFolders(new FolderType[] { bobFolder }, "bob");
+        mockFindItem("ALICE-FOLDER", 0, 10, 2, "alice");
+        mockGetItem(new MessageType[] { mockMessageItemId("ALICE-FOLDER:the #0 id"),
+                                        mockMessageItemId("ALICE-FOLDER:the #1 id") },
+                    generateIds(0, 2, "ALICE-FOLDER"), "alice");
+        mockFindItem("BOB-FOLDER", 0, 10, 2, "bob");
+        mockGetItem(new MessageType[] { mockMessageItemId("BOB-FOLDER:the #0 id"),
+                                        mockMessageItemId("BOB-FOLDER:the #1 id") },
+                    generateIds(0, 2, "BOB-FOLDER"), "bob");
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bob");
+        users.add("alice");
+
+        ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
+        Iterator<MailboxItem> mail = store.getMail(users).iterator();
+        for (String folder : new String[] { "BOB-FOLDER", "ALICE-FOLDER" })
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                assertTrue(mail.hasNext());
+                MailboxItem item = mail.next();
+                assertEquals(folder + ":the #" + i + " id", item.getHeader("Item ID"));
+            }
+        }
+        assertFalse(mail.hasNext());
     }
 }
