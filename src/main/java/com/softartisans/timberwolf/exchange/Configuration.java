@@ -18,11 +18,6 @@ public class Configuration
         this.getPageSize = getItemPageSize;
     }
 
-    public DateTime getStartDate()
-    {
-        return null;
-    }
-
     public int getFindItemPageSize()
     {
         return findPageSize;
