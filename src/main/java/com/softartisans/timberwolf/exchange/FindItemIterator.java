@@ -19,6 +19,8 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
     private int pageSize;
     private String folder;
     private int getItemsPageSize;
+    private String user;
+
     /**
      * If we ever make a call asking for pageSize items and get back less than that,
      * we know that there are no more messages to get, this is then set to true.
@@ -26,13 +28,14 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
     private boolean definitelyExhausted;
 
     public FindItemIterator(final ExchangeService exchangeService, final String folderId,
-                            final int idsPageSize, final int itemsPageSize)
+                            final int idsPageSize, final int itemsPageSize, final String targetUser)
     {
         service = exchangeService;
         pageSize = idsPageSize;
         folder = folderId;
         currentStart = 0;
         getItemsPageSize = itemsPageSize;
+        user = targetUser;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             {
                 return null;
             }
-            Vector<String> messageIds = FindItemHelper.findItems(service, folder, currentStart, pageSize);
+            Vector<String> messageIds = FindItemHelper.findItems(service, folder, currentStart, pageSize, user);
             currentStart += pageSize;
             LOG.debug("Got {} email ids.", messageIds.size());
             if (messageIds.size() < pageSize)
@@ -53,7 +56,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             }
             if (messageIds.size() > 0)
             {
-                return new GetItemIterator(service, messageIds, getItemsPageSize);
+                return new GetItemIterator(service, messageIds, getItemsPageSize, user);
             }
             else
             {

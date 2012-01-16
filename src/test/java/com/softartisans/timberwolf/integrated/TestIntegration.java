@@ -5,6 +5,7 @@ import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+import java.util.ArrayList;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
@@ -258,7 +259,11 @@ public class TestIntegration
         MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
         MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
-        Iterable<MailboxItem> mailboxItems = mailStore.getMail();
+        // TODO: Put appropriate users here during integration test task.
+        // This is just to get it compiling for now.
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("korganizer");
+        Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
         Assert.assertTrue(mailboxItems.iterator().hasNext());
         mailWriter.write(mailboxItems);
 
@@ -274,7 +279,7 @@ public class TestIntegration
                 requiredEmails.match(result);
             }
             requiredEmails.assertEmpty();
-            Iterable<MailboxItem> mails = mailStore.getMail();
+            Iterable<MailboxItem> mails = mailStore.getMail(users);
 
             for (MailboxItem mail : mails)
             {

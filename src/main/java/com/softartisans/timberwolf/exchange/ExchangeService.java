@@ -253,21 +253,30 @@ public class ExchangeService
         return conn;
     }
 
+    EnvelopeDocument requestBase(final String targetUser)
+    {
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
+        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
+        return request;
+    }
+
     /**
      * Returns the results of a find item request.
      *
      * @param findItem A FindItemType object that specifies the set of items to
      *                 gather from the Exchange server.
+     * @param targetUser The SMTP address (as a String) of the user to find items for.
      * @return A FindItemResponseType object with the requested items.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error sending the response,
      *                              such as an improper encoding or IO error.
      */
-    public FindItemResponseType findItem(final FindItemType findItem)
+    public FindItemResponseType findItem(final FindItemType findItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
+        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setFindItem(findItem);
 
         return sendRequest(request).getFindItemResponse();
@@ -278,16 +287,17 @@ public class ExchangeService
      *
      * @param getItem A GetItemType object that specifies the set of items to
      *                gather from the Exchange server.
+     * @param targetUser The SMTP address (as a String) of the user to get items for.
      * @return A GetItemResponseType object with the requested items.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error sending the response,
      *                              such as an improper encoding or IO error.
      */
-    public GetItemResponseType getItem(final GetItemType getItem)
+    public GetItemResponseType getItem(final GetItemType getItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
+        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setGetItem(getItem);
 
         return sendRequest(request).getGetItemResponse();
@@ -300,11 +310,11 @@ public class ExchangeService
      * @throws ServiceCallException A non-HTTP error has occurred during the request.
      * @throws HttpErrorException A HTTP error has occurred during the request.
      */
-    public FindFolderResponseType findFolder(final FindFolderType findFolder)
+    public FindFolderResponseType findFolder(final FindFolderType findFolder, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
+        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setFindFolder(findFolder);
 
         return sendRequest(request).getFindFolderResponse();

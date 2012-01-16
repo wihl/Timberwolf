@@ -12,6 +12,8 @@ import java.io.IOException;
 
 import java.net.HttpURLConnection;
 
+import java.util.ArrayList;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -113,10 +115,14 @@ final class App
             mailWriter = new ConsoleMailWriter();
         }
 
+        // TODO: Get actual users.  This is just for now until we do the 'get some usernames' task.
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("bkerr");
+
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
         try
         {
-            mailWriter.write(mailStore.getMail());
+            mailWriter.write(mailStore.getMail(users));
         }
         catch (ExchangeRuntimeException e)
         {

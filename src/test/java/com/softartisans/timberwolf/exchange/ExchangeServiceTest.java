@@ -4,24 +4,30 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderDocument
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ExchangeImpersonationType;
+import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import org.apache.xmlbeans.XmlException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Test;
+import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
-import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 
 public class ExchangeServiceTest
 {
@@ -29,6 +35,13 @@ public class ExchangeServiceTest
     private static final String soapPrelude =
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
         "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+        "<soapenv:Header>" +
+        "<typ:ExchangeImpersonation xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">" +
+        "<typ:ConnectingSID>" +
+        "<typ:PrincipalName>bkerr</typ:PrincipalName>" +
+        "</typ:ConnectingSID>" +
+        "</typ:ExchangeImpersonation>" +
+        "</soapenv:Header>" +
         "<soapenv:Body>";
     private static final String soapFinale =
         "</soapenv:Body>" +
@@ -212,7 +225,7 @@ public class ExchangeServiceTest
         FindItemType findReq = FindItemDocument.Factory.parse(findItemsRequest).getFindItem();
 
         ExchangeService service = new ExchangeService(url, factory);
-        FindItemResponseType response = service.findItem(findReq);
+        FindItemResponseType response = service.findItem(findReq, "bkerr");
 
         FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(findItemResponse))
                                         .getEnvelope().getBody().getFindItemResponse();
@@ -232,7 +245,7 @@ public class ExchangeServiceTest
         GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
 
         ExchangeService service = new ExchangeService(url, factory);
-        GetItemResponseType response = service.getItem(getReq);
+        GetItemResponseType response = service.getItem(getReq, "bkerr");
 
         GetItemResponseType expected = EnvelopeDocument.Factory.parse(soap(getItemResponse))
                                        .getEnvelope().getBody().getGetItemResponse();
@@ -251,7 +264,7 @@ public class ExchangeServiceTest
         FindFolderType findFolder = FindFolderDocument.Factory.parse(findFolderRequest).getFindFolder();
 
         ExchangeService service = new ExchangeService(url, factory);
-        FindFolderResponseType response = service.findFolder(findFolder);
+        FindFolderResponseType response = service.findFolder(findFolder, "bkerr");
 
         FindFolderResponseType expected = EnvelopeDocument.Factory.parse(soap(findFolderResponse))
                 .getEnvelope().getBody().getFindFolderResponse();
@@ -275,7 +288,7 @@ public class ExchangeServiceTest
 
         try
         {
-            service.findItem(findReq);
+            service.findItem(findReq, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -300,7 +313,7 @@ public class ExchangeServiceTest
 
         try
         {
-            service.findItem(findReq);
+            service.findItem(findReq, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -325,7 +338,7 @@ public class ExchangeServiceTest
 
         try
         {
-            service.findItem(findReq);
+            service.findItem(findReq, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -351,7 +364,7 @@ public class ExchangeServiceTest
 
         try
         {
-            service.findItem(findReq);
+            service.findItem(findReq, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -368,13 +381,12 @@ public class ExchangeServiceTest
         factory.forRequest(url, soap(getItemRequest).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, soap("Not a real response").getBytes("UTF-8"));
 
-
         GetItemType getReq = GetItemDocument.Factory.parse(getItemRequest).getGetItem();
         ExchangeService service = new ExchangeService(url, factory);
 
         try
         {
-            GetItemResponseType response = service.getItem(getReq);
+            GetItemResponseType response = service.getItem(getReq, "bkerr");
         }
         catch (ServiceCallException e)
         {
@@ -396,7 +408,7 @@ public class ExchangeServiceTest
 
         try
         {
-            GetItemResponseType response = service.getItem(getReq);
+            GetItemResponseType response = service.getItem(getReq, "bkerr");
         }
         catch (ServiceCallException e)
         {
@@ -420,7 +432,7 @@ public class ExchangeServiceTest
 
         try
         {
-            GetItemResponseType response = service.getItem(getReq);
+            GetItemResponseType response = service.getItem(getReq, "bkerr");
         }
         catch (ServiceCallException e)
         {
@@ -443,12 +455,29 @@ public class ExchangeServiceTest
 
         try
         {
-            service.findItem(findReq);
+            service.findItem(findReq, "bkerr");
             fail("No exception was thrown.");
         }
         catch (HttpErrorException e)
         {
             assertEquals("There was an HTTP 500 error while sending a request.", e.getMessage());
         }
+    }
+
+    @Test
+    public void testRequestBase()
+    {
+        ExchangeService service = new ExchangeService(url);
+
+        EnvelopeDocument request = service.requestBase("bkerr@INT.TARTARUS.COM");
+        assertTrue(request.getEnvelope().isSetHeader());
+        assertTrue(request.getEnvelope().getHeader().isSetExchangeImpersonation());
+        ExchangeImpersonationType impersonation = request.getEnvelope().getHeader().getExchangeImpersonation();
+        assertTrue(impersonation.getConnectingSID().isSetPrincipalName());
+        assertEquals("bkerr@INT.TARTARUS.COM", impersonation.getConnectingSID().getPrincipalName());
+
+        request = service.requestBase("korganizer@INT.TARTARUS.COM");
+        assertEquals("korganizer@INT.TARTARUS.COM", request.getEnvelope().getHeader().getExchangeImpersonation()
+                                                           .getConnectingSID().getPrincipalName());
     }
 }

@@ -18,6 +18,7 @@ import java.util.Vector;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -103,11 +104,12 @@ public class FindItemTest extends ExchangeTestBase
             throws ServiceCallException, HttpErrorException
     {
         FindItemType findItem = FindItemHelper.getFindItemsRequest(DistinguishedFolderIdNameType.INBOX, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(null);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(null);
 
         try
         {
-            Vector<String> items = FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
+            Vector<String> items = FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000,
+                                                            defaultUser);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -122,7 +124,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000, defaultUser);
         assertEquals(0, items.size());
     }
 
@@ -133,7 +135,7 @@ public class FindItemTest extends ExchangeTestBase
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000, defaultUser);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -150,7 +152,7 @@ public class FindItemTest extends ExchangeTestBase
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000, defaultUser);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -174,7 +176,7 @@ public class FindItemTest extends ExchangeTestBase
         messages[unset] = mock(MessageType.class);
         when(messages[unset].isSetItemId()).thenReturn(false);
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000);
+        Vector<String> items = FindItemHelper.findItems(service, defaultFolderId, 0, 1000, defaultUser);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -195,11 +197,11 @@ public class FindItemTest extends ExchangeTestBase
                 .thenReturn(new FindItemResponseMessageType[]{findMessage});
         FindItemResponseType findResponse = mock(FindItemResponseType.class);
         when(findResponse.getResponseMessages()).thenReturn(responseArr);
-        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+        when(service.findItem(any(FindItemType.class), eq(defaultUser))).thenReturn(findResponse);
 
         try
         {
-            FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000);
+            FindItemHelper.findItems(service, DistinguishedFolderIdNameType.INBOX, 0, 1000, defaultUser);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -216,7 +218,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
@@ -233,7 +235,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultFolderId, 0, 1000);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });

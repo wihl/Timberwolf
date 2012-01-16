@@ -73,14 +73,14 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail()
+    public final Iterable<MailboxItem> getMail(final Iterable<String> users)
     {
         return new Iterable<MailboxItem>()
         {
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new FindFolderIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries);
+                return new UserIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries, users);
             }
         };
     }

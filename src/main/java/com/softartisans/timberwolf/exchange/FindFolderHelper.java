@@ -84,14 +84,16 @@ public final class FindFolderHelper
      *
      * @param exchangeService The Exchange service to use.
      * @param findFolder The FindFolder request to use.
+     * @param targetUser The user to impersonate during the Exchange FindFolder request.
      * @return A queue of all child folders.
      * @throws ServiceCallException If the Exchange service could not be connected to.
      * @throws HttpErrorException If the response could not be parsed.
      */
-    static Queue<String> findFolders(final ExchangeService exchangeService, final FindFolderType findFolder)
+    static Queue<String> findFolders(final ExchangeService exchangeService, final FindFolderType findFolder,
+                                     final String targetUser)
             throws ServiceCallException, HttpErrorException
     {
-        FindFolderResponseType response = exchangeService.findFolder(findFolder);
+        FindFolderResponseType response = exchangeService.findFolder(findFolder, targetUser);
 
         if (response == null)
         {

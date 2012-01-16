@@ -58,6 +58,7 @@ public final class GetItemHelper
      * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
      * items will be returned
      * @param exchangeService The backend service used for contacting Exchange.
+     * @param targetUser The user to impersonate for the Exchange GetItem request.
      * @return A list of mailbox items that correspond to the given ids.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error making the Exchange
@@ -65,7 +66,7 @@ public final class GetItemHelper
      *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
-                                        final ExchangeService exchangeService)
+                                        final ExchangeService exchangeService, String targetUser)
             throws ServiceCallException, HttpErrorException
     {
         int max = Math.min(startIndex + count, ids.size());
@@ -74,7 +75,8 @@ public final class GetItemHelper
             return new Vector<MailboxItem>();
         }
         LOG.trace("Making request:\n" + getGetItemsRequest(ids.subList(startIndex, max)).toString());
-        GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)));
+        GetItemResponseType response = exchangeService.getItem(getGetItemsRequest(ids.subList(startIndex, max)),
+                                                               targetUser);
 
         if (response == null)
         {
