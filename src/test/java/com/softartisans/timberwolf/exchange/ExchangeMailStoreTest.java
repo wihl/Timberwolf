@@ -30,12 +30,22 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Test for ExchangeMailStore, uses mock exchange service */
 public class ExchangeMailStoreTest extends ExchangeTestBase
 {
     private final String idHeaderKey = "Item ID";
+    ArrayList<String> defaultUsers;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        defaultUsers = new ArrayList<String>();
+        defaultUsers.add("bkerr");
+    }
 
     @Test
     public void testGetMailFind0()
@@ -46,7 +56,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
         defaultMockFindFolders();
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUserSet))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -59,7 +69,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUserSet))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -82,7 +92,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         try
         {
-            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail(defaultUserSet);
+            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail(defaultUsers);
         }
         catch (ExchangeRuntimeException e)
         {
@@ -111,7 +121,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         defaultMockFindFolders();
         mockGetItem(messages, requestedList);
         int i = 0;
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUserSet))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
         {
             assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
@@ -340,7 +350,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                     generateIds(0, 2, "FOLDER-THREE-ID"));
 
         ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
-        Iterator<MailboxItem> mail = store.getMail(defaultUserSet).iterator();
+        Iterator<MailboxItem> mail = store.getMail(defaultUsers).iterator();
         for (String folder : new String[] { "FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID" })
         {
             for (int i = 0; i < (folder == "FOLDER-TWO-ID" ? 13 : 2); i++)
