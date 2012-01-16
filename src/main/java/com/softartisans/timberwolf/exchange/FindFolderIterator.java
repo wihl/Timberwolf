@@ -14,15 +14,13 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
 {
     private static final Logger LOG = LoggerFactory.getLogger(FindFolderIterator.class);
     private ExchangeService service;
-    private int findItemPageSize;
-    private int getItemsPageSize;
+    private Configuration config;
     private Queue<String> folderQueue;
 
-    public FindFolderIterator(final ExchangeService exchangeService, final int idsPageSize, final int itemsPageSize)
+    public FindFolderIterator(final ExchangeService exchangeService, final Configuration configuration)
     {
         service = exchangeService;
-        findItemPageSize = idsPageSize;
-        getItemsPageSize = itemsPageSize;
+        config = configuration;
 
         try
         {
@@ -54,8 +52,6 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
             return null;
         }
         FolderContext folder = new FolderContext(folderQueue.poll());
-        Configuration configuration = new Configuration(findItemPageSize,
-                                                        getItemsPageSize);
-        return new FindItemIterator(service, configuration, folder);
+        return new FindItemIterator(service, config, folder);
     }
 }

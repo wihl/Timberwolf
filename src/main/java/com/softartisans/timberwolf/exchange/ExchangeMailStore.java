@@ -80,7 +80,8 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new FindFolderIterator(exchangeService, maxFindItemsEntries, maxGetItemsEntries);
+                Configuration config = new Configuration(maxFindItemsEntries, maxGetItemsEntries);
+                return new FindFolderIterator(exchangeService, config);
             }
         };
     }
