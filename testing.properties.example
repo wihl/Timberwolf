@@ -19,4 +19,8 @@
 ## exchange server
 ###############################################################
 ## The URI of the Exchange instance.
-# ExchangeURI = https://exchange.test/ews/exchange.asmx
+# ExchangeURI = https://exchange.int.test/ews/exchange.asmx
+## The domain for users
+# LdapDomain = int.test
+## The config entry??
+# LdapConfigEntry = Timberwolf

@@ -5,7 +5,8 @@ import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import java.util.ArrayList;
+import com.softartisans.timberwolf.services.LdapFetcher;
+import com.softartisans.timberwolf.services.PrincipalFetchException;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
@@ -23,8 +24,12 @@ public class TestIntegration
 {
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
+    private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
+    private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
+    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
+                                                                                LDAP_DOMAIN_PROPERTY_NAME,
+                                                                                LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
     @Rule
     public HTableResource hbase = new HTableResource();
@@ -50,7 +55,7 @@ public class TestIntegration
     }
 
     @Test
-    public void testIntegrationNoCLI()
+    public void testIntegrationNoCLI() throws PrincipalFetchException
     {
         /*
         This test tests getting emails from an exchange server, and the breadth
@@ -255,14 +260,13 @@ public class TestIntegration
 
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
+        String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
         MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
         MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
-        // TODO: Put appropriate users here during integration test task.
-        // This is just to get it compiling for now.
-        ArrayList<String> users = new ArrayList<String>();
-        users.add("korganizer");
+        Iterable<String> users = new LdapFetcher(ldapDomain, ldapConfigEntry).getPrincipals();
         Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
         Assert.assertTrue(mailboxItems.iterator().hasNext());
         mailWriter.write(mailboxItems);
