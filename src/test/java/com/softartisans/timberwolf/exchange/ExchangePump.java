@@ -2,15 +2,21 @@ package com.softartisans.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageDispositionType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfAllItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
 
@@ -25,17 +31,26 @@ public class ExchangePump
 
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory = new AlfredoHttpUrlConnectionFactory();
+    private String user;
 
-    public ExchangePump(String exchangeUrl)
+    public ExchangePump(String exchangeUrl, String impersonatedUser)
     {
         endpoint = exchangeUrl;
+        user = impersonatedUser;
+    }
+
+    private EnvelopeDocument createEmptyRequest()
+    {
+        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
+        EnvelopeType envelope = request.addNewEnvelope();
+        envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(user);
+        return request;
     }
 
     private List<String> createFolders(TargetFolderIdType parentFolderId, String... folderNames)
     {
-        EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
-        EnvelopeType envelope = request.addNewEnvelope();
-        CreateFolderType createFolder = envelope.addNewBody().addNewCreateFolder();
+        EnvelopeDocument request = createEmptyRequest();
+        CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
         createFolder.setParentFolderId(parentFolderId);
         NonEmptyArrayOfFoldersType requestedFolders = createFolder.addNewFolders();
         for (String folderName : folderNames)
@@ -69,17 +84,47 @@ public class ExchangePump
         return createFolders(parentFolder, folderNames);
     }
 
-    public List<String> createMessages(String folderId, Message... messages)
+    private void createMessages(TargetFolderIdType folderId, Message... messages)
     {
-        return null;
+        EnvelopeDocument request = createEmptyRequest();
+        CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
+        createItem.setMessageDisposition(MessageDispositionType.SEND_ONLY);
+        createItem.setSavedItemFolderId(folderId);
+        NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
+
+        // TODO actually use the message, may merge with EmailMatcher
+        MessageType exchangeMessage = items.addNewMessage();
+        exchangeMessage.addNewFrom().addNewMailbox().setEmailAddress("tsender@int.tartarus.com");
+        com.microsoft.schemas.exchange.services.x2006.types.BodyType body = exchangeMessage.addNewBody();
+        body.setBodyType(BodyTypeType.TEXT);
+        body.setStringValue("The body of the email");
+        exchangeMessage.setSubject("The subject of the email");
+        exchangeMessage.addNewCcRecipients().addNewMailbox().setEmailAddress("ccboo@int.tartarus.com");
+        exchangeMessage.addNewBccRecipients().addNewMailbox().setEmailAddress("bccboo@int.tartarus.com");
+
+        BodyType response = sendRequest(request);
+        System.err.println(response);
+        if (response == null)
+        {
+            System.err.println("Got null response when creating messages");
+        }
     }
 
-    public List<String> createMessages(DistinguishedFolderIdNameType.Enum folderId, Message... messages)
+    public void createMessages(String folderId, Message... messages)
     {
-        return null;
+        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
+        parentFolder.addNewFolderId().setId(folderId);
+        createMessages(parentFolder);
     }
 
-    private org.xmlsoap.schemas.soap.envelope.BodyType sendRequest(final EnvelopeDocument envelope)
+    public void createMessages(DistinguishedFolderIdNameType.Enum folderId, Message... messages)
+    {
+        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
+        parentFolder.addNewDistinguishedFolderId().setId(folderId);
+        createMessages(parentFolder, messages);
+    }
+
+    private BodyType sendRequest(final EnvelopeDocument envelope)
     {
         String request = DECLARATION + envelope.xmlText();
         try
@@ -115,5 +160,11 @@ public class ExchangePump
     public class Message
     {
 
+        private String from;
+
+        public String getFrom()
+        {
+            return from;
+        }
     }
 }
