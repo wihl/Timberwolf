@@ -17,16 +17,8 @@ public class Configuration
     public Configuration(final int findItemPageSize,
                          final int getItemPageSize)
     {
-        if (findItemPageSize < 1)
-        {
-            throw new IllegalArgumentException("findItem page size must be greater than or equal to 1.");
-        }
-        if (getItemPageSize < 1)
-        {
-            throw new IllegalArgumentException("getItem page size must be greater than or equal to 1");
-        }
-        this.findPageSize = findItemPageSize;
-        this.getPageSize = getItemPageSize;
+        this.findPageSize = Math.max(findItemPageSize, 1);
+        this.getPageSize = Math.max(getItemPageSize, 1);
     }
 
     public int getFindItemPageSize()
