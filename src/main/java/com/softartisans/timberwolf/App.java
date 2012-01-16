@@ -10,10 +10,16 @@ import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
 import com.softartisans.timberwolf.services.PrincipalFetcher;
+import com.sun.security.auth.callback.TextCallbackHandler;
 
 import java.io.IOException;
 
 import java.net.HttpURLConnection;
+import java.security.PrivilegedAction;
+
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -25,8 +31,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Driver class to grab emails and put them in HBase.
  */
-final class App
+final class App implements PrivilegedAction<Object>
 {
+    private static String configurationEntry = "Timberwolf";
+
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
@@ -100,6 +108,15 @@ final class App
             }
 
             useHBase = allHBaseArgs;
+
+            LoginContext lc = new LoginContext(configurationEntry,
+                                               new TextCallbackHandler());
+            // Attempt authentication
+            // We might want to do this in a "for" loop to give
+            // user more than one chance to enter correct username/password
+            lc.login();
+
+            Subject.doAs(lc.getSubject(), this);
         }
         catch (CmdLineException e)
         {
@@ -107,13 +124,14 @@ final class App
             System.err.println("java timberwolf [options...] arguments...");
             parser.printUsage(System.err);
             System.err.println();
-            return;
         }
-
-        run();
+        catch (LoginException e)
+        {
+            System.err.println("Authentication failed: " + e.getMessage());
+        }
     }
 
-    private void run()
+    public Object run()
     {
         MailWriter mailWriter;
         if (useHBase)
@@ -129,10 +147,11 @@ final class App
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
         try
         {
-            PrincipalFetcher userLister = new LdapFetcher(domain, "Timberwolf");
+            PrincipalFetcher userLister = new LdapFetcher(domain);
             Iterable<String> users = userLister.getPrincipals();
 
             mailWriter.write(mailStore.getMail(users));
+            return 0;
         }
         catch (ExchangeRuntimeException e)
         {
@@ -182,5 +201,6 @@ final class App
             System.out.println("There was a problem fetching a list of users from Active Directory. "
                                + e.getMessage() +  "See the log for more details.");
         }
+        return 1;
     }
 }
