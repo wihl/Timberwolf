@@ -39,9 +39,9 @@ public final class FindItemHelper
     }
 
     /**
-     * Creates a FindItemType to request all the ids for the given configuration.
-     * This limits the scope of the search
-     * to the folder specified in the configuration.
+     * Creates a FindItemType to request all the ids for the
+     * given configuration. This limits the scope of the
+     * search to the folder specified in the configuration.
      *
      * @param folderId the folder from which to get ids
      * @param offset the number of entries to start from
@@ -70,7 +70,7 @@ public final class FindItemHelper
 
     /**
      * Gets a list of ids from the folder specified
-     * in the configurationfor the current user.
+     * in the configuration for the current user.
      *
      * @param exchangeService the actual service to use when requesting ids
      * @param folder the distinguished folder to obtain ids for

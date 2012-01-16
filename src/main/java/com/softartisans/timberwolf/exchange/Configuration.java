@@ -1,7 +1,5 @@
 package com.softartisans.timberwolf.exchange;
 
-import org.joda.time.DateTime;
-
 /**
  * This class contains any configurable settings
  * that will effect the exchange service calls.
