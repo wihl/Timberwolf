@@ -253,7 +253,7 @@ public class ExchangeService
         return conn;
     }
 
-    EnvelopeDocument requestBase(final String targetUser)
+    EnvelopeDocument createEmptyRequest(final String targetUser)
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
@@ -275,7 +275,7 @@ public class ExchangeService
     public FindItemResponseType findItem(final FindItemType findItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeDocument request = createEmptyRequest(targetUser);
         EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setFindItem(findItem);
 
@@ -296,7 +296,7 @@ public class ExchangeService
     public GetItemResponseType getItem(final GetItemType getItem, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeDocument request = createEmptyRequest(targetUser);
         EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setGetItem(getItem);
 
@@ -313,7 +313,7 @@ public class ExchangeService
     public FindFolderResponseType findFolder(final FindFolderType findFolder, final String targetUser)
         throws ServiceCallException, HttpErrorException
     {
-        EnvelopeDocument request = requestBase(targetUser);
+        EnvelopeDocument request = createEmptyRequest(targetUser);
         EnvelopeType envelope = request.getEnvelope();
         envelope.addNewBody().setFindFolder(findFolder);
 
