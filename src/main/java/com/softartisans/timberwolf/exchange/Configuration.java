@@ -1,58 +1,64 @@
 package com.softartisans.timberwolf.exchange;
 
-import org.joda.time.DateTime;
-
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 
-public class Configuration {
-    private final int findItemPageSize;
-    private final int getItemPageSize;
-    private final String folder;
-    DistinguishedFolderIdNameType.Enum distinguishedFolder;
+import org.joda.time.DateTime;
 
-    public Configuration(int findItemPageSize,
-                         int getItemPageSize,
-                         String folder)
+/**
+ * This class contains any configurable settings
+ * that will effect the exchange service calls.
+ */
+public class Configuration
+{
+    private final int findPageSize;
+    private final int getPageSize;
+    private final String stringFolder;
+    private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
+
+    public Configuration(final int findItemPageSize,
+                         final int getItemPageSize,
+                         final String folder)
     {
-        this.findItemPageSize = findItemPageSize;
-        this.getItemPageSize = getItemPageSize;
-        this.folder = folder;
-        this.distinguishedFolder = null;
+        this.findPageSize = findItemPageSize;
+        this.getPageSize = getItemPageSize;
+        this.stringFolder = folder;
+        this.distinguishedFolderId = null;
     }
 
-    public Configuration(int findItemPageSize, int getItemPageSize,
-                         DistinguishedFolderIdNameType.Enum distinguishedFolder)
+    public Configuration(final int findItemPageSize,
+                         final int getItemPageSize,
+                         final DistinguishedFolderIdNameType.Enum distinguishedFolder)
     {
-        this.findItemPageSize = findItemPageSize;
-        this.getItemPageSize = getItemPageSize;
-        this.folder = null;
-        this.distinguishedFolder = distinguishedFolder;
+        this.findPageSize = findItemPageSize;
+        this.getPageSize = getItemPageSize;
+        this.stringFolder = null;
+        this.distinguishedFolderId = distinguishedFolder;
     }
 
     public NonEmptyArrayOfBaseFolderIdsType getFolderIds()
     {
         NonEmptyArrayOfBaseFolderIdsType ids =
                 NonEmptyArrayOfBaseFolderIdsType.Factory.newInstance();
-        if (folder != null)
+        if (stringFolder != null)
         {
             FolderIdType folderType = ids.addNewFolderId();
-            folderType.setId(folder);
+            folderType.setId(stringFolder);
         }
         else
         {
             DistinguishedFolderIdType folderId =
                     ids.addNewDistinguishedFolderId();
-            folderId.setId(distinguishedFolder);
+            folderId.setId(distinguishedFolderId);
         }
         return ids;
     }
 
     public String getFolderId()
     {
-        return folder;
+        return stringFolder;
     }
 
     public DateTime getStartDate()
@@ -62,11 +68,11 @@ public class Configuration {
 
     public int getFindItemPageSize()
     {
-        return findItemPageSize;
+        return findPageSize;
     }
 
     public int getGetItemPageSize()
     {
-        return getItemPageSize;
+        return getPageSize;
     }
 }
