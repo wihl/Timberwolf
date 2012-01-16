@@ -9,16 +9,14 @@ import java.util.Iterator;
 public class UserIterator extends BaseChainIterator<MailboxItem>
 {
     private ExchangeService service;
-    private int findItemPageSize;
-    private int getItemPageSize;
     private Iterator<String> users;
+    private Configuration config;
 
-    public UserIterator(final ExchangeService exchangeService, final int idsPageSize, final int itemsPageSize,
+    public UserIterator(final ExchangeService exchangeService, Configuration configuration,
                         final Iterable<String> targetUsers)
     {
         service = exchangeService;
-        findItemPageSize = idsPageSize;
-        getItemPageSize = itemsPageSize;
+        config = configuration;
         users = targetUsers.iterator();
     }
 
@@ -30,6 +28,6 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             return null;
         }
 
-        return new FindFolderIterator(service, findItemPageSize, getItemPageSize, users.next());
+        return new FindFolderIterator(service, config, users.next());
     }
 }

@@ -86,8 +86,7 @@ public final class FindItemHelper
                                     final int offset)
             throws ServiceCallException, HttpErrorException
     {
-        return findItems(exchangeService,
-                         getFindItemsRequest(config, folder, offset));
+        return findItems(exchangeService, getFindItemsRequest(config, folder, offset), folder.getUser());
     }
 
     /**

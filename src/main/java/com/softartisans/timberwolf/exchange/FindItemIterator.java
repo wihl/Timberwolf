@@ -53,7 +53,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             }
             if (messageIds.size() > 0)
             {
-                return new GetItemIterator(service, messageIds, config);
+                return new GetItemIterator(service, messageIds, config, folder);
             }
             else
             {

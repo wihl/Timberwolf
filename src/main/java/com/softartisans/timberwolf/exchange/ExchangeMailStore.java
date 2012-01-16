@@ -78,7 +78,7 @@ public class ExchangeMailStore implements MailStore
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new FindFolderIterator(exchangeService, config);
+                return new UserIterator(exchangeService, config, users);
             }
         };
     }

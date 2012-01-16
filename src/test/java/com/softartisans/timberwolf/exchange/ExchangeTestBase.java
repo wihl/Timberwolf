@@ -46,7 +46,7 @@ public class ExchangeTestBase
     protected final String defaultUser = "bkerr";
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
-    protected FolderContext defaultFolder = new FolderContext(defaultFolderId);
+    protected FolderContext defaultFolder = new FolderContext(defaultFolderId, defaultUser);
 
     /** This configuration is used anytime we just need any standard configuration. */
     protected Configuration defaultConfig = new Configuration(1000, 1000);
@@ -60,7 +60,7 @@ public class ExchangeTestBase
     protected void mockFindItem(MessageType[] messages)
         throws ServiceCallException, HttpErrorException
     {
-        mockFindItem(messages, defaultFolderId, 0, 1000);
+        mockFindItem(messages, defaultFolderId, 0, 1000, defaultUser);
     }
 
     protected List<String> generateIds(int offset, int count, String folder)
@@ -92,10 +92,10 @@ public class ExchangeTestBase
         return findItems;
     }
 
-    private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds)
+    private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds, String user)
         throws ServiceCallException, HttpErrorException
     {
-        FolderContext folderContext = new FolderContext(folder);
+        FolderContext folderContext = new FolderContext(folder, user);
         Configuration config = new Configuration(maxIds, 0);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
         FindItemResponseType findItemResponse = mock(FindItemResponseType.class);

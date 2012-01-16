@@ -13,17 +13,24 @@ public class FolderContext
 {
     private final String stringFolder;
     private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
+    private final String user;
 
-    public FolderContext(final String folder)
+    private FolderContext(final String folder, final DistinguishedFolderIdNameType.Enum distinguishedFolder,
+                          final String targetUser)
     {
-        this.stringFolder = folder;
-        this.distinguishedFolderId = null;
+        stringFolder = folder;
+        distinguishedFolderId = distinguishedFolder;
+        user = targetUser;
     }
 
-    public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder)
+    public FolderContext(final String folder, final String targetUser)
     {
-        this.stringFolder = null;
-        this.distinguishedFolderId = distinguishedFolder;
+        this(folder, null, targetUser);
+    }
+
+    public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser)
+    {
+        this(null, distinguishedFolder, targetUser);
     }
 
     public NonEmptyArrayOfBaseFolderIdsType getFolderIds()
@@ -42,5 +49,10 @@ public class FolderContext
             folderId.setId(distinguishedFolderId);
         }
         return ids;
+    }
+
+    public String getUser()
+    {
+        return user;
     }
 }
