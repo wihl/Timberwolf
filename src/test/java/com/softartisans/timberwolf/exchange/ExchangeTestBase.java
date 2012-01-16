@@ -42,15 +42,12 @@ public class ExchangeTestBase
     public ExchangeService service;
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
     protected String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
-    protected List<String> defaultUserSet;
     protected final String defaultUser = "bkerr";
 
     @Before
     public void setUp() throws Exception
     {
         MockitoAnnotations.initMocks(this);
-        defaultUserSet = new ArrayList<String>();
-        defaultUserSet.add("bkerr");
     }
 
     protected void mockFindItem(MessageType[] messages)

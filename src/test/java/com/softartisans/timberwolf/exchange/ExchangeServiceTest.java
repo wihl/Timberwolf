@@ -465,18 +465,18 @@ public class ExchangeServiceTest
     }
 
     @Test
-    public void testRequestBase()
+    public void testEmptyRequest()
     {
         ExchangeService service = new ExchangeService(url);
 
-        EnvelopeDocument request = service.requestBase("bkerr@INT.TARTARUS.COM");
+        EnvelopeDocument request = service.createEmptyRequest("bkerr@INT.TARTARUS.COM");
         assertTrue(request.getEnvelope().isSetHeader());
         assertTrue(request.getEnvelope().getHeader().isSetExchangeImpersonation());
         ExchangeImpersonationType impersonation = request.getEnvelope().getHeader().getExchangeImpersonation();
         assertTrue(impersonation.getConnectingSID().isSetPrincipalName());
         assertEquals("bkerr@INT.TARTARUS.COM", impersonation.getConnectingSID().getPrincipalName());
 
-        request = service.requestBase("korganizer@INT.TARTARUS.COM");
+        request = service.createEmptyRequest("korganizer@INT.TARTARUS.COM");
         assertEquals("korganizer@INT.TARTARUS.COM", request.getEnvelope().getHeader().getExchangeImpersonation()
                                                            .getConnectingSID().getPrincipalName());
     }
