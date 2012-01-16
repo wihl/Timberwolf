@@ -266,7 +266,7 @@ public class ExchangeService
      *
      * @param findItem A FindItemType object that specifies the set of items to
      *                 gather from the Exchange server.
-     * @param targetUser The SMTP address (as a String) of the user to find items for.
+     * @param targetUser The principal name of the user to find items for.
      * @return A FindItemResponseType object with the requested items.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error sending the response,
@@ -287,7 +287,7 @@ public class ExchangeService
      *
      * @param getItem A GetItemType object that specifies the set of items to
      *                gather from the Exchange server.
-     * @param targetUser The SMTP address (as a String) of the user to get items for.
+     * @param targetUser The principal name of the user to get items for.
      * @return A GetItemResponseType object with the requested items.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error sending the response,
@@ -306,6 +306,7 @@ public class ExchangeService
     /**
      * Returns the response of a FindFolder request.
      * @param findFolder The FindFolder request,
+     * @param targetUser The principal name of the user to find folders for.
      * @return The response.
      * @throws ServiceCallException A non-HTTP error has occurred during the request.
      * @throws HttpErrorException A HTTP error has occurred during the request.
