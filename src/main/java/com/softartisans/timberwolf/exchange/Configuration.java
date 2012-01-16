@@ -9,9 +9,18 @@ public class Configuration
     private final int findPageSize;
     private final int getPageSize;
 
+    /**
+     *
+     * @param findItemPageSize Must be greater than or equal to 1.
+     * @param getItemPageSize
+     */
     public Configuration(final int findItemPageSize,
                          final int getItemPageSize)
     {
+        if (findItemPageSize < 1)
+        {
+            throw new IllegalArgumentException("page size must be greater than or equal to 1.");
+        }
         this.findPageSize = findItemPageSize;
         this.getPageSize = getItemPageSize;
     }
