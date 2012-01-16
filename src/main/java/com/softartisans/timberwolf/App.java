@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 final class App
 {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
+    /** This will get set to true if any hbase arguments are set. */
+    private boolean useHBase;
 
     @Option(name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
@@ -65,13 +67,11 @@ final class App
 
     public static void main(final String[] args) throws IOException, AuthenticationException
     {
-        new App().run(args);
+        new App().beginEverything(args);
     }
 
-    private void run(final String[] args) throws IOException, AuthenticationException
+    private void beginEverything(final String[] args) throws IOException, AuthenticationException
     {
-        boolean useHBase;
-
         CmdLineParser parser = new CmdLineParser(this);
         try
         {
@@ -110,6 +110,11 @@ final class App
             return;
         }
 
+        run();
+    }
+
+    private void run()
+    {
         MailWriter mailWriter;
         if (useHBase)
         {
