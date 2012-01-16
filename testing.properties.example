@@ -19,4 +19,4 @@
 ## exchange server
 ###############################################################
 ## The URI of the Exchange instance.
-# ExchangeURI = https://devexch01.int.tartarus.com/ews/exchange.asmx
+# ExchangeURI = https://exchange.test/ews/exchange.asmx
