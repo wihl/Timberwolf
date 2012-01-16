@@ -57,7 +57,6 @@ public final class FindItemHelper
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
 
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        // Asking for negative or zero max items is nonsensical.
         index.setMaxEntriesReturned(config.getFindItemPageSize());
         index.setBasePoint(FIND_ITEMS_BASE_POINT);
         // Negative offsets are nonsensical.

@@ -17,6 +17,7 @@ public class Configuration
     public Configuration(final int findItemPageSize,
                          final int getItemPageSize)
     {
+        // Asking for negative or zero max items is nonsensical.
         this.findPageSize = Math.max(findItemPageSize, 1);
         this.getPageSize = Math.max(getItemPageSize, 1);
     }
