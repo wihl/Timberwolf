@@ -69,6 +69,16 @@ public final class FindItemHelper
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
 
+        // TODO: Uncomment this once this work is combined with the
+        // configuration material. getStartDate() will need to be created.
+        /*
+        DateTime startDate = config.getStartDate();
+        if (startDate != null)
+        {
+            findItem.setRestriction(getAfterDateRestriction(startDate));
+        }
+        */
+        
         findItem.setParentFolderIds(folder.getFolderIds());
 
         return findItem;
