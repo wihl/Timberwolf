@@ -29,6 +29,10 @@ final class App
 {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
+    @Option(name = "--domain",
+            usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    private String domain;
+
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
                     + "https://example.contoso.com/ews/exchange.asmx")
@@ -74,6 +78,7 @@ final class App
             parser.parseArgument(args);
 
             LOG.debug("Timberwolf invoked with the following arguments:");
+            LOG.debug("Domain: {}", domain);
             LOG.debug("Exchange URL: {}", exchangeUrl);
             LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
             LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
@@ -119,7 +124,7 @@ final class App
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
         try
         {
-            PrincipalFetcher userLister = new LdapFetcher("int.tartarus.com", "Timberwolf");
+            PrincipalFetcher userLister = new LdapFetcher(domain, "Timberwolf");
             Iterable<String> users = userLister.getPrincipals();
 
             mailWriter.write(mailStore.getMail(users));
