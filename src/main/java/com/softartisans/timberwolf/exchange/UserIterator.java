@@ -42,13 +42,17 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
         return null;
     }
 
+    /**
+     * An iterator wrapper that wraps another iterator, and logs any exceptions
+     * thrown. I then returns false on hasNext() and null on next()
+     */
     private static class SafeIterator implements Iterator<MailboxItem>
     {
 
         private String user;
         private Iterator<MailboxItem> baseIterator;
 
-        public SafeIterator(String currentUser, Iterator<MailboxItem> iterator)
+        public SafeIterator(final String currentUser, final Iterator<MailboxItem> iterator)
         {
             user = currentUser;
             baseIterator = iterator;
