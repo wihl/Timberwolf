@@ -14,7 +14,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
     private Iterator<String> users;
 
     public UserIterator(final ExchangeService exchangeService, final int idsPageSize, final int itemsPageSize,
-                        Iterable<String> targetUsers)
+                        final Iterable<String> targetUsers)
     {
         service = exchangeService;
         findItemPageSize = idsPageSize;

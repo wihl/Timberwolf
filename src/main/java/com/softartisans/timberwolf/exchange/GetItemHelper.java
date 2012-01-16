@@ -66,7 +66,7 @@ public final class GetItemHelper
      *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
-                                        final ExchangeService exchangeService, String targetUser)
+                                        final ExchangeService exchangeService, final String targetUser)
             throws ServiceCallException, HttpErrorException
     {
         int max = Math.min(startIndex + count, ids.size());
