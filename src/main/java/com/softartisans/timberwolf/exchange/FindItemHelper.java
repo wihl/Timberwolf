@@ -5,14 +5,21 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
+import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
+import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
+import com.microsoft.schemas.exchange.services.x2006.types.UnindexedFieldURIType;
 
 import java.util.Vector;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +72,23 @@ public final class FindItemHelper
         findItem.setParentFolderIds(folder.getFolderIds());
 
         return findItem;
+    }
+
+    private static RestrictionType getAfterDateRestriction(final DateTime startDate)
+    {
+        IsGreaterThanType isGreaterThan = IsGreaterThanType.Factory.newInstance();
+
+        PathToUnindexedFieldType dateSentPath = PathToUnindexedFieldType.Factory.newInstance();
+        dateSentPath.setFieldURI(UnindexedFieldURIType.ITEM_DATE_TIME_SENT);
+        isGreaterThan.setPath(dateSentPath);
+
+        FieldURIOrConstantType dateConstraint = isGreaterThan.addNewFieldURIOrConstant();
+        ConstantValueType dateConstantValue = dateConstraint.addNewConstant();
+        dateConstantValue.setValue(startDate.toString());
+
+        RestrictionType restriction = RestrictionType.Factory.newInstance();
+        restriction.setSearchExpression(isGreaterThan);
+        return restriction;
     }
 
     /**
