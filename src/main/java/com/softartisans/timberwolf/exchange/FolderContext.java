@@ -5,7 +5,12 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 
-public class FolderContext {
+/**
+ * This class manages what folder an exchange
+ * service should be using as a scope.
+ */
+public class FolderContext
+{
     private final String stringFolder;
     private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
 
@@ -20,7 +25,7 @@ public class FolderContext {
         this.stringFolder = null;
         this.distinguishedFolderId = distinguishedFolder;
     }
-    
+
     public NonEmptyArrayOfBaseFolderIdsType getFolderIds()
     {
         NonEmptyArrayOfBaseFolderIdsType ids =
