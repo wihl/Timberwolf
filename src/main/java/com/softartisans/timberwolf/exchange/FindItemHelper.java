@@ -48,7 +48,9 @@ public final class FindItemHelper
      * @param maxEntries the maximum number of ids to grab with this request
      * @return the FindItemType necessary to request the ids
      */
-    static FindItemType getFindItemsRequest(final Configuration config, final int offset)
+    static FindItemType getFindItemsRequest(final Configuration config,
+                                            final FolderContext folder,
+                                            final int offset)
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -61,7 +63,7 @@ public final class FindItemHelper
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
 
-        findItem.setParentFolderIds(config.getFolderIds());
+        findItem.setParentFolderIds(folder.getFolderIds());
 
         return findItem;
     }
@@ -80,10 +82,12 @@ public final class FindItemHelper
      */
     static Vector<String> findItems(final ExchangeService exchangeService,
                                     final Configuration config,
+                                    final FolderContext folder,
                                     final int offset)
             throws ServiceCallException, HttpErrorException
     {
-        return findItems(exchangeService, getFindItemsRequest(config, offset));
+        return findItems(exchangeService,
+                         getFindItemsRequest(config, folder, offset));
     }
 
     /**

@@ -16,6 +16,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
     private static final Logger LOG = LoggerFactory.getLogger(FindItemIterator.class);
     private ExchangeService service;
     private Configuration config;
+    private FolderContext folder;
     private int currentStart;
     /**
      * If we ever make a call asking for pageSize items and get back less than that,
@@ -24,10 +25,12 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
     private boolean definitelyExhausted;
 
     public FindItemIterator(final ExchangeService exchangeService,
-                            final Configuration configuration)
+                            final Configuration configuration,
+                            final FolderContext folderContext)
     {
         service = exchangeService;
         config = configuration;
+        folder = folderContext;
         currentStart = 0;
     }
 
@@ -40,7 +43,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             {
                 return null;
             }
-            Vector<String> messageIds = FindItemHelper.findItems(service, config, currentStart);
+            Vector<String> messageIds = FindItemHelper.findItems(service, config, folder, currentStart);
             int pageSize = config.getFindItemPageSize();
             currentStart += pageSize;
             LOG.debug("Got {} email ids.", messageIds.size());
