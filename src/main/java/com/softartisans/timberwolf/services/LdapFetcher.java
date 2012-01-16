@@ -63,7 +63,7 @@ public class LdapFetcher implements PrincipalFetcher, PrivilegedAction<Iterable<
      * privileged action, so it assumes that all authentication has already
      * been taken care of through SASL. This should not be called directly,
      * it's called by Subject.doAs(). You should call getPrincipals, which
-     * takes care of logging in. If you're already logged in? Then then this
+     * takes care of logging in. If you're already logged in? Then this
      * class needs to be touched up to remove all the login stuff.
      *
      * @return A list of principals to get emails for.
