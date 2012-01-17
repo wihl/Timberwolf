@@ -56,4 +56,16 @@ public class RequiredUser
             }
         }
     }
+
+    public void sendEmail(ExchangePump pump)
+    {
+        for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
+        {
+            for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
+            {
+                System.err.println(" Sending email for folder: " + folder.getId());
+                folder.sendEmail(pump, user);
+            }
+        }
+    }
 }

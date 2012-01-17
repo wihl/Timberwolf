@@ -86,28 +86,24 @@ public class ExchangePump
         return createFolders(user, parentFolder, folders);
     }
 
-    public void sendMessages(Message... messages)
+    public void sendMessages(List<RequiredEmail> emails)
     {
         EnvelopeDocument request = createEmptyRequest(sender);
         CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
         createItem.setMessageDisposition(MessageDispositionType.SEND_ONLY);
         NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
 
-        // TODO actually use the message, may merge with EmailMatcher
-        MessageType exchangeMessage = items.addNewMessage();
-        exchangeMessage.addNewFrom().addNewMailbox().setEmailAddress("tsender@int.tartarus.com");
-        com.microsoft.schemas.exchange.services.x2006.types.BodyType body = exchangeMessage.addNewBody();
-        body.setBodyType(BodyTypeType.TEXT);
-        body.setStringValue("The body of the email");
-        exchangeMessage.setSubject("The subject of the email");
-        exchangeMessage.addNewCcRecipients().addNewMailbox().setEmailAddress("ccboo@int.tartarus.com");
-        exchangeMessage.addNewBccRecipients().addNewMailbox().setEmailAddress("bccboo@int.tartarus.com");
-
-        BodyType response = sendRequest(request);
-        System.err.println(response);
-        if (response == null)
+        for (RequiredEmail email : emails)
         {
-            System.err.println("Got null response when creating messages");
+            MessageType exchangeMessage = items.addNewMessage();
+            exchangeMessage.addNewFrom().addNewMailbox().setEmailAddress(sender);
+            com.microsoft.schemas.exchange.services.x2006.types.BodyType body = exchangeMessage.addNewBody();
+            body.setBodyType(BodyTypeType.TEXT);
+            body.setStringValue(email.getBody());
+            exchangeMessage.setSubject(email.getSubject());
+            exchangeMessage.addNewToRecipients().addNewMailbox().setName(email.getTo());
+            BodyType response = sendRequest(request);
+            System.err.println(response);
         }
     }
 

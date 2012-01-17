@@ -9,11 +9,13 @@ public class RequiredFolder
     private final String name;
     private String id;
     private List<RequiredFolder> folders;
+    private List<RequiredEmail> emails;
 
     public RequiredFolder(final String folderName)
     {
         this.name = folderName;
         folders = new ArrayList<RequiredFolder>();
+        emails = new ArrayList<RequiredEmail>();
     }
 
     public String getName()
@@ -38,6 +40,13 @@ public class RequiredFolder
         return folder;
     }
 
+    public RequiredEmail add(String subject, String body)
+    {
+        RequiredEmail email = new RequiredEmail(subject, body);
+        emails.add(email);
+        return email;
+    }
+
     public void initialize(ExchangePump pump, String user)
     {
         if (folders.size() > 0)
@@ -48,6 +57,26 @@ public class RequiredFolder
                 System.err.println("    Initialized folder: " + folder.getId());
                 folder.initialize(pump, user);
             }
+            for (RequiredEmail email : emails)
+            {
+                email.initialize(this, user);
+            }
         }
+    }
+
+    public void sendEmail(ExchangePump pump, String user)
+    {
+        if (emails.size() > 0)
+        {
+            pump.sendMessages(emails);
+        }
+        if (folders.size() > 0)
+        {
+            for (RequiredFolder folder : folders)
+            {
+                folder.sendEmail(pump, user);
+            }
+        }
+
     }
 }
