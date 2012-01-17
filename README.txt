@@ -61,3 +61,10 @@ java -jar ${project}/target/timberwolf-SNAPSHOT-jar-with-dependencies.jar \
 will run Timberwolf at a very basic level and print all located emails to the console.
 
 MORE STUFF WILL NEED TO GO HERE. LIKE ALL THE HBASE STUFF.
+
+h2. Contributing
+
+h3. Coding Conventions
+
+The Timberwolf code works off of the java sun coding conventions with a few minor exceptions. Curly braces should always be on their own line and imports should be ordered alphabetically and broken up by groups.
+
