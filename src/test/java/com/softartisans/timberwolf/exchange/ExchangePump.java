@@ -31,15 +31,15 @@ public class ExchangePump
 
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory = new AlfredoHttpUrlConnectionFactory();
-    private String user;
+    private String sender;
 
-    public ExchangePump(String exchangeUrl, String impersonatedUser)
+    public ExchangePump(String exchangeUrl, String senderEmail)
     {
         endpoint = exchangeUrl;
-        user = impersonatedUser;
+        sender = senderEmail;
     }
 
-    private EnvelopeDocument createEmptyRequest()
+    private EnvelopeDocument createEmptyRequest(String user)
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
@@ -47,49 +47,50 @@ public class ExchangePump
         return request;
     }
 
-    private List<String> createFolders(TargetFolderIdType parentFolderId, String... folderNames)
+    private List<String> createFolders(String user, TargetFolderIdType parentFolderId, Folder... folders)
     {
-        EnvelopeDocument request = createEmptyRequest();
+        EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
         createFolder.setParentFolderId(parentFolderId);
         NonEmptyArrayOfFoldersType requestedFolders = createFolder.addNewFolders();
-        for (String folderName : folderNames)
+        for (Folder folder : folders)
         {
-            requestedFolders.addNewFolder().setDisplayName(folderName);
+            requestedFolders.addNewFolder().setDisplayName(folder.getName());
         }
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
         FolderInfoResponseMessageType[] array = response.getResponseMessages().getCreateFolderResponseMessageArray();
         List<String> folderIds = new ArrayList<String>();
+        int i=0;
         for (FolderInfoResponseMessageType folderResponse : array)
         {
             for (FolderType folder : folderResponse.getFolders().getFolderArray())
             {
-                folderIds.add(folder.getFolderId().getId());
+                folders[i].setId(folder.getFolderId().getId());
+                i++;
             }
         }
         return folderIds;
     }
 
-    public List<String> createFolders(String parent, String... folderNames)
+    public List<String> createFolders(String user, String parent, Folder... folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewFolderId().setId(parent);
-        return createFolders(parentFolder, folderNames);
+        return createFolders(user, parentFolder, folders);
     }
 
-    public List<String> createFolders(DistinguishedFolderIdNameType.Enum parent, String... folderNames)
+    public List<String> createFolders(String user, DistinguishedFolderIdNameType.Enum parent, Folder... folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
-        return createFolders(parentFolder, folderNames);
+        return createFolders(user, parentFolder, folders);
     }
 
-    private void createMessages(TargetFolderIdType folderId, Message... messages)
+    public void sendMessages(Message... messages)
     {
-        EnvelopeDocument request = createEmptyRequest();
+        EnvelopeDocument request = createEmptyRequest(sender);
         CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
         createItem.setMessageDisposition(MessageDispositionType.SEND_ONLY);
-        createItem.setSavedItemFolderId(folderId);
         NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
 
         // TODO actually use the message, may merge with EmailMatcher
@@ -108,20 +109,6 @@ public class ExchangePump
         {
             System.err.println("Got null response when creating messages");
         }
-    }
-
-    public void createMessages(String folderId, Message... messages)
-    {
-        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
-        parentFolder.addNewFolderId().setId(folderId);
-        createMessages(parentFolder);
-    }
-
-    public void createMessages(DistinguishedFolderIdNameType.Enum folderId, Message... messages)
-    {
-        TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
-        parentFolder.addNewDistinguishedFolderId().setId(folderId);
-        createMessages(parentFolder, messages);
     }
 
     private BodyType sendRequest(final EnvelopeDocument envelope)
@@ -152,6 +139,33 @@ public class ExchangePump
         {
             e.printStackTrace();
             return null;
+        }
+
+    }
+
+    public static class Folder
+    {
+        private final String name;
+        private String id;
+
+        public Folder(final String folderName)
+        {
+            this.name = folderName;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public String getId()
+        {
+            return id;
+        }
+
+        public void setId(final String folderId)
+        {
+            id = folderId;
         }
 
     }
