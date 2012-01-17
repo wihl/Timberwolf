@@ -58,7 +58,7 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         private int code;
         private byte[] responseData;
 
-        public MockRequest(String address, byte[] request)
+        public MockRequest(final String address, final byte[] request)
         {
             url = address;
             requestData = request;

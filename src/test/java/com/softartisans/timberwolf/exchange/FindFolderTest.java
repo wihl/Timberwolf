@@ -78,7 +78,7 @@ public class FindFolderTest extends ExchangeTestBase
 
         FindFolderType findFoldersRequest = FindFolderHelper.getFindFoldersRequest(
                 DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        Queue<String> foldersVec = FindFolderHelper.findFolders(service, findFoldersRequest);
+        Queue<String> foldersVec = FindFolderHelper.findFolders(getService(), findFoldersRequest);
         int folderCount = 0;
         for (String folder : foldersVec)
         {
@@ -95,13 +95,13 @@ public class FindFolderTest extends ExchangeTestBase
         FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(getService().findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
         when(findFolderResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findFolderResponseMessage.isSetRootFolder()).thenReturn(false);
-        FindFolderHelper.findFolders(service, findFolder);
+        FindFolderHelper.findFolders(getService(), findFolder);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class FindFolderTest extends ExchangeTestBase
         FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(getService().findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
@@ -121,7 +121,7 @@ public class FindFolderTest extends ExchangeTestBase
         when(findFolderResponseMessage.isSetRootFolder()).thenReturn(true);
         when(findFolderResponseMessage.getRootFolder()).thenReturn(findFolderParent);
         when(findFolderParent.isSetFolders()).thenReturn(false);
-        FindFolderHelper.findFolders(service, findFolder);
+        FindFolderHelper.findFolders(getService(), findFolder);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class FindFolderTest extends ExchangeTestBase
         when(messages[unset].isSetFolderId()).thenReturn(false);
         mockFindFolders(messages);
         Queue<String> items = FindFolderHelper.findFolders(
-                service, FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
+                getService(), FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT));
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {

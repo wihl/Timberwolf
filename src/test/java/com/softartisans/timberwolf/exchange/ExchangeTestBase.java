@@ -42,16 +42,36 @@ import static org.mockito.Mockito.when;
 public class ExchangeTestBase
 {
     @Mock
-    public ExchangeService service;
+    private ExchangeService service;
+
+    protected ExchangeService getService()
+    {
+        return service;
+    }
 
     /** This is the name of our default folder. */
-    protected String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
+    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
+
+    protected String getDefaultFolderId()
+    {
+        return defaultFolderId;
+    }
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
-    protected FolderContext defaultFolder = new FolderContext(defaultFolderId);
+    private FolderContext defaultFolder = new FolderContext(defaultFolderId);
+
+    protected FolderContext getDefaultFolder()
+    {
+        return defaultFolder;
+    }
 
     /** This configuration is used anytime we just need any standard configuration. */
-    protected Configuration defaultConfig = new Configuration(1000, 1000);
+    private Configuration defaultConfig = new Configuration(1000, 1000);
+
+    protected Configuration getDefaultConfig()
+    {
+        return defaultConfig;
+    }
 
     @Before
     public void setUp() throws Exception

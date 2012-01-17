@@ -82,7 +82,7 @@ public class FindItemTest extends ExchangeTestBase
 
         final int assertCount2 = 13;
         request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount2);
-        assertEquals(assertCount, request.getIndexedPageItemView().getOffset());
+        assertEquals(assertCount2, request.getIndexedPageItemView().getOffset());
 
         request = FindItemHelper.getFindItemsRequest(config, inbox, 0);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
@@ -118,11 +118,11 @@ public class FindItemTest extends ExchangeTestBase
     {
         Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, inbox, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(null);
+        when(getService().findItem(LikeThis(findItem))).thenReturn(null);
 
         try
         {
-            Vector<String> items = FindItemHelper.findItems(service, config, inbox, 0);
+            Vector<String> items = FindItemHelper.findItems(getService(), config, inbox, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -137,7 +137,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, defaultFolder, 0);
+        Vector<String> items = FindItemHelper.findItems(getService(), getDefaultConfig(), getDefaultFolder(), 0);
         assertEquals(0, items.size());
     }
 
@@ -148,7 +148,7 @@ public class FindItemTest extends ExchangeTestBase
         MessageType message = mockMessageItemId("foobar27");
         MessageType[] messages = new MessageType[]{message};
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, defaultFolder, 0);
+        Vector<String> items = FindItemHelper.findItems(getService(), getDefaultConfig(), getDefaultFolder(), 0);
         Vector<String> expected = new Vector<String>(1);
         expected.add("foobar27");
         assertEquals(expected, items);
@@ -165,7 +165,7 @@ public class FindItemTest extends ExchangeTestBase
             messages[i] = mockMessageItemId("the" + i + "id");
         }
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, defaultFolder, 0);
+        Vector<String> items = FindItemHelper.findItems(getService(), getDefaultConfig(), getDefaultFolder(), 0);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -189,7 +189,7 @@ public class FindItemTest extends ExchangeTestBase
         messages[unset] = mock(MessageType.class);
         when(messages[unset].isSetItemId()).thenReturn(false);
         mockFindItem(messages);
-        Vector<String> items = FindItemHelper.findItems(service, defaultConfig, defaultFolder, 0);
+        Vector<String> items = FindItemHelper.findItems(getService(), getDefaultConfig(), getDefaultFolder(), 0);
         Vector<String> expected = new Vector<String>(count);
         for (int i = 0; i < count; i++)
         {
@@ -210,12 +210,12 @@ public class FindItemTest extends ExchangeTestBase
                 .thenReturn(new FindItemResponseMessageType[]{findMessage});
         FindItemResponseType findResponse = mock(FindItemResponseType.class);
         when(findResponse.getResponseMessages()).thenReturn(responseArr);
-        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+        when(getService().findItem(any(FindItemType.class))).thenReturn(findResponse);
 
         try
         {
             Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
-            FindItemHelper.findItems(service, config, inbox, 0);
+            FindItemHelper.findItems(getService(), config, inbox, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -231,8 +231,8 @@ public class FindItemTest extends ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, defaultFolder, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(getDefaultConfig(), getDefaultFolder(), 0);
+        when(getService().findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
@@ -248,8 +248,8 @@ public class FindItemTest extends ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, defaultFolder, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(getDefaultConfig(), getDefaultFolder(), 0);
+        when(getService().findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
