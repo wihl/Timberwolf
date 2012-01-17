@@ -12,7 +12,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
     private Iterator<String> users;
     private Configuration config;
 
-    public UserIterator(final ExchangeService exchangeService, Configuration configuration,
+    public UserIterator(final ExchangeService exchangeService, final Configuration configuration,
                         final Iterable<String> targetUsers)
     {
         service = exchangeService;
