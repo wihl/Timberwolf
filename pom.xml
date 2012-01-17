@@ -4,7 +4,7 @@
 
   <groupId>com.softartisans.timberwolf</groupId>
   <artifactId>timberwolf</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>${version}</version>
   <packaging>jar</packaging>
 
   <name>timberwolf</name>
@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version>SNAPSHOT</version>
   </properties>
 
   <build>

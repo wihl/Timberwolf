@@ -15,27 +15,23 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
 {
     private static final Logger LOG = LoggerFactory.getLogger(FindItemIterator.class);
     private ExchangeService service;
+    private Configuration config;
+    private FolderContext folder;
     private int currentStart;
-    private int pageSize;
-    private String folder;
-    private int getItemsPageSize;
-    private String user;
-
     /**
      * If we ever make a call asking for pageSize items and get back less than that,
      * we know that there are no more messages to get, this is then set to true.
      */
     private boolean definitelyExhausted;
 
-    public FindItemIterator(final ExchangeService exchangeService, final String folderId,
-                            final int idsPageSize, final int itemsPageSize, final String targetUser)
+    public FindItemIterator(final ExchangeService exchangeService,
+                            final Configuration configuration,
+                            final FolderContext folderContext)
     {
         service = exchangeService;
-        pageSize = idsPageSize;
-        folder = folderId;
+        config = configuration;
+        folder = folderContext;
         currentStart = 0;
-        getItemsPageSize = itemsPageSize;
-        user = targetUser;
     }
 
     @Override
@@ -47,7 +43,8 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             {
                 return null;
             }
-            Vector<String> messageIds = FindItemHelper.findItems(service, folder, currentStart, pageSize, user);
+            Vector<String> messageIds = FindItemHelper.findItems(service, config, folder, currentStart);
+            int pageSize = config.getFindItemPageSize();
             currentStart += pageSize;
             LOG.debug("Got {} email ids.", messageIds.size());
             if (messageIds.size() < pageSize)
@@ -56,7 +53,7 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
             }
             if (messageIds.size() > 0)
             {
-                return new GetItemIterator(service, messageIds, getItemsPageSize, user);
+                return new GetItemIterator(service, messageIds, config, folder);
             }
             else
             {
