@@ -6,8 +6,11 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 
 /**
- * This class manages what folder an exchange
- * service should be using as a scope.
+ * FolderContext class holds information about where a service call should be looking for
+ * emails.  The context is defined by a user and folder.  Folders can be named either
+ * with a DistinguishedFolderId (for standard folders like Inbox and Sent Items), or
+ * by a folder ID String (for folders discovered by other service calls).  Users are
+ * identified with their principal name as a String.
  */
 public class FolderContext
 {
