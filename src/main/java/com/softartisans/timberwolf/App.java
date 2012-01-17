@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 final class App implements PrivilegedAction<Object>
 {
-    private static String configurationEntry = "Timberwolf";
+    private static final String CONFIGURATION_ENTRY = "Timberwolf";
 
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     /** This will get set to true if any hbase arguments are set. */
@@ -109,7 +109,7 @@ final class App implements PrivilegedAction<Object>
 
             useHBase = allHBaseArgs;
 
-            LoginContext lc = new LoginContext(configurationEntry,
+            LoginContext lc = new LoginContext(CONFIGURATION_ENTRY,
                                                new TextCallbackHandler());
             // Attempt authentication
             // We might want to do this in a "for" loop to give
