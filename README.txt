@@ -68,3 +68,4 @@ h3. Coding Conventions
 
 The Timberwolf code works off of the java sun coding conventions with a few minor exceptions. Curly braces should always be on their own line and imports should be ordered alphabetically and broken up by groups.
 
+You can run "mvn checkstyle:checkstyle" in order to confirm whether your additions conform to the coding convention.
