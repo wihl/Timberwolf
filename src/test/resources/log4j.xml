@@ -31,10 +31,15 @@
       <level value="warn" />
     </logger>
 
-    <!-- uncomment the following to see all exchange http traffic -->
-    <!-- 
+    <!-- ExchangeService and FindFolderIterator are particularly
+         chatty during the integration test -->
     <logger name="com.softartisans.timberwolf.exchange.ExchangeService">
-      <level value="trace" />
-    </logger> -->
+      <!-- set this to trace to see all exchange http traffic -->
+      <level value="fatal" />
+    </logger>
+
+    <logger name="com.softartisans.timberwolf.exchange.FindFolderIterator">
+      <level value="fatal" />
+    </logger>
 
 </log4j:configuration>
