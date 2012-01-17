@@ -47,13 +47,13 @@ public class ExchangePump
         return request;
     }
 
-    private List<String> createFolders(String user, TargetFolderIdType parentFolderId, Folder... folders)
+    private List<String> createFolders(String user, TargetFolderIdType parentFolderId, List<RequiredFolder> folders)
     {
         EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
         createFolder.setParentFolderId(parentFolderId);
         NonEmptyArrayOfFoldersType requestedFolders = createFolder.addNewFolders();
-        for (Folder folder : folders)
+        for (RequiredFolder folder : folders)
         {
             requestedFolders.addNewFolder().setDisplayName(folder.getName());
         }
@@ -65,21 +65,21 @@ public class ExchangePump
         {
             for (FolderType folder : folderResponse.getFolders().getFolderArray())
             {
-                folders[i].setId(folder.getFolderId().getId());
+                folders.get(i).setId(folder.getFolderId().getId());
                 i++;
             }
         }
         return folderIds;
     }
 
-    public List<String> createFolders(String user, String parent, Folder... folders)
+    public List<String> createFolders(String user, String parent, List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewFolderId().setId(parent);
         return createFolders(user, parentFolder, folders);
     }
 
-    public List<String> createFolders(String user, DistinguishedFolderIdNameType.Enum parent, Folder... folders)
+    public List<String> createFolders(String user, DistinguishedFolderIdNameType.Enum parent, List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
@@ -139,33 +139,6 @@ public class ExchangePump
         {
             e.printStackTrace();
             return null;
-        }
-
-    }
-
-    public static class Folder
-    {
-        private final String name;
-        private String id;
-
-        public Folder(final String folderName)
-        {
-            this.name = folderName;
-        }
-
-        public String getName()
-        {
-            return name;
-        }
-
-        public String getId()
-        {
-            return id;
-        }
-
-        public void setId(final String folderId)
-        {
-            id = folderId;
         }
 
     }
