@@ -124,9 +124,11 @@ import org.apache.hadoop.hbase.util.Bytes;
 public final class MockHTable implements HTableInterface
 {
   /**
-   * This is all the data for a MockHTable instance
+   * This is all the data for a MockHTable instance.
    */
-  private NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data = new TreeMap<byte[], NavigableMap<byte[],NavigableMap<byte[],NavigableMap<Long,byte[]>>>>(Bytes.BYTES_COMPARATOR);
+  private NavigableMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data =
+          new TreeMap<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>>(
+                  Bytes.BYTES_COMPARATOR);
 
   /**
    * The table name, if specified in create.
@@ -134,7 +136,7 @@ public final class MockHTable implements HTableInterface
   private String name;
 
   /**
-   * Helper method to convert some data into a list of KeyValue's
+   * Helper method to convert some data into a list of KeyValue's.
    *
    * @param row
    *          row value of the KeyValue's
@@ -142,13 +144,14 @@ public final class MockHTable implements HTableInterface
    *          data to decode
    * @return List of KeyValue's
    */
-  private static List<KeyValue> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata)
+  private static List<KeyValue> toKeyValue(final byte[] row, final NavigableMap<byte[], NavigableMap<byte[],
+          NavigableMap<Long, byte[]>>> rowdata)
   {
     return toKeyValue(row, rowdata, 0, Long.MAX_VALUE);
   }
 
   /**
-   * Helper method to convert some data into a list of KeyValue's with timestamp
+   * Helper method to convert some data into a list of KeyValue's with timestamp.
    * constraint
    *
    * @param row
@@ -161,20 +164,30 @@ public final class MockHTable implements HTableInterface
    *          end of the timestamp constraint
    * @return List of KeyValue's
    */
-  private static List<KeyValue> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd)
+  private static List<KeyValue> toKeyValue(final byte[] row, final NavigableMap<byte[], NavigableMap<byte[],
+          NavigableMap<Long, byte[]>>> rowdata, final long timestampStart, final long timestampEnd)
   {
     List<KeyValue> ret = new ArrayList<KeyValue>();
     for (byte[] family : rowdata.keySet())
+    {
       for (byte[] qualifier : rowdata.get(family).keySet())
-        for (Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).entrySet()){
+      {
+        for (Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).entrySet())
+        {
           Long timestamp = tsToVal.getKey();
           if (timestamp < timestampStart)
+          {
             continue;
+          }
           if (timestamp > timestampEnd)
+          {
             continue;
+          }
           byte[] value = tsToVal.getValue();
           ret.add(new KeyValue(row, family, qualifier, timestamp, value));
         }
+       }
+    }
     return ret;
   }
 
@@ -214,19 +227,22 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public boolean exists(Get get) throws IOException
+  public boolean exists(final Get get) throws IOException
   {
     return data.containsKey(get.getRow());
   }
 
   @Override
-  public Result get(Get get) throws IOException
+  public Result get(final Get get) throws IOException
   {
     if (!exists(get))
+    {
       return new Result();
+    }
     byte[] row = get.getRow();
     List<KeyValue> kvs = new ArrayList<KeyValue>();
-    if (!get.hasFamilies()) {
+    if (!get.hasFamilies())
+    {
       kvs = toKeyValue(row, data.get(row));
     }
     else
@@ -248,13 +264,13 @@ public final class MockHTable implements HTableInterface
           {
             qualifier = "".getBytes();
           }
-          if (!data.get(row).containsKey(family) || !data.get(row).get(family).containsKey(qualifier) ||
-              data.get(row).get(family).get(qualifier).isEmpty())
+          if (!data.get(row).containsKey(family) || !data.get(row).get(family).containsKey(qualifier)
+                  || data.get(row).get(family).get(qualifier).isEmpty())
           {
               continue;
           }
           Entry<Long, byte[]> timestampAndValue = data.get(row).get(family).get(qualifier).lastEntry();
-          kvs.add(new KeyValue(row,family, qualifier, timestampAndValue.getKey(), timestampAndValue.getValue()));
+          kvs.add(new KeyValue(row, family, qualifier, timestampAndValue.getKey(), timestampAndValue.getValue()));
         }
       }
     }
@@ -290,14 +306,14 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public Result getRowOrBefore(byte[] row, byte[] family) throws IOException
+  public Result getRowOrBefore(final byte[] row, final byte[] family) throws IOException
   {
     // FIXME: implement
     return null;
   }
 
   @Override
-  public ResultScanner getScanner(Scan scan) throws IOException
+  public ResultScanner getScanner(final Scan scan) throws IOException
   {
     final List<Result> ret = new ArrayList<Result>();
     byte[] st = scan.getStartRow();
@@ -400,14 +416,16 @@ public final class MockHTable implements HTableInterface
     return new ResultScanner()
     {
       private final Iterator<Result> iterator = ret.iterator();
+
       public Iterator<Result> iterator()
       {
         return iterator;
       }
-      public Result[] next(int nbRows) throws IOException
+
+      public Result[] next(final int nbRows) throws IOException
       {
         ArrayList<Result> resultSets = new ArrayList<Result>(nbRows);
-        for(int i = 0; i < nbRows; i++)
+        for (int i = 0; i < nbRows; i++)
         {
           Result next = next();
           if (next != null)
@@ -421,6 +439,7 @@ public final class MockHTable implements HTableInterface
         }
         return resultSets.toArray(new Result[resultSets.size()]);
       }
+
       public Result next() throws IOException
       {
         try
@@ -432,12 +451,17 @@ public final class MockHTable implements HTableInterface
           return null;
         }
       }
-      public void close() {}
+
+      public void close()
+      {
+
+      }
+
     };
   }
 
   @Override
-  public ResultScanner getScanner(byte[] family) throws IOException
+  public ResultScanner getScanner(final byte[] family) throws IOException
   {
     Scan scan = new Scan();
     scan.addFamily(family);
@@ -445,7 +469,7 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public ResultScanner getScanner(byte[] family, byte[] qualifier) throws IOException
+  public ResultScanner getScanner(final byte[] family, final byte[] qualifier) throws IOException
   {
     Scan scan = new Scan();
     scan.addColumn(family, qualifier);
@@ -453,13 +477,15 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public void put(Put put) throws IOException
+  public void put(final Put put) throws IOException
   {
     byte[] row = put.getRow();
-    NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row, new TreeMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>(Bytes.BYTES_COMPARATOR));
+    NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row,
+            new TreeMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>(Bytes.BYTES_COMPARATOR));
     for (byte[] family : put.getFamilyMap().keySet())
     {
-      NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new TreeMap<byte[], NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
+      NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new TreeMap<byte[],
+              NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
       for (KeyValue kv : put.getFamilyMap().get(family))
       {
         kv.updateLatestStamp(Bytes.toBytes(System.currentTimeMillis()));
@@ -482,19 +508,19 @@ public final class MockHTable implements HTableInterface
    *          set key to this if not found
    * @return found value or newObject if not found
    */
-  private <K, V> V forceFind(NavigableMap<K, V> map, K key, V newObject)
+  private <K, V> V forceFind(final NavigableMap<K, V> map, final K key, final V newObject)
   {
-    V data = map.get(key);
-    if (data == null)
+    V dataLocal = map.get(key);
+    if (dataLocal == null)
     {
-      data = newObject;
-      map.put(key, data);
+        dataLocal = newObject;
+      map.put(key, dataLocal);
     }
-    return data;
+    return dataLocal;
   }
 
   @Override
-  public void put(List<Put> puts) throws IOException
+  public void put(final List<Put> puts) throws IOException
   {
     for (Put put : puts)
     {
@@ -504,7 +530,7 @@ public final class MockHTable implements HTableInterface
 
   /**
    * Checks if the value with given details exists in database, or is
-   * non-existent in the case of value being null
+   * non-existent in the case of value being null.
    *
    * @param row
    *          row
@@ -517,26 +543,27 @@ public final class MockHTable implements HTableInterface
    * @return true if value is not null and exists in db, or value is null and
    *         not exists in db, false otherwise
    */
-  private boolean check(byte[] row, byte[] family, byte[] qualifier, byte[] value)
+  private boolean check(final byte[] row, final byte[] family, final byte[] qualifier, final byte[] value)
   {
     if (value == null || value.length == 0)
     {
-        return ! data.containsKey(row) || ! data.get(row).containsKey(family) ||
-                ! data.get(row).get(family).containsKey(qualifier);
+        return !data.containsKey(row) || !data.get(row).containsKey(family)
+                || !data.get(row).get(family).containsKey(qualifier);
     }
     else
     {
-        return data.containsKey(row) &&
-                data.get(row).containsKey(family) &&
-                data.get(row).get(family).containsKey(qualifier) &&
-                ! data.get(row).get(family).get(qualifier).isEmpty() &&
-                Arrays.equals(data.get(row).get(family).get(qualifier).lastEntry().getValue(), value);
+        return data.containsKey(row)
+                && data.get(row).containsKey(family)
+                && data.get(row).get(family).containsKey(qualifier)
+                && !data.get(row).get(family).get(qualifier).isEmpty()
+                && Arrays.equals(data.get(row).get(family).get(qualifier).lastEntry().getValue(), value);
     }
 
   }
 
   @Override
-  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException
+  public boolean checkAndPut(final byte[] row, final byte[] family, final byte[] qualifier, final byte[] value,
+                             final Put put) throws IOException
   {
     if (check(row, family, qualifier, value))
     {
@@ -547,7 +574,7 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public void delete(Delete delete) throws IOException
+  public void delete(final Delete delete) throws IOException
   {
     byte[] row = delete.getRow();
     if (data.get(row) == null)
@@ -578,7 +605,7 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public void delete(List<Delete> deletes) throws IOException
+  public void delete(final List<Delete> deletes) throws IOException
   {
     for (Delete delete : deletes)
     {
@@ -587,10 +614,10 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier,
-      byte[] value, Delete delete) throws IOException
+  public boolean checkAndDelete(final byte[] row, final byte[] family, final byte[] qualifier,
+      final byte[] value, final Delete delete) throws IOException
   {
-    if(check(row, family, qualifier, value))
+    if (check(row, family, qualifier, value))
     {
       delete(delete);
       return true;
@@ -599,15 +626,15 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public long incrementColumnValue(byte[] row, byte[] family,
-      byte[] qualifier, long amount) throws IOException
+  public long incrementColumnValue(final byte[] row, final byte[] family,
+      final byte[] qualifier, final long amount) throws IOException
   {
     return incrementColumnValue(row, family, qualifier, amount, true);
   }
 
   @Override
-  public long incrementColumnValue(byte[] row, byte[] family,
-      byte[] qualifier, long amount, boolean writeToWAL) throws IOException
+  public long incrementColumnValue(final byte[] row, final byte[] family,
+      final byte[] qualifier, final long amount, final boolean writeToWAL) throws IOException
   {
     if (check(row, family, qualifier, null))
     {
@@ -616,8 +643,8 @@ public final class MockHTable implements HTableInterface
       put(put);
       return amount;
     }
-    long newValue = Bytes.toLong(data.get(row).get(family).get(qualifier).lastEntry().getValue())+amount;
-    data.get(row).get(family).get(qualifier).put(System.currentTimeMillis(),Bytes.toBytes(newValue));
+    long newValue = Bytes.toLong(data.get(row).get(family).get(qualifier).lastEntry().getValue()) + amount;
+    data.get(row).get(family).get(qualifier).put(System.currentTimeMillis(), Bytes.toBytes(newValue));
     return newValue;
   }
 
@@ -640,19 +667,19 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public RowLock lockRow(byte[] row) throws IOException
+  public RowLock lockRow(final byte[] row) throws IOException
   {
     return null;
   }
 
   @Override
-  public void unlockRow(RowLock rl) throws IOException
+  public void unlockRow(final RowLock rl) throws IOException
   {
 
   }
 
   @Override
-  public Object[] batch(List<Row> actions) throws IOException,InterruptedException
+  public Object[] batch(final List<Row> actions) throws IOException, InterruptedException
   {
     List<Result> results = new ArrayList<Result>();
     for (Row r : actions)
@@ -676,13 +703,13 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public void batch(List<Row> actions, Object[] results) throws IOException, InterruptedException
+  public void batch(final List<Row> actions, Object[] results) throws IOException, InterruptedException
   {
     results = batch(actions);
   }
 
   @Override
-  public Result[] get(List<Get> gets) throws IOException
+  public Result[] get(final List<Get> gets) throws IOException
   {
     List<Result> results = new ArrayList<Result>();
     for (Get g : gets)
@@ -693,7 +720,7 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public Result increment(Increment increment) throws IOException
+  public Result increment(final Increment increment) throws IOException
   {
     List<KeyValue> kvs = new ArrayList<KeyValue>();
     Map<byte[], NavigableMap<byte[], Long>> famToVal = increment.getFamilyMap();
@@ -716,7 +743,7 @@ public final class MockHTable implements HTableInterface
   }
 
   /**
-   * Default way of constructing a MockHTable
+   * Default way of constructing a MockHTable.
    * @return a new MockHTable
    */
   public static MockHTable create()
@@ -729,7 +756,7 @@ public final class MockHTable implements HTableInterface
    * @param name The name of this MockHTable.
    * @return a new MockHTable.
    */
-  public static MockHTable create(String name)
+  public static MockHTable create(final String name)
   {
       MockHTable table = new MockHTable();
       table.name = name;
@@ -750,7 +777,7 @@ public final class MockHTable implements HTableInterface
    *          pre-loaded data
    * @return a new MockHTable loaded with given data
    */
-  public static MockHTable with(Map<String, Map<String, String>> dump)
+  public static MockHTable with(final Map<String, Map<String, String>> dump)
   {
     MockHTable ret = new MockHTable();
     for (String row : dump.keySet())
@@ -776,13 +803,16 @@ public final class MockHTable implements HTableInterface
    * @param val
    *          value
    */
-  private static void put(MockHTable ret, String row, String column, String val)
+  private static void put(final MockHTable ret, final String row, final String column, final String val)
   {
     String[] fq = split(column);
     byte[] family = Bytes.toBytesBinary(fq[0]);
     byte[] qualifier = Bytes.toBytesBinary(fq[1]);
-    NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> families = ret.forceFind(ret.data, Bytes.toBytesBinary(row), new TreeMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>(Bytes.BYTES_COMPARATOR));
-    NavigableMap<byte[], NavigableMap<Long, byte[]>> qualifiers = ret.forceFind(families, family, new TreeMap<byte[], NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
+    NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> families =
+            ret.forceFind(ret.data, Bytes.toBytesBinary(row), new TreeMap<byte[], NavigableMap<byte[],
+                    NavigableMap<Long, byte[]>>>(Bytes.BYTES_COMPARATOR));
+    NavigableMap<byte[], NavigableMap<Long, byte[]>> qualifiers = ret.forceFind(families, family, new TreeMap<byte[],
+            NavigableMap<Long, byte[]>>(Bytes.BYTES_COMPARATOR));
     NavigableMap<Long, byte[]> values = ret.forceFind(qualifiers, qualifier, new TreeMap<Long, byte[]>());
     values.put(System.currentTimeMillis(), Bytes.toBytesBinary(val));
   }
@@ -802,10 +832,10 @@ public final class MockHTable implements HTableInterface
    * @param dump
    * @return
    */
-  public static MockHTable with(String[][] dump)
+  public static MockHTable with(final String[][] dump)
   {
     MockHTable ret = new MockHTable();
-    for(String[] row : dump)
+    for (String[] row : dump)
     {
       put(ret, row[0], row[1], row[2]);
     }
@@ -813,18 +843,18 @@ public final class MockHTable implements HTableInterface
   }
 
   /**
-   * Column identification helper
+   * Column identification helper.
    *
    * @param column
    *          column name in the format family:qualifier
    * @return <code>{"family", "qualifier"}</code>
    */
-  private static String[] split(String column)
+  private static String[] split(final String column)
   {
     return new String[]
             {
         column.substring(0, column.indexOf(':')),
-        column.substring(column.indexOf(':')+1)
+        column.substring(column.indexOf(':') + 1)
             };
   }
 
@@ -837,7 +867,7 @@ public final class MockHTable implements HTableInterface
    *          family:qualifier of the data to read
    * @return value or null if row or column of the row does not exist
    */
-  public byte[] read(String rowid, String column)
+  public byte[] read(final String rowid, final String column)
   {
     NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> row = data.get(Bytes.toBytesBinary(rowid));
     if (row == null)
@@ -858,27 +888,27 @@ public final class MockHTable implements HTableInterface
     return row.get(family).get(qualifier).lastEntry().getValue();
   }
 
-  public static String toEString(boolean val)
+  public static String toEString(final boolean val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
-  public static String toEString(double val)
+  public static String toEString(final double val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
-  public static String toEString(float val)
+  public static String toEString(final float val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
-  public static String toEString(int val)
+  public static String toEString(final int val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
-  public static String toEString(long val)
+  public static String toEString(final long val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
-  public static String toEString(short val)
+  public static String toEString(final short val)
   {
     return Bytes.toStringBinary(Bytes.toBytes(val));
   }
