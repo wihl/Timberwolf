@@ -8,17 +8,24 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-/**
- * This simple class will perform the given privileged action using
- * the given authentication Entry. The entry corresponds to a java
- * login configuration.
- *
- * @param <T> This is the return type of the PrivilegedAction
- */
-public class Auth
+/** Helper class for running some code as an authenticated user. */
+public final class Auth
 {
-    static <T> T authenticateAndDo(final PrivilegedAction<T> action,
-                                   final String authenticationEntry)
+    private Auth()
+    {
+    }
+
+    /**
+     * Authenticates the given privileged action with the config entry, and run it.
+     *
+     * @param action the action to run when authenticated
+     * @param authenticationEntry the java login configuration entry.
+     * @param <T> the type that the action's run method returns
+     * @return the value that action's run method returns
+     * @throws LoginException if this fails to login
+     */
+    public static <T> T authenticateAndDo(final PrivilegedAction<T> action,
+                                          final String authenticationEntry)
             throws LoginException
     {
         LoginContext lc = new LoginContext(authenticationEntry,

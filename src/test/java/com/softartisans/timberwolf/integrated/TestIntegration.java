@@ -1,11 +1,15 @@
 package com.softartisans.timberwolf.integrated;
 
+import com.softartisans.timberwolf.Auth;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
-import java.util.ArrayList;
+import com.softartisans.timberwolf.services.LdapFetcher;
+import com.softartisans.timberwolf.services.PrincipalFetchException;
+import java.security.PrivilegedAction;
+import javax.security.auth.login.LoginException;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
@@ -23,8 +27,12 @@ public class TestIntegration
 {
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
+    private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
+    private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
+    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
+                                                                                LDAP_DOMAIN_PROPERTY_NAME,
+                                                                                LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
     @Rule
     public HTableResource hbase = new HTableResource();
@@ -50,7 +58,7 @@ public class TestIntegration
     }
 
     @Test
-    public void testIntegrationNoCLI()
+    public void testIntegrationNoCLI() throws PrincipalFetchException, LoginException
     {
         /*
         This test tests getting emails from an exchange server, and the breadth
@@ -60,13 +68,73 @@ public class TestIntegration
         recreating this structure, avoid putting the text that we check in
         multiple emails, except the sender, that's fine.
 
+        There are 5 users involved, some of which are in a security group set
+        up for impersonation (more on this below):
+          jclouseau - the user with impersonation rights for the group
+          korganizer - in the impersonation group, has a lot of folders and
+                       emails
+          aloner - another user in the impersonation group with just a few
+                   emails
+          marcher - a third user in the impersonation group, also has just a
+                    few emails
+          tsender - A helper user that is not in the impersonation group and
+                    does all of the sending
+
+        Before creating the security group for impersonation, create the user
+        mailboxes in exchanges.
+
+        In order to create a security group set up for impersonation:
+        One will have to log into our Exchange test server. From there,
+        open up the Exchange Management Console and select Recipient
+        Configuration and then Distribution Group. Right click inside the pane
+        and select New Distribution Group. On the first page, select new group.
+        On the second, one must specify the group type as security. Don't
+        specify an organization unit, and the names and aliases are arbitrary
+        but make them all the same. We will refer to this unique name as the
+        SecurityGroupName. On the last page simply press the New button and
+        the group should be created. It's not instantaneous, but should appear
+        within the list fairly quickly.
+
+        The users will then have to be added to the security group.
+        Right-click on the security group name and select Properties.
+        Under the members tab is a list of all the current members and an Add
+        button. Clicking the add button will bring up a list of members.
+        Multi-select the users that need to be in the impersonation group.
+
+        Once the members are added, create a ManagementScope. Open the Exchange
+        Management Shell. Then run the following to create a ManagementScope
+        with name "ScopeName" for the security group "SecurityGroupName"
+        (this should be on one line, but I wrapped it for readability):
+            New-ManagementScope -Name:ScopeName -RecipientRestrictionFilter
+            {MemberOfGroup -eq
+            "cn=SecurityGroupName,cn=Users,DC=int,DC=tartarus,DC=com"}
+        Then create a ManagementRoleAssignment for jclouseau. To create a
+        ManagementRoleAssignment named "ManagementRoleAssignmentName" over
+        scope "ScopeName" (again this is just one line):
+            New-ManagementRoleAssignment -Name:ManagementRoleAssignmentName
+            -Role:ApplicationImpersonation -User:jclouseau
+            -CustomRecipientWriteScope:ScopeName
+
+        Now jclouseau is set up to impersonate the other users.
+
+
         Below is the required structure; identation denotes the heirarchy.
         Some of the folders have a required count, that's
         denoted by having the count in parentheses after the folder name.
         The contents of the emails are defined in the actual code, by adding
         EmailMatchers to requiredEmails.
         Note that if you put html tags in the body (such as changing formatting),
-        that is considered text:
+        that is considered text.
+
+          aloner@*
+            Inbox
+              Rebecca
+            Eduardo
+
+          marcher@*
+            Inbox
+              Anthony
+            Barbara
 
           korganizer@*
             Inbox
@@ -87,10 +155,45 @@ public class TestIntegration
             Page GetItems (11)
 
          */
-        String keyHeader = "Item ID";
+        final String keyHeader = "Item ID";
 
         EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
 
+        /////////////
+        //  aloner
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                      .subject("Dear Alex")
+                      .bodyContains("leave this in your inbox");
+        // Rebecca
+        requiredEmails.add()
+                      .subject("About Rebecca")
+                      .bodyContains("She did something");
+        // Eduardo
+        requiredEmails.add()
+                      .subject("About Eduardo")
+                      .bodyContains("Something happened to him");
+
+        /////////////
+        // marcher
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                      .subject("Dear Mary")
+                      .bodyContains("Don't rearrange");
+        // Anthony
+        requiredEmails.add()
+                      .subject("About Anthony")
+                      .bodyContains("He did something");
+        // Barbara
+        requiredEmails.add()
+                      .subject("About Barbara")
+                      .bodyContains("Something happened to her");
+
+        /////////////
+        // korganizer
+        /////////////
         // Inbox
         requiredEmails.add()
                       .sender("tsender")
@@ -159,19 +262,33 @@ public class TestIntegration
         }
 
 
-        String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        final String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
+        final String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
-        MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
-        MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
+        Auth.authenticateAndDo(new PrivilegedAction<Object>()
+        {
+            @Override
+            public Object run()
+            {
 
-        // TODO: Put appropriate users here during integration test task.
-        // This is just to get it compiling for now.
-        ArrayList<String> users = new ArrayList<String>();
-        users.add("korganizer");
-        Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
-        Assert.assertTrue(mailboxItems.iterator().hasNext());
-        mailWriter.write(mailboxItems);
+                MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
+                MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
+                try
+                {
+                    Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
+                    Assert.assertTrue(mailboxItems.iterator().hasNext());
+                    mailWriter.write(mailboxItems);
+                }
+                catch (PrincipalFetchException e)
+                {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }, ldapConfigEntry);
         // Now prove that everything is in HBase.
 
         try
@@ -184,19 +301,6 @@ public class TestIntegration
                 requiredEmails.match(result);
             }
             requiredEmails.assertEmpty();
-            Iterable<MailboxItem> mails = mailStore.getMail(users);
-
-            for (MailboxItem mail : mails)
-            {
-                Get get = createGet(mail.getHeader(keyHeader), hbase.getFamily(), mail.getHeaderKeys());
-                Result result = hTable.get(get);
-                for (String header : mail.getHeaderKeys())
-                {
-                    String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(hbase.getFamily()),
-                                                                       Bytes.toBytes(header)));
-                    Assert.assertEquals(mail.getHeader(header), tableValue);
-                }
-            }
         }
         catch (Exception e)
         {
