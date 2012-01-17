@@ -17,7 +17,7 @@ import java.util.Vector;
 
 import org.junit.Test;
 
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -95,7 +95,7 @@ public class FindFolderTest extends ExchangeTestBase
         FindFolderResponseMessageType findFolderResponseMessage = mock(FindFolderResponseMessageType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        when(getService().findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(getService().findFolder(likeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
@@ -113,7 +113,7 @@ public class FindFolderTest extends ExchangeTestBase
         FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
         FindFolderType findFolder =
                 FindFolderHelper.getFindFoldersRequest(DistinguishedFolderIdNameType.MSGFOLDERROOT);
-        when(getService().findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(getService().findFolder(likeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});

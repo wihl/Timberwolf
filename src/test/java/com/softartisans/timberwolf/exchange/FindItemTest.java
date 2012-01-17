@@ -18,7 +18,7 @@ import java.util.Vector;
 
 import org.junit.Test;
 
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -118,7 +118,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, inbox, 0);
-        when(getService().findItem(LikeThis(findItem))).thenReturn(null);
+        when(getService().findItem(likeThis(findItem))).thenReturn(null);
 
         try
         {
@@ -232,7 +232,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(getDefaultConfig(), getDefaultFolder(), 0);
-        when(getService().findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(getService().findItem(likeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
@@ -249,7 +249,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(getDefaultConfig(), getDefaultFolder(), 0);
-        when(getService().findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(getService().findItem(likeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});

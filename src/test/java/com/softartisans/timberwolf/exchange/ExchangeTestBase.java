@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -121,7 +121,7 @@ public class ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(likeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
             .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
@@ -154,7 +154,7 @@ public class ExchangeTestBase
         FindFolderParentType findFolderParent = mock(FindFolderParentType.class);
         ArrayOfFoldersType arrayOfFolders = mock(ArrayOfFoldersType.class);
         when(findFolderParent.getFolders()).thenReturn(arrayOfFolders);
-        when(service.findFolder(LikeThis(findFolder))).thenReturn(findFolderResponse);
+        when(service.findFolder(likeThis(findFolder))).thenReturn(findFolderResponse);
         when(findFolderResponse.getResponseMessages()).thenReturn(findFolderArrayOfResponseMessages);
         when(findFolderArrayOfResponseMessages.getFindFolderResponseMessageArray())
                 .thenReturn(new FindFolderResponseMessageType[]{findFolderResponseMessage});
@@ -194,7 +194,7 @@ public class ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         ItemInfoResponseMessageType itemInfoResponseMessage = mock(ItemInfoResponseMessageType.class);
         ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
-        when(service.getItem(LikeThis(getItem))).thenReturn(getItemResponse);
+        when(service.getItem(likeThis(getItem))).thenReturn(getItemResponse);
         when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())
                 .thenReturn(new ItemInfoResponseMessageType[]{itemInfoResponseMessage});
