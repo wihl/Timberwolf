@@ -48,6 +48,10 @@ http://docs.oracle.com/javase/1.4.2/docs/guide/security/jaas/spec/com/sun/securi
 
 If you do not set up a "Timberwolf" authorization configuration, you'll get the error, "Authentication failed: No LoginModules configured for Timberwolf", when you try to run Timberwolf.
 
+h3. Ensuring your realm/domain is properly set up
+
+If you run into errors such as "Cannot get kdc for realm...", it's possible that your domain is not properly configured. Ensure that your /etc/krb5.conf file and /etc/hosts file correctly describe your realm.
+
 h3. Executing the JAR
 
 java -jar ${project}/target/timberwolf-SNAPSHOT-jar-with-dependencies.jar \
