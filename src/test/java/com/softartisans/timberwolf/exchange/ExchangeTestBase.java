@@ -65,8 +65,10 @@ public class ExchangeTestBase
         return defaultFolder;
     }
 
+    private static final int DEFAULT_FIND_ITEM_COUNT = 1000;
+
     /** This configuration is used anytime we just need any standard configuration. */
-    private Configuration defaultConfig = new Configuration(1000, 1000);
+    private Configuration defaultConfig = new Configuration(DEFAULT_FIND_ITEM_COUNT, DEFAULT_FIND_ITEM_COUNT);
 
     protected Configuration getDefaultConfig()
     {
@@ -79,13 +81,13 @@ public class ExchangeTestBase
         MockitoAnnotations.initMocks(this);
     }
 
-    protected void mockFindItem(MessageType[] messages)
+    protected void mockFindItem(final MessageType[] messages)
         throws ServiceCallException, HttpErrorException
     {
-        mockFindItem(messages, defaultFolderId, 0, 1000);
+        mockFindItem(messages, defaultFolderId, 0, DEFAULT_FIND_ITEM_COUNT);
     }
 
-    protected List<String> generateIds(int offset, int count, String folder)
+    protected List<String> generateIds(final int offset, final int count, final String folder)
     {
         List<String> ids = new ArrayList<String>(count);
         for (int i = offset; i < offset + count; i++)
@@ -95,12 +97,12 @@ public class ExchangeTestBase
         return ids;
     }
 
-    protected MessageType[] mockFindItem(String folder, int offset, int maxIds, int count)
+    protected MessageType[] mockFindItem(final String folder, final int offset, final int maxIds, final int count)
             throws ServiceCallException, HttpErrorException
     {
         MessageType[] findItems = new MessageType[count];
         List<String> ids = generateIds(offset, count, folder);
-        for (int i=0; i<count; i++)
+        for (int i = 0; i < count; i++)
         {
             findItems[i] = mockMessageItemId(ids.get(i));
         }
@@ -108,7 +110,7 @@ public class ExchangeTestBase
         return findItems;
     }
 
-    private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds)
+    private void mockFindItem(final MessageType[] messages, final String folder, final int offset, final int maxIds)
         throws ServiceCallException, HttpErrorException
     {
         FolderContext folderContext = new FolderContext(folder);
@@ -141,7 +143,7 @@ public class ExchangeTestBase
         mockFindFolders(new FolderType[]{folderType});
     }
 
-    protected void mockFindFolders(FolderType[] folders)
+    protected void mockFindFolders(final FolderType[] folders)
             throws ServiceCallException, HttpErrorException
     {
         FindFolderType findFolder =
@@ -164,7 +166,7 @@ public class ExchangeTestBase
         when(arrayOfFolders.getFolderArray()).thenReturn(folders);
     }
 
-    protected MessageType mockMessageItemId(String itemId)
+    protected MessageType mockMessageItemId(final String itemId)
     {
         MessageType mockedMessage = mock(MessageType.class);
         ItemIdType mockedId = mock(ItemIdType.class);
@@ -174,17 +176,17 @@ public class ExchangeTestBase
         return mockedMessage;
     }
 
-    protected void mockGetItem(MessageType[] findResults, int initialOffset, int pageSize,
-                               int pageIndex, int max, String folder)
+    protected void mockGetItem(final MessageType[] findResults, final int initialOffset, final int pageSize,
+                               final int pageIndex, final int max, final String folder)
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         int start = pageSize * pageIndex;
-        max = Math.min(max, start + pageSize);
-        mockGetItem(Arrays.copyOfRange(findResults, start, max),
-                    generateIds(initialOffset + start, max - start, folder));
+        int trueMax = Math.min(max, start + pageSize);
+        mockGetItem(Arrays.copyOfRange(findResults, start, trueMax),
+                    generateIds(initialOffset + start, trueMax - start, folder));
     }
 
-    protected void mockGetItem(MessageType[] messages, List<String> requestedList)
+    protected void mockGetItem(final MessageType[] messages, final List<String> requestedList)
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         GetItemType getItem = GetItemHelper.getGetItemsRequest(requestedList);
