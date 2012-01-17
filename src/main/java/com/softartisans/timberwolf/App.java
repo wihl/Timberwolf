@@ -106,8 +106,7 @@ final class App implements PrivilegedAction<Integer>
 
             useHBase = allHBaseArgs;
 
-            Auth<Integer> auth = new Auth<Integer>();
-            auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
+            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
         }
         catch (CmdLineException e)
         {

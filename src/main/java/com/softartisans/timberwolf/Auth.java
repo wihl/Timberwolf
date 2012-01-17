@@ -15,10 +15,10 @@ import javax.security.auth.login.LoginException;
  *
  * @param <T> This is the return type of the PrivilegedAction
  */
-public class Auth<T>
+public class Auth
 {
-    T authenticateAndDo(final PrivilegedAction<T> action,
-                        final String authenticationEntry)
+    static <T> T authenticateAndDo(final PrivilegedAction<T> action,
+                                   final String authenticationEntry)
             throws LoginException
     {
         LoginContext lc = new LoginContext(authenticationEntry,
