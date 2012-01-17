@@ -17,7 +17,7 @@ import javax.security.auth.login.LoginException;
  */
 public class Auth
 {
-    static <T> T authenticateAndDo(final PrivilegedAction<T> action,
+    public static <T> T authenticateAndDo(final PrivilegedAction<T> action,
                                    final String authenticationEntry)
             throws LoginException
     {
