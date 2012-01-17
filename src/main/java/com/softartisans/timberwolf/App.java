@@ -10,15 +10,12 @@ import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
 import com.softartisans.timberwolf.services.PrincipalFetcher;
-import com.sun.security.auth.callback.TextCallbackHandler;
 
 import java.io.IOException;
 
 import java.net.HttpURLConnection;
 import java.security.PrivilegedAction;
 
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.kohsuke.args4j.CmdLineException;
@@ -109,14 +106,8 @@ final class App implements PrivilegedAction<Integer>
 
             useHBase = allHBaseArgs;
 
-            LoginContext lc = new LoginContext(CONFIGURATION_ENTRY,
-                                               new TextCallbackHandler());
-            // Attempt authentication
-            // We might want to do this in a "for" loop to give
-            // user more than one chance to enter correct username/password
-            lc.login();
-
-            Subject.doAs(lc.getSubject(), this);
+            Auth<Integer> auth = new Auth<Integer>();
+            auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
         }
         catch (CmdLineException e)
         {
