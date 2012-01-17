@@ -69,11 +69,11 @@ public class HBaseManager
         }
         catch (MasterNotRunningException e)
         {
-            logger.error("Unable to connect to Master!");
+            throw HBaseRuntimeException.create("Unable to connect to Master!", e, logger);
         }
         catch (ZooKeeperConnectionException e)
         {
-            logger.error("Unable to connect to ZooKeeper!");
+            throw HBaseRuntimeException.create("Unable to connect to ZooKeeper!", e, logger);
         }
     }
 
@@ -149,8 +149,7 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Could not determine existence of table "
-                        + tableName + "!");
+                throw HBaseRuntimeException.create("Could not determine existence of table ", e, logger);
             }
         }
         return false;
@@ -176,8 +175,8 @@ public class HBaseManager
                 }
                 catch (IOException e)
                 {
-                    logger.error("Could not acquire reference to table "
-                            + tableName + "!");
+                    throw HBaseRuntimeException.create("Could not acquire reference to table " + tableName + "!",
+                            e, logger);
                 }
             }
             else
@@ -244,7 +243,7 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Error creating table " + tableName + "!");
+                throw HBaseRuntimeException.create("Error creating table " + tableName + "!", e, logger);
             }
         }
         if (tables.containsKey(tableName))
@@ -270,7 +269,7 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Error deleting table " + tableName + "!");
+                throw HBaseRuntimeException.create("Error deleting table " + tableName + "!", e, logger);
             }
         }
         tables.remove(tableName);
