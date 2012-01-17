@@ -703,9 +703,9 @@ public final class MockHTable implements HTableInterface
   }
 
   @Override
-  public void batch(final List<Row> actions, Object[] results) throws IOException, InterruptedException
+  public void batch(final List<Row> actions, final Object[] results) throws IOException, InterruptedException
   {
-    results = batch(actions);
+
   }
 
   @Override

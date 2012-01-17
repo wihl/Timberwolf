@@ -1,23 +1,23 @@
 package com.softartisans.timberwolf.integrated;
 
-import org.apache.hadoop.hbase.client.Result;
-import org.junit.Assert;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** This is basically a helper to make creating EmailMatchers easier */
+import org.apache.hadoop.hbase.client.Result;
+import org.junit.Assert;
+
+/** This is basically a helper to make creating EmailMatchers easier. */
 public class EmailMatchers implements Iterable<EmailMatcher>
 {
     private List<EmailMatcher> matchers;
     private String family;
 
     /**
-     * Creates a new list of EmailMatchers
+     * Creates a new list of EmailMatchers.
      * @param columnFamily the column family for the table.
      */
-    public EmailMatchers(String columnFamily)
+    public EmailMatchers(final String columnFamily)
     {
         family = columnFamily;
         matchers = new ArrayList<EmailMatcher>();
@@ -40,7 +40,7 @@ public class EmailMatchers implements Iterable<EmailMatcher>
      * If an emailMatcher matches, remove it from the list
      * @param result a result from hbase that should contain a row with an email.
      */
-    public void match(Result result)
+    public void match(final Result result)
     {
         for (EmailMatcher matcher : matchers)
         {
@@ -53,7 +53,7 @@ public class EmailMatchers implements Iterable<EmailMatcher>
     }
 
     /**
-     * Assert that all email matchers matched an email
+     * Assert that all email matchers matched an email.
      */
     public void assertEmpty()
     {

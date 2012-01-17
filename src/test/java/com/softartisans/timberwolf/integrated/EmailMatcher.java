@@ -1,10 +1,10 @@
 package com.softartisans.timberwolf.integrated;
 
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.util.Bytes;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /** A class for validating emails in an hbase result. */
 public class EmailMatcher
@@ -13,19 +13,19 @@ public class EmailMatcher
 
     private String family;
 
-    public EmailMatcher(String columnFamily)
+    public EmailMatcher(final String columnFamily)
     {
         matchers = new ArrayList<FieldMatcher>();
         this.family = columnFamily;
     }
 
     /**
-     * Checks whether this email matcher matches the row in the result
+     * Checks whether this email matcher matches the row in the result.
      *
      * @param result the result from an hbase get or scan
      * @return true if it's a match, false otherwise
      */
-    boolean matches(Result result)
+    boolean matches(final Result result)
     {
         for (FieldMatcher matcher : matchers)
         {
@@ -38,7 +38,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the sender to have the given alias
+     * Require the sender to have the given alias.
      * @param alias the alias of the sender
      * @return this
      */
@@ -49,7 +49,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the to field to have the given alias
+     * Require the to field to have the given alias.
      * @param alias the alias of the sender
      * @return this
      */
@@ -60,7 +60,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the cc to have the given alias
+     * Require the cc to have the given alias.
      * @param alias the alias of the sender
      * @return this
      */
@@ -71,7 +71,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the bcc to have the given alias
+     * Require the bcc to have the given alias.
      * @param alias the alias of the sender
      * @return this
      */
@@ -82,7 +82,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the subject to be the given value
+     * Require the subject to be the given value.
      * @param subject the expected subject
      * @return this
      */
@@ -91,13 +91,13 @@ public class EmailMatcher
         matchers.add(new FieldMatcher("Subject")
         {
             @Override
-            protected boolean matches(String s)
+            protected boolean matches(final String s)
             {
                 return subject.equals(s);
             }
 
             @Override
-            public void appendToStringBuilder(StringBuilder sb)
+            public void appendToStringBuilder(final StringBuilder sb)
             {
                 sb.append("Subject is \"");
                 sb.append(subject);
@@ -108,7 +108,7 @@ public class EmailMatcher
     }
 
     /**
-     * Require the body to contain the given contents
+     * Require the body to contain the given contents.
      * @param contents some text that is expected in the body
      * @return this
      */
@@ -117,13 +117,13 @@ public class EmailMatcher
         matchers.add(new FieldMatcher("Body")
         {
             @Override
-            protected boolean matches(String s)
+            protected boolean matches(final String s)
             {
                 return s.contains(contents);
             }
 
             @Override
-            public void appendToStringBuilder(StringBuilder sb)
+            public void appendToStringBuilder(final StringBuilder sb)
             {
                 sb.append("Body contains \"");
                 sb.append(contents);
@@ -143,22 +143,27 @@ public class EmailMatcher
             matcher.appendToStringBuilder(sb);
             sb.append(", ");
         }
-        return sb.substring(0,sb.length()-2);
+        return sb.substring(0, sb.length() - 2);
     }
 
     /**
-     * Match a single field
+     * Match a single field.
      */
     private abstract class FieldMatcher
     {
-        protected String columnName;
+        private String columnName;
 
-        protected FieldMatcher(String columnName)
+        protected String getColumnName()
         {
-            this.columnName = columnName;
+            return columnName;
         }
 
-        public boolean matches(Result result)
+        protected FieldMatcher(final String aColumnName)
+        {
+            this.columnName = aColumnName;
+        }
+
+        public boolean matches(final Result result)
         {
             String value = Bytes.toString(result.getValue(Bytes.toBytes(family),
                                                           Bytes.toBytes(columnName)));
@@ -171,11 +176,11 @@ public class EmailMatcher
     }
 
     /**
-     * Match an email address field, such as To or Sender
+     * Match an email address field, such as To or Sender.
      */
     private final class EmailAddressMatcher extends FieldMatcher
     {
-        final String prefix;
+        private String prefix;
 
         private EmailAddressMatcher(final String column, final String alias)
         {
@@ -184,15 +189,15 @@ public class EmailMatcher
         }
 
         @Override
-        protected boolean matches(String s)
+        protected boolean matches(final String s)
         {
             return s.startsWith(prefix);
         }
 
         @Override
-        public void appendToStringBuilder(StringBuilder sb)
+        public void appendToStringBuilder(final StringBuilder sb)
         {
-            sb.append(columnName);
+            sb.append(getColumnName());
             sb.append(" begins \"");
             sb.append(prefix);
             sb.append("\"");

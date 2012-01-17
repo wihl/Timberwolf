@@ -368,7 +368,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         Iterator<MailboxItem> mail = store.getMail().iterator();
         final int folderId1 = 13;
         final int folderId2 = 2;
-        for (String folder : new String[] { "FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID" })
+        for (String folder : new String[] {"FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID" })
         {
             for (int i = 0; i < (folder == "FOLDER-TWO-ID" ? folderId1 : folderId2); i++)
             {
