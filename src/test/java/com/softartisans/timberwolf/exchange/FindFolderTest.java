@@ -9,22 +9,27 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
+
+import org.junit.Test;
+
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** A test fixture for the FindFolder specific tests */
+/** A test fixture for the FindFolder specific tests. */
 public class FindFolderTest extends ExchangeTestBase
 {
 
-    private FolderType mockFolderType(String folderId)
+    private FolderType mockFolderType(final String folderId)
     {
         FolderType folder = mock(FolderType.class);
         FolderIdType folderIdHolder = mock(FolderIdType.class);
@@ -58,12 +63,12 @@ public class FindFolderTest extends ExchangeTestBase
     @Test
     public void testFindFolders() throws ServiceCallException, HttpErrorException
     {
-        int count = 10;
+        final int count = 10;
 
         List<String> ids = new ArrayList<String>(count);
         FolderType[] folders = new FolderType[count];
 
-        for( int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             String id = "SADG345GFGFEFHGGFH454fgH56FDDGFNGGERTTGH%$466" + i;
             ids.add(id);
@@ -122,7 +127,7 @@ public class FindFolderTest extends ExchangeTestBase
     @Test
     public void testFindFoldersNoFolderId() throws ServiceCallException, HttpErrorException
     {
-        int count = 3;
+        final int count = 3;
         int unset = 1;
         FolderType[] messages = new FolderType[count];
         for (int i = 0; i < count; i++)

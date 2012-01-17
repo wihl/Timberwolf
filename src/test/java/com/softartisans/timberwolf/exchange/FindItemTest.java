@@ -34,7 +34,7 @@ public class FindItemTest extends ExchangeTestBase
     private FolderContext inbox =
             new FolderContext(DistinguishedFolderIdNameType.INBOX);
 
-    private static int DEFAULT_MAX_FIND_ITEMS = 1000;
+    private static final int DEFAULT_MAX_FIND_ITEMS = 1000;
     @Test
     public void testGetFindItemsRequestInbox()
     {
@@ -73,15 +73,15 @@ public class FindItemTest extends ExchangeTestBase
     @Test
     public void testGetFindItemsRequestOffset()
     {
-        int count = 10;
+        final int count = 10;
         Configuration config = new Configuration(count, 0);
 
-        int assertCount = 3;
+        final int assertCount = 3;
         FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount);
         assertEquals(assertCount, request.getIndexedPageItemView().getOffset());
 
-        assertCount = 13;
-        request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount);
+        final int assertCount2 = 13;
+        request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount2);
         assertEquals(assertCount, request.getIndexedPageItemView().getOffset());
 
         request = FindItemHelper.getFindItemsRequest(config, inbox, 0);
@@ -97,7 +97,7 @@ public class FindItemTest extends ExchangeTestBase
     private void assertFindItemsRequestMaxEntries(final int maxItems)
     {
         Configuration config = new Configuration(maxItems, 0);
-        int count = 5;
+        final int count = 5;
         FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, count);
         assertEquals(Math.max(1, maxItems), request.getIndexedPageItemView().getMaxEntriesReturned());
     }
@@ -105,11 +105,11 @@ public class FindItemTest extends ExchangeTestBase
     @Test
     public void testGetFindItemsRequestMaxEntries()
     {
-        int arbitraryValues[] = { 10, 3, 0, 1};
-        assertFindItemsRequestMaxEntries(arbitraryValues[0]);
-        assertFindItemsRequestMaxEntries(arbitraryValues[1]);
-        assertFindItemsRequestMaxEntries(arbitraryValues[2]);
-        assertFindItemsRequestMaxEntries(arbitraryValues[3]);
+        final int[] arbitraryValues = {10, 3, 0, 1};
+        for (int i = 0; i < arbitraryValues.length; i++)
+        {
+            assertFindItemsRequestMaxEntries(arbitraryValues[i]);
+        }
     }
 
     @Test
@@ -158,7 +158,7 @@ public class FindItemTest extends ExchangeTestBase
     public void testFindItemsItemsRespond100()
             throws ServiceCallException, HttpErrorException
     {
-        int count = 100;
+        final int count = 100;
         MessageType[] messages = new MessageType[count];
         for (int i = 0; i < count; i++)
         {
@@ -178,7 +178,7 @@ public class FindItemTest extends ExchangeTestBase
     public void testFindItemsItemsMissingId()
             throws ServiceCallException, HttpErrorException
     {
-        int count = 3;
+        final int count = 3;
         int unset = 1;
         MessageType[] messages = new MessageType[count];
         for (int i = 0; i < count; i++)
@@ -252,7 +252,7 @@ public class FindItemTest extends ExchangeTestBase
         when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-                .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });
+                .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
         when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
         when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);

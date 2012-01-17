@@ -20,17 +20,21 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.xmlbeans.XmlException;
 import org.junit.Before;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Base class for fixtures that need to mock out Exchange services.

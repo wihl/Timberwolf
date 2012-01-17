@@ -1,7 +1,7 @@
 package com.softartisans.timberwolf.hbase;
 
-import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.MailWriter;
+import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.MockHTable;
 
 import java.io.IOException;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 
 /**
  * Unit test for simple App.

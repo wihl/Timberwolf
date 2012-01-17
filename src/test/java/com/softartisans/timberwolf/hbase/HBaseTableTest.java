@@ -13,6 +13,8 @@ import static org.mockito.Mockito.mock;
  */
 public class HBaseTableTest
 {
+    private static final int DEFAULT_PUT_COUNT = 10;
+
     /**
      * Default constructor test.
      */
@@ -51,8 +53,7 @@ public class HBaseTableTest
     public void testPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
-        int putCount = 10;
-        for (int i = 0; i < putCount; i++)
+        for (int i = 0; i < DEFAULT_PUT_COUNT; i++)
         {
             Put put = mock(Put.class);
             table.put(put);
@@ -76,8 +77,7 @@ public class HBaseTableTest
     public void testFlushWithPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
-        int putCount = 10;
-        for (int i = 0; i < putCount; i++)
+        for (int i = 0; i < DEFAULT_PUT_COUNT; i++)
         {
             // We currently need at least a row here or a null pointer exception
             // is thrown later in MockHTable.

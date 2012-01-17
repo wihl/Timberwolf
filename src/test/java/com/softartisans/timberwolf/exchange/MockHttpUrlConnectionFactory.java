@@ -16,31 +16,29 @@ import static org.mockito.Mockito.when;
  */
 public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
-    List<MockRequest> requests = new ArrayList<MockRequest>();
+    private List<MockRequest> requests = new ArrayList<MockRequest>();
 
-    public MockRequest forRequest(String address, byte[] request)
+    public MockRequest forRequest(final String address, final byte[] request)
     {
         return new MockRequest(address, request);
     }
 
-    public HttpURLConnection newInstance(String address, byte[] request) throws ServiceCallException
+    public HttpURLConnection newInstance(final String address, final byte[] request) throws ServiceCallException
     {
         try
         {
             for (MockRequest mockRequest : requests)
             {
-                if (mockRequest.url == address &&
-                    Arrays.equals(mockRequest.requestData, request))
+                if (mockRequest.url == address && Arrays.equals(mockRequest.requestData, request))
                 {
                     HttpURLConnection mockConn = mock(HttpURLConnection.class);
                     when(mockConn.getResponseCode()).thenReturn(mockRequest.code);
-                    when(mockConn.getInputStream()).thenReturn(
-                        new ByteArrayInputStream(mockRequest.responseData));
+                    when(mockConn.getInputStream()).thenReturn(new ByteArrayInputStream(mockRequest.responseData));
                     return mockConn;
                 }
             }
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             throw new ServiceCallException(ServiceCallException.Reason.OTHER,
                 "There was an IO exception while mocking the request.", null);
@@ -50,10 +48,13 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
             "There was no mocked request matching the given url and data.", null);
     }
 
+    /**
+     * Represents a mock request.
+     */
     public class MockRequest
     {
-        private String url;
-        private byte[] requestData;
+        private final String url;
+        private final byte[] requestData;
         private int code;
         private byte[] responseData;
 
@@ -63,7 +64,7 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
             requestData = request;
         }
 
-        public void respondWith(int status, byte[] response)
+        public void respondWith(final int status, final byte[] response)
         {
             code = status;
             responseData = response;

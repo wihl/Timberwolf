@@ -7,9 +7,10 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SingleRecipientType;
 import com.softartisans.timberwolf.MailboxItem;
-import org.junit.Test;
 
 import java.util.Calendar;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,6 +19,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Test suite for the ExchangeEmail component.
+ */
 public class ExchangeEmailTest
 {
     @Test
@@ -42,10 +46,16 @@ public class ExchangeEmailTest
     @Test
     public void testTimeSent()
     {
+        final int year = 2011;
+        final int month = 12;
+        final int day = 7;
+        final int hour = 12;
+        final int minute = 55;
+        final int second = 30;
         MessageType mockedMessage = mock(MessageType.class);
         when(mockedMessage.isSetDateTimeSent()).thenReturn(true);
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2011, 12, 7, 12, 55, 30);
+        calendar.set(year, month, day, hour, minute, second);
         when(mockedMessage.getDateTimeSent()).thenReturn(calendar);
 
         MailboxItem mail = new ExchangeEmail(mockedMessage);
@@ -229,7 +239,8 @@ public class ExchangeEmailTest
         assertFalse(mail.hasKey("Bcc"));
 
         String[] keys = mail.getHeaderKeys();
-        assertEquals(3, keys.length);
+        final int keyLength = 3;
+        assertEquals(keyLength, keys.length);
         assertEquals("Body", keys[0]);
         assertEquals("Subject", keys[1]);
         assertEquals("To", keys[2]);
