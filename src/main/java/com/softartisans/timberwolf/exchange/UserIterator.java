@@ -10,16 +10,14 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
 {
     private static final Logger LOG = LoggerFactory.getLogger(UserIterator.class);
     private ExchangeService service;
-    private int findItemPageSize;
-    private int getItemPageSize;
     private Iterator<String> users;
+    private Configuration config;
 
-    public UserIterator(final ExchangeService exchangeService, final int idsPageSize, final int itemsPageSize,
+    public UserIterator(final ExchangeService exchangeService, final Configuration configuration,
                         final Iterable<String> targetUsers)
     {
         service = exchangeService;
-        findItemPageSize = idsPageSize;
-        getItemPageSize = itemsPageSize;
+        config = configuration;
         users = targetUsers.iterator();
     }
 
@@ -31,7 +29,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             String user = users.next();
             try
             {
-                return new SafeIterator(user, new FindFolderIterator(service, findItemPageSize, getItemPageSize, user));
+                return new SafeIterator(user, new FindFolderIterator(service, config, user));
             }
             catch (Exception e)
             {

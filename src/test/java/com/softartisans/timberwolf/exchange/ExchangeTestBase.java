@@ -40,9 +40,16 @@ public class ExchangeTestBase
 {
     @Mock
     public ExchangeService service;
-    /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
+
+    /** This is the name of our default folder. */
     protected String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
     protected final String defaultUser = "bkerr";
+
+    /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
+    protected FolderContext defaultFolder = new FolderContext(defaultFolderId, defaultUser);
+
+    /** This configuration is used anytime we just need any standard configuration. */
+    protected Configuration defaultConfig = new Configuration(1000, 1000);
 
     @Before
     public void setUp() throws Exception
@@ -53,7 +60,7 @@ public class ExchangeTestBase
     protected void mockFindItem(MessageType[] messages)
         throws ServiceCallException, HttpErrorException
     {
-        mockFindItem(messages, defaultFolderId, 0, 1000);
+        mockFindItem(messages, defaultFolderId, 0, 1000, defaultUser);
     }
 
     protected List<String> generateIds(int offset, int count, String folder)
@@ -85,16 +92,12 @@ public class ExchangeTestBase
         return findItems;
     }
 
-    private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds)
-        throws ServiceCallException, HttpErrorException
-    {
-        mockFindItem(messages, folder, offset, maxIds, defaultUser);
-    }
-
     private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds, String user)
         throws ServiceCallException, HttpErrorException
     {
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(folder, offset, maxIds);
+        FolderContext folderContext = new FolderContext(folder, user);
+        Configuration config = new Configuration(maxIds, 0);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
         FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
