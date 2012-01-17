@@ -8,7 +8,8 @@
      by EWS.  The operations this schema supports are:
         - FindItem request and response
         - GetItem request and response
-        - FindFolder request and response -->
+        - FindFolder request and response
+-->
 <xs:schema xmlns="http://schemas.xmlsoap.org/soap/envelope/"
            xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
            xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
@@ -38,6 +39,8 @@
   <xs:complexType name="HeaderType">
     <xs:choice>
       <xs:element ref="t:ServerVersionInfo"
+                  minOccurs="0" />
+      <xs:element ref="t:ExchangeImpersonation"
                   minOccurs="0" />
     </xs:choice>
   </xs:complexType>
