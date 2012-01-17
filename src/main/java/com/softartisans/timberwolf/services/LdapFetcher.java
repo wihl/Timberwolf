@@ -126,39 +126,4 @@ public class LdapFetcher implements PrincipalFetcher
         return userDNBuilder.toString();
     }
 
-    /** Queries the domain's LDAP server for supported authentication methods.
-     *
-     * I'm leaving this hear for the time being because it's quite likely
-     * we may face LDAP servers that don't support GSSAPI.
-     * @return An iterable listing all supported authentication methods.
-     * @throws PrincipalFetchException
-     */
-    public Iterable<String> getSecurityMechanisms() throws PrincipalFetchException
-    {
-        try
-        {
-            Hashtable<String, String> defEnv = defaultEnvironment();
-            DirContext ctx = new InitialDirContext(defEnv);
-
-            Attributes attrs = ctx.getAttributes(getProviderDiscoveryURL(),
-                                                 new String[]{"supportedSASLMechanisms"});
-            List<String> rtnList = new LinkedList<String>();
-            Attribute attrib = attrs.get("supportedSASLMechanisms");
-            if (attrib != null)
-            {
-                NamingEnumeration<?> values =
-                    ((BasicAttribute) attrib).getAll();
-                while (values.hasMore())
-                {
-                    rtnList.add(values.next().toString());
-                }
-            }
-            return rtnList;
-
-        }
-        catch (NamingException e)
-        {
-            throw new PrincipalFetchException(e);
-        }
-    }
 }
