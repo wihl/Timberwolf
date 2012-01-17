@@ -2,17 +2,14 @@ package com.softartisans.timberwolf.services;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
@@ -31,7 +28,7 @@ public class LdapFetcherTest {
     @Test
     public void getProviderDiscoveryURLTest()
     {
-        LdapFetcher result = new LdapFetcher(testDomain, testConfigEntry);
+        LdapFetcher result = new LdapFetcher(testDomain);
         Assert.assertEquals("ldap:///dc=int,dc=testDomain,dc=com",
                             result.getProviderDiscoveryURL());
     }
@@ -39,7 +36,7 @@ public class LdapFetcherTest {
     @Test
     public void getProviderDiscoveryURLEmptyTest()
     {
-        LdapFetcher result = new LdapFetcher("testDomain", testConfigEntry);
+        LdapFetcher result = new LdapFetcher("testDomain");
         Assert.assertEquals("ldap:///dc=testDomain",
                             result.getProviderDiscoveryURL());
     }
@@ -47,32 +44,20 @@ public class LdapFetcherTest {
     @Test(expected=IllegalArgumentException.class)
     public void illegalDomainNameEmptyTest()
     {
-        new LdapFetcher("", testConfigEntry);
+        new LdapFetcher("");
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void illegalDomainNameNullTest()
     {
-        new LdapFetcher(null, testConfigEntry);
+        new LdapFetcher(null);
     }
-    
-    @Test(expected=IllegalArgumentException.class)
-    public void illegalConfigurationEntryEmptyTest()
-    {
-        new LdapFetcher(testDomain, "");
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
-    public void illegalConfigurationEntryNullTest()
-    {
-        new LdapFetcher(testDomain, null);
-    }
-    
+
     @Test
     public void standardListTest() throws PrincipalFetchException
     {
         LdapFetcher fetcher = getTestFetcher(testDomain, testConfigEntry);
-        List<String> results = asList(fetcher.run());
+        List<String> results = asList(fetcher.getPrincipals());
         Assert.assertTrue(results.contains("first@" + testDomain));
     }
 
@@ -112,7 +97,7 @@ public class LdapFetcherTest {
         {
             throw new PrincipalFetchException("An exception was thrown setting up mock objects?", e);
         }
-        LdapFetcher fetcher = new LdapFetcher(testDomain, testConfigEntry)
+        LdapFetcher fetcher = new LdapFetcher(testDomain)
         {
             DirContext getInitialContext(final Hashtable<String, String> environment) throws NamingException
             {
