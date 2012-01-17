@@ -42,7 +42,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
 
     /**
      * An iterator wrapper that wraps another iterator, and logs any exceptions
-     * thrown. I then returns false on hasNext() and null on next()
+     * thrown. It then returns false on hasNext() and null on next()
      */
     private static class SafeIterator implements Iterator<MailboxItem>
     {
@@ -85,10 +85,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             catch (Exception e)
             {
                 LOG.warn("Failed to get email for user: {}", user);
-                if (LOG.isDebugEnabled())
-                {
-                    LOG.debug("Due to exception", e);
-                }
+                LOG.debug("Due to exception", e);
             }
             return null;
         }

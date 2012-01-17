@@ -22,5 +22,6 @@
 # ExchangeURI = https://exchange.int.test/ews/exchange.asmx
 ## The domain for users
 # LdapDomain = int.test
-## The config entry??
+## The config entry to be used from the java login
+## configuration usually located at ~/.java.login.config
 # LdapConfigEntry = Timberwolf
