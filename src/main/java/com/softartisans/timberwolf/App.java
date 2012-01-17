@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Driver class to grab emails and put them in HBase.
  */
-final class App implements PrivilegedAction<Object>
+final class App implements PrivilegedAction<Integer>
 {
     private static final String CONFIGURATION_ENTRY = "Timberwolf";
 
@@ -131,7 +131,7 @@ final class App implements PrivilegedAction<Object>
         }
     }
 
-    public Object run()
+    public Integer run()
     {
         MailWriter mailWriter;
         if (useHBase)
