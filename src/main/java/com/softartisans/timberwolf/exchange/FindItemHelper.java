@@ -75,6 +75,7 @@ public final class FindItemHelper
      * @param folder the distinguished folder to obtain ids for
      * @param offset the number of items to offset for paging
      * @param maxEntries the maximum number of entries to add
+     * @param targetUser The user to impersonate for the Exchange FindItem request.
      * @return a list of exchange ids
      * @throws ServiceCallException If we can't connect to the exchange service
      * @throws HttpErrorException If the response cannot be parsed
@@ -85,8 +86,7 @@ public final class FindItemHelper
                                     final int offset)
             throws ServiceCallException, HttpErrorException
     {
-        return findItems(exchangeService,
-                         getFindItemsRequest(config, folder, offset));
+        return findItems(exchangeService, getFindItemsRequest(config, folder, offset), folder.getUser());
     }
 
     /**
@@ -94,14 +94,16 @@ public final class FindItemHelper
      *
      * @param exchangeService the actual service to use when requesting ids
      * @param findItem the FindItemType to use for the request
+     * @param targetUser The user to impersonate for the Exchange FindItem request.
      * @return a list of exchange ids
      * @throws ServiceCallException If we can't connect to the exchange service
      * @throws HttpErrorException If the response cannot be parsed
      */
-    private static Vector<String> findItems(final ExchangeService exchangeService, final FindItemType findItem)
+    private static Vector<String> findItems(final ExchangeService exchangeService, final FindItemType findItem,
+                                            final String targetUser)
             throws ServiceCallException, HttpErrorException
     {
-        FindItemResponseType response = exchangeService.findItem(findItem);
+        FindItemResponseType response = exchangeService.findItem(findItem, targetUser);
 
         if (response == null)
         {

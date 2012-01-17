@@ -18,6 +18,7 @@ import java.util.Vector;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class FindItemTest extends ExchangeTestBase
 {
     private FolderContext inbox =
-            new FolderContext(DistinguishedFolderIdNameType.INBOX);
+            new FolderContext(DistinguishedFolderIdNameType.INBOX, defaultUser);
 
     @Test
     public void testGetFindItemsRequestInbox()
@@ -60,7 +61,7 @@ public class FindItemTest extends ExchangeTestBase
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
         Configuration config = new Configuration(1000, 0);
-        FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS);
+        FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS, defaultUser);
         assertEquals(findItem.xmlText(),
                      FindItemHelper.getFindItemsRequest(config, folder, 0).xmlText());
     }
@@ -108,7 +109,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         Configuration config = new Configuration(1000, 0);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, inbox, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(null);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(null);
 
         try
         {
@@ -200,7 +201,7 @@ public class FindItemTest extends ExchangeTestBase
                 .thenReturn(new FindItemResponseMessageType[]{findMessage});
         FindItemResponseType findResponse = mock(FindItemResponseType.class);
         when(findResponse.getResponseMessages()).thenReturn(responseArr);
-        when(service.findItem(any(FindItemType.class))).thenReturn(findResponse);
+        when(service.findItem(any(FindItemType.class), eq(defaultUser))).thenReturn(findResponse);
 
         try
         {
@@ -222,7 +223,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, defaultFolder, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
@@ -239,7 +240,7 @@ public class FindItemTest extends ExchangeTestBase
         FindItemResponseMessageType findItemResponseMessage = mock(FindItemResponseMessageType.class);
         FindItemParentType findItemParent = mock(FindItemParentType.class);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(defaultConfig, defaultFolder, 0);
-        when(service.findItem(LikeThis(findItem))).thenReturn(findItemResponse);
+        when(service.findItem(LikeThis(findItem), eq(defaultUser))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
                 .thenReturn(new FindItemResponseMessageType[]{ findItemResponseMessage });

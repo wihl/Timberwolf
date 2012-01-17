@@ -20,13 +20,15 @@ public class GetItemIterator extends BaseChainIterator<MailboxItem>
     private Vector<String> ids;
     private int currentStart;
     private Configuration config;
+    private FolderContext folder;
 
     public GetItemIterator(final ExchangeService exchangeService, final Vector<String> messageIds,
-                           final Configuration configuration)
+                           final Configuration configuration, final FolderContext folderContext)
     {
         service = exchangeService;
         ids = messageIds;
         config = configuration;
+        folder = folderContext;
         currentStart = 0;
     }
 
@@ -40,7 +42,7 @@ public class GetItemIterator extends BaseChainIterator<MailboxItem>
         try
         {
             int pageSize = config.getGetItemPageSize();
-            Vector<MailboxItem> ret = GetItemHelper.getItems(pageSize, currentStart, ids, service);
+            Vector<MailboxItem> ret = GetItemHelper.getItems(pageSize, currentStart, ids, service, folder.getUser());
             LOG.debug("Got {} email ids.", ret.size());
             currentStart += pageSize;
             return ret.iterator();
