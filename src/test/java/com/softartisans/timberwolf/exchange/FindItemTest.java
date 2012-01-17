@@ -13,23 +13,28 @@ import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
+
 import java.util.Vector;
+
+import org.junit.Test;
+
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Test;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Test class for all the FindItem specific stuff
+ * Test class for all the FindItem specific stuff.
  */
 public class FindItemTest extends ExchangeTestBase
 {
     private FolderContext inbox =
             new FolderContext(DistinguishedFolderIdNameType.INBOX);
 
+    private static int DEFAULT_MAX_FIND_ITEMS = 1000;
     @Test
     public void testGetFindItemsRequestInbox()
     {
@@ -39,10 +44,10 @@ public class FindItemTest extends ExchangeTestBase
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.INBOX);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(1000);
+        index.setMaxEntriesReturned(DEFAULT_MAX_FIND_ITEMS);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
-        Configuration config = new Configuration(1000, 0);
+        Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
         assertEquals(findItem.xmlText(),
                      FindItemHelper.getFindItemsRequest(config, inbox, 0).xmlText());
     }
@@ -56,10 +61,10 @@ public class FindItemTest extends ExchangeTestBase
         DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(1000);
+        index.setMaxEntriesReturned(DEFAULT_MAX_FIND_ITEMS);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
-        Configuration config = new Configuration(1000, 0);
+        Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
         FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS);
         assertEquals(findItem.xmlText(),
                      FindItemHelper.getFindItemsRequest(config, folder, 0).xmlText());
@@ -68,13 +73,16 @@ public class FindItemTest extends ExchangeTestBase
     @Test
     public void testGetFindItemsRequestOffset()
     {
-        Configuration config = new Configuration(10, 0);
+        int count = 10;
+        Configuration config = new Configuration(count, 0);
 
-        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, 3);
-        assertEquals(3, request.getIndexedPageItemView().getOffset());
+        int assertCount = 3;
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount);
+        assertEquals(assertCount, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(config, inbox, 13);
-        assertEquals(13, request.getIndexedPageItemView().getOffset());
+        assertCount = 13;
+        request = FindItemHelper.getFindItemsRequest(config, inbox, assertCount);
+        assertEquals(assertCount, request.getIndexedPageItemView().getOffset());
 
         request = FindItemHelper.getFindItemsRequest(config, inbox, 0);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
@@ -86,27 +94,29 @@ public class FindItemTest extends ExchangeTestBase
         assertEquals(1, request.getIndexedPageItemView().getOffset());
     }
 
-    private void assertFindItemsRequestMaxEntries(int maxItems)
+    private void assertFindItemsRequestMaxEntries(final int maxItems)
     {
         Configuration config = new Configuration(maxItems, 0);
-        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, 5);
+        int count = 5;
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, count);
         assertEquals(Math.max(1, maxItems), request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
     @Test
     public void testGetFindItemsRequestMaxEntries()
     {
-        assertFindItemsRequestMaxEntries(10);
-        assertFindItemsRequestMaxEntries(3);
-        assertFindItemsRequestMaxEntries(0);
-        assertFindItemsRequestMaxEntries(1);
+        int arbitraryValues[] = { 10, 3, 0, 1};
+        assertFindItemsRequestMaxEntries(arbitraryValues[0]);
+        assertFindItemsRequestMaxEntries(arbitraryValues[1]);
+        assertFindItemsRequestMaxEntries(arbitraryValues[2]);
+        assertFindItemsRequestMaxEntries(arbitraryValues[3]);
     }
 
     @Test
     public void testFindItemsInboxRespondNull()
             throws ServiceCallException, HttpErrorException
     {
-        Configuration config = new Configuration(1000, 0);
+        Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, inbox, 0);
         when(service.findItem(LikeThis(findItem))).thenReturn(null);
 
@@ -204,7 +214,7 @@ public class FindItemTest extends ExchangeTestBase
 
         try
         {
-            Configuration config = new Configuration(1000, 0);
+            Configuration config = new Configuration(DEFAULT_MAX_FIND_ITEMS, 0);
             FindItemHelper.findItems(service, config, inbox, 0);
             fail("No exception was thrown.");
         }

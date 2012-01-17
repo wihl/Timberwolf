@@ -1,9 +1,5 @@
 package com.softartisans.timberwolf;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,6 +9,13 @@ import java.io.StringReader;
 import org.junit.After;
 import org.junit.Before;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Base class for console test suites.
+ */
 public class ConsoleTestBase
 {
     private final ByteArrayOutputStream toBeTested = new ByteArrayOutputStream();
@@ -33,7 +36,7 @@ public class ConsoleTestBase
     }
 
 
-    protected void assertConsoleOutput(String[] lines) throws IOException
+    protected void assertConsoleOutput(final String[] lines) throws IOException
     {
         String consoleOutput = toBeTested.toString();
         String newline = System.getProperty("line.separator");
