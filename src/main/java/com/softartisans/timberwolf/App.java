@@ -1,7 +1,5 @@
 package com.softartisans.timberwolf;
 
-import com.cloudera.alfredo.client.AuthenticationException;
-
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.exchange.ExchangeRuntimeException;
 import com.softartisans.timberwolf.exchange.HttpErrorException;
@@ -70,12 +68,12 @@ final class App implements PrivilegedAction<Integer>
     {
     }
 
-    public static void main(final String[] args) throws IOException, AuthenticationException
+    public static void main(final String[] args) throws IOException
     {
         new App().beginEverything(args);
     }
 
-    private void beginEverything(final String[] args) throws IOException, AuthenticationException
+    private void beginEverything(final String[] args) throws IOException
     {
         CmdLineParser parser = new CmdLineParser(this);
         try
