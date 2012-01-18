@@ -16,6 +16,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -278,7 +279,7 @@ public class TestIntegration
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new DateTime(0));
                     Assert.assertTrue(mailboxItems.iterator().hasNext());
                     mailWriter.write(mailboxItems);
                 }

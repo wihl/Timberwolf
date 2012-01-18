@@ -10,6 +10,13 @@ import java.io.InputStreamReader;
  */
 public final class Utilities
 {
+    /**
+     * A format string that produces IS0 8601-compatible date strings.  Suitable
+     * for use with org.joda.time.DateTime.toString().  For more information on
+     * ISO 8601, see http://en.wikipedia.org/wiki/ISO_8601.
+     */
+    public static final String ISO_8601_FORMAT = "YYYY-MM-dd'T'HH:mm:ssZ";
+
     private Utilities()
     {
     }

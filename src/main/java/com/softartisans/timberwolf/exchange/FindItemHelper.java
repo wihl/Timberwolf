@@ -14,14 +14,20 @@ import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
+import com.microsoft.schemas.exchange.services.x2006.types.TwoOperandExpressionType;
 import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
 import com.microsoft.schemas.exchange.services.x2006.types.UnindexedFieldURIType;
 
 import java.util.Vector;
 
+import javax.xml.namespace.QName;
+
+import org.apache.xmlbeans.XmlException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.softartisans.timberwolf.Utilities.ISO_8601_FORMAT;
 
 /**
  * Contains helper methods for FindItems requests.
@@ -58,6 +64,7 @@ public final class FindItemHelper
     static FindItemType getFindItemsRequest(final Configuration config,
                                             final FolderContext folder,
                                             final int offset)
+        throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -69,36 +76,53 @@ public final class FindItemHelper
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
 
-        // TODO: Uncomment this once this work is combined with the
-        // configuration material. getStartDate() will need to be created.
-        /*
+
         DateTime startDate = config.getStartDate();
         if (startDate != null)
         {
             findItem.setRestriction(getAfterDateRestriction(startDate));
         }
-        */
-        
+
         findItem.setParentFolderIds(folder.getFolderIds());
 
         return findItem;
     }
 
-    private static RestrictionType getAfterDateRestriction(final DateTime startDate)
+    static RestrictionType getAfterDateRestriction(final DateTime startDate) throws ServiceCallException
     {
-        IsGreaterThanType isGreaterThan = IsGreaterThanType.Factory.newInstance();
+        /* The xml schema concerning restrictions uses some rather unconventional
+           features (abstract types and substitution groups) that xmlbeans has some
+           trouble with.  In theory, we should be able to use the 'substitute'
+           mehtod to insert the correct derived type into our XmlBeans object where
+           it's currently using an abstract type, but I can't get that work properly.
+           Fortunately, parsing the restriction from a string sets everything
+           correctly.  If you get the urge to try to refactor this to do things the
+           right way with substitutions, these links may help:
+                http://wiki.apache.org/xmlbeans/SubstGroupsFaq
+                http://xmlbeans.apache.org/docs/2.4.0/reference/index.html
+        */
 
-        PathToUnindexedFieldType dateSentPath = PathToUnindexedFieldType.Factory.newInstance();
-        dateSentPath.setFieldURI(UnindexedFieldURIType.ITEM_DATE_TIME_SENT);
-        isGreaterThan.setPath(dateSentPath);
+        String xml =
+              "<mes:Restriction xmlns:mes=\"http://schemas.microsoft.com/exchange/services/2006/messages\""
+            + "                 xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            + "  <typ:IsGreaterThan>"
+            + "    <typ:FieldURI FieldURI=\"item:DateTimeRecieved\" />"
+            + "    <typ:FieldURIOrConstant>"
+            + "      <typ:Constant Value=\"" + startDate.toString(ISO_8601_FORMAT) + "\" />"
+            + "    </typ:FieldURIOrConstant>"
+            + "  </typ:IsGreaterThan>"
+            + "</mes:Restriction>";
 
-        FieldURIOrConstantType dateConstraint = isGreaterThan.addNewFieldURIOrConstant();
-        ConstantValueType dateConstantValue = dateConstraint.addNewConstant();
-        dateConstantValue.setValue(startDate.toString());
-
-        RestrictionType restriction = RestrictionType.Factory.newInstance();
-        restriction.setSearchExpression(isGreaterThan);
-        return restriction;
+        try
+        {
+            return RestrictionType.Factory.parse(xml);
+        }
+        catch (XmlException e)
+        {
+            LOG.error("Unable to parse generated Restriction tag:");
+            LOG.error(xml);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Cannot construct restriction tag.");
+        }
     }
 
     /**

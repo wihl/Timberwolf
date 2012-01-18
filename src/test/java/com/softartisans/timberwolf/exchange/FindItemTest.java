@@ -17,6 +17,7 @@ import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import java.util.Vector;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -32,7 +33,7 @@ public class FindItemTest extends ExchangeTestBase
             new FolderContext(DistinguishedFolderIdNameType.INBOX, defaultUser);
 
     @Test
-    public void testGetFindItemsRequestInbox()
+    public void testGetFindItemsRequestInbox() throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -43,13 +44,14 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(1000);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
         Configuration config = new Configuration(1000, 0);
         assertEquals(findItem.xmlText(),
                      FindItemHelper.getFindItemsRequest(config, inbox, 0).xmlText());
     }
 
     @Test
-    public void testGetFindItemsRequestDeletedItems()
+    public void testGetFindItemsRequestDeletedItems() throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -60,6 +62,7 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(1000);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
         Configuration config = new Configuration(1000, 0);
         FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS, defaultUser);
         assertEquals(findItem.xmlText(),
@@ -67,7 +70,7 @@ public class FindItemTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetFindItemsRequestOffset()
+    public void testGetFindItemsRequestOffset() throws ServiceCallException
     {
         Configuration config = new Configuration(10, 0);
 
@@ -87,7 +90,7 @@ public class FindItemTest extends ExchangeTestBase
         assertEquals(1, request.getIndexedPageItemView().getOffset());
     }
 
-    private void assertFindItemsRequestMaxEntries(int maxItems)
+    private void assertFindItemsRequestMaxEntries(int maxItems) throws ServiceCallException
     {
         Configuration config = new Configuration(maxItems, 0);
         FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, 5);
@@ -95,7 +98,7 @@ public class FindItemTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetFindItemsRequestMaxEntries()
+    public void testGetFindItemsRequestMaxEntries() throws ServiceCallException
     {
         assertFindItemsRequestMaxEntries(10);
         assertFindItemsRequestMaxEntries(3);

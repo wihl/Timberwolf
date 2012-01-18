@@ -3,6 +3,8 @@ package com.softartisans.timberwolf.exchange;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailboxItem;
 
+import org.joda.time.DateTime;
+
 import java.util.Iterator;
 
 /**
@@ -71,14 +73,14 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail(final Iterable<String> users)
+    public final Iterable<MailboxItem> getMail(final Iterable<String> users, final DateTime startDate)
     {
         return new Iterable<MailboxItem>()
         {
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new UserIterator(exchangeService, config, users);
+                return new UserIterator(exchangeService, config.withStartDate(startDate), users);
             }
         };
     }

@@ -18,6 +18,8 @@ import java.security.PrivilegedAction;
 
 import javax.security.auth.login.LoginException;
 
+import org.joda.time.DateTime;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -140,7 +142,10 @@ final class App implements PrivilegedAction<Integer>
             PrincipalFetcher userLister = new LdapFetcher(domain);
             Iterable<String> users = userLister.getPrincipals();
 
-            mailWriter.write(mailStore.getMail(users));
+            // TODO: HAM-112 will make this be a real date
+            DateTime startDate = new DateTime();
+
+            mailWriter.write(mailStore.getMail(users, startDate));
             return 0;
         }
         catch (ExchangeRuntimeException e)

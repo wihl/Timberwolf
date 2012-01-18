@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import org.apache.xmlbeans.XmlException;
+import org.joda.time.DateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -38,6 +39,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 {
     private final String idHeaderKey = "Item ID";
     ArrayList<String> defaultUsers;
+    private static DateTime defaultTime = new DateTime(0);
 
     @Before
     public void setUp() throws Exception
@@ -56,7 +58,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
         defaultMockFindFolders();
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers, defaultTime))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -69,7 +71,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers, defaultTime))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -92,7 +94,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         try
         {
-            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail(defaultUsers);
+            Iterable<MailboxItem> mail = new ExchangeMailStore(service).getMail(defaultUsers, defaultTime);
         }
         catch (ExchangeRuntimeException e)
         {
@@ -121,7 +123,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         defaultMockFindFolders();
         mockGetItem(messages, requestedList);
         int i = 0;
-        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers))
+        for (MailboxItem mailboxItem : new ExchangeMailStore(service).getMail(defaultUsers, defaultTime))
         {
             assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
@@ -355,7 +357,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                     generateIds(0, 2, "FOLDER-THREE-ID"));
 
         ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
-        Iterator<MailboxItem> mail = store.getMail(defaultUsers).iterator();
+        Iterator<MailboxItem> mail = store.getMail(defaultUsers, defaultTime).iterator();
         for (String folder : new String[] { "FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID" })
         {
             for (int i = 0; i < (folder == "FOLDER-TWO-ID" ? 13 : 2); i++)
@@ -399,7 +401,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         users.add("alice");
 
         ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
-        Iterator<MailboxItem> mail = store.getMail(users).iterator();
+        Iterator<MailboxItem> mail = store.getMail(users, defaultTime).iterator();
         for (String folder : new String[] { "BOB-FOLDER", "ALICE-FOLDER" })
         {
             for (int i = 0; i < 2; i++)
