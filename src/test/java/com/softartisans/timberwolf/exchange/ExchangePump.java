@@ -40,7 +40,6 @@ public class ExchangePump
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory = new AlfredoHttpUrlConnectionFactory();
     private String sender;
-    private static final int MAX_FIND_ITEMS_RETRIES = 10;
 
     public ExchangePump(String exchangeUrl, String senderEmail)
     {
@@ -125,52 +124,40 @@ public class ExchangePump
         }
     }
 
-    public HashMap<String, List<MessageId>> findItems(String user, int expectedCount) throws FailedToFindMessage
+    public HashMap<String, List<MessageId>> findItems(String user) throws FailedToFindMessage
     {
-        for (int i = 0; i < MAX_FIND_ITEMS_RETRIES; i++)
+        HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();
+        EnvelopeDocument request = createEmptyRequest(user);
+        FindItemType findItem = request.getEnvelope().addNewBody().addNewFindItem();
+        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
+        ItemResponseShapeType itemShape = findItem.addNewItemShape();
+        itemShape.setBaseShape(DefaultShapeNamesType.DEFAULT);
+        // I tried to use ID_ONLY and add some AdditionalProperties, but the
+        // schema appears to be screwy and not have FieldURI in there correctly
+        findItem.addNewParentFolderIds().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.INBOX);
+        BodyType response = sendRequest(request);
+        FindItemResponseMessageType responseMessage =
+                response.getFindItemResponse().getResponseMessages().getFindItemResponseMessageArray()[0];
+        if (responseMessage.getResponseCode() != ResponseCodeType.NO_ERROR)
         {
-            HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();
-            EnvelopeDocument request = createEmptyRequest(user);
-            FindItemType findItem = request.getEnvelope().addNewBody().addNewFindItem();
-            findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-            ItemResponseShapeType itemShape = findItem.addNewItemShape();
-            itemShape.setBaseShape(DefaultShapeNamesType.DEFAULT);
-            // I tried to use ID_ONLY and add some AdditionalProperties, but the
-            // schema appears to be screwy and not have FieldURI in there correctly
-            findItem.addNewParentFolderIds().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.INBOX);
-            BodyType response = sendRequest(request);
-            FindItemResponseMessageType responseMessage =
-                    response.getFindItemResponse().getResponseMessages().getFindItemResponseMessageArray()[0];
-            if (responseMessage.getResponseCode() != ResponseCodeType.NO_ERROR)
+            throw new FailedToFindMessage(
+                    "ResponseCode some sort of error: " + responseMessage.getResponseCode());
+        }
+        for (MessageType email : responseMessage.getRootFolder().getItems().getMessageArray())
+        {
+            String folderId = RequiredEmail.getFolderId(email.getSubject());
+            if (folderId != null)
             {
-                throw new FailedToFindMessage(
-                        "ResponseCode some sort of error: " + responseMessage.getResponseCode());
-            }
-            for (MessageType email : responseMessage.getRootFolder().getItems().getMessageArray())
-            {
-                String folderId = RequiredEmail.getFolderId(email.getSubject());
-                if (folderId != null)
+                List<MessageId> emails = emailResults.get(folderId);
+                if (emails == null)
                 {
-                    List<MessageId> emails = emailResults.get(folderId);
-                    if (emails == null)
-                    {
-                        emails = new ArrayList<MessageId>();
-                        emailResults.put(folderId, emails);
-                    }
-                    emails.add(new MessageId(email.getItemId().getId(), email.getItemId().getChangeKey()));
+                    emails = new ArrayList<MessageId>();
+                    emailResults.put(folderId, emails);
                 }
-            }
-            if (emailResults.size() > expectedCount)
-            {
-                throw new FailedToFindMessage("Found more items than expected, perhaps a more complicated "
-                                                + "separator is necessary");
-            }
-            else if (emailResults.size() == expectedCount)
-            {
-                return emailResults;
+                emails.add(new MessageId(email.getItemId().getId(), email.getItemId().getChangeKey()));
             }
         }
-        return null;
+        return emailResults;
     }
 
     private BodyType sendRequest(final EnvelopeDocument envelope)

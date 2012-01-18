@@ -1,6 +1,7 @@
 package com.softartisans.timberwolf.exchange;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /** Helper class for required folders in exchange */
@@ -47,24 +48,21 @@ public class RequiredFolder
         return email;
     }
 
-    public int initialize(ExchangePump pump, String user)
+    public void initialize(ExchangePump pump, String user)
     {
-        int expectedEmailCount = 0;
         if (folders.size() > 0)
         {
             pump.createFolders(user, getId(), folders);
             for (RequiredFolder folder : folders)
             {
                 System.err.println("    Initialized folder: " + folder.getId());
-                expectedEmailCount += folder.initialize(pump, user);
+                folder.initialize(pump, user);
             }
         }
-        expectedEmailCount += emails.size();
         for (RequiredEmail email : emails)
         {
             email.initialize(this, user);
         }
-        return expectedEmailCount;
     }
 
     public void sendEmail(ExchangePump pump, String user) throws ExchangePump.FailedToCreateMessage
@@ -81,5 +79,23 @@ public class RequiredFolder
             }
         }
 
+    }
+
+    public boolean checkEmailsBeforeMove(HashMap<String, List<ExchangePump.MessageId>> items)
+    {
+        List<ExchangePump.MessageId> messageIds = items.get(id);
+        int idSize = messageIds == null ? 0 : messageIds.size();
+        if (emails.size() != idSize)
+        {
+            return false;
+        }
+        for (RequiredFolder folder : folders)
+        {
+            if (!folder.checkEmailsBeforeMove(items))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

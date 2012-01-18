@@ -13,7 +13,7 @@ public class RequiredUser
 {
     private final String user;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
-    private int expectedEmailsInInbox;
+    private static final int MAX_FIND_ITEM_ATTEMPTS = 10;
 
     public RequiredUser(String username)
     {
@@ -53,7 +53,7 @@ public class RequiredUser
             for (RequiredFolder folder : folders)
             {
                 System.err.println(" Initialized folder: " + folder.getId());
-                expectedEmailsInInbox += folder.initialize(pump, user);
+                folder.initialize(pump, user);
             }
         }
     }
@@ -72,14 +72,25 @@ public class RequiredUser
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage
     {
-        HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user, expectedEmailsInInbox);
-        for (String folder : items.keySet())
+        RETRY: for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
         {
-            System.err.println(folder);
-            for (ExchangePump.MessageId id : items.get(folder))
+            HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user);
+            for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
             {
-                System.err.println("  " + id);
+                for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
+                {
+                    if (folder.checkEmailsBeforeMove(items))
+                    {
+                        System.err.println("Ready to move emails");
+                    }
+                    else
+                    {
+                        System.err.println("Not ready, trying again");
+                        continue RETRY;
+                    }
+                }
             }
+            break;
         }
     }
 }
