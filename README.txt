@@ -6,18 +6,6 @@ exchange instance which it has access to and upload them into hbase. It also
 allows for periodic recynching between Exchange and hbase through periodic
 executions of the tool.
 
-## Documentation
-
-We don't currently publish documentation.
-
-## Contact us
-
-_Not yet._
-
-## Bug and Issue tracker.
-
-_None._
-
 ## Compiling Timberwolf
 
 Compiling Timberwolf requires the following tools:
@@ -29,6 +17,18 @@ To compile Timberwolf, run `mvn compile`.
 To build a distribution, run `mvn package`.
 
 The final Flume distribution artifacts will be in $project/target/.
+
+## Documentation
+
+We don't currently publish documentation.
+
+## Contact us
+
+_Not yet._
+
+## Bug and Issue tracker.
+
+_None._
 
 ## Running Timberwolf
 
