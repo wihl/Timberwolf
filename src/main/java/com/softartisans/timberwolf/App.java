@@ -152,10 +152,7 @@ final class App implements PrivilegedAction<Integer>
             PrincipalFetcher userLister = new LdapFetcher(domain);
             Iterable<String> users = userLister.getPrincipals();
 
-            // TODO: HAM-112 will make this be a real date
-            DateTime startDate = new DateTime();
-
-            mailWriter.write(mailStore.getMail(users, startDate));
+            mailWriter.write(mailStore.getMail(users, timeUpdater));
             return 0;
         }
         catch (ExchangeRuntimeException e)

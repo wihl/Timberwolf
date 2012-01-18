@@ -1,12 +1,13 @@
 package com.softartisans.timberwolf;
 
-import org.joda.time.DateTime;
-
 /**
  * MailStore represents a repository, either local or remote, of mail.
  */
 public interface MailStore
 {
-    /** Returns some mail for the given users, starting at the given date and time. */
-    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, DateTime startDate);
+    /**
+     * Returns some mail for the given users, only getting the mail for each user since the
+     * time returned by timeUpdater.lastUpdated.
+     */
+    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserTimeUpdater timeUpdater);
 }

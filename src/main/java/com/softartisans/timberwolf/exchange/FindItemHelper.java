@@ -76,8 +76,7 @@ public final class FindItemHelper
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
 
-
-        DateTime startDate = config.getStartDate();
+        DateTime startDate = config.getLastUpdated(folder.getUser());
         if (startDate != null)
         {
             findItem.setRestriction(getAfterDateRestriction(startDate));

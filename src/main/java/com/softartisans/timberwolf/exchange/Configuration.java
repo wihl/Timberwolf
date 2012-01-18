@@ -1,5 +1,8 @@
 package com.softartisans.timberwolf.exchange;
 
+import com.softartisans.timberwolf.NoopUserTimeUpdater;
+import com.softartisans.timberwolf.UserTimeUpdater;
+
 import org.joda.time.DateTime;
 
 /**
@@ -10,20 +13,20 @@ public class Configuration
 {
     private final int findPageSize;
     private final int getPageSize;
-    private final DateTime dateTimeFrom;
+    private final UserTimeUpdater timeUpdater;
 
     /**
      * @param findItemPageSize Must be greater than or equal to 1.
      * @param getItemPageSize
-     * @param startDate The earliest date and time to look for messages.
+     * @param userTimeUpdater The UserTimeUpdater that defines the time range for each user.
      */
     public Configuration(final int findItemPageSize, final int getItemPageSize,
-                         final DateTime startDate)
+                         final UserTimeUpdater userTimeUpdater)
     {
         // Asking for negative or zero max items is nonsensical.
         this.findPageSize = Math.max(findItemPageSize, 1);
         this.getPageSize = Math.max(getItemPageSize, 1);
-        this.dateTimeFrom = startDate;
+        this.timeUpdater = userTimeUpdater;
     }
 
     /**
@@ -34,7 +37,7 @@ public class Configuration
      */
     public Configuration(final int findItemPageSize, final int getItemPageSize)
     {
-        this(findItemPageSize, getItemPageSize, new DateTime(0));
+        this(findItemPageSize, getItemPageSize, new NoopUserTimeUpdater());
     }
 
     public int getFindItemPageSize()
@@ -47,13 +50,18 @@ public class Configuration
         return getPageSize;
     }
 
-    public Configuration withStartDate(DateTime startDate)
+    public Configuration withTimeUpdater(UserTimeUpdater userTimeUpdater)
     {
-        return new Configuration(findPageSize, getPageSize, startDate);
+        return new Configuration(findPageSize, getPageSize, userTimeUpdater);
     }
 
-    public DateTime getStartDate()
+    public DateTime getLastUpdated(String user)
     {
-        return dateTimeFrom;
+        return timeUpdater.lastUpdated(user);
+    }
+
+    public void setLastUpdated(String user, DateTime time)
+    {
+        timeUpdater.setUpdateTime(user, time);
     }
 }

@@ -4,6 +4,7 @@ import com.softartisans.timberwolf.Auth;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
+import com.softartisans.timberwolf.NoopUserTimeUpdater;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.services.LdapFetcher;
@@ -279,7 +280,7 @@ public class TestIntegration
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new DateTime(0));
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new NoopUserTimeUpdater());
                     Assert.assertTrue(mailboxItems.iterator().hasNext());
                     mailWriter.write(mailboxItems);
                 }
