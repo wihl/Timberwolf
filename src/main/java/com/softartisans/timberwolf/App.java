@@ -7,6 +7,7 @@ import com.softartisans.timberwolf.exchange.ExchangeRuntimeException;
 import com.softartisans.timberwolf.exchange.HttpErrorException;
 import com.softartisans.timberwolf.exchange.ServiceCallException;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
+import com.softartisans.timberwolf.hbase.HBaseManager;
 import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
 import com.softartisans.timberwolf.services.PrincipalFetcher;
@@ -128,7 +129,8 @@ final class App implements PrivilegedAction<Integer>
         MailWriter mailWriter;
         if (useHBase)
         {
-            mailWriter = HBaseMailWriter.create(hbaseQuorum, hbaseclientPort, hbaseTableName, hbaseKeyHeader,
+            HBaseManager hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
+            mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
         }
         else
