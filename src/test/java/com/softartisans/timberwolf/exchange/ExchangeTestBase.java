@@ -20,18 +20,23 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.xmlbeans.XmlException;
 import org.junit.Before;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.eq;
-import org.mockito.MockitoAnnotations;
+
 
 /**
  * Base class for fixtures that need to mock out Exchange services.
@@ -39,17 +44,43 @@ import org.mockito.MockitoAnnotations;
 public class ExchangeTestBase
 {
     @Mock
-    public ExchangeService service;
+    private ExchangeService service;
+
+    protected ExchangeService getService()
+    {
+        return service;
+    }
 
     /** This is the name of our default folder. */
-    protected String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
-    protected final String defaultUser = "bkerr";
+    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
+
+    protected String getDefaultFolderId()
+    {
+        return defaultFolderId;
+    }
+
+    private final String defaultUser = "bkerr";
+
+    protected String getDefaultUser()
+    {
+        return defaultUser;
+    }
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
-    protected FolderContext defaultFolder = new FolderContext(defaultFolderId, defaultUser);
+    private FolderContext defaultFolder = new FolderContext(defaultFolderId, defaultUser);
+
+    protected FolderContext getDefaultFolder()
+    {
+        return defaultFolder;
+    }
 
     /** This configuration is used anytime we just need any standard configuration. */
-    protected Configuration defaultConfig = new Configuration(1000, 1000);
+    private Configuration defaultConfig = new Configuration(1000, 1000);
+
+    protected Configuration getDefaultConfig()
+    {
+        return defaultConfig;
+    }
 
     @Before
     public void setUp() throws Exception
