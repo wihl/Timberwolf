@@ -9,24 +9,21 @@ import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.softartisans.timberwolf.MailboxItem;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.xmlbeans.XmlException;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
+import org.junit.Test;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Test fixture for the tests specific to GetItem.
+ * Test fixture for the tests specific to GetItem
  */
 public class GetItemTest extends ExchangeTestBase
 {
@@ -68,13 +65,12 @@ public class GetItemTest extends ExchangeTestBase
         GetItemType getItem = GetItemType.Factory.newInstance();
         getItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
         NonEmptyArrayOfBaseItemIdsType items = getItem.addNewItemIds();
-        final int count = 100;
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < 100; i++)
         {
             items.addNewItemId().setId("idNumber" + i);
         }
         ArrayList<String> ids = new ArrayList<String>();
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < 100; i++)
         {
             ids.add("idNumber" + i);
         }
@@ -86,7 +82,7 @@ public class GetItemTest extends ExchangeTestBase
             throws ServiceCallException, HttpErrorException
     {
         Vector<String> list = new Vector<String>();
-        Vector<MailboxItem> items = GetItemHelper.getItems(0, 0, list, getService());
+        Vector<MailboxItem> items = GetItemHelper.getItems(0, 0, list, service, defaultUser);
         assertEquals(0, items.size());
     }
 
@@ -94,9 +90,8 @@ public class GetItemTest extends ExchangeTestBase
     public void testGetItems0to1()
             throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
-        final int count = 5;
-        Vector<String> wholeList = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
         {
             wholeList.add(null);
         }
@@ -105,7 +100,7 @@ public class GetItemTest extends ExchangeTestBase
         wholeList.set(0, idValue);
         requestedList.add(idValue);
         mockGetItem(new MessageType[]{mockMessageItemId(idValue)}, requestedList);
-        Vector<MailboxItem> items = GetItemHelper.getItems(1, 0, wholeList, getService());
+        Vector<MailboxItem> items = GetItemHelper.getItems(1, 0, wholeList, service, defaultUser);
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -114,19 +109,17 @@ public class GetItemTest extends ExchangeTestBase
     public void testGetItems3to4()
             throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
-        final int count = 5;
-        Vector<String> wholeList = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
         {
             wholeList.add(null);
         }
         List<String> requestedList = new Vector<String>(1);
         String idValue = "id1";
-        final int wholeListCount = 3;
-        wholeList.set(wholeListCount, idValue);
+        wholeList.set(3, idValue);
         requestedList.add(idValue);
         mockGetItem(new MessageType[]{mockMessageItemId(idValue)}, requestedList);
-        Vector<MailboxItem> items = GetItemHelper.getItems(1, wholeListCount, wholeList, getService());
+        Vector<MailboxItem> items = GetItemHelper.getItems(1, 3, wholeList, service, defaultUser);
         assertEquals(1, items.size());
         assertEquals(idValue, items.get(0).getHeader(idHeaderKey));
     }
@@ -136,19 +129,17 @@ public class GetItemTest extends ExchangeTestBase
             throws XmlException, IOException, HttpErrorException,
                    ServiceCallException
     {
-        final int count = 5;
-        Vector<String> wholeList = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
+        Vector<String> wholeList = new Vector<String>(5);
+        for (int i = 0; i < 5; i++)
         {
             wholeList.add(null);
         }
         List<String> requestedList = new Vector<String>(1);
         String idValue = "id1";
-        final int wholeListCount = 3;
-        wholeList.set(wholeListCount, idValue);
+        wholeList.set(3, idValue);
         requestedList.add(idValue);
         mockGetItem(new MessageType[0], requestedList);
-        Vector<MailboxItem> items = GetItemHelper.getItems(1, wholeListCount, wholeList, getService());
+        Vector<MailboxItem> items = GetItemHelper.getItems(1, 3, wholeList, service, defaultUser);
         assertEquals(0, items.size());
     }
 
@@ -156,17 +147,14 @@ public class GetItemTest extends ExchangeTestBase
     public void testGetItems2to93()
             throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
-        final int count = 100;
-        Vector<String> wholeList = new Vector<String>(count);
-        for (int i = 0; i < count; i++)
+        Vector<String> wholeList = new Vector<String>(100);
+        for (int i = 0; i < 100; i++)
         {
             wholeList.add(null);
         }
         List<String> requestedList = new Vector<String>(1);
-        final int messageTypeCount = 91;
-        MessageType[] messages = new MessageType[messageTypeCount];
-        final int messageLoopCount = 93;
-        for (int i = 2; i < messageLoopCount; i++)
+        MessageType[] messages = new MessageType[91];
+        for (int i = 2; i < 93; i++)
         {
             String id = "id #" + i;
             wholeList.set(i, id);
@@ -174,7 +162,7 @@ public class GetItemTest extends ExchangeTestBase
             messages[i - 2] = mockMessageItemId(id);
         }
         mockGetItem(messages, requestedList);
-        Vector<MailboxItem> items = GetItemHelper.getItems(messageTypeCount, 2, wholeList, getService());
+        Vector<MailboxItem> items = GetItemHelper.getItems(91, 2, wholeList, service, defaultUser);
         assertEquals(requestedList.size(), items.size());
         for (int i = 0; i < requestedList.size(); i++)
         {
@@ -193,14 +181,14 @@ public class GetItemTest extends ExchangeTestBase
                 .thenReturn(new ItemInfoResponseMessageType[]{infoMessage});
         GetItemResponseType getResponse = mock(GetItemResponseType.class);
         when(getResponse.getResponseMessages()).thenReturn(responseArr);
-        when(getService().getItem(any(GetItemType.class))).thenReturn(getResponse);
+        when(service.getItem(any(GetItemType.class), eq(defaultUser))).thenReturn(getResponse);
 
         Vector<String> ids = new Vector<String>();
         ids.add("abcd");
 
         try
         {
-            GetItemHelper.getItems(1, 0, ids, getService());
+            GetItemHelper.getItems(1, 0, ids, service, defaultUser);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)

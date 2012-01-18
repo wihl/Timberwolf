@@ -2,7 +2,13 @@
 # This script is only for Jenkins to run just before the build.
 # It's all platform-specific.
 
-echo "ZooKeeperQuorum = hdhbase01.int.softartisans.com\nZooKeeperClientPort = 2181\nExchangeURI = https://devexch01.int.tartarus.com/ews/exchange.asmx" > testing.properties
+cat <<EOF >> testing.properties
+ZooKeeperQuorum = hdhbase01.int.softartisans.com
+ZooKeeperClientPort = 2181
+ExchangeURI = https://devexch01.int.tartarus.com/ews/exchange.asmx
+LdapDomain = int.tartarus.com
+LdapConfigEntry = Timberwolf
+EOF
 
-# bkerr is the user we use for integration testing.
-echo pass@word1 | kinit korganizer@INT.TARTARUS.COM
+# jclouseau is the user who can impersonate everyone else.
+echo pass@word1 | kinit jclouseau@INT.TARTARUS.COM

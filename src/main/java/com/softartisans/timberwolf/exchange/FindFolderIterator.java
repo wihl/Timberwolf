@@ -16,17 +16,20 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
     private ExchangeService service;
     private Configuration config;
     private Queue<String> folderQueue;
+    private String user;
 
-    public FindFolderIterator(final ExchangeService exchangeService, final Configuration configuration)
+    public FindFolderIterator(final ExchangeService exchangeService, final Configuration configuration,
+                              final String targetUser)
     {
         service = exchangeService;
         config = configuration;
+        user = targetUser;
 
         try
         {
             folderQueue = FindFolderHelper.findFolders(exchangeService,
                                                        FindFolderHelper.getFindFoldersRequest(
-                                                               DistinguishedFolderIdNameType.MSGFOLDERROOT));
+                                                               DistinguishedFolderIdNameType.MSGFOLDERROOT), user);
             if (folderQueue.size() == 0)
             {
                 LOG.debug("Did not find any folders.");
@@ -51,7 +54,7 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
         {
             return null;
         }
-        FolderContext folder = new FolderContext(folderQueue.poll());
+        FolderContext folder = new FolderContext(folderQueue.poll(), user);
         return new FindItemIterator(service, config, folder);
     }
 }

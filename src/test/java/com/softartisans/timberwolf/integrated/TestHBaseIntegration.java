@@ -19,7 +19,7 @@ import org.junit.Test;
 public class TestHBaseIntegration
 {
     @Rule
-    private HTableResource htable = new HTableResource();
+    public HTableResource htable = new HTableResource();
 
     private static Put createPut(final String rowKey, final String family, final String qualifier,
                                  final String value)
