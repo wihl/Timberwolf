@@ -205,7 +205,7 @@ public class ExchangeTestBase
     }
 
     protected void mockGetItem(final MessageType[] findResults, final int initialOffset, final int pageSize,
-                               final int pageIndex, final int max, final String folder, final String user)
+                               final int pageIndex, int max, final String folder, final String user)
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         int start = pageSize * pageIndex;

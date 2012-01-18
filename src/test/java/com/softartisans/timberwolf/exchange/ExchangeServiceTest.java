@@ -210,7 +210,7 @@ public class ExchangeServiceTest
     + "</m:ResponseMessages>"
     + "</m:FindFolderResponse>";
 
-    private static String soap(String body)
+    private static String soap(final String body)
     {
         return SOAP_PRELUDE + body + SOAP_FINALE;
     }
@@ -301,7 +301,7 @@ public class ExchangeServiceTest
     }
 
     @Test
-    public void TestInputStreamException()
+    public void testInputStreamException()
         throws UnsupportedEncodingException, ServiceCallException, XmlException, ServiceCallException,
                HttpErrorException, IOException
     {
@@ -332,7 +332,7 @@ public class ExchangeServiceTest
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
         HttpURLConnection conn = mock(HttpURLConnection.class);
         when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { }));
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {}));
         when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
@@ -425,9 +425,9 @@ public class ExchangeServiceTest
         MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
         factory.forRequest(URL, soap(GET_ITEM_REQUEST).getBytes("UTF-8"))
                .respondWith(HttpURLConnection.HTTP_OK, (
-                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                       "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-                       "</soapenv:Envelope>").getBytes("UTF-8"));
+                       "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                               + "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">"
+                               + "</soapenv:Envelope>").getBytes("UTF-8"));
 
         GetItemType getReq = GetItemDocument.Factory.parse(GET_ITEM_REQUEST).getGetItem();
         ExchangeService service = new ExchangeService(URL, factory);
@@ -449,7 +449,9 @@ public class ExchangeServiceTest
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
         HttpURLConnection conn = mock(HttpURLConnection.class);
         when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR);
-        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] { 64, 64, 64 }));
+        final int defaultBufValue = 64;
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {defaultBufValue, defaultBufValue,
+                defaultBufValue }));
         when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);

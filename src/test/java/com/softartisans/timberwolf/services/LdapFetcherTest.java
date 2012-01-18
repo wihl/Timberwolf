@@ -33,7 +33,7 @@ public class LdapFetcherTest
     public void getProviderDiscoveryURLTest()
     {
         LdapFetcher result = new LdapFetcher(TEST_DOMAIN);
-        Assert.assertEquals("ldap:///dc=int,dc=TEST_DOMAIN,dc=com",
+        Assert.assertEquals("ldap:///dc=int,dc=testDomain,dc=com",
                             result.getProviderDiscoveryURL());
     }
 
