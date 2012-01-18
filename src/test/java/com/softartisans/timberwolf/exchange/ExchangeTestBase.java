@@ -205,13 +205,13 @@ public class ExchangeTestBase
     }
 
     protected void mockGetItem(final MessageType[] findResults, final int initialOffset, final int pageSize,
-                               final int pageIndex, int max, final String folder, final String user)
+                               final int pageIndex, final int max, final String folder, final String user)
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
         int start = pageSize * pageIndex;
-        max = Math.min(max, start + pageSize);
-        mockGetItem(Arrays.copyOfRange(findResults, start, max),
-                    generateIds(initialOffset + start, max - start, folder), user);
+        int trueMax = Math.min(max, start + pageSize);
+        mockGetItem(Arrays.copyOfRange(findResults, start, trueMax),
+                    generateIds(initialOffset + start, trueMax - start, folder), user);
     }
 
     protected void mockGetItem(final MessageType[] messages, final List<String> requestedList)
