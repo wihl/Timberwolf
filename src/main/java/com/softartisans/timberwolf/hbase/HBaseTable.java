@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HBaseTable implements IHBaseTable
 {
-    private static Logger logger = LoggerFactory.getLogger(HBaseTable.class);
+    private static Logger LOG = LoggerFactory.getLogger(HBaseTable.class);
     private HTableInterface table;
     private List<Put> puts = new ArrayList<Put>();
     private final String name;
@@ -49,7 +49,7 @@ public class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not get from HBase!", e, logger);
+            throw HBaseRuntimeException.create("Could not get from HBase!", e, LOG);
         }
         return result;
     }
@@ -67,7 +67,7 @@ public class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not write puts to HTable!", e, logger);
+            throw HBaseRuntimeException.create("Could not write puts to HTable!", e, LOG);
         }
 
     }
@@ -94,7 +94,7 @@ public class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not close table " + name + "!", e, logger);
+            throw HBaseRuntimeException.create("Could not close table " + name + "!", e, LOG);
         }
     }
 }
