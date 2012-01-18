@@ -32,8 +32,11 @@ public class ExchangePumpTest
         RequiredUser bkerr = new RequiredUser("bkerr");
         RequiredFolder folder1 = bkerr.addFolderToInbox("folder1");
         folder1.add(email("bkerr"), "My first email", "The body of said email");
-        folder1.addFolder("folderA");
+        folder1.add(email("bkerr"), "My second email", "The body of said email");
+        RequiredFolder folderA = folder1.addFolder("folderA");
+        folderA.add(email("bkerr"), "Another email", "a body of mine");
         folder1.addFolder("folderD");
+
 //        RequiredFolder folder2 = bkerr.addFolderToRoot("folder2");
 //        folder2.addFolder("folderB");
 //        folder2.addFolder("folderC");

@@ -113,16 +113,24 @@ public class ExchangePump
             body.setStringValue(email.getBody());
             exchangeMessage.setSubject(email.getSubject());
             exchangeMessage.addNewToRecipients().addNewMailbox().setEmailAddress(email.getTo());
-            BodyType response = sendRequest(request);
-            ItemInfoResponseMessageType[] responses =
-                    response.getCreateItemResponse().getResponseMessages().getCreateItemResponseMessageArray();
-            if (responses.length != 1)
+        }
+        BodyType response = sendRequest(request);
+        ItemInfoResponseMessageType[] responses =
+                response.getCreateItemResponse().getResponseMessages().getCreateItemResponseMessageArray();
+        System.err.println(response);
+        if (responses.length != emails.size())
+        {
+            System.err.println(response);
+            throw new FailedToCreateMessage(
+                    "There should have been " + emails.size() + " response message to createItem");
+        }
+        for (ItemInfoResponseMessageType resp : responses)
+        {
+            if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
             {
-                throw new FailedToCreateMessage("There should have been 1 response message to createItem");
-            }
-            if (responses[0].getResponseCode() != ResponseCodeType.NO_ERROR)
-            {
-                throw new FailedToCreateMessage("ResponseCode some sort of error: " + responses[0].getResponseCode());
+                System.err.println(response);
+                throw new FailedToCreateMessage(
+                        "ResponseCode some sort of error: " + resp.getResponseCode());
             }
         }
     }
@@ -179,13 +187,17 @@ public class ExchangePump
         BodyType response = sendRequest(request);
         ItemInfoResponseMessageType[] responses =
                 response.getMoveItemResponse().getResponseMessages().getMoveItemResponseMessageArray();
-        if (responses.length != 1)
+        if (responses.length != messageIds.size())
         {
-            throw new FailedToMoveMessage("There should have been 1 response message to createItem");
+            throw new FailedToMoveMessage("There should have been 1 response message to moveItem");
         }
-        if (responses[0].getResponseCode() != ResponseCodeType.NO_ERROR)
+
+        for (ItemInfoResponseMessageType resp : responses)
         {
-            throw new FailedToMoveMessage("ResponseCode some sort of error: " + responses[0].getResponseCode());
+        if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
+        {
+            throw new FailedToMoveMessage("ResponseCode some sort of error: " + resp.getResponseCode());
+        }
         }
     }
 
