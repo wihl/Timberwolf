@@ -47,21 +47,24 @@ public class RequiredFolder
         return email;
     }
 
-    public void initialize(ExchangePump pump, String user)
+    public int initialize(ExchangePump pump, String user)
     {
+        int expectedEmailCount = 0;
         if (folders.size() > 0)
         {
             pump.createFolders(user, getId(), folders);
             for (RequiredFolder folder : folders)
             {
                 System.err.println("    Initialized folder: " + folder.getId());
-                folder.initialize(pump, user);
-            }
-            for (RequiredEmail email : emails)
-            {
-                email.initialize(this, user);
+                expectedEmailCount += folder.initialize(pump, user);
             }
         }
+        expectedEmailCount += emails.size();
+        for (RequiredEmail email : emails)
+        {
+            email.initialize(this, user);
+        }
+        return expectedEmailCount;
     }
 
     public void sendEmail(ExchangePump pump, String user) throws ExchangePump.FailedToCreateMessage

@@ -48,4 +48,17 @@ public class RequiredEmail
         return to;
     }
 
+    public static String getFolderId(String subject)
+    {
+        String[] s = subject.split("::");
+        if (s.length != 2)
+        {
+            return null;
+        }
+        else
+        {
+            return s[1];
+        }
+
+    }
 }

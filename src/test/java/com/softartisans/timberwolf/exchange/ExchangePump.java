@@ -3,12 +3,17 @@ package com.softartisans.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageDispositionType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfAllItemsType;
@@ -17,6 +22,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
@@ -34,6 +40,7 @@ public class ExchangePump
     private String endpoint;
     private HttpUrlConnectionFactory connectionFactory = new AlfredoHttpUrlConnectionFactory();
     private String sender;
+    private static final int MAX_FIND_ITEMS_RETRIES = 10;
 
     public ExchangePump(String exchangeUrl, String senderEmail)
     {
@@ -113,9 +120,57 @@ public class ExchangePump
             }
             if (responses[0].getResponseCode() != ResponseCodeType.NO_ERROR)
             {
-                throw new FailedToCreateMessage("ResponseCode some sort of error: " + responses[1].getResponseCode());
+                throw new FailedToCreateMessage("ResponseCode some sort of error: " + responses[0].getResponseCode());
             }
         }
+    }
+
+    public HashMap<String, List<MessageId>> findItems(String user, int expectedCount) throws FailedToFindMessage
+    {
+        for (int i = 0; i < MAX_FIND_ITEMS_RETRIES; i++)
+        {
+            HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();
+            EnvelopeDocument request = createEmptyRequest(user);
+            FindItemType findItem = request.getEnvelope().addNewBody().addNewFindItem();
+            findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
+            ItemResponseShapeType itemShape = findItem.addNewItemShape();
+            itemShape.setBaseShape(DefaultShapeNamesType.DEFAULT);
+            // I tried to use ID_ONLY and add some AdditionalProperties, but the
+            // schema appears to be screwy and not have FieldURI in there correctly
+            findItem.addNewParentFolderIds().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.INBOX);
+            BodyType response = sendRequest(request);
+            FindItemResponseMessageType responseMessage =
+                    response.getFindItemResponse().getResponseMessages().getFindItemResponseMessageArray()[0];
+            if (responseMessage.getResponseCode() != ResponseCodeType.NO_ERROR)
+            {
+                throw new FailedToFindMessage(
+                        "ResponseCode some sort of error: " + responseMessage.getResponseCode());
+            }
+            for (MessageType email : responseMessage.getRootFolder().getItems().getMessageArray())
+            {
+                String folderId = RequiredEmail.getFolderId(email.getSubject());
+                if (folderId != null)
+                {
+                    List<MessageId> emails = emailResults.get(folderId);
+                    if (emails == null)
+                    {
+                        emails = new ArrayList<MessageId>();
+                        emailResults.put(folderId, emails);
+                    }
+                    emails.add(new MessageId(email.getItemId().getId(), email.getItemId().getChangeKey()));
+                }
+            }
+            if (emailResults.size() > expectedCount)
+            {
+                throw new FailedToFindMessage("Found more items than expected, perhaps a more complicated "
+                                                + "separator is necessary");
+            }
+            else if (emailResults.size() == expectedCount)
+            {
+                return emailResults;
+            }
+        }
+        return null;
     }
 
     private BodyType sendRequest(final EnvelopeDocument envelope)
@@ -163,16 +218,49 @@ public class ExchangePump
         }
     }
 
+    public class FailedToFindMessage extends Exception
+    {
+        public FailedToFindMessage(String message)
+        {
+            super(message);
+        }
+
+        public FailedToFindMessage(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
 
     /** A simple class representing an email */
-    public class Message
+    public class MessageId
     {
+        private final String id;
+        private final String changeKey;
 
-        private String from;
-
-        public String getFrom()
+        private MessageId(String id, String changeKey)
         {
-            return from;
+            this.id = id;
+            this.changeKey = changeKey;
+        }
+
+        private String getId()
+        {
+            return id;
+        }
+
+        private String getChangeKey()
+        {
+            return changeKey;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "MessageId{" +
+                   "id='" + id + '\'' +
+                   ", changeKey='" + changeKey + '\'' +
+                   '}';
         }
     }
 }

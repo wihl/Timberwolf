@@ -13,6 +13,7 @@ public class RequiredUser
 {
     private final String user;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
+    private int expectedEmailsInInbox;
 
     public RequiredUser(String username)
     {
@@ -52,7 +53,7 @@ public class RequiredUser
             for (RequiredFolder folder : folders)
             {
                 System.err.println(" Initialized folder: " + folder.getId());
-                folder.initialize(pump, user);
+                expectedEmailsInInbox += folder.initialize(pump, user);
             }
         }
     }
@@ -65,6 +66,19 @@ public class RequiredUser
             {
                 System.err.println(" Sending email for folder: " + folder.getId());
                 folder.sendEmail(pump, user);
+            }
+        }
+    }
+
+    public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage
+    {
+        HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user, expectedEmailsInInbox);
+        for (String folder : items.keySet())
+        {
+            System.err.println(folder);
+            for (ExchangePump.MessageId id : items.get(folder))
+            {
+                System.err.println("  " + id);
             }
         }
     }
