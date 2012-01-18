@@ -25,7 +25,7 @@ public class HBaseManager
     /**
      * The logger for this class.
      */
-    private static Logger logger = LoggerFactory.getLogger(HBaseManager.class);
+    private static Logger LOG = LoggerFactory.getLogger(HBaseManager.class);
 
     /**
      * The underlying table collection.
@@ -69,11 +69,11 @@ public class HBaseManager
         }
         catch (MasterNotRunningException e)
         {
-            logger.error("Unable to connect to Master!");
+            throw HBaseRuntimeException.create("Unable to connect to Master!", e, LOG);
         }
         catch (ZooKeeperConnectionException e)
         {
-            logger.error("Unable to connect to ZooKeeper!");
+            throw HBaseRuntimeException.create("Unable to connect to ZooKeeper!", e, LOG);
         }
     }
 
@@ -149,8 +149,7 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Could not determine existence of table "
-                        + tableName + "!");
+                throw HBaseRuntimeException.create("Could not determine existence of table ", e, LOG);
             }
         }
         return false;
@@ -165,9 +164,8 @@ public class HBaseManager
     {
         if (canRemote())
         {
-            if (tableExistsRemotely(tableName))
-            {
-                logger.info("Table " + tableName + " exists.");
+            if (tableExistsRemotely(tableName)) {
+                LOG.info("Table " + tableName + " exists.");
                 HTableInterface table;
                 try
                 {
@@ -176,13 +174,12 @@ public class HBaseManager
                 }
                 catch (IOException e)
                 {
-                    logger.error("Could not acquire reference to table "
-                            + tableName + "!");
+                    throw HBaseRuntimeException.create("Could not acquire reference to table " + tableName + "!",
+                            e, LOG);
                 }
             }
-            else
-            {
-                logger.info("Table " + tableName + " does not exist.");
+            else {
+                LOG.info("Table " + tableName + " does not exist.");
             }
         }
         return null;
@@ -198,9 +195,8 @@ public class HBaseManager
         {
             return false;
         }
-        if (hbase == null)
-        {
-            logger.error("HBase instance is not initialized!");
+        if (hbase == null) {
+            LOG.error("HBase instance is not initialized!");
         }
         return true;
     }
@@ -228,10 +224,9 @@ public class HBaseManager
             }
             try
             {
-                if (hbase.tableExists(tableName))
-                {
-                    logger.info("Cannot create table " + tableName + ", as "
-                        + "the table already exists!");
+                if (hbase.tableExists(tableName)) {
+                    LOG.error("Cannot create table " + tableName + ", as "
+                            + "the table already exists!");
                 }
                 else
                 {
@@ -244,8 +239,12 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Error creating table " + tableName + "!");
+                throw HBaseRuntimeException.create("Error creating table " + tableName + "!", e, LOG);
             }
+        }
+        if (tables.containsKey(tableName))
+        {
+            return tables.get(tableName);
         }
         return null;
     }
@@ -266,7 +265,7 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                logger.error("Error deleting table " + tableName + "!");
+                throw HBaseRuntimeException.create("Error deleting table " + tableName + "!", e, LOG);
             }
         }
         tables.remove(tableName);
