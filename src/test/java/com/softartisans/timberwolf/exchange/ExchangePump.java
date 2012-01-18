@@ -7,16 +7,19 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.MoveItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageDispositionType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfAllItemsType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
 import java.io.InputStream;
@@ -160,6 +163,32 @@ public class ExchangePump
         return emailResults;
     }
 
+    public void moveMessages(final String user, final String folder, final List<MessageId> messageIds)
+            throws FailedToMoveMessage
+    {
+        EnvelopeDocument request = createEmptyRequest(user);
+        MoveItemType moveItem = request.getEnvelope().addNewBody().addNewMoveItem();
+        moveItem.addNewToFolderId().addNewFolderId().setId(folder);
+        NonEmptyArrayOfBaseItemIdsType itemIds = moveItem.addNewItemIds();
+        for (MessageId messageId : messageIds)
+        {
+            ItemIdType itemId = itemIds.addNewItemId();
+            itemId.setId(messageId.getId());
+            itemId.setChangeKey(messageId.getChangeKey());
+        }
+        BodyType response = sendRequest(request);
+        ItemInfoResponseMessageType[] responses =
+                response.getMoveItemResponse().getResponseMessages().getMoveItemResponseMessageArray();
+        if (responses.length != 1)
+        {
+            throw new FailedToMoveMessage("There should have been 1 response message to createItem");
+        }
+        if (responses[0].getResponseCode() != ResponseCodeType.NO_ERROR)
+        {
+            throw new FailedToMoveMessage("ResponseCode some sort of error: " + responses[0].getResponseCode());
+        }
+    }
+
     private BodyType sendRequest(final EnvelopeDocument envelope)
     {
         String request = DECLARATION + envelope.xmlText();
@@ -213,6 +242,19 @@ public class ExchangePump
         }
 
         public FailedToFindMessage(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
+    public class FailedToMoveMessage extends Exception
+    {
+        public FailedToMoveMessage(String message)
+        {
+            super(message);
+        }
+
+        public FailedToMoveMessage(String message, Throwable cause)
         {
             super(message, cause);
         }

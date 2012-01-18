@@ -57,6 +57,8 @@
       <xs:element ref="m:CreateFolderResponse" />
       <xs:element ref="m:CreateItem" />
       <xs:element ref="m:CreateItemResponse" />
+      <xs:element ref="m:MoveItem" />
+      <xs:element ref="m:MoveItemResponse" />
     </xs:choice>
   </xs:complexType>
 </xs:schema>

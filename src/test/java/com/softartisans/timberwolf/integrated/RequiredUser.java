@@ -70,7 +70,7 @@ public class RequiredUser
         }
     }
 
-    public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage
+    public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
     {
         RETRY: for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
         {
@@ -90,7 +90,15 @@ public class RequiredUser
                     }
                 }
             }
-            break;
+            // we have succesfully gotten all the emails
+            for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
+            {
+                for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
+                {
+                    folder.moveMessages(pump, user, items);
+                }
+            }
+            return;
         }
     }
 }

@@ -81,7 +81,7 @@ public class RequiredFolder
 
     }
 
-    public boolean checkEmailsBeforeMove(HashMap<String, List<ExchangePump.MessageId>> items)
+    public boolean checkEmailsBeforeMove(final HashMap<String, List<ExchangePump.MessageId>> items)
     {
         List<ExchangePump.MessageId> messageIds = items.get(id);
         int idSize = messageIds == null ? 0 : messageIds.size();
@@ -97,5 +97,19 @@ public class RequiredFolder
             }
         }
         return true;
+    }
+
+    public void moveMessages(final ExchangePump pump, final String user,
+                             final HashMap<String, List<ExchangePump.MessageId>> items)
+            throws ExchangePump.FailedToMoveMessage
+    {
+        if (emails.size() > 0)
+        {
+            pump.moveMessages(user, id, items.get(id));
+        }
+        for (RequiredFolder folder : folders)
+        {
+            folder.moveMessages(pump, user, items);
+        }
     }
 }
