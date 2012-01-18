@@ -64,7 +64,7 @@ public class RequiredFolder
         }
     }
 
-    public void sendEmail(ExchangePump pump, String user)
+    public void sendEmail(ExchangePump pump, String user) throws ExchangePump.FailedToCreateMessage
     {
         if (emails.size() > 0)
         {

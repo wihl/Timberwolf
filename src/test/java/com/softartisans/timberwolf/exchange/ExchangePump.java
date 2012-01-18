@@ -4,6 +4,8 @@ import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderRespon
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
@@ -86,7 +88,7 @@ public class ExchangePump
         return createFolders(user, parentFolder, folders);
     }
 
-    public void sendMessages(List<RequiredEmail> emails)
+    public void sendMessages(List<RequiredEmail> emails) throws FailedToCreateMessage
     {
         EnvelopeDocument request = createEmptyRequest(sender);
         CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
@@ -103,7 +105,16 @@ public class ExchangePump
             exchangeMessage.setSubject(email.getSubject());
             exchangeMessage.addNewToRecipients().addNewMailbox().setEmailAddress(email.getTo());
             BodyType response = sendRequest(request);
-            System.err.println(response);
+            ItemInfoResponseMessageType[] responses =
+                    response.getCreateItemResponse().getResponseMessages().getCreateItemResponseMessageArray();
+            if (responses.length != 1)
+            {
+                throw new FailedToCreateMessage("There should have been 1 response message to createItem");
+            }
+            if (responses[0].getResponseCode() != ResponseCodeType.NO_ERROR)
+            {
+                throw new FailedToCreateMessage("ResponseCode some sort of error: " + responses[1].getResponseCode());
+            }
         }
     }
 
@@ -138,6 +149,20 @@ public class ExchangePump
         }
 
     }
+
+    public class FailedToCreateMessage extends Exception
+    {
+        public FailedToCreateMessage(String message)
+        {
+            super(message);
+        }
+
+        public FailedToCreateMessage(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
 
     /** A simple class representing an email */
     public class Message

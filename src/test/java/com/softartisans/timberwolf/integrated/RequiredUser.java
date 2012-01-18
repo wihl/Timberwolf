@@ -57,7 +57,7 @@ public class RequiredUser
         }
     }
 
-    public void sendEmail(ExchangePump pump)
+    public void sendEmail(ExchangePump pump) throws ExchangePump.FailedToCreateMessage
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
