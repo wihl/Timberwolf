@@ -8,7 +8,7 @@ executions of the tool.
 
 ## Documentation
 
-We don't have any documentation so there you go.
+We don't currently publish documentation.
 
 ## Contact us
 
@@ -71,9 +71,15 @@ file and /etc/hosts file correctly describe your realm.
         --domain ${yourDomain}
 
 This will run Timberwolf at a very basic level and print all located emails to
-the console.
+the console. In order to import the emails into an hbase instance, you must
+specify the required hbase arguments:
 
-MORE STUFF WILL NEED TO GO HERE. LIKE ALL THE HBASE STUFF.
+    java -jar ${project}/target/timberwolf-SNAPSHOT-jar-with-dependencies.jar \
+        --exchange-url ${yourExchangeUrl}/ews/exchange.asmx \
+        --domain ${yourDomain}
+        --hbase-clientport ${portYourHbaseListensOn} \
+        --hbase-quorum ${yourHbaseUrl} \
+        --hbase-table ${resultingTable}
 
 ## Contributing
 
@@ -91,9 +97,14 @@ additions conform to the coding convention.
 
 ### Running the tests
 
-The tests can be run by running "mvn test". There are a number of integrated
-tests that you can also run, but you must create the file
-{project}/testing.properties file that specifies the following properties:
+Before submitting a patch for approval, you should run the tests with:
+    mvn test
+
+There are a number of integrated tests that you can also run if you'd like,
+but they are ignored by default. In order to run the integrated tests, you
+must have a working instance of hbase and exchange to test against. And then
+you must create the file {project}/testing.properties that specifies the
+following properties:
 
 * *ZooKeeperQuorum*: This must specify the machine hosting your zookeeper
   instance.
@@ -110,3 +121,6 @@ tests that you can also run, but you must create the file
 Just rename the properties appropriately and rename the file to
 "testing.properties". All of these properties directly correspond to command
 line arguments that Timberwolf accepts.
+
+Although the integrated tests run against exchange and hbase, they will not
+effect any existing data nor will they leave any testing data in hbase.
