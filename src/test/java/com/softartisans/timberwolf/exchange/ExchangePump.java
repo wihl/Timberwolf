@@ -113,11 +113,18 @@ public class ExchangePump
             body.setStringValue(email.getBody());
             exchangeMessage.setSubject(email.getSubject());
             exchangeMessage.addNewToRecipients().addNewMailbox().setEmailAddress(email.getTo());
+            if (email.getCc() != null)
+            {
+                exchangeMessage.addNewCcRecipients().addNewMailbox().setEmailAddress(email.getCc());
+            }
+            if (email.getBcc() != null)
+            {
+                exchangeMessage.addNewBccRecipients().addNewMailbox().setEmailAddress(email.getBcc());
+            }
         }
         BodyType response = sendRequest(request);
         ItemInfoResponseMessageType[] responses =
                 response.getCreateItemResponse().getResponseMessages().getCreateItemResponseMessageArray();
-        System.err.println(response);
         if (responses.length != emails.size())
         {
             System.err.println(response);

@@ -160,7 +160,9 @@ public class RequiredUser
         }
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : topLevelEmails.keySet())
         {
-            if (topLevelEmails.get(distinguishedFolder).size() != items.get(distinguishedFolder.toString()).size())
+            List<ExchangePump.MessageId> emails = items.get(distinguishedFolder.toString());
+            int itemSize = emails == null ? 0 : emails.size();
+            if (topLevelEmails.get(distinguishedFolder).size() != itemSize)
             {
                 return true;
             }

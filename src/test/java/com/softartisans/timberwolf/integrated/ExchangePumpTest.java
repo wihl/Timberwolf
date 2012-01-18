@@ -35,10 +35,13 @@ public class ExchangePumpTest
         folder1.add(email("bkerr"), "My second email", "The body of said email");
         RequiredFolder folderA = folder1.addFolder("folderA");
         folderA.add(email("bkerr"), "Another email", "a body of mine");
-        folder1.addFolder("folderD");
+        RequiredFolder folderD = folder1.addFolder("folderD");
+        folderD.add(email("dkramer"), "carbon copy", "cc bkerr").cc(email("bkerr"));
+        folderD.add(email("dkramer"), "blind carbon copy", "bcc to him").bcc(email("bkerr"));
 
         bkerr.addToInbox(email("bkerr"), "With a fox", "sam i am");
         bkerr.addToDeletedItems(email("bkerr"), "gone", "with the wind");
+
 
 
 //        RequiredFolder folder2 = bkerr.addFolderToRoot("folder2");

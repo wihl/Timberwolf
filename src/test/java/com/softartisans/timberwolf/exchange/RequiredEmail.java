@@ -12,6 +12,8 @@ public class RequiredEmail
     private String body;
     private String folderId;
     private String to;
+    private String cc;
+    private String bcc;
 
     public RequiredEmail(String toEmail, String subjectText, String bodyText)
     {
@@ -61,6 +63,16 @@ public class RequiredEmail
         return to;
     }
 
+    public String getCc()
+    {
+        return cc;
+    }
+
+    public String getBcc()
+    {
+        return bcc;
+    }
+
     public static String getFolderId(String subject)
     {
         String[] s = subject.split(FOLDER_ID_SEPARATOR);
@@ -77,5 +89,17 @@ public class RequiredEmail
             return s[1];
         }
 
+    }
+
+    public RequiredEmail cc(String ccEmail)
+    {
+        cc = ccEmail;
+        return this;
+    }
+
+    public RequiredEmail bcc(String bccEmail)
+    {
+        bcc = bccEmail;
+        return this;
     }
 }
