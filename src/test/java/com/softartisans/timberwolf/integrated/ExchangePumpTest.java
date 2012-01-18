@@ -37,6 +37,10 @@ public class ExchangePumpTest
         folderA.add(email("bkerr"), "Another email", "a body of mine");
         folder1.addFolder("folderD");
 
+        bkerr.addToInbox(email("bkerr"), "With a fox", "sam i am");
+        bkerr.addToDeletedItems(email("bkerr"), "gone", "with the wind");
+
+
 //        RequiredFolder folder2 = bkerr.addFolderToRoot("folder2");
 //        folder2.addFolder("folderB");
 //        folder2.addFolder("folderC");

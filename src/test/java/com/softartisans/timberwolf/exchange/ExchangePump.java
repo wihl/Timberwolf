@@ -171,12 +171,12 @@ public class ExchangePump
         return emailResults;
     }
 
-    public void moveMessages(final String user, final String folder, final List<MessageId> messageIds)
-            throws FailedToMoveMessage
+    private void moveMessages(final String user, final TargetFolderIdType targetFolderId,
+                              final List<MessageId> messageIds) throws FailedToMoveMessage
     {
         EnvelopeDocument request = createEmptyRequest(user);
         MoveItemType moveItem = request.getEnvelope().addNewBody().addNewMoveItem();
-        moveItem.addNewToFolderId().addNewFolderId().setId(folder);
+        moveItem.setToFolderId(targetFolderId);
         NonEmptyArrayOfBaseItemIdsType itemIds = moveItem.addNewItemIds();
         for (MessageId messageId : messageIds)
         {
@@ -194,11 +194,27 @@ public class ExchangePump
 
         for (ItemInfoResponseMessageType resp : responses)
         {
-        if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
-        {
-            throw new FailedToMoveMessage("ResponseCode some sort of error: " + resp.getResponseCode());
+            if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
+            {
+                throw new FailedToMoveMessage("ResponseCode some sort of error: " + resp.getResponseCode());
+            }
         }
-        }
+    }
+
+    public void moveMessages(final String user, final String folder, final List<MessageId> messageIds)
+            throws FailedToMoveMessage
+    {
+        TargetFolderIdType targetFolderId = TargetFolderIdType.Factory.newInstance();
+        targetFolderId.addNewFolderId().setId(folder);
+        moveMessages(user, targetFolderId, messageIds);
+    }
+
+    public void moveMessages(final String user, final DistinguishedFolderIdNameType.Enum distinguishedFolder,
+                             final List<MessageId> messageIds) throws FailedToMoveMessage
+    {
+        TargetFolderIdType targetFolderId = TargetFolderIdType.Factory.newInstance();
+        targetFolderId.addNewDistinguishedFolderId().setId(distinguishedFolder);
+        moveMessages(user, targetFolderId, messageIds);
     }
 
     private BodyType sendRequest(final EnvelopeDocument envelope)
