@@ -11,8 +11,8 @@ import java.util.Map;
 /** Helper class for required users in exchange */
 public class RequiredUser
 {
-    private String user;
-    private Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
+    private final String user;
+    private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
 
     public RequiredUser(String username)
     {

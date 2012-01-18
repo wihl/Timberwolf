@@ -40,9 +40,9 @@ public class RequiredFolder
         return folder;
     }
 
-    public RequiredEmail add(String subject, String body)
+    public RequiredEmail add(String to, String subject, String body)
     {
-        RequiredEmail email = new RequiredEmail(subject, body);
+        RequiredEmail email = new RequiredEmail(to, subject, body);
         emails.add(email);
         return email;
     }

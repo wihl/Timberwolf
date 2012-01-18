@@ -101,7 +101,7 @@ public class ExchangePump
             body.setBodyType(BodyTypeType.TEXT);
             body.setStringValue(email.getBody());
             exchangeMessage.setSubject(email.getSubject());
-            exchangeMessage.addNewToRecipients().addNewMailbox().setName(email.getTo());
+            exchangeMessage.addNewToRecipients().addNewMailbox().setEmailAddress(email.getTo());
             BodyType response = sendRequest(request);
             System.err.println(response);
         }

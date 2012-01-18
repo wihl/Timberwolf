@@ -9,10 +9,11 @@ public class RequiredEmail
     private String folderId;
     private String to;
 
-    public RequiredEmail(String subjectText, String bodyText)
+    public RequiredEmail(String toEmail, String subjectText, String bodyText)
     {
         subject = subjectText;
         body = bodyText;
+        to = toEmail;
     }
 
     public void initialize(RequiredFolder folder, String username)
