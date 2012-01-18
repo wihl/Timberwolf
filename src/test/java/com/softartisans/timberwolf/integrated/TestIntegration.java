@@ -23,25 +23,25 @@ public class TestIntegration
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
 
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
+    private IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME);
 
     @Rule
-    public HTableResource hbase = new HTableResource();
+    private HTableResource hbase = new HTableResource();
 
-    private Get createGet(String row, String columnFamily, String[] headers)
+    private Get createGet(final String row, final String columnFamily, final String[] headers)
     {
             Get get = new Get(Bytes.toBytes(row));
-            for( String header : headers)
+            for (String header : headers)
             {
                 get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
             }
         return get;
     }
 
-    private Scan createScan(String columnFamily, String[] headers)
+    private Scan createScan(final String columnFamily, final String[] headers)
     {
         Scan scan = new Scan();
-        for( String header : headers)
+        for (String header : headers)
         {
             scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
         }
@@ -141,7 +141,8 @@ public class TestIntegration
                       .bodyContains("Ms child")
                       .bodyContains("wants to be in the loop too.");
         // Page FindItems (29)
-        for (int i = 1; i < 30; i++)
+        final int findItemsCount = 30;
+        for (int i = 1; i < findItemsCount; i++)
         {
             requiredEmails.add()
                           .subject("Page FindItems" + i)
@@ -149,7 +150,8 @@ public class TestIntegration
                           .bodyContains("#" + i);
         }
         // Page GetItems (11)
-        for (int i = 1; i < 12; i++)
+        final int getItemsCount = 12;
+        for (int i = 1; i < getItemsCount; i++)
         {
             requiredEmails.add()
                           .subject("Page GetItems" + i)
@@ -160,7 +162,9 @@ public class TestIntegration
 
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
 
-        MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
+        final int findItemsPageSize = 12;
+        final int getItemsPageSize = 4;
+        MailStore mailStore = new ExchangeMailStore(exchangeURL, findItemsPageSize, getItemsPageSize);
         MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
         Iterable<MailboxItem> mailboxItems = mailStore.getMail();
