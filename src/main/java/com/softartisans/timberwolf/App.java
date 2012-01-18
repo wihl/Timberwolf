@@ -8,6 +8,7 @@ import com.softartisans.timberwolf.exchange.HttpErrorException;
 import com.softartisans.timberwolf.exchange.ServiceCallException;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.hbase.HBaseManager;
+import com.softartisans.timberwolf.hbase.HBaseUserTimeUpdater;
 import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
 import com.softartisans.timberwolf.services.PrincipalFetcher;
@@ -57,9 +58,13 @@ final class App implements PrivilegedAction<Integer>
     private String hbaseclientPort;
 
     @Option(name = "--hbase-table",
-            usage = "The HBase table name that email data will be imported "
-                  + "into.")
+            usage = "The HBase table name that email data will be imported into.")
     private String hbaseTableName;
+
+    @Option(name = "--hbase-metadata-table",
+            usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
+                  + "email for each user.")
+    private String hbaseMetadataTableName;
 
     @Option(name = "--hbase-key-header.",
             usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
@@ -96,10 +101,10 @@ final class App implements PrivilegedAction<Integer>
 
             boolean noHBaseArgs =
                     hbaseQuorum == null && hbaseclientPort == null
-                    && hbaseTableName == null;
+                    && hbaseTableName == null && hbaseMetadataTableName == null;
             boolean allHBaseArgs =
                     hbaseQuorum != null && hbaseclientPort != null
-                    && hbaseTableName != null;
+                    && hbaseTableName != null && hbaseMetadataTableName != null;
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
@@ -127,15 +132,18 @@ final class App implements PrivilegedAction<Integer>
     public Integer run()
     {
         MailWriter mailWriter;
+        UserTimeUpdater timeUpdater;
         if (useHBase)
         {
             HBaseManager hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
             mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
+            timeUpdater = new HBaseUserTimeUpdater(hbaseManager, hbaseMetadataTableName);
         }
         else
         {
             mailWriter = new ConsoleMailWriter();
+            timeUpdater = new NoopUserTimeUpdater();
         }
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
