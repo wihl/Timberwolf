@@ -50,7 +50,7 @@ public class ExchangeService
      */
     public ExchangeService(final String url)
     {
-        this(url, new AlfredoHttpUrlConnectionFactory());
+        this(url, new SaslHttpUrlConnectionFactory());
     }
 
     /**

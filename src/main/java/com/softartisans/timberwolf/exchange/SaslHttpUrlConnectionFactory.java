@@ -11,11 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A HttpUrlConnectionFactory that works with Alfredo.
+ * A HttpUrlConnectionFactory that works with Sasl.
  */
-public class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
+public class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AlfredoHttpUrlConnectionFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SaslHttpUrlConnectionFactory.class);
 
     private static final String HTTP_METHOD = "POST";
     private static final int TIMEOUT = 10000;
