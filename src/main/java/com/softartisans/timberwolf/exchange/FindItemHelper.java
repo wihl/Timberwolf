@@ -24,6 +24,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.xmlbeans.XmlException;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,15 +103,12 @@ public final class FindItemHelper
         */
 
         String xml =
-              "<mes:Restriction xmlns:mes=\"http://schemas.microsoft.com/exchange/services/2006/messages\""
-            + "                 xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
-            + "  <typ:IsGreaterThan>"
-            + "    <typ:FieldURI FieldURI=\"item:DateTimeRecieved\" />"
+              "  <typ:IsGreaterThan xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            + "    <typ:FieldURI FieldURI=\"item:DateTimeReceived\" />"
             + "    <typ:FieldURIOrConstant>"
-            + "      <typ:Constant Value=\"" + startDate.toString(ISO_8601_FORMAT) + "\" />"
+            + "      <typ:Constant Value=\"" + startDate.toDateTime(DateTimeZone.UTC).toString(ISO_8601_FORMAT) + "\" />"
             + "    </typ:FieldURIOrConstant>"
-            + "  </typ:IsGreaterThan>"
-            + "</mes:Restriction>";
+            + "  </typ:IsGreaterThan>";
 
         try
         {

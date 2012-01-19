@@ -15,7 +15,7 @@ public final class Utilities
      * for use with org.joda.time.DateTime.toString().  For more information on
      * ISO 8601, see http://en.wikipedia.org/wiki/ISO_8601.
      */
-    public static final String ISO_8601_FORMAT = "YYYY-MM-dd'T'HH:mm:ssZ";
+    public static final String ISO_8601_FORMAT = "YYYY-MM-dd'T'HH:mm:ss";
 
     private Utilities()
     {
