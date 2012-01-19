@@ -97,16 +97,13 @@ public class ExchangePump
         return createFolders(user, parentFolder, folders);
     }
 
-    public void sendMessages(List<RequiredEmail> emails) throws FailedToCreateMessage
+    private void createEmails(final List<RequiredEmail> emails, final EnvelopeDocument request,
+                              final NonEmptyArrayOfAllItemsType emptyItemsType)
+            throws FailedToCreateMessage
     {
-        EnvelopeDocument request = createEmptyRequest(sender);
-        CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
-        createItem.setMessageDisposition(MessageDispositionType.SEND_ONLY);
-        NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
-
         for (RequiredEmail email : emails)
         {
-            MessageType exchangeMessage = items.addNewMessage();
+            MessageType exchangeMessage = emptyItemsType.addNewMessage();
             exchangeMessage.addNewFrom().addNewMailbox().setEmailAddress(sender);
             com.microsoft.schemas.exchange.services.x2006.types.BodyType body = exchangeMessage.addNewBody();
             body.setBodyType(BodyTypeType.TEXT);
@@ -140,6 +137,28 @@ public class ExchangePump
                         "ResponseCode some sort of error: " + resp.getResponseCode());
             }
         }
+    }
+
+    public void sendMessages(List<RequiredEmail> emails) throws FailedToCreateMessage
+    {
+        EnvelopeDocument request = createEmptyRequest(sender);
+        CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
+        createItem.setMessageDisposition(MessageDispositionType.SEND_ONLY);
+        NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
+
+        createEmails(emails, request, items);
+    }
+
+
+    public void saveDrafts(final String user, final List<RequiredEmail> drafts) throws FailedToCreateMessage
+    {
+        EnvelopeDocument request = createEmptyRequest(user);
+        CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
+        createItem.addNewSavedItemFolderId().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.DRAFTS);
+        createItem.setMessageDisposition(MessageDispositionType.SAVE_ONLY);
+        NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
+
+        createEmails(drafts, request, items);
     }
 
     public HashMap<String, List<MessageId>> findItems(String user) throws FailedToFindMessage

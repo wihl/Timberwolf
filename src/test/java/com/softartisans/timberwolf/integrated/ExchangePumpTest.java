@@ -41,6 +41,7 @@ public class ExchangePumpTest
 
         bkerr.addToInbox(email("bkerr"), "With a fox", "sam i am");
         bkerr.addToDeletedItems(email("bkerr"), "gone", "with the wind");
+        bkerr.addDraft(email("dkramer"), "I'm unsure", "as to what I will say");
 
 
 

@@ -15,6 +15,7 @@ public class RequiredUser
     private final String user;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>> topLevelEmails;
+    private final List<RequiredEmail> drafts;
     private static final int MAX_FIND_ITEM_ATTEMPTS = 10;
 
     public RequiredUser(String username)
@@ -22,6 +23,7 @@ public class RequiredUser
         user = username;
         distinguishedFolders = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>>();
         topLevelEmails = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>>();
+        drafts = new ArrayList<RequiredEmail>();
     }
 
     private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder, final String toEmail,
@@ -46,6 +48,13 @@ public class RequiredUser
     public RequiredEmail addToDeletedItems(final String toEmail, final String subjectText, final String bodyText)
     {
         return addToFolder(DistinguishedFolderIdNameType.DELETEDITEMS, toEmail, subjectText, bodyText);
+    }
+
+    public RequiredEmail addDraft(final String toEmail, final String subject, final String body)
+    {
+        RequiredEmail email = new RequiredEmail(toEmail,subject,body);
+        drafts.add(email);
+        return email;
     }
 
     public RequiredFolder addFolderToInbox(final String folderName)
@@ -91,6 +100,10 @@ public class RequiredUser
                 email.initialize(distinguishedFolder);
             }
         }
+        for (RequiredEmail email : drafts)
+        {
+            email.initialize(DistinguishedFolderIdNameType.DRAFTS);
+        }
     }
 
     public void sendEmail(ExchangePump pump) throws ExchangePump.FailedToCreateMessage
@@ -107,6 +120,7 @@ public class RequiredUser
         {
             pump.sendMessages(topLevelEmails.get(distinguishedFolder));
         }
+        pump.saveDrafts(user, drafts);
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
@@ -168,5 +182,6 @@ public class RequiredUser
             }
         }
         return false;
+        // no need to check the drafts folder, those are saved directly to drafts
     }
 }
