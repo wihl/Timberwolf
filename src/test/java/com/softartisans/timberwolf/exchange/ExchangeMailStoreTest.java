@@ -1,6 +1,5 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.cloudera.alfredo.client.AuthenticationException;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
@@ -52,7 +51,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     @Test
     public void testGetMailFind0()
             throws XmlException, IOException, HttpErrorException,
-                   ServiceCallException, AuthenticationException
+                   ServiceCallException
     {
         // Exchange returns 0 mail when findItem is called
         MessageType[] messages = new MessageType[0];
@@ -67,7 +66,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     @Test
     public void testGetMailFind0Folders()
             throws XmlException, IOException, HttpErrorException,
-                   ServiceCallException, AuthenticationException
+                   ServiceCallException
     {
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
@@ -80,7 +79,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     @Test
     public void testGetMailGet0()
             throws XmlException, IOException, HttpErrorException,
-                   ServiceCallException, AuthenticationException
+                   ServiceCallException
     {
         // Exchange returns 0 mail even though you asked for some mail
         int count = 100;
@@ -105,7 +104,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     @Test
     public void testGetMail30()
             throws XmlException, IOException, HttpErrorException,
-                   ServiceCallException, AuthenticationException
+                   ServiceCallException
     {
         // Exchange returns 30 in FindItems and 30 in GetItems
         int count = 30;
@@ -136,7 +135,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
     @Test
     public void testFindMailOneIdPageTwoItemPages()
-            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+            throws IOException, ServiceCallException,
+                   HttpErrorException, XmlException
     {
         int itemsInExchange = 10;
         int idPageSize = 11;
@@ -162,7 +162,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
     @Test
     public void testFindMailOneIdPageFiveItemPages()
-            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+            throws IOException, ServiceCallException,
+                   HttpErrorException, XmlException
     {
         int itemsInExchange = 24;
         int idPageSize = 30;
@@ -191,7 +192,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
     @Test
     public void testFindMailTwoIdPages10ItemPages()
-            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+            throws IOException, ServiceCallException,
+                   HttpErrorException, XmlException
     {
         int itemsInExchange = 50;
         int idPageSize = 30;
@@ -228,7 +230,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
     @Test
     public void testFindMailFiveIdPages20ItemPages()
-            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+            throws IOException, ServiceCallException,
+                   HttpErrorException, XmlException
     {
         int itemsInExchange = 100;
         int idPageSize = 20;
@@ -261,7 +264,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
     @Test
     public void testFindMailItemPageLargerThanIdPage()
-            throws IOException, AuthenticationException, ServiceCallException, HttpErrorException, XmlException
+            throws IOException, ServiceCallException,
+                   HttpErrorException, XmlException
     {
         int itemsInExchange = 20;
         int idPageSize = 5;
