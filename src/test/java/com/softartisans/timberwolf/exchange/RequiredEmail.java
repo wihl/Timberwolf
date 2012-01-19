@@ -14,6 +14,7 @@ public class RequiredEmail
     private String to;
     private String cc;
     private String bcc;
+    private String from;
 
     public RequiredEmail(String toEmail, String subjectText, String bodyText)
     {
@@ -63,6 +64,11 @@ public class RequiredEmail
         return to;
     }
 
+    public String getFrom()
+    {
+        return from;
+    }
+
     public String getCc()
     {
         return cc;
@@ -100,6 +106,24 @@ public class RequiredEmail
     public RequiredEmail bcc(String bccEmail)
     {
         bcc = bccEmail;
+        return this;
+    }
+
+    public RequiredEmail to(String toEmail)
+    {
+        to = toEmail;
+        return this;
+    }
+
+    /**
+     * The checked sender of the given email.
+     * This does not change the sender.
+     * @param fromEmail the expected sender
+     * @return this
+     */
+    public RequiredEmail from(String fromEmail)
+    {
+        from = fromEmail;
         return this;
     }
 }

@@ -18,17 +18,19 @@ public class RequiredUser
     private final List<RequiredEmail> drafts;
     private final List<RequiredEmail> sentItems;
     private static final int MAX_FIND_ITEM_ATTEMPTS = 10;
+    private final String emailAddress;
 
-    public RequiredUser(String username)
+    public RequiredUser(String username, String domain)
     {
         user = username;
+        emailAddress = username + "@" + domain;
         distinguishedFolders = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>>();
         topLevelEmails = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>>();
         drafts = new ArrayList<RequiredEmail>();
         sentItems = new ArrayList<RequiredEmail>();
     }
 
-    private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder, final String toEmail,
+    private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder,
                                       final String subjectText, final String bodyText)
     {
         List<RequiredEmail> emails = topLevelEmails.get(folder);
@@ -37,31 +39,31 @@ public class RequiredUser
             emails = new ArrayList<RequiredEmail>();
             topLevelEmails.put(folder, emails);
         }
-        RequiredEmail email = new RequiredEmail(toEmail, subjectText, bodyText);
+        RequiredEmail email = new RequiredEmail(emailAddress, subjectText, bodyText);
         emails.add(email);
         return email;
     }
 
-    public RequiredEmail addToInbox(final String toEmail, final String subjectText, final String bodyText)
+    public RequiredEmail addToInbox(final String subjectText, final String bodyText)
     {
-        return addToFolder(DistinguishedFolderIdNameType.INBOX, toEmail, subjectText, bodyText);
+        return addToFolder(DistinguishedFolderIdNameType.INBOX, subjectText, bodyText);
     }
 
-    public RequiredEmail addToDeletedItems(final String toEmail, final String subjectText, final String bodyText)
+    public RequiredEmail addToDeletedItems(final String subjectText, final String bodyText)
     {
-        return addToFolder(DistinguishedFolderIdNameType.DELETEDITEMS, toEmail, subjectText, bodyText);
+        return addToFolder(DistinguishedFolderIdNameType.DELETEDITEMS, subjectText, bodyText);
     }
 
     public RequiredEmail addDraft(final String toEmail, final String subject, final String body)
     {
-        RequiredEmail email = new RequiredEmail(toEmail,subject,body);
+        RequiredEmail email = new RequiredEmail(toEmail,subject,body).from(emailAddress);
         drafts.add(email);
         return email;
     }
 
     public RequiredEmail addSentItem(final String toEmail, final String subject, final String body)
     {
-        RequiredEmail email = new RequiredEmail(toEmail, subject, body);
+        RequiredEmail email = new RequiredEmail(toEmail, subject, body).from(emailAddress);
         sentItems.add(email);
         return email;
     }
@@ -84,7 +86,7 @@ public class RequiredUser
             folders = new ArrayList<RequiredFolder>();
             distinguishedFolders.put(parent, folders);
         }
-        RequiredFolder folder = new RequiredFolder(folderName);
+        RequiredFolder folder = new RequiredFolder(folderName, emailAddress);
         folders.add(folder);
         return folder;
     }

@@ -8,13 +8,15 @@ import java.util.List;
 public class RequiredFolder
 {
     private final String name;
+    private final String emailAddress;
     private String id;
     private List<RequiredFolder> folders;
     private List<RequiredEmail> emails;
 
-    public RequiredFolder(final String folderName)
+    public RequiredFolder(final String folderName, final String email)
     {
         this.name = folderName;
+        this.emailAddress = email;
         folders = new ArrayList<RequiredFolder>();
         emails = new ArrayList<RequiredEmail>();
     }
@@ -36,14 +38,14 @@ public class RequiredFolder
 
     public RequiredFolder addFolder(final String childFolder)
     {
-        RequiredFolder folder = new RequiredFolder(childFolder);
+        RequiredFolder folder = new RequiredFolder(childFolder, emailAddress);
         folders.add(folder);
         return folder;
     }
 
-    public RequiredEmail add(String to, String subject, String body)
+    public RequiredEmail add(String subject, String body)
     {
-        RequiredEmail email = new RequiredEmail(to, subject, body);
+        RequiredEmail email = new RequiredEmail(emailAddress, subject, body);
         emails.add(email);
         return email;
     }

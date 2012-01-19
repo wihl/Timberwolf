@@ -1,19 +1,20 @@
 package com.softartisans.timberwolf.integrated;
 
+import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.softartisans.timberwolf.Auth;
 import com.softartisans.timberwolf.MailStore;
 import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.exchange.ExchangeMailStore;
+import com.softartisans.timberwolf.exchange.ExchangePump;
+import com.softartisans.timberwolf.exchange.RequiredFolder;
 import com.softartisans.timberwolf.hbase.HBaseMailWriter;
 import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
+import java.io.IOException;
 import java.security.PrivilegedAction;
 import javax.security.auth.login.LoginException;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
@@ -57,8 +58,15 @@ public class TestIntegration
         return scan;
     }
 
+    private String email(String username)
+    {
+        return username + "@" + IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
+    }
+
     @Test
-    public void testIntegrationNoCLI() throws PrincipalFetchException, LoginException
+    public void testIntegrationNoCLI()
+            throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
+                   ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
     {
         /*
         This test tests getting emails from an exchange server, and the breadth
@@ -155,8 +163,14 @@ public class TestIntegration
             Page GetItems (11)
 
          */
+
+        final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        final String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
+        final String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
+
         final String keyHeader = "Item ID";
 
+        // TODO: this should be gone when the test is fully converted
         EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
 
         /////////////
@@ -191,80 +205,61 @@ public class TestIntegration
                       .subject("About Barbara")
                       .bodyContains("Something happened to her");
 
+        // Emails, TODO change
+        String bkerrUsername = "bkerr";
+        String bkerrEmail = email(bkerrUsername);
+
+        String tsenderEmail = email("tsender");
+        String abenjaminEmail = email("abenjamin");
+        String mprinceEmail = email("mprince");
         /////////////
         // korganizer
         /////////////
-        // Inbox
-        requiredEmails.add()
-                      .sender("tsender")
-                      .subject("Leave it be")
-                      .bodyContains("love your inbox clean");
-        // child of Inbox
-        requiredEmails.add()
-                      .subject("To the child of inbox")
-                      .bodyContains("child of Inbox");
-        // Inbox Jr
-        requiredEmails.add()
-                      .bodyContains("Inbox Jr")
-                      .bodyContains("is getting lonely");
-        requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
-        // Drafts
-        requiredEmails.add().to("tsender").subject("A draft");
-        // Sent Items
-        requiredEmails.add()
-                      .sender("korganizer")
-                      .to("abenjamin")
-                      .subject("A message to someone else");
-        requiredEmails.add()
-                      .bcc("tsender")
-                      .to("bkerr")
-                      .subject("to whom");
-        // Deleted Items
-        requiredEmails.add().subject("Whoops").bodyContains("this is trash");
-        // Deleted Folder
-        requiredEmails.add().bodyContains("Deleted Folder");
-        // Topper
-        requiredEmails.add()
-                      .to("bkerr")
-                      .cc("korganizer")
-                      .subject("Hey hey Bobbie, throw it in the Topper");
-        // Middler
-        requiredEmails.add().bodyContains("away this should go into middler, placed neatly.");
-        requiredEmails.add().subject("Another middler");
-        requiredEmails.add().subject("Yet another in the middler");
-        // Middler Jr
-        requiredEmails.add().subject("organize away to MJ").bodyContains("Middler Jr");
-        // Middler II (0)
-        // Middler III
-        requiredEmails.add().subject("Forward to Middler III");
-        // Middler IV (0)
-        // Ms child
-        requiredEmails.add().bodyContains("Ms child").bodyContains("nicer than MJ");
-        requiredEmails.add()
-                      .subject("Super nesting")
-                      .bodyContains("Ms child")
-                      .bodyContains("wants to be in the loop too.");
+        // TODO: change to korganizer
+        RequiredUser bkerr = new RequiredUser("bkerr", ldapDomain);
+        bkerr.addToInbox("Leave it be", "Even though you love your inbox clean").from(tsenderEmail);
+        bkerr.addFolder(DistinguishedFolderIdNameType.INBOX, "child of Inbox")
+             .add("To the child of inbox", "here is the body of the email in the child of Inbox");
+        RequiredFolder inboxJr = bkerr.addFolderToInbox("Inbox Jr");
+        inboxJr.add("books","Inbox Jr is getting lonely over here");
+        inboxJr.add("For Inbox Jr","some sort of body here");
+        bkerr.addDraft(tsenderEmail,"A draft", "with something I'll never tell you");
+        bkerr.addSentItem(abenjaminEmail, "A message to semone else", "you can tell, because of the to field");
+        bkerr.addSentItem(mprinceEmail, "To whom", "is this email going").bcc(tsenderEmail);
+        bkerr.addToDeletedItems("Whoops","This is going in the trash");
+        bkerr.addFolder(DistinguishedFolderIdNameType.DELETEDITEMS,"Deleted folder")
+                .add("Uh oh", "this is going in the recycling bin, which we're throwing out");
+        RequiredFolder topper = bkerr.addFolderToRoot("Topper");
+        topper.add("Hey hey Bobby McGee", "Makes me think of that Janis Joplin song").to(tsenderEmail).cc(bkerrEmail);
+        RequiredFolder middler = topper.addFolder("Middler");
+        middler.add("Move it", "Away this should go into middler, placed neatly there for all to see");
+        middler.add("Another middler email", "that has a super boring body");
+        middler.add("Yet another in the middler folder", "oh so many emails");
+        RequiredFolder middlerJr = middler.addFolder("Middler Jr");
+        middlerJr.add("organize away to MJ", "this will be moved to middler Jr");
+        RequiredFolder middlerIII = middlerJr.addFolder("Middler II").addFolder("Middler III");
+        middlerIII.add("Forward this on to Middler III", "where it shall be left");
+        RequiredFolder msChild = middlerIII.addFolder("Middler IV").addFolder("Ms child");
+        msChild.add("Ms child", "is way nicer than MJ");
+        msChild.add("Super nesting", "The child of Ms child is so deep");
+        RequiredFolder findItems = bkerr.addFolderToRoot("Page FindItems");
         // Page FindItems (29)
-        for (int i = 1; i < 30; i++)
+        for (int i = 0; i < 29; i++)
         {
-            requiredEmails.add()
-                          .subject("Page FindItems" + i)
-                          .bodyContains("Page FindItems")
-                          .bodyContains("#" + i);
+            findItems.add("Page FindItems" + (i+1), "Page FindItems #" + (i+1));
         }
+        RequiredFolder getItems = bkerr.addFolderToRoot("Page GetItems");
         // Page GetItems (11)
-        for (int i = 1; i < 12; i++)
+        for (int i = 0; i < 11; i++)
         {
-            requiredEmails.add()
-                          .subject("Page GetItems" + i)
-                          .bodyContains("Page GetItems")
-                          .bodyContains("#" + i);
+            getItems.add("Page GetItems" + (i+1), "Page GetItems #" + (i+1));
         }
 
+        ExchangePump pump = new ExchangePump(exchangeURL, "bkerr");
+        bkerr.initialize(pump);
 
-        final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
-        final String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
-        final String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
+        bkerr.sendEmail(pump);
+        bkerr.moveEmails(pump);
 
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
@@ -291,20 +286,9 @@ public class TestIntegration
         }, ldapConfigEntry);
         // Now prove that everything is in HBase.
 
-        try
-        {
-            HTableInterface hTable = hbase.getTestingTable();
-            Scan scan = createScan(hbase.getFamily(), new String[]{"Subject", "Sender", "Bcc", "Cc", "To", "Body"});
-            ResultScanner scanner = hTable.getScanner(scan);
-            for (Result result = scanner.next(); result != null; result = scanner.next())
-            {
-                requiredEmails.match(result);
-            }
-            requiredEmails.assertEmpty();
-        }
-        catch (Exception e)
-        {
-            Assert.fail("Error when attempting to compare.");
-        }
+        ExpectedEmails expectedEmails = new ExpectedEmails();
+        expectedEmails.require(bkerr, hbase);
+        expectedEmails.checkHbase();
+
     }
 }

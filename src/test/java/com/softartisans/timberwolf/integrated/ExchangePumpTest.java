@@ -29,18 +29,18 @@ public class ExchangePumpTest
     public void testCreateFolders() throws Exception
     {
         String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
-        RequiredUser bkerr = new RequiredUser("bkerr");
+        RequiredUser bkerr = new RequiredUser("bkerr", IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME));
         RequiredFolder folder1 = bkerr.addFolderToInbox("folder1");
-        folder1.add(email("bkerr"), "My first email", "The body of said email");
-        folder1.add(email("bkerr"), "My second email", "The body of said email");
+        folder1.add("My first email", "The body of said email");
+        folder1.add("My second email", "The body of said email");
         RequiredFolder folderA = folder1.addFolder("folderA");
-        folderA.add(email("bkerr"), "Another email", "a body of mine");
+        folderA.add("Another email", "a body of mine");
         RequiredFolder folderD = folder1.addFolder("folderD");
-        folderD.add(email("dkramer"), "carbon copy", "cc bkerr").cc(email("bkerr"));
-        folderD.add(email("dkramer"), "blind carbon copy", "bcc to him").bcc(email("bkerr"));
+        folderD.add("carbon copy", "cc bkerr").cc(email("bkerr"));
+        folderD.add("blind carbon copy", "bcc to him").bcc(email("bkerr")).to("dkramer");
 
-        bkerr.addToInbox(email("bkerr"), "With a fox", "sam i am");
-        bkerr.addToDeletedItems(email("bkerr"), "gone", "with the wind");
+        bkerr.addToInbox("With a fox", "sam i am");
+        bkerr.addToDeletedItems("gone", "with the wind");
         bkerr.addDraft(email("dkramer"), "I'm unsure", "as to what I will say");
         bkerr.addSentItem(email("dkramer"), "Hey dkramer", "this is the body");
 
