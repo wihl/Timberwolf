@@ -18,6 +18,7 @@ import org.junit.Test;
  */
 public class TestHBaseIntegration
 {
+    // @junitRule
     @Rule
     public HTableResource htable = new HTableResource();
 

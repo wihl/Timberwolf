@@ -38,6 +38,13 @@
 
     <property name="basedir" value="${basedir}"/>
   -->
+  
+  <!-- Disables VisibilityModifierChecks around JUnit rules properties. -->
+  <module name="SuppressWithNearbyCommentFilter">
+    <property name="commentFormat" value="@junitRule"/>
+    <property name="checkFormat" value="VisibilityModifierCheck"/>
+    <property name="influenceFormat" value="2"/>
+  </module>
 
   <!-- Checks that a package-info.java file exists for each package.   -->
   <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage -->
@@ -69,6 +76,9 @@
   </module>
 
   <module name="TreeWalker">
+
+    <!-- Lets us use filtering on comments. -->
+    <module name="FileContentsHolder"/>
 
     <!-- Checks for Javadoc comments.           -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
