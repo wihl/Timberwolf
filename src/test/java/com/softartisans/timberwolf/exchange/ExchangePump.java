@@ -161,6 +161,19 @@ public class ExchangePump
         createEmails(drafts, request, items);
     }
 
+    public void sendAndSave(final String user, final List<RequiredEmail> drafts) throws FailedToCreateMessage
+    {
+        EnvelopeDocument request = createEmptyRequest(user);
+        CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
+        createItem.addNewSavedItemFolderId().addNewDistinguishedFolderId()
+                  .setId(DistinguishedFolderIdNameType.SENTITEMS);
+        createItem.setMessageDisposition(MessageDispositionType.SEND_AND_SAVE_COPY);
+        NonEmptyArrayOfAllItemsType items = createItem.addNewItems();
+
+        createEmails(drafts, request, items);
+    }
+
+
     public HashMap<String, List<MessageId>> findItems(String user) throws FailedToFindMessage
     {
         HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();

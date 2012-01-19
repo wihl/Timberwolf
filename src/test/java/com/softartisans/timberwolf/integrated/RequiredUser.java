@@ -16,6 +16,7 @@ public class RequiredUser
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>> topLevelEmails;
     private final List<RequiredEmail> drafts;
+    private final List<RequiredEmail> sentItems;
     private static final int MAX_FIND_ITEM_ATTEMPTS = 10;
 
     public RequiredUser(String username)
@@ -24,6 +25,7 @@ public class RequiredUser
         distinguishedFolders = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>>();
         topLevelEmails = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>>();
         drafts = new ArrayList<RequiredEmail>();
+        sentItems = new ArrayList<RequiredEmail>();
     }
 
     private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder, final String toEmail,
@@ -54,6 +56,13 @@ public class RequiredUser
     {
         RequiredEmail email = new RequiredEmail(toEmail,subject,body);
         drafts.add(email);
+        return email;
+    }
+
+    public RequiredEmail addSentItem(final String toEmail, final String subject, final String body)
+    {
+        RequiredEmail email = new RequiredEmail(toEmail, subject, body);
+        sentItems.add(email);
         return email;
     }
 
@@ -104,6 +113,10 @@ public class RequiredUser
         {
             email.initialize(DistinguishedFolderIdNameType.DRAFTS);
         }
+        for (RequiredEmail email : sentItems)
+        {
+            email.initialize(DistinguishedFolderIdNameType.SENTITEMS);
+        }
     }
 
     public void sendEmail(ExchangePump pump) throws ExchangePump.FailedToCreateMessage
@@ -121,6 +134,7 @@ public class RequiredUser
             pump.sendMessages(topLevelEmails.get(distinguishedFolder));
         }
         pump.saveDrafts(user, drafts);
+        pump.sendAndSave(user, sentItems);
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
@@ -151,6 +165,7 @@ public class RequiredUser
                 pump.moveMessages(user, distinguishedFolder, items.get(distinguishedFolder.toString()));
 
             }
+            // no need to move the drafts or sentItems lists, those are saved directly
             return;
         }
     }
@@ -182,6 +197,6 @@ public class RequiredUser
             }
         }
         return false;
-        // no need to check the drafts folder, those are saved directly to drafts
+        // no need to check the drafts or sentItems lists, those are saved directly
     }
 }
