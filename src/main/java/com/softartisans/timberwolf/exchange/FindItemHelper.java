@@ -62,9 +62,7 @@ public final class FindItemHelper
      * @param maxEntries the maximum number of ids to grab with this request
      * @return the FindItemType necessary to request the ids
      */
-    static FindItemType getFindItemsRequest(final Configuration config,
-                                            final FolderContext folder,
-                                            final int offset)
+    static FindItemType getFindItemsRequest(final Configuration config, final FolderContext folder, final int offset)
         throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
