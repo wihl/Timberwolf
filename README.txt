@@ -1,10 +1,10 @@
 # Welcome to Timberwolf
 
 Timberwolf is an open-source, command-line service to aid in importing emails
-from Microsoft Exchange into Hadoop hbase. It will locate all emails within an
-exchange instance which it has access to and upload them into hbase. It also
-allows for periodic recynching between Exchange and hbase through periodic
-executions of the tool.
+from Microsoft Exchange into Apache HBase. It will locate all emails within an
+exchange instance which it has access to and upload them into HBase. By
+keeping track of when it was last run, Timberwolf can periodically update
+HBase with new messages.
 
 ## Compiling Timberwolf
 
@@ -16,11 +16,7 @@ Compiling Timberwolf requires the following tools:
 To compile Timberwolf, run `mvn compile`.
 To build a distribution, run `mvn package`.
 
-The final Flume distribution artifacts will be in $project/target/.
-
-## Documentation
-
-We don't currently publish documentation.
+The final Timberwolf distribution artifacts will be in $project/target/.
 
 ## Contact us
 
@@ -71,8 +67,8 @@ file and /etc/hosts file correctly describe your realm.
         --domain ${yourDomain}
 
 This will run Timberwolf at a very basic level and print all located emails to
-the console. In order to import the emails into an hbase instance, you must
-specify the required hbase arguments:
+the console. In order to import the emails into an HBase instance, you must
+specify the required HBase arguments:
 
     java -jar ${project}/target/timberwolf-SNAPSHOT-jar-with-dependencies.jar \
         --exchange-url ${yourExchangeUrl}/ews/exchange.asmx \
@@ -83,8 +79,8 @@ specify the required hbase arguments:
 
 ## Contributing
 
-Timberwolf is an open-source project. Anyone can contribute to Timberwolf by
-submitting a patch (MORE DATA NEEDED HERE)
+Submissions are welcome. To submit your changes, fork this repository and do
+your work in a topic branch. Once you're done, you can submit a pull request.
 
 ### Coding Conventions
 
@@ -97,30 +93,32 @@ additions conform to the coding convention.
 
 ### Running the tests
 
-Before submitting a patch for approval, you should run the tests with:
+Before submitting a pull request for approval, you should run the tests with:
     mvn test
 
 There are a number of integrated tests that you can also run if you'd like,
 but they are ignored by default. In order to run the integrated tests, you
-must have a working instance of hbase and exchange to test against. And then
-you must create the file {project}/testing.properties that specifies the
-following properties:
+must have a working instance of HBase test against. And then you must
+create the file {project}/testing.properties that specifies the following
+properties:
 
-* *ZooKeeperQuorum*: This must specify the machine hosting your zookeeper
-  instance.
-* *ZooKeeperClientPort*= This specifies the port your zookeeper instance is
-  listening on.
-* *ExchangeURI* = This specifies the exchange web service you intend to hit.
-  It will most like end with ".../ews/exchange.asmx"
-* *LdapDomain* = This specifies the domain you're testing on.
-* *LdapConfigEntry* = This specifies your jaas login configuration entry you
-  intend to use for testing. Likely, you can use the same configuration you
-  use for runtime, which is "Timberwolf".
+* *ZooKeeperQuorum*
+* *ZooKeeperClientPort*
+
+There are additional integrated tests which also require a working instance of
+Microsoft Exchange. Those tests will require these additional properties:
+
+* *ExchangeURI*
+* *LdapDomain*
+* *LdapConfigEntry*
 
 "testing.properties.example" is a sample file you can use to get you started.
-Just rename the properties appropriately and rename the file to
+It also contains information about what each property means. Just rename the
+properties appropriately and rename the file to
 "testing.properties". All of these properties directly correspond to command
-line arguments that Timberwolf accepts.
+line arguments that Timberwolf accepts (except for LdapConfigEntry).
 
-Although the integrated tests run against exchange and hbase, they will not
-effect any existing data nor will they leave any testing data in hbase.
+Timberwolf runs integrated tests by creating a temporary table in HBase to
+test against and then deleting it once the tests are complete. The tests will
+not remove any existing data from HBase, nor will they leave any testing data
+behind.
