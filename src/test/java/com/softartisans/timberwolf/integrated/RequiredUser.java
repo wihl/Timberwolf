@@ -199,4 +199,21 @@ public class RequiredUser
         return false;
         // no need to check the drafts or sentItems lists, those are saved directly
     }
+
+    public void getAllEmails(List<RequiredEmail> destination)
+    {
+        for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
+        {
+            for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
+            {
+                folder.getAllEmails(destination);
+            }
+        }
+        for (DistinguishedFolderIdNameType.Enum distinguishedFolder : topLevelEmails.keySet())
+        {
+            destination.addAll(topLevelEmails.get(distinguishedFolder));
+        }
+        destination.addAll(drafts);
+        destination.addAll(sentItems);
+    }
 }

@@ -112,4 +112,13 @@ public class RequiredFolder
             folder.moveMessages(pump, user, items);
         }
     }
+
+    public void getAllEmails(List<RequiredEmail> destination)
+    {
+        destination.addAll(emails);
+        for (RequiredFolder folder : folders)
+        {
+            folder.getAllEmails(destination);
+        }
+    }
 }
