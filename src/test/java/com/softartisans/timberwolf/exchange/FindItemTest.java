@@ -5,19 +5,29 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.BasePathToElementType;
+import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
+import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
+import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
+import com.microsoft.schemas.exchange.services.x2006.types.SearchExpressionType;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import java.util.Vector;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -252,4 +262,33 @@ public class FindItemTest extends ExchangeTestBase
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);
     }
 
+    @Test
+    public void testGetAfterDateRestriction() throws ServiceCallException
+    {
+        RestrictionType restriction = FindItemHelper.getAfterDateRestriction(new DateTime(0));
+        SearchExpressionType searchExpression = restriction.getSearchExpression();
+        assertTrue("Restriction was not using a greater than comparison.",
+                   searchExpression instanceof IsGreaterThanType);
+        IsGreaterThanType greaterThan = (IsGreaterThanType) searchExpression;
+        BasePathToElementType basePath = greaterThan.getPath();
+        assertTrue("Restriction was not using an unindexed field uri.", basePath instanceof PathToUnindexedFieldType);
+        PathToUnindexedFieldType fieldUri = (PathToUnindexedFieldType) basePath;
+        assertEquals("item:DateTimeReceived", fieldUri.getFieldURI().toString());
+        FieldURIOrConstantType startDate = greaterThan.getFieldURIOrConstant();
+        assertFalse("Restriction was comparing against a path, not a constant.", startDate.isSetPath());
+        assertTrue("Resitriction was not comparing against a constant.", startDate.isSetConstant());
+        ConstantValueType constant = startDate.getConstant();
+        assertEquals("Epoch time 0 did not produce the correct string.", "1970-01-01T00:00:00", constant.getValue());
+
+        restriction = FindItemHelper.getAfterDateRestriction(new DateTime(2000, 2, 10, 3, 4, 55, 0, DateTimeZone.UTC));
+        String date = ((IsGreaterThanType)restriction.getSearchExpression()).getFieldURIOrConstant()
+                                                     .getConstant().getValue();
+        assertEquals("UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
+
+        restriction = FindItemHelper.getAfterDateRestriction(new DateTime(2000, 2, 9, 22, 4, 55, 0,
+                                                                          DateTimeZone.forOffsetHours(-5)));
+        date = ((IsGreaterThanType)restriction.getSearchExpression()).getFieldURIOrConstant()
+                                              .getConstant().getValue();
+        assertEquals("Non-UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
+    }
 }
