@@ -39,7 +39,7 @@
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.3.3</version>
       	<configuration>
-      	  <onlyAnalyze>com.softartisans.timberwolf.*</onlyAnalyze>
+      	  <onlyAnalyze>com.ripariandata.timberwolf.*</onlyAnalyze>
       	</configuration>
       </plugin>
       <plugin>
@@ -95,7 +95,7 @@
           </descriptors>
           <archive>
             <manifest>
-              <mainClass>com.softartisans.timberwolf.App</mainClass>
+              <mainClass>com.ripariandata.timberwolf.App</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -141,7 +141,7 @@
       	<artifactId>maven-testability-plugin</artifactId>
       	<version>1.3.3</version>
       	<configuration>
-      	  <whiteList>com.microsoft.*:com.softartisans.timberwolf.exchangeservice.*:org.apache.*</whiteList>
+      	  <whiteList>com.microsoft.*:com.ripariandata.timberwolf.exchangeservice.*:org.apache.*</whiteList>
       	</configuration>
       </plugin>
       <plugin>
@@ -149,7 +149,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.8</version>
 	      <configuration>
-	        <excludePackageNames>com.microsoft.*:com.softartisans.timberwolf.exchangeservice*:org.*</excludePackageNames>
+	        <excludePackageNames>com.microsoft.*:com.ripariandata.timberwolf.exchangeservice*:org.*</excludePackageNames>
 	      </configuration>
       </plugin>
       <plugin>
