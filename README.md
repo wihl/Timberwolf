@@ -88,13 +88,12 @@ The Timberwolf code works off of the java sun coding conventions with a few
 minor exceptions. Curly braces should always be on their own line and imports
 should be ordered alphabetically and broken up by groups.
 
-You can run "mvn checkstyle:checkstyle" in order to confirm whether your
+You can run `mvn checkstyle:checkstyle` in order to confirm whether your
 additions conform to the coding convention.
 
 ### Running the tests
 
-Before submitting a pull request for approval, you should run the tests with:
-    mvn test
+Before submitting a pull request for approval, you should run the tests with `mvn test`.
 
 There are a number of integrated tests that you can also run if you'd like,
 but they are ignored by default. In order to run the integrated tests, you
