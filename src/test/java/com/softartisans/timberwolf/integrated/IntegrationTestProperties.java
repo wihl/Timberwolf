@@ -1,15 +1,15 @@
 package com.softartisans.timberwolf.integrated;
 
-import org.junit.Assume;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
+
+import org.junit.Assume;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * This rule checks that certain properties are set, and ignores the test if
@@ -42,7 +42,9 @@ public class IntegrationTestProperties implements TestRule
         try
         {
             path = System.getProperty(FILENAME_PROPERTY_NAME);
-        } catch (SecurityException se) {
+        }
+        catch (SecurityException se)
+        {
             System.err.println("Permission denied for accessing property: \"" + FILENAME_PROPERTY_NAME
                                + "\"; using default filename \"testing.properties\"");
         }
@@ -91,40 +93,42 @@ public class IntegrationTestProperties implements TestRule
     }
 
     /**
-     * Creates a new rule with a set of required properties
+     * Creates a new rule with a set of required properties.
      * @param propertyNames the properties that must be set, or the test will
      * be ignored
      */
-    public IntegrationTestProperties(String... propertyNames)
+    public IntegrationTestProperties(final String... propertyNames)
     {
         requiredProperties = propertyNames;
     }
 
     /**
-     * Returns the testing property
+     * Returns the testing property.
      * @param name the name of the property
      * @return the value of the property or null if the property is not set
      */
-    public static String getProperty(String name)
+    public static String getProperty(final String name)
     {
         return SET_PROPERTIES.getProperty(name);
     }
 
     @Override
-    public Statement apply(Statement statement, Description description)
+    public Statement apply(final Statement statement, final Description description)
     {
         return new IntegrationPropertiesStatement(description.getClassName() + "." + description.getMethodName(),
                                                   requiredProperties, statement);
     }
 
+    /**
+     * A Statement used for IntegrationProperties.
+     */
     private class IntegrationPropertiesStatement extends Statement
     {
         private String testName;
         private String[] propertyNames;
         private Statement statement;
 
-        public IntegrationPropertiesStatement(
-                String methodName, String[] properties, Statement base)
+        public IntegrationPropertiesStatement(final String methodName, final String[] properties, final Statement base)
         {
             testName = methodName;
             propertyNames = properties;
@@ -140,7 +144,7 @@ public class IntegrationTestProperties implements TestRule
 
         /**
          * Ignores the test (by calling JUnit's Assume methods) if any of the
-         * properties is undefined and list the necessary properties in System.err
+         * properties is undefined and list the necessary properties in System.err.
          *
          */
         private void ignoreIfMissingProperties()
@@ -164,7 +168,7 @@ public class IntegrationTestProperties implements TestRule
                 sb.append(propertyNames[0]);
                 sb.append('\"');
 
-                for (int i=1; i<propertyNames.length-1; i++)
+                for (int i = 1; i < propertyNames.length - 1; i++)
                 {
                     sb.append(", \"");
                     sb.append(propertyNames[i]);

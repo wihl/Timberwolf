@@ -1,15 +1,13 @@
 package com.softartisans.timberwolf.hbase;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.mockito.Mockito.*;
 
 /**
  * Unit test for HBaseManager.
@@ -19,14 +17,14 @@ public class HBaseManagerTest
     /**
      * Our logger for this class.
      */
-    Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
+    private Logger logger = LoggerFactory.getLogger(HBaseManagerTest.class);
 
     /**
      * Creates an IHBaseTable with a specific name.
      * @param name The name of the IHBaseTable.
      * @return A IHBaseTable with a specific name.
      */
-    private IHBaseTable createNamedTable(String name)
+    private IHBaseTable createNamedTable(final String name)
     {
         HBaseTable table = mock(HBaseTable.class);
         when(table.getName()).thenReturn(name);
