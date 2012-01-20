@@ -84,7 +84,7 @@ public final class FindItemHelper
            features (abstract types and substitution groups) that xmlbeans has some
            trouble with.  In theory, we should be able to use the 'substitute'
            mehtod to insert the correct derived type into our XmlBeans object where
-           it's currently using an abstract type, but I can't get that work properly.
+           it's currently using an abstract type, but I can't get that to work properly.
            Fortunately, parsing the restriction from a string sets everything
            correctly.  If you get the urge to try to refactor this to do things the
            right way with substitutions, these links may help:
