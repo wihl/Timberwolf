@@ -3,6 +3,8 @@ package com.softartisans.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
@@ -11,6 +13,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.MoveItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.DisposalType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
@@ -19,6 +22,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType
 import com.microsoft.schemas.exchange.services.x2006.types.MessageDispositionType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfAllItemsType;
+import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseItemIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
@@ -97,6 +101,20 @@ public class ExchangePump
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
         createFolders(user, parentFolder, folders);
+    }
+
+    public void deleteFolders(String user, List<RequiredFolder> folders)
+    {
+        EnvelopeDocument request = createEmptyRequest(user);
+        DeleteFolderType deleteFolder = request.getEnvelope().addNewBody().addNewDeleteFolder();
+        deleteFolder.setDeleteType(DisposalType.HARD_DELETE);
+        NonEmptyArrayOfBaseFolderIdsType doomedFolders = deleteFolder.addNewFolderIds();
+
+        for (RequiredFolder folder : folders)
+        {
+            doomedFolders.addNewFolderId().setId(folder.getId());
+        }
+        sendRequest(request);
     }
 
     private void createEmails(final List<RequiredEmail> emails, final EnvelopeDocument request,

@@ -1,5 +1,10 @@
 package com.softartisans.timberwolf.integrated;
 
+import java.security.PrivilegedAction;
+
+import junit.framework.Assert;
+
+import com.softartisans.timberwolf.Auth;
 import com.softartisans.timberwolf.exchange.ExchangePump;
 import com.softartisans.timberwolf.exchange.RequiredFolder;
 import org.junit.Rule;
@@ -28,8 +33,8 @@ public class ExchangePumpTest
     @Test
     public void testCreateFolders() throws Exception
     {
-        String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
-        RequiredUser bkerr = new RequiredUser("bkerr", IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME));
+        final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        final RequiredUser bkerr = new RequiredUser("bkerr", IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME));
         RequiredFolder folder1 = bkerr.addFolderToInbox("folder1");
         folder1.add("My first email", "The body of said email");
         folder1.add("My second email", "The body of said email");
@@ -51,11 +56,27 @@ public class ExchangePumpTest
 //        folder2.addFolder("folderC");
 
 
-        ExchangePump pump = new ExchangePump(exchangeURL, "bkerr");
-        bkerr.initialize(pump);
+        Auth.authenticateAndDo(new PrivilegedAction<Integer>() {
+            public Integer run() {
+                ExchangePump pump = new ExchangePump(exchangeURL, "bkerr");
+                try
+                {
+                    bkerr.initialize(pump);
 
-        bkerr.sendEmail(pump);
-        bkerr.moveEmails(pump);
+                    bkerr.sendEmail(pump);
+                    bkerr.moveEmails(pump);
+                }
+                catch (Exception e)
+                {
+                    Assert.fail("Exception was thrown: " + e.getMessage());
+                }
+                finally
+                {
+                    bkerr.deleteEmails(pump);
+                }
+                return 0;
+            }
+        }, "Timberwolf");
     }
 
 }

@@ -151,6 +151,15 @@ public class RequiredUser
         }
     }
 
+    public void deleteEmails(ExchangePump pump)
+    {
+        for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
+        {
+            List<RequiredFolder> folders = distinguishedFolders.get(distinguishedFolder);
+            pump.deleteFolders(user, folders);
+        }
+    }
+
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
     {
         for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
