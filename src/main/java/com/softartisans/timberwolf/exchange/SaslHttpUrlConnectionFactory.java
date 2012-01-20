@@ -28,7 +28,7 @@ public class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         try
         {
             URL url = new URL(address);
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             conn.setRequestMethod(HTTP_METHOD);
             conn.setDoOutput(true);

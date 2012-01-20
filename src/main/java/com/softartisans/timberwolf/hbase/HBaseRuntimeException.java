@@ -10,7 +10,7 @@ public class HBaseRuntimeException extends RuntimeException
         super(message, cause);
     }
 
-    public static HBaseRuntimeException create(final String message, final Throwable cause, Logger logger)
+    public static HBaseRuntimeException create(final String message, final Throwable cause, final Logger logger)
     {
         logger.error(message);
         return new HBaseRuntimeException(message, cause);
