@@ -28,11 +28,21 @@ import org.junit.Test;
 public class TestIntegration
 {
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
+    private static final String EXCHANGE_USER1_PROPERTY_NAME = "ExchangeUser1";
+    private static final String EXCHANGE_USER2_PROPERTY_NAME = "ExchangeUser2";
+    private static final String EXCHANGE_USER3_PROPERTY_NAME = "ExchangeUser3";
+    private static final String EXCHANGE_SENDER_PROPERTY_NAME = "ExchangeSender";
+    private static final String EXCHANGE_IGNORED_USER_PROPERTY_NAME = "ExchangeIgnoredUser";
 
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
+                                                                                EXCHANGE_USER1_PROPERTY_NAME,
+                                                                                EXCHANGE_USER2_PROPERTY_NAME,
+                                                                                EXCHANGE_USER3_PROPERTY_NAME,
+                                                                                EXCHANGE_SENDER_PROPERTY_NAME,
+                                                                                EXCHANGE_IGNORED_USER_PROPERTY_NAME,
                                                                                 LDAP_DOMAIN_PROPERTY_NAME,
                                                                                 LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
@@ -76,55 +86,6 @@ public class TestIntegration
         asserting that those emails are in the hbase table afterwards. If you're
         recreating this structure, avoid putting the text that we check in
         multiple emails, except the sender, that's fine.
-
-        There are 5 users involved, some of which are in a security group set
-        up for impersonation (more on this below):
-          jclouseau - the user with impersonation rights for the group
-          korganizer - in the impersonation group, has a lot of folders and
-                       emails
-          aloner - another user in the impersonation group with just a few
-                   emails
-          marcher - a third user in the impersonation group, also has just a
-                    few emails
-          tsender - A helper user that is not in the impersonation group and
-                    does all of the sending
-
-        Before creating the security group for impersonation, create the user
-        mailboxes in exchanges.
-
-        In order to create a security group set up for impersonation:
-        One will have to log into our Exchange test server. From there,
-        open up the Exchange Management Console and select Recipient
-        Configuration and then Distribution Group. Right click inside the pane
-        and select New Distribution Group. On the first page, select new group.
-        On the second, one must specify the group type as security. Don't
-        specify an organization unit, and the names and aliases are arbitrary
-        but make them all the same. We will refer to this unique name as the
-        SecurityGroupName. On the last page simply press the New button and
-        the group should be created. It's not instantaneous, but should appear
-        within the list fairly quickly.
-
-        The users will then have to be added to the security group.
-        Right-click on the security group name and select Properties.
-        Under the members tab is a list of all the current members and an Add
-        button. Clicking the add button will bring up a list of members.
-        Multi-select the users that need to be in the impersonation group.
-
-        Once the members are added, create a ManagementScope. Open the Exchange
-        Management Shell. Then run the following to create a ManagementScope
-        with name "ScopeName" for the security group "SecurityGroupName"
-        (this should be on one line, but I wrapped it for readability):
-            New-ManagementScope -Name:ScopeName -RecipientRestrictionFilter
-            {MemberOfGroup -eq
-            "cn=SecurityGroupName,cn=Users,DC=int,DC=tartarus,DC=com"}
-        Then create a ManagementRoleAssignment for jclouseau. To create a
-        ManagementRoleAssignment named "ManagementRoleAssignmentName" over
-        scope "ScopeName" (again this is just one line):
-            New-ManagementRoleAssignment -Name:ManagementRoleAssignmentName
-            -Role:ApplicationImpersonation -User:jclouseau
-            -CustomRecipientWriteScope:ScopeName
-
-        Now jclouseau is set up to impersonate the other users.
 
 
         Below is the required structure; identation denotes the heirarchy.
@@ -174,17 +135,17 @@ public class TestIntegration
         // Emails, TODO get these from properties
 
         // The emails of this user are not checked
-        final String senderUsername = "scottdSender";
+        final String senderUsername = IntegrationTestProperties.getProperty(EXCHANGE_SENDER_PROPERTY_NAME);
         final String senderEmail = email(senderUsername);
 
         // The emails of this user are not checked
-        final String ignoredUsername = "scottdIgnored";
+        final String ignoredUsername = IntegrationTestProperties.getProperty(EXCHANGE_IGNORED_USER_PROPERTY_NAME);
         final String ignoredEmail = email(ignoredUsername);
 
-        String username1 = "scottd1";
+        String username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
         String email1 = email(username1);
-        String username2 = "scottd2";
-        String username3 = "scottd3";
+        String username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
+        String username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
 
 
         /////////////

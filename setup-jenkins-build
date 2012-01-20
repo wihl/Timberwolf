@@ -8,6 +8,12 @@ ZooKeeperClientPort = 2181
 ExchangeURI = https://devexch01.int.tartarus.com/ews/exchange.asmx
 LdapDomain = int.tartarus.com
 LdapConfigEntry = Timberwolf
+# Exchange Users
+ExchangeUser1 = jenkins1
+ExchangeUser2 = jenkins2
+ExchangeUser3 = jenkins3
+ExchangeSender = jenkinsSender
+ExchangeIgnoredUser = jenkinsIgnored
 EOF
 
 # jclouseau is the user who can impersonate everyone else.
