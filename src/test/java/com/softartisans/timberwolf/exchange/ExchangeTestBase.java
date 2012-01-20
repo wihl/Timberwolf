@@ -20,12 +20,14 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.softartisans.timberwolf.UserTimeUpdater;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.xmlbeans.XmlException;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
@@ -95,8 +97,19 @@ public class ExchangeTestBase
     private void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds, String user)
         throws ServiceCallException, HttpErrorException
     {
-        FolderContext folderContext = new FolderContext(folder, user);
+        mockFindItem(messages, folder, offset, maxIds, user, new DateTime(0));
+    }
+
+    protected void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds, String user,
+                                DateTime startDate)
+        throws ServiceCallException, HttpErrorException
+    {
         Configuration config = new Configuration(maxIds, 0);
+        UserTimeUpdater timeUpdater = mock(UserTimeUpdater.class);
+        when(timeUpdater.lastUpdated(user)).thenReturn(startDate);
+        config = config.withTimeUpdater(timeUpdater);
+
+        FolderContext folderContext = new FolderContext(folder, user);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
         FindItemResponseType findItemResponse = mock(FindItemResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);

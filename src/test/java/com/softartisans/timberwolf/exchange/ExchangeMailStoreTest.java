@@ -4,6 +4,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMes
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfRealItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
@@ -15,6 +16,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.NoopUserTimeUpdater;
+import com.softartisans.timberwolf.UserTimeUpdater;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.LikeThis;
 import org.junit.Before;
 import org.junit.Test;
@@ -414,6 +417,53 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                 MailboxItem item = mail.next();
                 assertEquals(folder + ":the #" + i + " id", item.getHeader("Item ID"));
             }
+        }
+        assertFalse(mail.hasNext());
+    }
+
+    @Test
+    public void testGetMailWithStartDates() throws ServiceCallException, HttpErrorException, XmlException, IOException
+    {
+        FolderType aliceFolder = mock(FolderType.class);
+        FolderIdType aliceId = mock(FolderIdType.class);
+        when(aliceFolder.isSetFolderId()).thenReturn(true);
+        when(aliceFolder.getFolderId()).thenReturn(aliceId);
+        when(aliceId.getId()).thenReturn("ALICE-FOLDER");
+
+        mockFindFolders(new FolderType[] { aliceFolder }, "alice");
+        MessageType[] allMessages = mockFindItem("ALICE-FOLDER", 0, 10, 5, "alice");
+        mockGetItem(allMessages, generateIds(0, 5, "ALICE-FOLDER"), "alice");
+
+        MessageType[] newMessages = new MessageType[2];
+        newMessages[0] = allMessages[3];
+        newMessages[1] = allMessages[4];
+        mockFindItem(newMessages, "ALICE-FOLDER", 0, 10, "alice", new DateTime(3 * 1000));
+        mockGetItem(newMessages, generateIds(3, 2, "ALICE-FOLDER"), "alice");
+
+        UserTimeUpdater mockTimeUpdater = mock(UserTimeUpdater.class);
+        when(mockTimeUpdater.lastUpdated("alice")).thenReturn(new DateTime(0));
+
+        ArrayList<String> users = new ArrayList<String>();
+        users.add("alice");
+
+        ExchangeMailStore store = new ExchangeMailStore(service, 10, 5);
+        Iterator<MailboxItem> mail = store.getMail(users, mockTimeUpdater).iterator();
+        for (int i = 0; i < 5; i++)
+        {
+            assertTrue(mail.hasNext());
+            MailboxItem item = mail.next();
+            assertEquals("ALICE-FOLDER:the #" + i + " id", item.getHeader("Item ID"));
+        }
+        assertFalse(mail.hasNext());
+
+        when(mockTimeUpdater.lastUpdated("alice")).thenReturn(new DateTime(3 * 1000));
+
+        mail = store.getMail(users, mockTimeUpdater).iterator();
+        for (int i = 3; i < 5; i++)
+        {
+            assertTrue(mail.hasNext());
+            MailboxItem item = mail.next();
+            assertEquals("ALICE-FOLDER:the #" + i + " id", item.getHeader("Item ID"));
         }
         assertFalse(mail.hasNext());
     }
