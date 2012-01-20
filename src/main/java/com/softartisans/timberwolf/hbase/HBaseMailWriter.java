@@ -51,14 +51,11 @@ public final class HBaseMailWriter implements MailWriter
      * @param columnFamily The column family to add mail headers to.
      * @return A new HBaseMailWriter instance with the specified settings.
      */
-    public static MailWriter create(final String quorum,
-                                         final String clientPort,
-                                         final String tableName,
-                                         final String keyHeader,
-                                         final String columnFamily)
+    public static MailWriter create(final HBaseManager hbase,
+                                    final String tableName,
+                                    final String keyHeader,
+                                    final String columnFamily)
     {
-        HBaseManager hbase = new HBaseManager(quorum, clientPort);
-
         List<String> columnFamilies = new ArrayList<String>();
         columnFamilies.add(columnFamily);
 
@@ -79,8 +76,8 @@ public final class HBaseMailWriter implements MailWriter
      * @return A new HBaseMailWriter instance with the specified settings.
      */
     public static MailWriter create(final IHBaseTable table,
-                                         final String keyHeader,
-                                         final String columnFamily)
+                                    final String keyHeader,
+                                    final String columnFamily)
     {
         return new HBaseMailWriter(table, keyHeader, columnFamily);
     }

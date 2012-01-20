@@ -16,9 +16,6 @@ import org.joda.time.DateTime;
  */
 public class HBaseUserTimeUpdater implements UserTimeUpdater
 {
-    /** The HBaseManager for the HBase instance wherein our timings will be stored. */
-    private HBaseManager manager;
-
     /** The table wherein our timings are stored. */
     private IHBaseTable table;
 
@@ -33,8 +30,6 @@ public class HBaseUserTimeUpdater implements UserTimeUpdater
      */
     public HBaseUserTimeUpdater(final HBaseManager hBaseManager, final String updateTable)
     {
-        manager = hBaseManager;
-
         List<String> columnFamilies = new ArrayList<String>();
         columnFamilies.add(TIME_COLUMN_FAMILY);
 

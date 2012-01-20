@@ -21,11 +21,10 @@ import org.slf4j.LoggerFactory;
  */
 public class HBaseManager
 {
-
     /**
      * The logger for this class.
      */
-    private static Logger LOG = LoggerFactory.getLogger(HBaseManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseManager.class);
 
     /**
      * The underlying table collection.
@@ -164,7 +163,8 @@ public class HBaseManager
     {
         if (canRemote())
         {
-            if (tableExistsRemotely(tableName)) {
+            if (tableExistsRemotely(tableName))
+            {
                 LOG.info("Table " + tableName + " exists.");
                 HTableInterface table;
                 try
@@ -178,7 +178,8 @@ public class HBaseManager
                             e, LOG);
                 }
             }
-            else {
+            else
+            {
                 LOG.info("Table " + tableName + " does not exist.");
             }
         }
@@ -195,7 +196,8 @@ public class HBaseManager
         {
             return false;
         }
-        if (hbase == null) {
+        if (hbase == null)
+        {
             LOG.error("HBase instance is not initialized!");
         }
         return true;
@@ -224,7 +226,8 @@ public class HBaseManager
             }
             try
             {
-                if (hbase.tableExists(tableName)) {
+                if (hbase.tableExists(tableName))
+                {
                     LOG.error("Cannot create table " + tableName + ", as "
                             + "the table already exists!");
                 }

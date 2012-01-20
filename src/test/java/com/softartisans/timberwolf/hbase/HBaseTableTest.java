@@ -2,9 +2,8 @@ package com.softartisans.timberwolf.hbase;
 
 import com.softartisans.timberwolf.MockHTable;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Result;
-import org.junit.*;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
@@ -100,7 +99,8 @@ public class HBaseTableTest
     {
         String rowKey = "row";
         IHBaseTable table = new HBaseTable(MockHTable.create());
-        for (int i = 0; i < 10; i++)
+        final int count = 10;
+        for (int i = 0; i < count; i++)
         {
             Put put = new Put(Bytes.toBytes(rowKey + i));
             put.add(Bytes.toBytes(defaultColumnFamily), Bytes.toBytes(defaultColumnQualifier), Bytes.toBytes(i));
@@ -108,13 +108,13 @@ public class HBaseTableTest
         }
         table.flush();
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < count; i++)
         {
             Get get = new Get(Bytes.toBytes(rowKey + i));
             Result result = table.get(get);
             int value = Bytes.toInt(result.getValue(Bytes.toBytes(defaultColumnFamily),
                     Bytes.toBytes(defaultColumnQualifier)));
-            Assert.assertEquals(i,value);
+            Assert.assertEquals(i, value);
         }
     }
 

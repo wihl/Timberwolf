@@ -5,6 +5,9 @@ package com.softartisans.timberwolf;
  */
 public interface MailStore
 {
-    /** Returns some mail for the given users. */
-    Iterable<MailboxItem> getMail(Iterable<String> targetUsers);
+    /**
+     * Returns some mail for the given users, only getting the mail for each user since the
+     * time returned by timeUpdater.lastUpdated.
+     */
+    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserTimeUpdater timeUpdater);
 }

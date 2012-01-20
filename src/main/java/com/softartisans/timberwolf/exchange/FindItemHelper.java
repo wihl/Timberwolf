@@ -10,11 +10,17 @@ import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
 
 import java.util.Vector;
 
+import org.apache.xmlbeans.XmlException;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.softartisans.timberwolf.Utilities.ISO_8601_FORMAT;
 
 /**
  * Contains helper methods for FindItems requests.
@@ -48,9 +54,8 @@ public final class FindItemHelper
      * @param maxEntries the maximum number of ids to grab with this request
      * @return the FindItemType necessary to request the ids
      */
-    static FindItemType getFindItemsRequest(final Configuration config,
-                                            final FolderContext folder,
-                                            final int offset)
+    static FindItemType getFindItemsRequest(final Configuration config, final FolderContext folder, final int offset)
+        throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -62,9 +67,49 @@ public final class FindItemHelper
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
 
+        DateTime startDate = config.getLastUpdated(folder.getUser());
+        if (startDate != null)
+        {
+            findItem.setRestriction(getAfterDateRestriction(startDate));
+        }
+
         findItem.setParentFolderIds(folder.getFolderIds());
 
         return findItem;
+    }
+
+    static RestrictionType getAfterDateRestriction(final DateTime startDate) throws ServiceCallException
+    {
+        /* The xml schema concerning restrictions uses some rather unconventional
+           features (abstract types and substitution groups) that xmlbeans has some
+           trouble with.  In theory, we should be able to use the 'substitute'
+           mehtod to insert the correct derived type into our XmlBeans object where
+           it's currently using an abstract type, but I can't get that to work properly.
+           Fortunately, parsing the restriction from a string sets everything
+           correctly.  If you get the urge to try to refactor this to do things the
+           right way with substitutions, these links may help:
+                http://wiki.apache.org/xmlbeans/SubstGroupsFaq
+                http://xmlbeans.apache.org/docs/2.4.0/reference/index.html
+        */
+
+        String xml =
+              "<typ:IsGreaterThan xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            + "  <typ:FieldURI FieldURI=\"item:DateTimeReceived\" />"
+            + "  <typ:FieldURIOrConstant>"
+            + "    <typ:Constant Value=\"" + startDate.toDateTime(DateTimeZone.UTC).toString(ISO_8601_FORMAT) + "\" />"
+            + "  </typ:FieldURIOrConstant>"
+            + "</typ:IsGreaterThan>";
+
+        try
+        {
+            return RestrictionType.Factory.parse(xml);
+        }
+        catch (XmlException e)
+        {
+            LOG.error("Unable to parse generated Restriction tag:");
+            LOG.error(xml);
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Cannot construct restriction tag.");
+        }
     }
 
     /**

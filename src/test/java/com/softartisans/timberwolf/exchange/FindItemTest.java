@@ -5,23 +5,36 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.types.BasePathToElementType;
+import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
+import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
+import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
+import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
+import com.microsoft.schemas.exchange.services.x2006.types.SearchExpressionType;
 
 import java.util.Vector;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import org.junit.Test;
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -38,7 +51,7 @@ public class FindItemTest extends ExchangeTestBase
     private static final int DEFAULT_MAX_ENTRIES = 1000;
 
     @Test
-    public void testGetFindItemsRequestInbox()
+    public void testGetFindItemsRequestInbox() throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -49,13 +62,14 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(DEFAULT_MAX_ENTRIES);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
         Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
         assertEquals(findItem.xmlText(),
                      FindItemHelper.getFindItemsRequest(config, inbox, 0).xmlText());
     }
 
     @Test
-    public void testGetFindItemsRequestDeletedItems()
+    public void testGetFindItemsRequestDeletedItems() throws ServiceCallException
     {
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
@@ -66,6 +80,7 @@ public class FindItemTest extends ExchangeTestBase
         index.setMaxEntriesReturned(DEFAULT_MAX_ENTRIES);
         index.setBasePoint(IndexBasePointType.BEGINNING);
         index.setOffset(0);
+        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
         Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
         FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS, getDefaultUser());
         assertEquals(findItem.xmlText(),
@@ -73,7 +88,7 @@ public class FindItemTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetFindItemsRequestOffset()
+    public void testGetFindItemsRequestOffset() throws ServiceCallException
     {
         final int maxEntries = 10;
         Configuration config = new Configuration(maxEntries, 0);
@@ -96,7 +111,7 @@ public class FindItemTest extends ExchangeTestBase
         assertEquals(1, request.getIndexedPageItemView().getOffset());
     }
 
-    private void assertFindItemsRequestMaxEntries(final int maxItems)
+    private void assertFindItemsRequestMaxEntries(final int maxItems) throws ServiceCallException
     {
         Configuration config = new Configuration(maxItems, 0);
         final int offset = 5;
@@ -105,7 +120,7 @@ public class FindItemTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetFindItemsRequestMaxEntries()
+    public void testGetFindItemsRequestMaxEntries() throws ServiceCallException
     {
         final int maxEntries1 = 10;
         assertFindItemsRequestMaxEntries(maxEntries1);
@@ -263,4 +278,45 @@ public class FindItemTest extends ExchangeTestBase
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(false);
     }
 
+    @Test
+    public void testGetAfterDateRestriction() throws ServiceCallException
+    {
+        RestrictionType restriction = FindItemHelper.getAfterDateRestriction(new DateTime(0));
+        SearchExpressionType searchExpression = restriction.getSearchExpression();
+        assertTrue("Restriction was not using a greater than comparison.",
+                   searchExpression instanceof IsGreaterThanType);
+        IsGreaterThanType greaterThan = (IsGreaterThanType) searchExpression;
+        BasePathToElementType basePath = greaterThan.getPath();
+        assertTrue("Restriction was not using an unindexed field uri.", basePath instanceof PathToUnindexedFieldType);
+        PathToUnindexedFieldType fieldUri = (PathToUnindexedFieldType) basePath;
+        assertEquals("item:DateTimeReceived", fieldUri.getFieldURI().toString());
+        FieldURIOrConstantType startDate = greaterThan.getFieldURIOrConstant();
+        assertFalse("Restriction was comparing against a path, not a constant.", startDate.isSetPath());
+        assertTrue("Resitriction was not comparing against a constant.", startDate.isSetConstant());
+        ConstantValueType constant = startDate.getConstant();
+        assertEquals("Epoch time 0 did not produce the correct string.", "1970-01-01T00:00:00", constant.getValue());
+
+        final int year = 2000;
+        final int month = 2;
+        final int day = 10;
+        final int hour = 3;
+        final int minute = 4;
+        final int seconds = 55;
+        final int milliseconds = 0;
+        final int tzOffset = -5;
+        final int offsetDay = 9;
+        final int offsetHour = 22;
+
+        restriction = FindItemHelper.getAfterDateRestriction(
+            new DateTime(year, month, day, hour, minute, seconds, milliseconds, DateTimeZone.UTC));
+        String date = ((IsGreaterThanType) restriction.getSearchExpression()).getFieldURIOrConstant()
+                                                     .getConstant().getValue();
+        assertEquals("UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
+
+        restriction = FindItemHelper.getAfterDateRestriction(
+            new DateTime(year, month, offsetDay, offsetHour, minute, seconds, milliseconds,
+                         DateTimeZone.forOffsetHours(tzOffset)));
+        date = ((IsGreaterThanType) restriction.getSearchExpression()).getFieldURIOrConstant().getConstant().getValue();
+        assertEquals("Non-UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
+    }
 }
