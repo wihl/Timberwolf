@@ -3,18 +3,19 @@ package com.softartisans.timberwolf.integrated;
 import com.softartisans.timberwolf.hbase.HBaseConfigurator;
 import com.softartisans.timberwolf.hbase.HBaseManager;
 import com.softartisans.timberwolf.hbase.IHBaseTable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.HTable;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.HTable;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an external resource for managing an HTable.
@@ -37,7 +38,7 @@ public class HTableResource extends IntegrationTestProperties
     private IHBaseTable table;
     private HTable testingTable;
 
-    /** Create a new htable resource */
+    /** Create a new htable resource. */
     public HTableResource()
     {
         super(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
@@ -46,8 +47,10 @@ public class HTableResource extends IntegrationTestProperties
     @Override
     public Statement apply(final Statement inner, final Description description)
     {
+        final int arbitraryValue1 = 130;
+        final int arbitraryValue2 = 32;
         name = description.getClassName() + "." + description.getMethodName()
-               + (new BigInteger(130, new Random()).toString(32));
+               + (new BigInteger(arbitraryValue1, new Random()).toString(arbitraryValue2));
         LOG.debug("Using temporary table: " + name);
         return super.apply(new Statement()
         {
@@ -123,7 +126,7 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
-     * Closes the current table and regets the table from hbase
+     * Closes the current table and regets the table from hbase.
      * @return a new instance of the table
      * @throws IOException if there was a problem closing or getting the table
      */
@@ -153,7 +156,7 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
-     * returns whether or not the table exists
+     * returns whether or not the table exists.
      * @return true if the table exists
      */
     public boolean exists()
