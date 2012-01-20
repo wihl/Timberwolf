@@ -81,49 +81,14 @@ public class TestIntegration
     {
         /*
         This test tests getting emails from an exchange server, and the breadth
-        of what that entails, and then putting it all in Exchange. It does so by
-        assuming a certain structure of emails on the exchange server, and then
-        asserting that those emails are in the hbase table afterwards. If you're
-        recreating this structure, avoid putting the text that we check in
-        multiple emails, except the sender, that's fine.
-
-
-        Below is the required structure; identation denotes the heirarchy.
-        Some of the folders have a required count, that's
-        denoted by having the count in parentheses after the folder name.
-        The contents of the emails are defined in the actual code, by adding
-        EmailMatchers to requiredEmails.
-        Note that if you put html tags in the body (such as changing formatting),
-        that is considered text.
-
-          aloner@*
-            Inbox
-              Rebecca
-            Eduardo
-
-          marcher@*
-            Inbox
-              Anthony
-            Barbara
-
-          korganizer@*
-            Inbox
-              child of Inbox
-              Inbox jr
-            Drafts
-            Sent Items
-            Deleted Items
-              Deleted Folder
-            Topper
-              Middler
-                Middler Jr
-                  Middler II (0)
-                    Middler III
-                      Middler IV (0)
-                Ms child
-            Page FindItems (29)
-            Page GetItems (11)
-
+        of what that entails, and then putting it all in Exchange. It depends
+        on a certain set of users, specified in the testing.properties. The
+        test than creates a bunch of folders in those user accounts, fills them
+        with email, runs timberwolf to get the messages into hbase, and then
+        asserts that all the created messages are in hbase.
+        After the test it deletes ALL content from the user accounts.
+        The authenticated user account must be able to impersonate all the
+        required user accounts specified in the properties.
          */
 
         final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
@@ -131,8 +96,6 @@ public class TestIntegration
         final String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
         final String keyHeader = "Item ID";
-
-        // Emails, TODO get these from properties
 
         // The emails of this user are not checked
         final String senderUsername = IntegrationTestProperties.getProperty(EXCHANGE_SENDER_PROPERTY_NAME);
@@ -142,10 +105,10 @@ public class TestIntegration
         final String ignoredUsername = IntegrationTestProperties.getProperty(EXCHANGE_IGNORED_USER_PROPERTY_NAME);
         final String ignoredEmail = email(ignoredUsername);
 
-        String username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
-        String email1 = email(username1);
-        String username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
-        String username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
+        final String username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
+        final String email1 = email(username1);
+        final String username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
+        final String username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
 
 
         /////////////
@@ -189,7 +152,6 @@ public class TestIntegration
         {
             getItems.add("Page GetItems" + (i+1), "Page GetItems #" + (i+1));
         }
-
 
         /////////////
         //  User #2
