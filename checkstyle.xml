@@ -38,7 +38,7 @@
 
     <property name="basedir" value="${basedir}"/>
   -->
-  
+
   <!-- Disables VisibilityModifierChecks around JUnit rules properties. -->
   <module name="SuppressWithNearbyCommentFilter">
     <property name="commentFormat" value="@junitRule"/>
@@ -181,7 +181,7 @@
 
     <!-- Checks for common coding problems         -->
     <!-- See http://checkstyle.sf.net/config_coding.html -->
-    <!-- <module name="AvoidInlineConditionals"/> Yeah, I don't think so CheckStyle. -->
+    <!-- <module name="AvoidInlineConditionals"/> This blocks ternary statements. I don't think so. -->
     <module name="DoubleCheckedLocking"/>  <!-- MY FAVOURITE -->
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>

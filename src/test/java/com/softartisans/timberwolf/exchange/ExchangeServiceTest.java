@@ -29,7 +29,7 @@ import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
 
 /**
- * Test suite for the ExchangeService component.
+ * Test suite for the ExchangeService class.
  */
 public class ExchangeServiceTest
 {

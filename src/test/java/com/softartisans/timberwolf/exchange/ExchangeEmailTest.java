@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Test suite for the ExchangeEmail component.
+ * Test suite for the ExchangeEmail class.
  */
 public class ExchangeEmailTest
 {

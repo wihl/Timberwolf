@@ -30,13 +30,13 @@ public class TestIntegration
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
 
-    // @junitRule
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
                                                                                 LDAP_DOMAIN_PROPERTY_NAME,
                                                                                 LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
-    // @junitRule
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource hbase = new HTableResource();
 

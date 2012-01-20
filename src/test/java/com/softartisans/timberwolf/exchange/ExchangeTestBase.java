@@ -53,11 +53,11 @@ public class ExchangeTestBase
     }
 
     /** This is the name of our default folder. */
-    private String defaultFolderId = "ANAMAZINGLYENGLISH-LIKEGUID";
+    private static final String DEFAULT_FOLDER_ID = "ANAMAZINGLYENGLISH-LIKEGUID";
 
     protected String getDefaultFolderId()
     {
-        return defaultFolderId;
+        return DEFAULT_FOLDER_ID;
     }
 
     private final String defaultUser = "bkerr";
@@ -68,7 +68,7 @@ public class ExchangeTestBase
     }
 
     /** This is needed anytime we'd like to look in a particular folder with mockFindItem. */
-    private FolderContext defaultFolder = new FolderContext(defaultFolderId, defaultUser);
+    private FolderContext defaultFolder = new FolderContext(DEFAULT_FOLDER_ID, defaultUser);
 
     protected FolderContext getDefaultFolder()
     {
@@ -94,7 +94,7 @@ public class ExchangeTestBase
     protected void mockFindItem(final MessageType[] messages)
         throws ServiceCallException, HttpErrorException
     {
-        mockFindItem(messages, defaultFolderId, 0, DEFAULT_PAGE_SIZE, defaultUser);
+        mockFindItem(messages, DEFAULT_FOLDER_ID, 0, DEFAULT_PAGE_SIZE, defaultUser);
     }
 
     protected List<String> generateIds(final int offset, final int count, final String folder)
@@ -155,7 +155,7 @@ public class ExchangeTestBase
         FolderIdType folderIdType = mock(FolderIdType.class);
         when(folderType.isSetFolderId()).thenReturn(true);
         when(folderType.getFolderId()).thenReturn(folderIdType);
-        when(folderIdType.getId()).thenReturn(defaultFolderId);
+        when(folderIdType.getId()).thenReturn(DEFAULT_FOLDER_ID);
         mockFindFolders(new FolderType[]{folderType});
     }
 

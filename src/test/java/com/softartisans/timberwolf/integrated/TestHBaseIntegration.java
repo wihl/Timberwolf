@@ -18,7 +18,7 @@ import org.junit.Test;
  */
 public class TestHBaseIntegration
 {
-    // @junitRule
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource htable = new HTableResource();
 
