@@ -74,6 +74,25 @@ public class TestIntegration
         return username + "@" + IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
     }
 
+    private void removeUsers(final Iterable<String> users, final String ignoredUsername1, final String ignoredUsername2)
+    {
+        Iterator<String> p = users.iterator();
+        // We are going to skip over the sender username to avoid double
+        // counting emails
+        while (p.hasNext())
+        {
+            String user = p.next();
+            if (user.equals(ignoredUsername1))
+            {
+                p.remove();
+            }
+            else if (user.equals(ignoredUsername2))
+            {
+                p.remove();
+            }
+        }
+    }
+
     @Test
     public void testIntegrationNoCLI()
             throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
@@ -199,17 +218,7 @@ public class TestIntegration
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
-                    Iterator<String> p = users.iterator();
-                    // We are going to skip over the sender username to avoid double
-                    // counting emails
-                    while (p.hasNext())
-                    {
-                        if (p.next().equals(senderUsername))
-                        {
-                            p.remove();
-                            break;
-                        }
-                    }
+                    removeUsers(users, senderUsername, ignoredUsername);
                     Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
                     Assert.assertTrue(mailboxItems.iterator().hasNext());
                     mailWriter.write(mailboxItems);
@@ -225,6 +234,8 @@ public class TestIntegration
 
         ExpectedEmails expectedEmails = new ExpectedEmails();
         expectedEmails.require(user1, hbase);
+        expectedEmails.require(user2, hbase);
+        expectedEmails.require(user3, hbase);
         expectedEmails.checkHbase();
 
     }
