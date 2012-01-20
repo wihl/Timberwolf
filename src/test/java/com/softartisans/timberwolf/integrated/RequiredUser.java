@@ -91,6 +91,12 @@ public class RequiredUser
         return folder;
     }
 
+    /**
+     * All RequiredEmails will have their folderId set to their containing
+     * folder. All folders are created on exchange and their folderId is set
+     * the the resulting folderId Exchange assigned.
+     * @param pump
+     */
     public void initialize(ExchangePump pump)
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())

@@ -58,7 +58,11 @@ public class ExchangePump
         return request;
     }
 
-    private List<String> createFolders(String user, TargetFolderIdType parentFolderId, List<RequiredFolder> folders)
+    /**
+     * Tells Exchange to create all given 'folders' inside parentFolderId.
+     * The request is performed as 'user'.
+     */
+    private void createFolders(String user, TargetFolderIdType parentFolderId, List<RequiredFolder> folders)
     {
         EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
@@ -70,7 +74,6 @@ public class ExchangePump
         }
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
         FolderInfoResponseMessageType[] array = response.getResponseMessages().getCreateFolderResponseMessageArray();
-        List<String> folderIds = new ArrayList<String>();
         int i=0;
         for (FolderInfoResponseMessageType folderResponse : array)
         {
@@ -80,21 +83,20 @@ public class ExchangePump
                 i++;
             }
         }
-        return folderIds;
     }
 
-    public List<String> createFolders(String user, String parent, List<RequiredFolder> folders)
+    public void createFolders(String user, String parent, List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewFolderId().setId(parent);
-        return createFolders(user, parentFolder, folders);
+        createFolders(user, parentFolder, folders);
     }
 
-    public List<String> createFolders(String user, DistinguishedFolderIdNameType.Enum parent, List<RequiredFolder> folders)
+    public void createFolders(String user, DistinguishedFolderIdNameType.Enum parent, List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
-        return createFolders(user, parentFolder, folders);
+        createFolders(user, parentFolder, folders);
     }
 
     private void createEmails(final List<RequiredEmail> emails, final EnvelopeDocument request,
