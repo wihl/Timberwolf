@@ -10,13 +10,13 @@ import org.joda.time.DateTime;
 public class NoopUserTimeUpdater implements UserTimeUpdater
 {
     @Override
-    public DateTime lastUpdated(String user)
+    public DateTime lastUpdated(final String user)
     {
         return new DateTime(0);
     }
 
     @Override
-    public void setUpdateTime(String user, DateTime dateTime)
+    public void setUpdateTime(final String user, final DateTime dateTime)
     {
     }
 }

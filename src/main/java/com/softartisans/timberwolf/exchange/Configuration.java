@@ -50,17 +50,17 @@ public class Configuration
         return getPageSize;
     }
 
-    public Configuration withTimeUpdater(UserTimeUpdater userTimeUpdater)
+    public Configuration withTimeUpdater(final UserTimeUpdater userTimeUpdater)
     {
         return new Configuration(findPageSize, getPageSize, userTimeUpdater);
     }
 
-    public DateTime getLastUpdated(String user)
+    public DateTime getLastUpdated(final String user)
     {
         return timeUpdater.lastUpdated(user);
     }
 
-    public void setLastUpdated(String user, DateTime time)
+    public void setLastUpdated(final String user, final DateTime time)
     {
         timeUpdater.setUpdateTime(user, time);
     }

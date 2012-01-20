@@ -5,22 +5,14 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMe
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
-import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
-import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
-import com.microsoft.schemas.exchange.services.x2006.types.TwoOperandExpressionType;
 import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
-import com.microsoft.schemas.exchange.services.x2006.types.UnindexedFieldURIType;
 
 import java.util.Vector;
-
-import javax.xml.namespace.QName;
 
 import org.apache.xmlbeans.XmlException;
 import org.joda.time.DateTime;
@@ -101,12 +93,12 @@ public final class FindItemHelper
         */
 
         String xml =
-              "  <typ:IsGreaterThan xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
-            + "    <typ:FieldURI FieldURI=\"item:DateTimeReceived\" />"
-            + "    <typ:FieldURIOrConstant>"
-            + "      <typ:Constant Value=\"" + startDate.toDateTime(DateTimeZone.UTC).toString(ISO_8601_FORMAT) + "\" />"
-            + "    </typ:FieldURIOrConstant>"
-            + "  </typ:IsGreaterThan>";
+              "<typ:IsGreaterThan xmlns:typ=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            + "  <typ:FieldURI FieldURI=\"item:DateTimeReceived\" />"
+            + "  <typ:FieldURIOrConstant>"
+            + "    <typ:Constant Value=\"" + startDate.toDateTime(DateTimeZone.UTC).toString(ISO_8601_FORMAT) + "\" />"
+            + "  </typ:FieldURIOrConstant>"
+            + "</typ:IsGreaterThan>";
 
         try
         {

@@ -18,8 +18,6 @@ import java.security.PrivilegedAction;
 
 import javax.security.auth.login.LoginException;
 
-import org.joda.time.DateTime;
-
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
