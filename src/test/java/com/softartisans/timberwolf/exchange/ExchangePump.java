@@ -41,7 +41,7 @@ public class ExchangePump
     private static final String SOAP_ENCODING = "UTF-8";
 
     private String endpoint;
-    private HttpUrlConnectionFactory connectionFactory = new AlfredoHttpUrlConnectionFactory();
+    private HttpUrlConnectionFactory connectionFactory = new SaslHttpUrlConnectionFactory();
     private String sender;
 
     public ExchangePump(String exchangeUrl, String senderEmail)

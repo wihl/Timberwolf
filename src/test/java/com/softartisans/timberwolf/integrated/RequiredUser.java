@@ -150,7 +150,7 @@ public class RequiredUser
         for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
         {
             HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user);
-            if (checkRequiredEmails(items))
+            if (!checkRequiredEmails(items))
             {
                 continue;
             }
@@ -178,6 +178,12 @@ public class RequiredUser
         }
     }
 
+    /**
+     * This ensure that all the message ids in items corresponds to the
+     * messages for this user.
+     *
+     * @return false if message check up correctly, true otherwise
+     */
     private boolean checkRequiredEmails(final HashMap<String, List<ExchangePump.MessageId>> items)
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
@@ -191,7 +197,7 @@ public class RequiredUser
                 else
                 {
                     System.err.println("Not ready, trying again");
-                    return true;
+                    return false;
                 }
             }
         }
@@ -201,13 +207,17 @@ public class RequiredUser
             int itemSize = emails == null ? 0 : emails.size();
             if (topLevelEmails.get(distinguishedFolder).size() != itemSize)
             {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
         // no need to check the drafts or sentItems lists, those are saved directly
     }
 
+    /**
+     * This populates 'destination' with all emails of the user by recursively
+     * walking through all the folders.
+     */
     public void getAllEmails(List<RequiredEmail> destination)
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())

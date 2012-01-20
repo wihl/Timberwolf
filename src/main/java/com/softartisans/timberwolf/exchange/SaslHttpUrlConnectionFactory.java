@@ -1,8 +1,5 @@
 package com.softartisans.timberwolf.exchange;
 
-import com.cloudera.alfredo.client.AuthenticatedURL;
-import com.cloudera.alfredo.client.AuthenticationException;
-
 import java.io.IOException;
 
 import java.net.HttpURLConnection;
@@ -14,11 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A HttpUrlConnectionFactory that works with Alfredo.
+ * A HttpUrlConnectionFactory that works with Sasl.
  */
-class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
+class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AlfredoHttpUrlConnectionFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SaslHttpUrlConnectionFactory.class);
 
     private static final String HTTP_METHOD = "POST";
     private static final int TIMEOUT = 10000;
@@ -30,9 +27,8 @@ class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
     {
         try
         {
-            AuthenticatedURL.Token token = new AuthenticatedURL.Token();
             URL url = new URL(address);
-            HttpURLConnection conn = new AuthenticatedURL().openConnection(url, token);
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
             conn.setRequestMethod(HTTP_METHOD);
             conn.setDoOutput(true);
@@ -41,12 +37,6 @@ class AlfredoHttpUrlConnectionFactory implements HttpUrlConnectionFactory
             conn.setRequestProperty(CONTENT_LENGTH_HEADER, "" + request.length);
             conn.getOutputStream().write(request);
             return conn;
-        }
-        catch (AuthenticationException e)
-        {
-            LOG.error("Authentication error for URL " + address, e);
-            throw new ServiceCallException(ServiceCallException.Reason.AUTHENTICATION,
-                "There was an error authenticating with the remote server.", e);
         }
         catch (MalformedURLException e)
         {

@@ -83,6 +83,13 @@ public class RequiredFolder
 
     }
 
+    /**
+     * This confirms that the number of message ids in 'items' corresponds to
+     * the number of messages this folder contains. This recursively performs
+     * the same operation in all child folders as well.
+
+     * @return true if all emails match up correctly, false otherwise
+     */
     public boolean checkEmailsBeforeMove(final HashMap<String, List<ExchangePump.MessageId>> items)
     {
         List<ExchangePump.MessageId> messageIds = items.get(id);
