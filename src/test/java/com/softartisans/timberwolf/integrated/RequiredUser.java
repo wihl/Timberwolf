@@ -2,6 +2,8 @@ package com.softartisans.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.softartisans.timberwolf.exchange.ExchangePump;
+import com.softartisans.timberwolf.exchange.ExchangePump.FailedToFindMessage;
+import com.softartisans.timberwolf.exchange.ExchangePump.MessageId;
 import com.softartisans.timberwolf.exchange.RequiredEmail;
 import com.softartisans.timberwolf.exchange.RequiredFolder;
 import java.util.ArrayList;
@@ -158,13 +160,37 @@ public class RequiredUser
             List<RequiredFolder> folders = distinguishedFolders.get(distinguishedFolder);
             pump.deleteFolders(user, folders);
         }
+        try {
+            ArrayList<MessageId> allItems = new ArrayList<MessageId>();
+            HashMap<String, List<MessageId>> inboxItems = pump.findItems(user, DistinguishedFolderIdNameType.INBOX);
+            for (String folder : inboxItems.keySet())
+            {
+                allItems.addAll(inboxItems.get(folder));
+            }
+            HashMap<String, List<MessageId>> draftItems = pump.findItems(user, DistinguishedFolderIdNameType.DRAFTS);
+            for (String folder : draftItems.keySet())
+            {
+                allItems.addAll(draftItems.get(folder));
+            }
+            HashMap<String, List<MessageId>> sentItems = pump.findItems(user, DistinguishedFolderIdNameType.SENTITEMS);
+            for (String folder : sentItems.keySet())
+            {
+                allItems.addAll(sentItems.get(folder));
+            }
+            pump.deleteEmails(user, allItems);
+        }
+        catch (FailedToFindMessage e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
     {
         for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
         {
-            HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user);
+            HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user, DistinguishedFolderIdNameType.INBOX);
             if (!checkRequiredEmails(items))
             {
                 continue;

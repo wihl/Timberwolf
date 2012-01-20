@@ -5,6 +5,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.DeleteItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponseMessageType;
@@ -19,6 +20,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemResponseShapeType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageDispositionType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfAllItemsType;
@@ -117,6 +119,19 @@ public class ExchangePump
         sendRequest(request);
     }
 
+    public void deleteEmails(String user, List<MessageId> emails)
+    {
+        EnvelopeDocument request = createEmptyRequest(user);
+        DeleteItemType deleteItem = request.getEnvelope().addNewBody().addNewDeleteItem();
+        deleteItem.setDeleteType(DisposalType.HARD_DELETE);
+        NonEmptyArrayOfBaseItemIdsType doomedItems = deleteItem.addNewItemIds();
+        for (MessageId email : emails)
+        {
+            doomedItems.addNewItemId().setId(email.getId());
+        }
+        sendRequest(request);
+    }
+
     private void createEmails(final List<RequiredEmail> emails, final EnvelopeDocument request,
                               final NonEmptyArrayOfAllItemsType emptyItemsType)
             throws FailedToCreateMessage
@@ -194,7 +209,7 @@ public class ExchangePump
     }
 
 
-    public HashMap<String, List<MessageId>> findItems(String user) throws FailedToFindMessage
+    public HashMap<String, List<MessageId>> findItems(String user, DistinguishedFolderIdNameType.Enum parent) throws FailedToFindMessage
     {
         HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();
         EnvelopeDocument request = createEmptyRequest(user);
@@ -204,7 +219,7 @@ public class ExchangePump
         itemShape.setBaseShape(DefaultShapeNamesType.DEFAULT);
         // I tried to use ID_ONLY and add some AdditionalProperties, but the
         // schema appears to be screwy and not have FieldURI in there correctly
-        findItem.addNewParentFolderIds().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.INBOX);
+        findItem.addNewParentFolderIds().addNewDistinguishedFolderId().setId(parent);
         BodyType response = sendRequest(request);
         FindItemResponseMessageType responseMessage =
                 response.getFindItemResponse().getResponseMessages().getFindItemResponseMessageArray()[0];
