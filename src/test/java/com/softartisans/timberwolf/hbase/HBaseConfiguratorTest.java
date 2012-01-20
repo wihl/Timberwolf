@@ -1,8 +1,12 @@
 package com.softartisans.timberwolf.hbase;
 
 import org.apache.hadoop.conf.Configuration;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 
+/**
+ * Tests for the HBaseConfigurator.
+ */
 public class HBaseConfiguratorTest
 {
     /**
@@ -13,12 +17,8 @@ public class HBaseConfiguratorTest
     {
         String quorum = "hbase01.int.softartisans.com";
         String clientPort = "2181";
-        Configuration configuration = HBaseConfigurator.createConfiguration(
-                quorum,
-                clientPort);
-        Assert.assertEquals(
-                quorum,configuration.get("hbase.zookeeper.quorum"));
-        Assert.assertEquals(clientPort,configuration.get(
-                "hbase.zookeeper.property.clientPort"));
+        Configuration configuration = HBaseConfigurator.createConfiguration(quorum, clientPort);
+        Assert.assertEquals(quorum, configuration.get("hbase.zookeeper.quorum"));
+        Assert.assertEquals(clientPort, configuration.get("hbase.zookeeper.property.clientPort"));
     }
 }

@@ -31,28 +31,31 @@ public class TestIntegration
 
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
+
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
                                                                                 LDAP_DOMAIN_PROPERTY_NAME,
                                                                                 LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource hbase = new HTableResource();
 
-    private Get createGet(String row, String columnFamily, String[] headers)
+    private Get createGet(final String row, final String columnFamily, final String[] headers)
     {
             Get get = new Get(Bytes.toBytes(row));
-            for( String header : headers)
+            for (String header : headers)
             {
                 get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
             }
         return get;
     }
 
-    private Scan createScan(String columnFamily, String[] headers)
+    private Scan createScan(final String columnFamily, final String[] headers)
     {
         Scan scan = new Scan();
-        for( String header : headers)
+        for (String header : headers)
         {
             scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
         }
@@ -159,110 +162,7 @@ public class TestIntegration
          */
         final String keyHeader = "Item ID";
 
-        EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
-
-        /////////////
-        //  aloner
-        /////////////
-        // Inbox
-        requiredEmails.add()
-                      .subject("Dear Alex")
-                      .bodyContains("leave this in your inbox");
-        // Rebecca
-        requiredEmails.add()
-                      .subject("About Rebecca")
-                      .bodyContains("She did something");
-        // Eduardo
-        requiredEmails.add()
-                      .subject("About Eduardo")
-                      .bodyContains("Something happened to him");
-
-        /////////////
-        // marcher
-        /////////////
-        // Inbox
-        requiredEmails.add()
-                      .subject("Dear Mary")
-                      .bodyContains("Don't rearrange");
-        // Anthony
-        requiredEmails.add()
-                      .subject("About Anthony")
-                      .bodyContains("He did something");
-        // Barbara
-        requiredEmails.add()
-                      .subject("About Barbara")
-                      .bodyContains("Something happened to her");
-
-        /////////////
-        // korganizer
-        /////////////
-        // Inbox
-        requiredEmails.add()
-                      .sender("tsender")
-                      .subject("Leave it be")
-                      .bodyContains("love your inbox clean");
-        // child of Inbox
-        requiredEmails.add()
-                      .subject("To the child of inbox")
-                      .bodyContains("child of Inbox");
-        // Inbox Jr
-        requiredEmails.add()
-                      .bodyContains("Inbox Jr")
-                      .bodyContains("is getting lonely");
-        requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
-        // Drafts
-        requiredEmails.add().to("tsender").subject("A draft");
-        // Sent Items
-        requiredEmails.add()
-                      .sender("korganizer")
-                      .to("abenjamin")
-                      .subject("A message to someone else");
-        requiredEmails.add()
-                      .bcc("tsender")
-                      .to("bkerr")
-                      .subject("to whom");
-        // Deleted Items
-        requiredEmails.add().subject("Whoops").bodyContains("this is trash");
-        // Deleted Folder
-        requiredEmails.add().bodyContains("Deleted Folder");
-        // Topper
-        requiredEmails.add()
-                      .to("bkerr")
-                      .cc("korganizer")
-                      .subject("Hey hey Bobbie, throw it in the Topper");
-        // Middler
-        requiredEmails.add().bodyContains("away this should go into middler, placed neatly.");
-        requiredEmails.add().subject("Another middler");
-        requiredEmails.add().subject("Yet another in the middler");
-        // Middler Jr
-        requiredEmails.add().subject("organize away to MJ").bodyContains("Middler Jr");
-        // Middler II (0)
-        // Middler III
-        requiredEmails.add().subject("Forward to Middler III");
-        // Middler IV (0)
-        // Ms child
-        requiredEmails.add().bodyContains("Ms child").bodyContains("nicer than MJ");
-        requiredEmails.add()
-                      .subject("Super nesting")
-                      .bodyContains("Ms child")
-                      .bodyContains("wants to be in the loop too.");
-        // Page FindItems (29)
-        for (int i = 1; i < 30; i++)
-        {
-            requiredEmails.add()
-                          .subject("Page FindItems" + i)
-                          .bodyContains("Page FindItems")
-                          .bodyContains("#" + i);
-        }
-        // Page GetItems (11)
-        for (int i = 1; i < 12; i++)
-        {
-            requiredEmails.add()
-                          .subject("Page GetItems" + i)
-                          .bodyContains("Page GetItems")
-                          .bodyContains("#" + i);
-        }
-
+        EmailMatchers requiredEmails = generateEmailMatchers();
 
         final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
         final String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
@@ -273,8 +173,9 @@ public class TestIntegration
             @Override
             public Object run()
             {
-
-                MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
+                final int findItemsPageSize = 12;
+                final int getItemsPageSize = 4;
+                MailStore mailStore = new ExchangeMailStore(exchangeURL, findItemsPageSize, getItemsPageSize);
                 MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
 
                 try
@@ -291,6 +192,7 @@ public class TestIntegration
                 return null;
             }
         }, ldapConfigEntry);
+
         // Now prove that everything is in HBase.
 
         try
@@ -308,5 +210,115 @@ public class TestIntegration
         {
             Assert.fail("Error when attempting to compare.");
         }
+    }
+
+    private EmailMatchers generateEmailMatchers()
+    {
+        EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
+
+        /////////////
+        //  aloner
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                .subject("Dear Alex")
+                .bodyContains("leave this in your inbox");
+        // Rebecca
+        requiredEmails.add()
+                .subject("About Rebecca")
+                .bodyContains("She did something");
+        // Eduardo
+        requiredEmails.add()
+                .subject("About Eduardo")
+                .bodyContains("Something happened to him");
+
+        /////////////
+        // marcher
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                .subject("Dear Mary")
+                .bodyContains("Don't rearrange");
+        // Anthony
+        requiredEmails.add()
+                .subject("About Anthony")
+                .bodyContains("He did something");
+        // Barbara
+        requiredEmails.add()
+                .subject("About Barbara")
+                .bodyContains("Something happened to her");
+
+        /////////////
+        // korganizer
+        /////////////
+        // Inbox
+        requiredEmails.add()
+                .sender("tsender")
+                .subject("Leave it be")
+                .bodyContains("love your inbox clean");
+        // child of Inbox
+        requiredEmails.add()
+                .subject("To the child of inbox")
+                .bodyContains("child of Inbox");
+        // Inbox Jr
+        requiredEmails.add()
+                .bodyContains("Inbox Jr")
+                .bodyContains("is getting lonely");
+        requiredEmails.add().to("korganizer").subject("For Inbox Jr").bodyContains("Inbox Jr");
+        // Drafts
+        requiredEmails.add().to("tsender").subject("A draft");
+        // Sent Items
+        requiredEmails.add()
+                .sender("korganizer")
+                .to("abenjamin")
+                .subject("A message to someone else");
+        requiredEmails.add()
+                .bcc("tsender")
+                .to("bkerr")
+                .subject("to whom");
+        // Deleted Items
+        requiredEmails.add().subject("Whoops").bodyContains("this is trash");
+        // Deleted Folder
+        requiredEmails.add().bodyContains("Deleted Folder");
+        // Topper
+        requiredEmails.add()
+                .to("bkerr")
+                .cc("korganizer")
+                .subject("Hey hey Bobbie, throw it in the Topper");
+        // Middler
+        requiredEmails.add().bodyContains("away this should go into middler, placed neatly.");
+        requiredEmails.add().subject("Another middler");
+        requiredEmails.add().subject("Yet another in the middler");
+        // Middler Jr
+        requiredEmails.add().subject("organize away to MJ").bodyContains("Middler Jr");
+        // Middler II (0)
+        // Middler III
+        requiredEmails.add().subject("Forward to Middler III");
+        // Middler IV (0)
+        // Ms child
+        requiredEmails.add().bodyContains("Ms child").bodyContains("nicer than MJ");
+        requiredEmails.add()
+                .subject("Super nesting")
+                .bodyContains("Ms child")
+                .bodyContains("wants to be in the loop too.");
+        // Page FindItems (29)
+        final int findItemsCount = 30;
+        for (int i = 1; i < findItemsCount; i++)
+        {
+            requiredEmails.add()
+                    .subject("Page FindItems" + i)
+                    .bodyContains("Page FindItems")
+                    .bodyContains("#" + i);
+        }
+        // Page GetItems (11)
+        final int getItemsCount = 12;
+        for (int i = 1; i < getItemsCount; i++)
+        {
+            requiredEmails.add()
+                    .subject("Page GetItems" + i)
+                    .bodyContains("Page GetItems")
+                    .bodyContains("#" + i);
+        }
+        return requiredEmails;
     }
 }
