@@ -20,9 +20,11 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
 import com.microsoft.schemas.exchange.services.x2006.types.SearchExpressionType;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
 import java.util.Vector;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import org.junit.Test;
 
@@ -32,9 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.junit.Test;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -296,15 +296,27 @@ public class FindItemTest extends ExchangeTestBase
         ConstantValueType constant = startDate.getConstant();
         assertEquals("Epoch time 0 did not produce the correct string.", "1970-01-01T00:00:00", constant.getValue());
 
-        restriction = FindItemHelper.getAfterDateRestriction(new DateTime(2000, 2, 10, 3, 4, 55, 0, DateTimeZone.UTC));
-        String date = ((IsGreaterThanType)restriction.getSearchExpression()).getFieldURIOrConstant()
+        final int year = 2000;
+        final int month = 2;
+        final int day = 10;
+        final int hour = 3;
+        final int minute = 4;
+        final int seconds = 55;
+        final int milliseconds = 0;
+        final int tzOffset = -5;
+        final int offsetDay = 9;
+        final int offsetHour = 22;
+
+        restriction = FindItemHelper.getAfterDateRestriction(
+            new DateTime(year, month, day, hour, minute, seconds, milliseconds, DateTimeZone.UTC));
+        String date = ((IsGreaterThanType) restriction.getSearchExpression()).getFieldURIOrConstant()
                                                      .getConstant().getValue();
         assertEquals("UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
 
-        restriction = FindItemHelper.getAfterDateRestriction(new DateTime(2000, 2, 9, 22, 4, 55, 0,
-                                                                          DateTimeZone.forOffsetHours(-5)));
-        date = ((IsGreaterThanType)restriction.getSearchExpression()).getFieldURIOrConstant()
-                                              .getConstant().getValue();
+        restriction = FindItemHelper.getAfterDateRestriction(
+            new DateTime(year, month, offsetDay, offsetHour, minute, seconds, milliseconds,
+                         DateTimeZone.forOffsetHours(tzOffset)));
+        date = ((IsGreaterThanType) restriction.getSearchExpression()).getFieldURIOrConstant().getConstant().getValue();
         assertEquals("Non-UTC date time did not produce the correct string.", "2000-02-10T03:04:55", date);
     }
 }

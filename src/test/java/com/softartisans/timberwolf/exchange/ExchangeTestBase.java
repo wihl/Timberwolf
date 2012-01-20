@@ -20,17 +20,20 @@ import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+
 import com.softartisans.timberwolf.UserTimeUpdater;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.xmlbeans.XmlException;
+
 import org.joda.time.DateTime;
 import org.junit.Before;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -39,8 +42,6 @@ import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-
 
 /**
  * Base class for fixtures that need to mock out Exchange services.
@@ -135,8 +136,8 @@ public class ExchangeTestBase
         mockFindItem(messages, folder, offset, maxIds, user, new DateTime(0));
     }
 
-    protected void mockFindItem(MessageType[] messages, String folder, int offset, int maxIds, String user,
-                                DateTime startDate)
+    protected void mockFindItem(final MessageType[] messages, final String folder, final int offset, final int maxIds,
+                                final String user, final DateTime startDate)
         throws ServiceCallException, HttpErrorException
     {
         Configuration config = new Configuration(maxIds, 0);

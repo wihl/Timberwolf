@@ -3,8 +3,6 @@ package com.softartisans.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.ArrayOfFoldersType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
@@ -12,20 +10,24 @@ import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.NoopUserTimeUpdater;
 import com.softartisans.timberwolf.UserTimeUpdater;
+
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.xmlbeans.XmlException;
+
 import org.joda.time.DateTime;
+
 import org.junit.Before;
 import org.junit.Test;
-
 
 import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 
@@ -33,13 +35,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static com.softartisans.timberwolf.exchange.IsXmlBeansRequest.likeThis;
-import org.junit.Before;
-import org.junit.Test;
 
 /** Test for ExchangeMailStore, uses mock exchange service. */
 public class ExchangeMailStoreTest extends ExchangeTestBase
@@ -64,7 +63,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         MessageType[] messages = new MessageType[0];
         mockFindItem(messages);
         defaultMockFindFolders();
-        for (MailboxItem mailboxItem : new ExchangeMailStore(getService()).getMail(defaultUsers, new NoopUserTimeUpdater()))
+        ExchangeMailStore store = new ExchangeMailStore(getService());
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -77,7 +77,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
-        for (MailboxItem mailboxItem : new ExchangeMailStore(getService()).getMail(defaultUsers, new NoopUserTimeUpdater()))
+        ExchangeMailStore store = new ExchangeMailStore(getService());
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -100,7 +101,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         try
         {
-            Iterable<MailboxItem> mail = new ExchangeMailStore(getService()).getMail(defaultUsers, new NoopUserTimeUpdater());
+            ExchangeMailStore store = new ExchangeMailStore(getService());
+            Iterable<MailboxItem> mail = store.getMail(defaultUsers, new NoopUserTimeUpdater());
         }
         catch (ExchangeRuntimeException e)
         {
@@ -129,7 +131,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         defaultMockFindFolders();
         mockGetItem(messages, requestedList);
         int i = 0;
-        for (MailboxItem mailboxItem : new ExchangeMailStore(getService()).getMail(defaultUsers, new NoopUserTimeUpdater()))
+        ExchangeMailStore store = new ExchangeMailStore(getService());
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
         {
             assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
@@ -357,25 +360,25 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                     generateIds(offsetZero, countTwo, "FOLDER-ONE-ID"));
         mockFindItem("FOLDER-TWO-ID", offsetZero, maxIdTen, countTen);
         mockGetItem(new MessageType[] {mockMessageItemId("FOLDER-TWO-ID:the #0 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #1 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #2 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #3 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #4 id")},
+                                       mockMessageItemId("FOLDER-TWO-ID:the #1 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #2 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #3 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #4 id")},
                     generateIds(offsetZero, countFive, "FOLDER-TWO-ID"));
         mockGetItem(new MessageType[] {mockMessageItemId("FOLDER-TWO-ID:the #5 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #6 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #7 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #8 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #9 id"), },
+                                       mockMessageItemId("FOLDER-TWO-ID:the #6 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #7 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #8 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #9 id"), },
                     generateIds(offsetFive, countFive, "FOLDER-TWO-ID"));
         mockFindItem("FOLDER-TWO-ID", offsetTen, maxIdTen, countThree);
         mockGetItem(new MessageType[] {mockMessageItemId("FOLDER-TWO-ID:the #10 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #11 id"),
-                                        mockMessageItemId("FOLDER-TWO-ID:the #12 id"), },
+                                       mockMessageItemId("FOLDER-TWO-ID:the #11 id"),
+                                       mockMessageItemId("FOLDER-TWO-ID:the #12 id"), },
                     generateIds(offsetTen, countThree, "FOLDER-TWO-ID"));
         mockFindItem("FOLDER-THREE-ID", offsetZero, maxIdTen, countTwo);
-        mockGetItem(new MessageType[] { mockMessageItemId("FOLDER-THREE-ID:the #0 id"),
-                                        mockMessageItemId("FOLDER-THREE-ID:the #1 id")},
+        mockGetItem(new MessageType[] {mockMessageItemId("FOLDER-THREE-ID:the #0 id"),
+                                       mockMessageItemId("FOLDER-THREE-ID:the #1 id")},
                     generateIds(offsetZero, countTwo, "FOLDER-THREE-ID"));
 
         final int findItemPageSize = 10;
@@ -455,15 +458,23 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         when(aliceFolder.getFolderId()).thenReturn(aliceId);
         when(aliceId.getId()).thenReturn("ALICE-FOLDER");
 
-        mockFindFolders(new FolderType[] { aliceFolder }, "alice");
-        MessageType[] allMessages = mockFindItem("ALICE-FOLDER", 0, 10, 5, "alice");
-        mockGetItem(allMessages, generateIds(0, 5, "ALICE-FOLDER"), "alice");
+        final int findItemPageSize = 10;
+        final int getItemPageSize = 5;
+        final int totalMessageCount = 5;
+        final int newMessageCount = 2;
+        final int newMessageTime = 3000;
 
-        MessageType[] newMessages = new MessageType[2];
-        newMessages[0] = allMessages[3];
-        newMessages[1] = allMessages[4];
-        mockFindItem(newMessages, "ALICE-FOLDER", 0, 10, "alice", new DateTime(3 * 1000));
-        mockGetItem(newMessages, generateIds(3, 2, "ALICE-FOLDER"), "alice");
+        mockFindFolders(new FolderType[] {aliceFolder}, "alice");
+        MessageType[] allMessages = mockFindItem("ALICE-FOLDER", 0, findItemPageSize, totalMessageCount, "alice");
+        mockGetItem(allMessages, generateIds(0, totalMessageCount, "ALICE-FOLDER"), "alice");
+
+        MessageType[] newMessages = new MessageType[newMessageCount];
+        newMessages[0] = allMessages[totalMessageCount - newMessageCount];
+        newMessages[1] = allMessages[totalMessageCount - newMessageCount + 1];
+        mockFindItem(newMessages, "ALICE-FOLDER", 0, findItemPageSize, "alice", new DateTime(newMessageTime));
+        mockGetItem(newMessages,
+                    generateIds(totalMessageCount - newMessageCount, newMessageCount, "ALICE-FOLDER"),
+                    "alice");
 
         UserTimeUpdater mockTimeUpdater = mock(UserTimeUpdater.class);
         when(mockTimeUpdater.lastUpdated("alice")).thenReturn(new DateTime(0));
@@ -471,9 +482,9 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         ArrayList<String> users = new ArrayList<String>();
         users.add("alice");
 
-        ExchangeMailStore store = new ExchangeMailStore(getService(), 10, 5);
+        ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
         Iterator<MailboxItem> mail = store.getMail(users, mockTimeUpdater).iterator();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < totalMessageCount; i++)
         {
             assertTrue(mail.hasNext());
             MailboxItem item = mail.next();
@@ -481,10 +492,10 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         }
         assertFalse(mail.hasNext());
 
-        when(mockTimeUpdater.lastUpdated("alice")).thenReturn(new DateTime(3 * 1000));
+        when(mockTimeUpdater.lastUpdated("alice")).thenReturn(new DateTime(newMessageTime));
 
         mail = store.getMail(users, mockTimeUpdater).iterator();
-        for (int i = 3; i < 5; i++)
+        for (int i = totalMessageCount - newMessageCount; i < totalMessageCount; i++)
         {
             assertTrue(mail.hasNext());
             MailboxItem item = mail.next();
