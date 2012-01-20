@@ -2,9 +2,15 @@ package com.softartisans.timberwolf;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import org.junit.Test;
-import static org.mockito.Mockito.*;
 
+import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests various aspects of a ConsoleMailWriter.
+ */
 public class ConsoleMailWriterTest extends ConsoleTestBase
 {
     @Test
@@ -16,20 +22,20 @@ public class ConsoleMailWriterTest extends ConsoleTestBase
         when(item1.getHeader("Recipient")).thenReturn("to@me.com");
         when(item1.getHeader("CC")).thenReturn("fake@names3.com");
         when(item1.getHeader("BCC")).thenReturn("fake@names.com;fake2@names.com");
-        
+
         MailboxItem item2 = mock(MailboxItem.class);
         when(item2.getHeaderKeys()).thenReturn(new String[]{"Room", "Time", "Importance"});
         when(item2.getHeader("Room")).thenReturn("Body text");
         when(item2.getHeader("Time")).thenReturn("Tuesday December 5th");
         when(item2.getHeader("Importance")).thenReturn("Low");
-        
+
         ArrayList<MailboxItem> items = new ArrayList<MailboxItem>();
         items.add(item1);
         items.add(item2);
-        
+
         ConsoleMailWriter writer = new ConsoleMailWriter();
         writer.write(items);
-        
+
         String[] lines = new String[]{
                 "===========================================================",
                 "Body: Body text",
@@ -41,7 +47,7 @@ public class ConsoleMailWriterTest extends ConsoleTestBase
                 "Time: Tuesday December 5th",
                 "Importance: Low"
         };
-        
+
         assertConsoleOutput(lines);
     }
 }

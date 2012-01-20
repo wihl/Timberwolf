@@ -1,6 +1,9 @@
 package com.softartisans.timberwolf.integrated;
 
 import com.softartisans.timberwolf.hbase.IHBaseTable;
+
+import java.io.IOException;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
@@ -10,15 +13,17 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-
+/**
+ * Integration test suite for the HBase components.
+ */
 public class TestHBaseIntegration
 {
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource htable = new HTableResource();
 
-    private static Put createPut(String rowKey, String family, String qualifier,
-                                 String value)
+    private static Put createPut(final String rowKey, final String family, final String qualifier,
+                                 final String value)
     {
         Put put = new Put(Bytes.toBytes(rowKey));
         put.add(Bytes.toBytes(family),
@@ -27,7 +32,7 @@ public class TestHBaseIntegration
         return put;
     }
 
-    private static Get createGet(String rowKey, String family)
+    private static Get createGet(final String rowKey, final String family)
     {
         Get get = new Get(Bytes.toBytes(rowKey));
         get.addFamily(Bytes.toBytes(family));
@@ -67,7 +72,7 @@ public class TestHBaseIntegration
 
         IHBaseTable table = htable.getTable();
 
-        Put put = createPut(rowKey, htable.getFamily(), qualifier,value);
+        Put put = createPut(rowKey, htable.getFamily(), qualifier, value);
         table.put(put);
 
         try
@@ -75,10 +80,10 @@ public class TestHBaseIntegration
             // We want to do the read without using the manager.
             HTableInterface tableInterface = htable.getTestingTable();
 
-            Result result = tableInterface.get(createGet(rowKey,htable.getFamily()));
+            Result result = tableInterface.get(createGet(rowKey, htable.getFamily()));
             String tableValue = Bytes.toString(result.getValue(Bytes.toBytes(htable.getFamily()),
                                                                Bytes.toBytes(qualifier)));
-            Assert.assertEquals(value,tableValue);
+            Assert.assertEquals(value, tableValue);
         }
         catch (IOException e)
         {

@@ -1,9 +1,5 @@
 package com.softartisans.timberwolf.services;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
-
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -21,33 +17,40 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class LdapFetcherTest {
-    final static String testDomain = "int.testDomain.com";
-    final static String testConfigEntry = "Timberwolf";
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * Test suite for the LdapFetcher.
+ */
+public class LdapFetcherTest
+{
+    static final String TEST_DOMAIN = "int.testDomain.com";
+    static final String TEST_CONFIG_ENTRY = "Timberwolf";
 
     @Test
     public void getProviderDiscoveryURLTest()
     {
-        LdapFetcher result = new LdapFetcher(testDomain);
+        LdapFetcher result = new LdapFetcher(TEST_DOMAIN);
         Assert.assertEquals("ldap:///dc=int,dc=testDomain,dc=com",
                             result.getProviderDiscoveryURL());
     }
-    
+
     @Test
     public void getProviderDiscoveryURLEmptyTest()
     {
         LdapFetcher result = new LdapFetcher("testDomain");
-        Assert.assertEquals("ldap:///dc=testDomain",
-                            result.getProviderDiscoveryURL());
+        Assert.assertEquals("ldap:///dc=testDomain", result.getProviderDiscoveryURL());
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void illegalDomainNameEmptyTest()
     {
         new LdapFetcher("");
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void illegalDomainNameNullTest()
     {
         new LdapFetcher(null);
@@ -56,18 +59,19 @@ public class LdapFetcherTest {
     @Test
     public void standardListTest() throws PrincipalFetchException
     {
-        LdapFetcher fetcher = getTestFetcher(testDomain, testConfigEntry);
+        LdapFetcher fetcher = getTestFetcher(TEST_DOMAIN, TEST_CONFIG_ENTRY);
         List<String> results = asList(fetcher.getPrincipals());
-        Assert.assertTrue(results.contains("first@" + testDomain));
+        Assert.assertTrue(results.contains("first@" + TEST_DOMAIN));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private LdapFetcher getTestFetcher(String domainName, String configurationEntry) throws PrincipalFetchException
+    private LdapFetcher getTestFetcher(final String domainName, final String configurationEntry)
+            throws PrincipalFetchException
     {
         final DirContext context = mock(DirContext.class);
         SearchControls ctrl = new SearchControls();
         final String expectedAttribute = "userPrincipalName";
-        String[][] results = { { "first" }, { "second", "second2" } };
+        String[][] results = {{"first"}, {"second", "second2"}};
         String[] attributeFilter = {
                 expectedAttribute
         };
@@ -76,7 +80,8 @@ public class LdapFetcherTest {
         try
         {
             final TestEnumerator<SearchResult> resultEnum = new TestEnumerator<SearchResult>();
-            when(context.search(eq("CN=Users"), eq("(objectClass=person)"), Mockito. any(SearchControls.class))).thenReturn(resultEnum);
+            when(context.search(eq("CN=Users"), eq("(objectClass=person)"), Mockito.any(SearchControls.class)))
+                    .thenReturn(resultEnum);
             for (String[] currentResultArray : results)
             {
                 SearchResult mockResult = mock(SearchResult.class);
@@ -97,7 +102,7 @@ public class LdapFetcherTest {
         {
             throw new PrincipalFetchException("An exception was thrown setting up mock objects?", e);
         }
-        LdapFetcher fetcher = new LdapFetcher(testDomain)
+        LdapFetcher fetcher = new LdapFetcher(TEST_DOMAIN)
         {
             DirContext getInitialContext(final Hashtable<String, String> environment) throws NamingException
             {
@@ -107,7 +112,7 @@ public class LdapFetcherTest {
         return fetcher;
     }
 
-    private List<String> asList(Iterable<String> iter)
+    private List<String> asList(final Iterable<String> iter)
     {
         List<String> results = new ArrayList<String>();
         for (String str : iter)
@@ -117,31 +122,40 @@ public class LdapFetcherTest {
         return results;
     }
 
+    /**
+     * Testing Enumerator class.
+     * @param <T> The type of the TestEnumerator collection.
+     */
     private class TestEnumerator<T> extends ArrayList<T> implements NamingEnumeration<T>
     {
         private int pointer = 0;
 
         @Override
-        public boolean hasMoreElements() {
+        public boolean hasMoreElements()
+        {
             return this.size() > pointer;
         }
 
         @Override
-        public T nextElement() {
+        public T nextElement()
+        {
             return this.get(pointer++);
         }
 
         @Override
-        public void close() throws NamingException {
+        public void close() throws NamingException
+        {
         }
 
         @Override
-        public boolean hasMore() throws NamingException {
+        public boolean hasMore() throws NamingException
+        {
             return this.size() > pointer;
         }
 
         @Override
-        public T next() throws NamingException {
+        public T next() throws NamingException
+        {
             return this.get(pointer++);
         }
     }

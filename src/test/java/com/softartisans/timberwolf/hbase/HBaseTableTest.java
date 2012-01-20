@@ -6,7 +6,10 @@ import org.apache.hadoop.hbase.client.Result;
 import org.junit.*;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import static org.mockito.Mockito.*;
+import org.junit.Assert;
+import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for HBaseTable.
@@ -15,6 +18,7 @@ public class HBaseTableTest
 {
     private final String defaultColumnFamily = "f";
     private final String defaultColumnQualifier = "q";
+    private static final int DEFAULT_PUT_COUNT = 10;
 
     /**
      * Default constructor test.
@@ -33,7 +37,7 @@ public class HBaseTableTest
     {
         String name = "defaultTableName";
         IHBaseTable table = new HBaseTable(MockHTable.create(name));
-        Assert.assertEquals(name,table.getName());
+        Assert.assertEquals(name, table.getName());
     }
 
     /**
@@ -54,7 +58,7 @@ public class HBaseTableTest
     public void testPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < DEFAULT_PUT_COUNT; i++)
         {
             Put put = mock(Put.class);
             table.put(put);
@@ -78,7 +82,7 @@ public class HBaseTableTest
     public void testFlushWithPuts()
     {
         IHBaseTable table = new HBaseTable(MockHTable.create());
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < DEFAULT_PUT_COUNT; i++)
         {
             // We currently need at least a row here or a null pointer exception
             // is thrown later in MockHTable.

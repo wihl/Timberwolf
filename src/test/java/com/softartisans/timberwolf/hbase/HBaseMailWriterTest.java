@@ -1,34 +1,42 @@
 package com.softartisans.timberwolf.hbase;
 
+import com.softartisans.timberwolf.MailWriter;
 import com.softartisans.timberwolf.MailboxItem;
 import com.softartisans.timberwolf.MockHTable;
-import com.softartisans.timberwolf.MailWriter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.*;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit test for simple App.
  */
 public class HBaseMailWriterTest
 {
-    Logger logger = LoggerFactory.getLogger(HBaseMailWriter.class);
+    private Logger logger = LoggerFactory.getLogger(HBaseMailWriter.class);
 
     /**
      * Creates a mock MailboxItem given a dictionary of headers as keys with the header values as values.
      * @param mailboxItemDescription The above-mentioned dictionary.
      * @return A mock MailboxItem.
      */
-    private MailboxItem mockMailboxItem(Dictionary<String, String> mailboxItemDescription)
+    private MailboxItem mockMailboxItem(final Dictionary<String, String> mailboxItemDescription)
     {
         MailboxItem mailboxItem = mock(MailboxItem.class);
 
@@ -38,7 +46,7 @@ public class HBaseMailWriterTest
 
         when(mailboxItem.getHeaderKeys()).thenReturn(headers);
 
-        for( String header : headers)
+        for (String header : headers)
         {
             String value = mailboxItemDescription.get(header);
 
@@ -69,14 +77,14 @@ public class HBaseMailWriterTest
      * @param columnFamily The column family for our headers in table.
      * @param rowKey The specific rowKey for this description in the table.
      */
-    private void assertMailboxItemDescription(HTableInterface mailTable,
-                                              Dictionary<String, String> mailboxItemDescription,
-                                              String columnFamily,
-                                              String rowKey)
+    private void assertMailboxItemDescription(final HTableInterface mailTable,
+                                              final Dictionary<String, String> mailboxItemDescription,
+                                              final String columnFamily,
+                                              final String rowKey)
     {
         Enumeration<String> headers = mailboxItemDescription.keys();
 
-        while(headers.hasMoreElements())
+        while (headers.hasMoreElements())
         {
             String header = headers.nextElement();
             String value = mailboxItemDescription.get(header);
@@ -121,7 +129,8 @@ public class HBaseMailWriterTest
 
         writer.write(mails);
 
-        assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily, mail.getHeader(arbitraryHeader));
+        assertMailboxItemDescription(mockHTable, mailboxItemDescription, arbitraryFamily,
+                mail.getHeader(arbitraryHeader));
     }
 
     /**
