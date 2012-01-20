@@ -12,6 +12,8 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple class for holding a bunch of expected emails, and then either
@@ -19,6 +21,7 @@ import org.junit.Assert;
  */
 public class ExpectedEmails
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ExpectedEmails.class);
     private final List<RequiredEmail> requiredEmails;
     private HTableResource hbase;
 
@@ -53,7 +56,7 @@ public class ExpectedEmails
             return false;
         }
         String to = getString(result, "To");
-        if (to == null || !email.getTo().equals(to))
+        if (to == null || !email.getToString().equals(to))
         {
             return false;
         }
@@ -68,7 +71,7 @@ public class ExpectedEmails
         if (email.getCc() != null)
         {
             String cc = getString(result, "Cc");
-            if (cc == null || !email.getCc().equals(cc))
+            if (cc == null || !email.getCcString().equals(cc))
             {
                 return false;
             }
@@ -76,7 +79,7 @@ public class ExpectedEmails
         if (email.getBcc() != null)
         {
             String bcc = getString(result, "Bcc");
-            if (bcc == null || !email.getBcc().equals(bcc))
+            if (bcc == null || !email.getBccString().equals(bcc))
             {
                 return false;
             }
@@ -94,7 +97,8 @@ public class ExpectedEmails
             {
                 System.out.println("  " + email);
             }
-            Assert.fail("Missing " + temp.size() + " required emails");
+            Assert.fail(
+                    "Missing " + temp.size() + " required emails out of " + requiredEmails.size() + " expected emails");
         }
     }
 
@@ -108,6 +112,24 @@ public class ExpectedEmails
         return scan;
     }
 
+    private void logResult(final Result result)
+    {
+        LOG.info("Result in HBase:");
+        String subject = getString(result, "Subject");
+        LOG.info("Subject: {}", subject);
+        String body = getString(result, "Body");
+        LOG.info("Body: {}", body);
+        String to = getString(result, "To");
+        LOG.info("To: {}", to);
+        String from = getString(result, "Sender");
+        LOG.info("Sender: {}", from);
+        String cc = getString(result, "Cc");
+        LOG.info("Cc: {}", cc);
+        String bcc = getString(result, "Bcc");
+        LOG.info("Bcc: {}", bcc);
+
+    }
+
     public void checkHbase() throws IOException
     {
         List<RequiredEmail> temp = new LinkedList<RequiredEmail>(requiredEmails);
@@ -116,6 +138,7 @@ public class ExpectedEmails
         ResultScanner scanner = table.getScanner(scan);
         for (Result result = scanner.next(); result != null; result = scanner.next())
         {
+            logResult(result);
             Iterator<RequiredEmail> p = temp.iterator();
             while (p.hasNext())
             {

@@ -209,6 +209,9 @@ public class TestIntegration
         String bkerrUsername = "bkerr";
         String bkerrEmail = email(bkerrUsername);
 
+        String senderUsername = "bkerr";
+        String senderEmail = email(bkerrUsername);
+
         String tsenderEmail = email("tsender");
         String abenjaminEmail = email("abenjamin");
         String mprinceEmail = email("mprince");
@@ -217,8 +220,8 @@ public class TestIntegration
         /////////////
         // TODO: change to korganizer
         RequiredUser bkerr = new RequiredUser("bkerr", ldapDomain);
-        bkerr.addToInbox("Leave it be", "Even though you love your inbox clean").from(tsenderEmail);
-        bkerr.addFolder(DistinguishedFolderIdNameType.INBOX, "child of Inbox")
+        bkerr.addToInbox("Leave it be", "Even though you love your inbox clean").from(senderEmail);
+        bkerr.addFolderToInbox("child of Inbox")
              .add("To the child of inbox", "here is the body of the email in the child of Inbox");
         RequiredFolder inboxJr = bkerr.addFolderToInbox("Inbox Jr");
         inboxJr.add("books","Inbox Jr is getting lonely over here");
@@ -255,7 +258,7 @@ public class TestIntegration
             getItems.add("Page GetItems" + (i+1), "Page GetItems #" + (i+1));
         }
 
-        ExchangePump pump = new ExchangePump(exchangeURL, "bkerr");
+        ExchangePump pump = new ExchangePump(exchangeURL, senderUsername);
         bkerr.initialize(pump);
 
         bkerr.sendEmail(pump);

@@ -56,7 +56,7 @@ public class RequiredUser
 
     public RequiredEmail addDraft(final String toEmail, final String subject, final String body)
     {
-        RequiredEmail email = new RequiredEmail(toEmail,subject,body).from(emailAddress);
+        RequiredEmail email = new RequiredEmail(toEmail,subject,body);
         drafts.add(email);
         return email;
     }
@@ -135,8 +135,14 @@ public class RequiredUser
         {
             pump.sendMessages(topLevelEmails.get(distinguishedFolder));
         }
-        pump.saveDrafts(user, drafts);
-        pump.sendAndSave(user, sentItems);
+        if (drafts.size() > 0)
+        {
+            pump.saveDrafts(user, drafts);
+        }
+        if (sentItems.size() > 0)
+        {
+            pump.sendAndSave(user, sentItems);
+        }
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage

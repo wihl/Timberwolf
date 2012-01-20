@@ -64,6 +64,11 @@ public class RequiredEmail
         return to;
     }
 
+    public String getToString()
+    {
+        return to + ";";
+    }
+
     public String getFrom()
     {
         return from;
@@ -73,10 +78,19 @@ public class RequiredEmail
     {
         return cc;
     }
+    public String getCcString()
+    {
+        return cc + ";";
+    }
 
     public String getBcc()
     {
         return bcc;
+    }
+
+    public String getBccString()
+    {
+        return bcc + ";";
     }
 
     public static String getFolderId(String subject)
@@ -125,5 +139,19 @@ public class RequiredEmail
     {
         from = fromEmail;
         return this;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "RequiredEmail{" +
+               "subject='" + subject + '\'' +
+               ", body='" + body + '\'' +
+               ", folderId='" + folderId + '\'' +
+               ", to='" + to + '\'' +
+               ", cc='" + cc + '\'' +
+               ", bcc='" + bcc + '\'' +
+               ", from='" + from + '\'' +
+               '}';
     }
 }
