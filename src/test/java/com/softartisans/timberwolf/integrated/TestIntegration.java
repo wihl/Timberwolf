@@ -13,6 +13,7 @@ import com.softartisans.timberwolf.services.LdapFetcher;
 import com.softartisans.timberwolf.services.PrincipalFetchException;
 import java.io.IOException;
 import java.security.PrivilegedAction;
+import java.util.Iterator;
 import javax.security.auth.login.LoginException;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
@@ -170,70 +171,40 @@ public class TestIntegration
 
         final String keyHeader = "Item ID";
 
-        // TODO: this should be gone when the test is fully converted
-        EmailMatchers requiredEmails = new EmailMatchers(hbase.getFamily());
+        // Emails, TODO get these from properties
+
+        // The emails of this user are not checked
+        final String senderUsername = "scottdSender";
+        final String senderEmail = email(senderUsername);
+
+        // The emails of this user are not checked
+        final String ignoredUsername = "scottdIgnored";
+        final String ignoredEmail = email(ignoredUsername);
+
+        String username1 = "scottd1";
+        String email1 = email(username1);
+        String username2 = "scottd2";
+        String username3 = "scottd3";
+
 
         /////////////
-        //  aloner
+        // User #1
         /////////////
-        // Inbox
-        requiredEmails.add()
-                      .subject("Dear Alex")
-                      .bodyContains("leave this in your inbox");
-        // Rebecca
-        requiredEmails.add()
-                      .subject("About Rebecca")
-                      .bodyContains("She did something");
-        // Eduardo
-        requiredEmails.add()
-                      .subject("About Eduardo")
-                      .bodyContains("Something happened to him");
-
-        /////////////
-        // marcher
-        /////////////
-        // Inbox
-        requiredEmails.add()
-                      .subject("Dear Mary")
-                      .bodyContains("Don't rearrange");
-        // Anthony
-        requiredEmails.add()
-                      .subject("About Anthony")
-                      .bodyContains("He did something");
-        // Barbara
-        requiredEmails.add()
-                      .subject("About Barbara")
-                      .bodyContains("Something happened to her");
-
-        // Emails, TODO change
-        String bkerrUsername = "bkerr";
-        String bkerrEmail = email(bkerrUsername);
-
-        String senderUsername = "bkerr";
-        String senderEmail = email(bkerrUsername);
-
-        String tsenderEmail = email("tsender");
-        String abenjaminEmail = email("abenjamin");
-        String mprinceEmail = email("mprince");
-        /////////////
-        // korganizer
-        /////////////
-        // TODO: change to korganizer
-        RequiredUser bkerr = new RequiredUser("bkerr", ldapDomain);
-        bkerr.addToInbox("Leave it be", "Even though you love your inbox clean").from(senderEmail);
-        bkerr.addFolderToInbox("child of Inbox")
+        RequiredUser user1 = new RequiredUser(username1, ldapDomain);
+        user1.addToInbox("Leave it be", "Even though you love your inbox clean").from(senderEmail);
+        user1.addFolderToInbox("child of Inbox")
              .add("To the child of inbox", "here is the body of the email in the child of Inbox");
-        RequiredFolder inboxJr = bkerr.addFolderToInbox("Inbox Jr");
+        RequiredFolder inboxJr = user1.addFolderToInbox("Inbox Jr");
         inboxJr.add("books","Inbox Jr is getting lonely over here");
         inboxJr.add("For Inbox Jr","some sort of body here");
-        bkerr.addDraft(tsenderEmail,"A draft", "with something I'll never tell you");
-        bkerr.addSentItem(abenjaminEmail, "A message to semone else", "you can tell, because of the to field");
-        bkerr.addSentItem(mprinceEmail, "To whom", "is this email going").bcc(tsenderEmail);
-        bkerr.addToDeletedItems("Whoops","This is going in the trash");
-        bkerr.addFolder(DistinguishedFolderIdNameType.DELETEDITEMS,"Deleted folder")
+        user1.addDraft(senderEmail,"A draft", "with something I'll never tell you");
+        user1.addSentItem(senderEmail, "A message to semone else", "you can tell, because of the to field");
+        user1.addSentItem(ignoredEmail, "To whom", "is this email going").bcc(senderEmail);
+        user1.addToDeletedItems("Whoops","This is going in the trash");
+        user1.addFolder(DistinguishedFolderIdNameType.DELETEDITEMS,"Deleted folder")
                 .add("Uh oh", "this is going in the recycling bin, which we're throwing out");
-        RequiredFolder topper = bkerr.addFolderToRoot("Topper");
-        topper.add("Hey hey Bobby McGee", "Makes me think of that Janis Joplin song").to(tsenderEmail).cc(bkerrEmail);
+        RequiredFolder topper = user1.addFolderToRoot("Topper");
+        topper.add("Hey hey Bobby McGee", "Makes me think of that Janis Joplin song").to(ignoredEmail).cc(email1);
         RequiredFolder middler = topper.addFolder("Middler");
         middler.add("Move it", "Away this should go into middler, placed neatly there for all to see");
         middler.add("Another middler email", "that has a super boring body");
@@ -245,24 +216,53 @@ public class TestIntegration
         RequiredFolder msChild = middlerIII.addFolder("Middler IV").addFolder("Ms child");
         msChild.add("Ms child", "is way nicer than MJ");
         msChild.add("Super nesting", "The child of Ms child is so deep");
-        RequiredFolder findItems = bkerr.addFolderToRoot("Page FindItems");
+        RequiredFolder findItems = user1.addFolderToRoot("Page FindItems");
         // Page FindItems (29)
         for (int i = 0; i < 29; i++)
         {
             findItems.add("Page FindItems" + (i+1), "Page FindItems #" + (i+1));
         }
-        RequiredFolder getItems = bkerr.addFolderToRoot("Page GetItems");
+        RequiredFolder getItems = user1.addFolderToRoot("Page GetItems");
         // Page GetItems (11)
         for (int i = 0; i < 11; i++)
         {
             getItems.add("Page GetItems" + (i+1), "Page GetItems #" + (i+1));
         }
 
-        ExchangePump pump = new ExchangePump(exchangeURL, senderUsername);
-        bkerr.initialize(pump);
 
-        bkerr.sendEmail(pump);
-        bkerr.moveEmails(pump);
+        /////////////
+        //  User #2
+        /////////////
+        RequiredUser user2 = new RequiredUser(username2, ldapDomain);
+        user2.addToInbox("Dear Alex", "Leave this bad boy in your inbox");
+        user2.addFolderToInbox("Rebecca")
+             .add("About Rebecca", "She did something");
+        user2.addFolderToRoot("Eduardo")
+             .add("Concerning Eduardo", "Something happened to him");
+
+        /////////////
+        // User #3
+        /////////////
+        RequiredUser user3 = new RequiredUser(username3, ldapDomain);
+        user3.addToInbox("Dear Mary", "Don't rearrange this email");
+        user3.addFolderToInbox("Anthony")
+             .add("About Anthony", "He did something");
+        user3.addFolderToRoot("Barbara")
+             .add("Concerning Barbara", "Something happened to her");
+
+
+        ExchangePump pump = new ExchangePump(exchangeURL, senderUsername);
+        user1.initialize(pump);
+        user2.initialize(pump);
+        user3.initialize(pump);
+
+        user1.sendEmail(pump);
+        user2.sendEmail(pump);
+        user3.sendEmail(pump);
+
+        user1.moveEmails(pump);
+        user2.moveEmails(pump);
+        user3.moveEmails(pump);
 
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
@@ -276,6 +276,17 @@ public class TestIntegration
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
+                    Iterator<String> p = users.iterator();
+                    // We are going to skip over the sender username to avoid double
+                    // counting emails
+                    while (p.hasNext())
+                    {
+                        if (p.next().equals(senderUsername))
+                        {
+                            p.remove();
+                            break;
+                        }
+                    }
                     Iterable<MailboxItem> mailboxItems = mailStore.getMail(users);
                     Assert.assertTrue(mailboxItems.iterator().hasNext());
                     mailWriter.write(mailboxItems);
@@ -290,7 +301,7 @@ public class TestIntegration
         // Now prove that everything is in HBase.
 
         ExpectedEmails expectedEmails = new ExpectedEmails();
-        expectedEmails.require(bkerr, hbase);
+        expectedEmails.require(user1, hbase);
         expectedEmails.checkHbase();
 
     }
