@@ -5,7 +5,6 @@ import com.ripariandata.timberwolf.Auth;
 import com.ripariandata.timberwolf.MailStore;
 import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
-import com.ripariandata.timberwolf.NoopUserTimeUpdater;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
@@ -13,13 +12,13 @@ import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToMoveMessage;
 import com.ripariandata.timberwolf.exchange.RequiredFolder;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
+import com.ripariandata.timberwolf.hbase.HBaseUserTimeUpdater;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import java.io.IOException;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -55,6 +54,9 @@ public class TestIntegration
 
     @Rule
     public HTableResource hbase = new HTableResource();
+
+    @Rule
+    public HTableResource userTable = new HTableResource("t");
 
     private String exchangeURL;
     private String ldapDomain;
@@ -139,6 +141,11 @@ public class TestIntegration
         user2.moveEmails(pump);
         user3.moveEmails(pump);
 
+        // We need to close the tables, because HBaseUserTimeUpdater and
+        // HBaseMailWriter call CreateTable, so we can't have any
+        // references to that open
+        userTable.closeTables();
+        hbase.regetTable();
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
             @Override
@@ -147,15 +154,14 @@ public class TestIntegration
 
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
                 MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
+                HBaseUserTimeUpdater timeUpdater =
+                        new HBaseUserTimeUpdater(userTable.getManager(), userTable.getName());
 
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
                     removeUsers(users, senderEmail, ignoredEmail);
-                    System.out.print("Users: ");
-                    System.out.println(StringUtils.join(users.iterator(), ", "));
-                    // TODO: actually pass something useful here
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new NoopUserTimeUpdater());
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, timeUpdater);
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)

@@ -33,15 +33,25 @@ public class HTableResource extends IntegrationTestProperties
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
     private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
     private static final String COLUMN_FAMILY = "h";
+    /** A lock for safely creating the hbaseManager */
+    private static final Object MANAGER_LOCK = new Object();
+    /** The hbaseManager shared among HTableResources */
+    private static HBaseManager hbaseManager;
     private String name;
-    private HBaseManager hbaseManager;
     private IHBaseTable table;
     private HTable testingTable;
+    private String columnFamily;
 
     /** Create a new htable resource. */
     public HTableResource()
     {
+        this(COLUMN_FAMILY);
+    }
+
+    public HTableResource(final String columnFamilyName)
+    {
         super(ZOO_KEEPER_QUORUM_PROPERTY_NAME, ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME);
+        columnFamily = columnFamilyName;
     }
 
     @Override
@@ -57,8 +67,14 @@ public class HTableResource extends IntegrationTestProperties
             @Override
             public void evaluate() throws Throwable
             {
-                hbaseManager = new HBaseManager(getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
-                                                getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
+                synchronized (MANAGER_LOCK)
+                {
+                    if (hbaseManager == null)
+                    {
+                        hbaseManager = new HBaseManager(getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
+                                                        getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
+                    }
+                }
 
                 table = createTable();
                 try
@@ -92,7 +108,7 @@ public class HTableResource extends IntegrationTestProperties
         }, description);
     }
 
-    private void closeTables() throws IOException
+    void closeTables() throws IOException
     {
         try
         {
@@ -170,7 +186,7 @@ public class HTableResource extends IntegrationTestProperties
         if (table == null)
         {
             List<String> columnFamilies = new ArrayList<String>();
-            columnFamilies.add(COLUMN_FAMILY);
+            columnFamilies.add(columnFamily);
             table = hbaseManager.createTable(name, columnFamilies);
         }
         return table;
@@ -216,5 +232,14 @@ public class HTableResource extends IntegrationTestProperties
                 getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));
         testingTable = new HTable(configuration, name);
         return testingTable;
+    }
+
+    /**
+     * Gets the hbaseManager used
+     * @return the hbase manager that is managing tables for the tests
+     */
+    public HBaseManager getManager()
+    {
+        return hbaseManager;
     }
 }
