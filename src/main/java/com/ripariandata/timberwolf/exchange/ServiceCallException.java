@@ -66,7 +66,7 @@ public class ServiceCallException extends Exception
      * Logs a ServiceCallException to the appropriate logs.
      * @param logger The logger to use for logging.
      * @param e The ServiceCallException to log.
-     * @return TheServiceCallException logged.
+     * @return The ServiceCallException logged.
      */
     public static ServiceCallException log(Logger logger, ServiceCallException e)
     {
