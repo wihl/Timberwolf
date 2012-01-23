@@ -65,6 +65,7 @@ public class ExchangePump
     /**
      * Tells Exchange to create all given 'folders' inside parentFolderId.
      * The request is performed as 'user'.
+     * Will not create folders that already have ids.
      */
     private void createFolders(String user, TargetFolderIdType parentFolderId, List<RequiredFolder> folders)
     {
@@ -74,7 +75,15 @@ public class ExchangePump
         NonEmptyArrayOfFoldersType requestedFolders = createFolder.addNewFolders();
         for (RequiredFolder folder : folders)
         {
-            requestedFolders.addNewFolder().setDisplayName(folder.getName());
+            // Don't recreate folders that already exist
+            if (folder.getId() == null)
+            {
+                requestedFolders.addNewFolder().setDisplayName(folder.getName());
+            }
+        }
+        if (requestedFolders.sizeOfFolderArray() == 0)
+        {
+            return;
         }
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
         FolderInfoResponseMessageType[] array = response.getResponseMessages().getCreateFolderResponseMessageArray();

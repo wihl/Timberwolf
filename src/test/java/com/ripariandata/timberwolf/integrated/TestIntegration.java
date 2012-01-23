@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import javax.security.auth.login.LoginException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -92,6 +93,62 @@ public class TestIntegration
                 p.remove();
             }
         }
+    }
+
+    private void runForEmails(final String exchangeURL, final String ldapDomain, final String ldapConfigEntry,
+                              final String keyHeader, final String senderUsername, final String ignoredUsername,
+                              final RequiredUser user1, final RequiredUser user2, final RequiredUser user3,
+                              final ExchangePump pump)
+            throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
+                   ExchangePump.FailedToMoveMessage, LoginException, IOException
+    {
+        final ExpectedEmails expectedEmails;
+        user1.initialize(pump);
+        user2.initialize(pump);
+        user3.initialize(pump);
+
+        user1.sendEmail(pump);
+        user2.sendEmail(pump);
+        user3.sendEmail(pump);
+
+        user1.moveEmails(pump);
+        user2.moveEmails(pump);
+        user3.moveEmails(pump);
+
+
+        Auth.authenticateAndDo(new PrivilegedAction<Object>()
+        {
+            @Override
+            public Object run()
+            {
+
+                MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
+                MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
+
+                try
+                {
+                    Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
+                    removeUsers(users, senderUsername, ignoredUsername);
+                    System.out.print("Users: ");
+                    System.out.println(StringUtils.join(users.iterator(), ", "));
+                    // TODO: actually pass something useful here
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new NoopUserTimeUpdater());
+                    Assert.assertTrue(mailboxItems.iterator().hasNext());
+                    mailWriter.write(mailboxItems);
+                }
+                catch (PrincipalFetchException e)
+                {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }, ldapConfigEntry);
+
+        expectedEmails = new ExpectedEmails();
+        expectedEmails.require(user1, hbase);
+        expectedEmails.require(user2, hbase);
+        expectedEmails.require(user3, hbase);
+        expectedEmails.checkHbase();
     }
 
     @Test
@@ -193,52 +250,28 @@ public class TestIntegration
         user3.addFolderToRoot("Barbara")
              .add("Concerning Barbara", "Something happened to her");
 
-
+        // TODO: encapsulate this into a method
         ExchangePump pump = new ExchangePump(exchangeURL, senderUsername);
-        user1.initialize(pump);
-        user2.initialize(pump);
-        user3.initialize(pump);
+        runForEmails(exchangeURL, ldapDomain, ldapConfigEntry, keyHeader, senderUsername, ignoredUsername, user1, user2,
+                     user3,
+                     pump);
 
-        user1.sendEmail(pump);
-        user2.sendEmail(pump);
-        user3.sendEmail(pump);
 
-        user1.moveEmails(pump);
-        user2.moveEmails(pump);
-        user3.moveEmails(pump);
+        // send new emails / create new folders
+        user1.nextRun();
+        user2.nextRun();
+        user3.nextRun();
 
-        Auth.authenticateAndDo(new PrivilegedAction<Object>()
-        {
-            @Override
-            public Object run()
-            {
+        // TODO actually do that
+        user1.addToInbox("An email after the first one", "A new email");
+        middlerJr.add("A new email in the middler Jr", "The body for this new email");
+        RequiredFolder newFolder = middlerJr.addFolder("New folder");
+        newFolder.add("this new email is in a new folder", "and it has a new body");
 
-                MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
-                MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
-
-                try
-                {
-                    Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
-                    removeUsers(users, senderUsername, ignoredUsername);
-                    // TODO: actually pass something useful here
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new NoopUserTimeUpdater());
-                    Assert.assertTrue(mailboxItems.iterator().hasNext());
-                    mailWriter.write(mailboxItems);
-                }
-                catch (PrincipalFetchException e)
-                {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }, ldapConfigEntry);
-        // Now prove that everything is in HBase.
-
-        ExpectedEmails expectedEmails = new ExpectedEmails();
-        expectedEmails.require(user1, hbase);
-        expectedEmails.require(user2, hbase);
-        expectedEmails.require(user3, hbase);
-        expectedEmails.checkHbase();
-
+        runForEmails(exchangeURL, ldapDomain, ldapConfigEntry, keyHeader, senderUsername, ignoredUsername, user1, user2,
+                     user3,
+                     pump);
     }
+
+
 }

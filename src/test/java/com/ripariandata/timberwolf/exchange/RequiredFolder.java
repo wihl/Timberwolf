@@ -10,8 +10,8 @@ public class RequiredFolder
     private final String name;
     private final String emailAddress;
     private String id;
-    private List<RequiredFolder> folders;
-    private List<RequiredEmail> emails;
+    private final List<RequiredFolder> folders;
+    private final List<RequiredEmail> emails;
 
     public RequiredFolder(final String folderName, final String email)
     {
@@ -55,11 +55,10 @@ public class RequiredFolder
         if (folders.size() > 0)
         {
             pump.createFolders(user, getId(), folders);
-            for (RequiredFolder folder : folders)
-            {
-                System.err.println("    Initialized folder: " + folder.getId());
-                folder.initialize(pump, user);
-            }
+        }
+        for (RequiredFolder folder : folders)
+        {
+            folder.initialize(pump, user);
         }
         for (RequiredEmail email : emails)
         {
@@ -119,6 +118,18 @@ public class RequiredFolder
         for (RequiredFolder folder : folders)
         {
             folder.moveMessages(pump, user, items);
+        }
+    }
+
+    /**
+     * Wipes out all the emails in this folder, for getting new emails.
+     */
+    public void nextRun()
+    {
+        emails.clear();
+        for (RequiredFolder folder : folders)
+        {
+            folder.nextRun();
         }
     }
 

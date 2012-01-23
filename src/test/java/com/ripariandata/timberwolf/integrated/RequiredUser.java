@@ -220,6 +220,27 @@ public class RequiredUser
     }
 
     /**
+     * Starts another run, so that more emails can be sent, or folders created
+     * without recreating/resending the original emails/folders. This wipes out
+     * all emails retrieved from getAllEmails, only the new ones created after
+     * calling this will be returned.
+     */
+    public void nextRun()
+    {
+        for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
+        {
+            List<RequiredFolder> folders = distinguishedFolders.get(distinguishedFolder);
+            for (RequiredFolder folder : folders)
+            {
+                folder.nextRun();
+            }
+        }
+        topLevelEmails.clear();
+        drafts.clear();
+        sentItems.clear();
+    }
+
+    /**
      * This ensure that all the message ids in items corresponds to the
      * messages for this user.
      *
