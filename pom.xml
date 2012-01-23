@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.softartisans.timberwolf</groupId>
+  <groupId>com.ripariandata.timberwolf</groupId>
   <artifactId>timberwolf</artifactId>
   <version>${version}</version>
   <packaging>jar</packaging>
@@ -39,7 +39,7 @@
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.3.3</version>
       	<configuration>
-      	  <onlyAnalyze>com.softartisans.timberwolf.*</onlyAnalyze>
+      	  <onlyAnalyze>com.ripariandata.timberwolf.*</onlyAnalyze>
       	</configuration>
       </plugin>
       <plugin>
@@ -48,7 +48,7 @@
         <version>2.8</version>
         <configuration>
           <configLocation>checkstyle.xml</configLocation>
-          <!--<includeTestSourceDirectory>true</includeTestSourceDirectory>-->
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
         </configuration>
       </plugin>
       <plugin>
@@ -73,7 +73,7 @@
       	  <instrumentation>
       	    <excludes>
       	      <exclude>com/microsoft/**</exclude>
-      	      <exclude>com/softartisans/timberwolf/exchangeservice/**</exclude>
+      	      <exclude>com/ripariandata/timberwolf/exchangeservice/**</exclude>
       	      <exclude>org/xmlsoap/**</exclude>
       	      <exclude>org/w3/**</exclude>
       	    </excludes>
@@ -95,7 +95,7 @@
           </descriptors>
           <archive>
             <manifest>
-              <mainClass>com.softartisans.timberwolf.App</mainClass>
+              <mainClass>com.ripariandata.timberwolf.App</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -141,7 +141,7 @@
       	<artifactId>maven-testability-plugin</artifactId>
       	<version>1.3.3</version>
       	<configuration>
-      	  <whiteList>com.microsoft.*:com.softartisans.timberwolf.exchangeservice.*:org.apache.*</whiteList>
+      	  <whiteList>com.microsoft.*:com.ripariandata.timberwolf.exchangeservice.*:org.apache.*</whiteList>
       	</configuration>
       </plugin>
       <plugin>
@@ -149,7 +149,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.8</version>
 	      <configuration>
-	        <excludePackageNames>com.microsoft.*:com.softartisans.timberwolf.exchangeservice*:org.*</excludePackageNames>
+	        <excludePackageNames>com.microsoft.*:com.ripariandata.timberwolf.exchangeservice*:org.*</excludePackageNames>
 	      </configuration>
       </plugin>
       <plugin>

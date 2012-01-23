@@ -9,7 +9,7 @@
 ## Necessary for the integration tests that hit an actual hbase
 ###############################################################
 ## The ZooKeeper quorum used to connect to HBase.
-# ZooKeeperQuorum = hdhbase01.int.softartisans.com
+# ZooKeeperQuorum = hbase.int.test
 ## The ZooKeeper client port used to connect to HBase.
 # ZooKeeperClientPort = 2181
 

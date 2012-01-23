@@ -33,12 +33,12 @@
 
     <!-- ExchangeService and FindFolderIterator are particularly
          chatty during the integration test -->
-    <logger name="com.softartisans.timberwolf.exchange.ExchangeService">
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangeService">
       <!-- set this to trace to see all exchange http traffic -->
       <level value="fatal" />
     </logger>
 
-    <logger name="com.softartisans.timberwolf.exchange.FindFolderIterator">
+    <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator">
       <level value="fatal" />
     </logger>
 
