@@ -1,6 +1,7 @@
 package com.ripariandata.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import org.slf4j.Logger;
 
 /** Exception that can be thrown by HttpUrlConnectionFactories. */
 public class ServiceCallException extends Exception
@@ -60,4 +61,18 @@ public class ServiceCallException extends Exception
         }
         return null;
     }
+
+    /**
+     * Logs a ServiceCallException to the appropriate logs.
+     * @param logger The logger to use for logging.
+     * @param e The ServiceCallException to log.
+     * @return TheServiceCallException logged.
+     */
+    public static ServiceCallException log(Logger logger, ServiceCallException e)
+    {
+        logger.error(e.getMessage());
+        logger.debug(e.getMessage(), e);
+        return e;
+    }
+
 }

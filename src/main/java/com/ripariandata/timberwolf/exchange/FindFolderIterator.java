@@ -34,18 +34,16 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
                                                                DistinguishedFolderIdNameType.MSGFOLDERROOT), user);
             if (folderQueue.size() == 0)
             {
-                LOG.debug("Did not find any folders.");
+                LOG.warn("Did not find any folders.");
             }
         }
         catch (ServiceCallException e)
         {
-            LOG.error("Failed to find folder ids.", e);
-            throw new ExchangeRuntimeException("Failed to find folder ids.", e);
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find folder ids.", e));
         }
         catch (HttpErrorException e)
         {
-            LOG.error("Failed to find folder ids.", e);
-            throw new ExchangeRuntimeException("Failed to find folder ids.", e);
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find folder ids.", e));
         }
 
         accessTime = new DateTime();
