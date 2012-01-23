@@ -8,6 +8,9 @@ import com.ripariandata.timberwolf.MailboxItem;
 import com.ripariandata.timberwolf.NoopUserTimeUpdater;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
+import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
+import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
+import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToMoveMessage;
 import com.ripariandata.timberwolf.exchange.RequiredFolder;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.services.LdapFetcher;
@@ -19,7 +22,9 @@ import javax.security.auth.login.LoginException;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -37,6 +42,11 @@ public class TestIntegration
 
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
+
+    RequiredUser user1;
+    RequiredUser user2;
+    RequiredUser user3;
+
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
                                                                                 EXCHANGE_USER1_PROPERTY_NAME,
@@ -49,6 +59,26 @@ public class TestIntegration
 
     @Rule
     public HTableResource hbase = new HTableResource();
+    ExchangePump pump;
+
+    String exchangeURL;
+    String ldapDomain;
+    String ldapConfigEntry;
+
+    final String keyHeader = "Item ID";
+
+    // The emails of this user are not checked
+    String senderUsername;
+    String senderEmail;
+
+    // The emails of this user are not checked
+    String ignoredUsername;
+    String ignoredEmail;
+
+    String username1;
+    String email1;
+    String username2;
+    String username3;
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -93,48 +123,30 @@ public class TestIntegration
             }
         }
     }
-
-    @Test
-    public void testIntegrationNoCLI()
-            throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
-                   ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
+    
+    @Before
+    public void SetupUsers() throws FailedToCreateMessage, FailedToFindMessage, FailedToMoveMessage
     {
-        /*
-        This test tests getting emails from an exchange server, and the breadth
-        of what that entails, and then putting it all in Exchange. It depends
-        on a certain set of users, specified in the testing.properties. The
-        test than creates a bunch of folders in those user accounts, fills them
-        with email, runs timberwolf to get the messages into hbase, and then
-        asserts that all the created messages are in hbase.
-        After the test it deletes ALL content from the user accounts.
-        The authenticated user account must be able to impersonate all the
-        required user accounts specified in the properties.
-         */
+        exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
+        ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
+        ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
-        final String exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
-        final String ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
-        final String ldapConfigEntry = IntegrationTestProperties.getProperty(LDAP_CONFIG_ENTRY_PROPERTY_NAME);
+        senderUsername = IntegrationTestProperties.getProperty(EXCHANGE_SENDER_PROPERTY_NAME);
+        senderEmail = email(senderUsername);
 
-        final String keyHeader = "Item ID";
+        ignoredUsername = IntegrationTestProperties.getProperty(EXCHANGE_IGNORED_USER_PROPERTY_NAME);
+        ignoredEmail = email(ignoredUsername);
 
-        // The emails of this user are not checked
-        final String senderUsername = IntegrationTestProperties.getProperty(EXCHANGE_SENDER_PROPERTY_NAME);
-        final String senderEmail = email(senderUsername);
-
-        // The emails of this user are not checked
-        final String ignoredUsername = IntegrationTestProperties.getProperty(EXCHANGE_IGNORED_USER_PROPERTY_NAME);
-        final String ignoredEmail = email(ignoredUsername);
-
-        final String username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
-        final String email1 = email(username1);
-        final String username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
-        final String username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
+        username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
+        email1 = email(username1);
+        username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
+        username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
 
 
         /////////////
         // User #1
         /////////////
-        RequiredUser user1 = new RequiredUser(username1, ldapDomain);
+        user1 = new RequiredUser(username1, ldapDomain);
         user1.addToInbox("Leave it be", "Even though you love your inbox clean").from(senderEmail);
         user1.addFolderToInbox("child of Inbox")
              .add("To the child of inbox", "here is the body of the email in the child of Inbox");
@@ -176,7 +188,7 @@ public class TestIntegration
         /////////////
         //  User #2
         /////////////
-        RequiredUser user2 = new RequiredUser(username2, ldapDomain);
+        user2 = new RequiredUser(username2, ldapDomain);
         user2.addToInbox("Dear Alex", "Leave this bad boy in your inbox");
         user2.addFolderToInbox("Rebecca")
              .add("About Rebecca", "She did something");
@@ -186,15 +198,14 @@ public class TestIntegration
         /////////////
         // User #3
         /////////////
-        RequiredUser user3 = new RequiredUser(username3, ldapDomain);
+        user3 = new RequiredUser(username3, ldapDomain);
         user3.addToInbox("Dear Mary", "Don't rearrange this email");
         user3.addFolderToInbox("Anthony")
              .add("About Anthony", "He did something");
         user3.addFolderToRoot("Barbara")
              .add("Concerning Barbara", "Something happened to her");
 
-
-        ExchangePump pump = new ExchangePump(exchangeURL, senderUsername);
+        pump = new ExchangePump(exchangeURL, senderUsername);
         user1.initialize(pump);
         user2.initialize(pump);
         user3.initialize(pump);
@@ -206,6 +217,48 @@ public class TestIntegration
         user1.moveEmails(pump);
         user2.moveEmails(pump);
         user3.moveEmails(pump);
+    }
+
+    @After
+    public void DeleteEmails()
+    {
+        if (pump != null)
+        {
+            if (user1 != null)
+            {
+                user1.deleteEmails(pump);
+                user1 = null;
+            }
+            if (user2 != null)
+            {
+                user2.deleteEmails(pump);
+                user2 = null;
+            }
+            if (user3 != null)
+            {
+                user3.deleteEmails(pump);
+                user3 = null;
+            }
+            pump = null;
+        }
+    }
+
+    @Test
+    public void testIntegrationNoCLI()
+            throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
+                   ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
+    {
+        /*
+        This test tests getting emails from an exchange server, and the breadth
+        of what that entails, and then putting it all in Exchange. It depends
+        on a certain set of users, specified in the testing.properties. The
+        test than creates a bunch of folders in those user accounts, fills them
+        with email, runs timberwolf to get the messages into hbase, and then
+        asserts that all the created messages are in hbase.
+        After the test it deletes ALL content from the user accounts.
+        The authenticated user account must be able to impersonate all the
+        required user accounts specified in the properties.
+         */
 
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {

@@ -112,7 +112,11 @@ public class ExchangePump
 
         for (RequiredFolder folder : folders)
         {
-            doomedFolders.addNewFolderId().setId(folder.getId());
+            final String folderId = folder.getId();
+            if (folderId != null && folderId.length() > 0)
+            {
+                doomedFolders.addNewFolderId().setId(folderId);
+            }
         }
         sendRequest(request);
     }
