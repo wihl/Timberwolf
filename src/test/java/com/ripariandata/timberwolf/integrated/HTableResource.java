@@ -145,6 +145,20 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
+     * Wipes out the contents of the table
+     * @return a new version of the table, same name.
+     * @throws IOException if there was a problem closing, deleting or
+     * creating the table.
+     */
+    public IHBaseTable resetTable() throws IOException
+    {
+        closeTables();
+        hbaseManager.deleteTable(name);
+        table = createTable();
+        return table;
+    }
+
+    /**
      * Creates a randomly named table for testing.
      * <b>Note:</b> This won't create multiple tables if called more than once.
      * To have multiple tables, use multiple HTableResources

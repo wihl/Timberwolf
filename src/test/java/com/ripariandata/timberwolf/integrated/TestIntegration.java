@@ -139,11 +139,6 @@ public class TestIntegration
         user2.moveEmails(pump);
         user3.moveEmails(pump);
 
-        if (hbase.getTable() == null)
-        {
-            hbase.regetTable();
-        }
-
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
             @Override
@@ -304,6 +299,7 @@ public class TestIntegration
 
         runForEmails();
 
+        hbase.resetTable();
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
