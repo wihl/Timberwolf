@@ -65,6 +65,11 @@ public class HTableResource extends IntegrationTestProperties
                 {
                     inner.evaluate();
                 }
+                catch (Throwable e)
+                {
+                    e.printStackTrace();
+                    throw e;
+                }
                 finally
                 {
                     try
@@ -93,7 +98,8 @@ public class HTableResource extends IntegrationTestProperties
         {
             if (table != null)
             {
-                table.close();
+                hbaseManager.close();
+                table = null;
             }
         }
         finally
@@ -101,6 +107,7 @@ public class HTableResource extends IntegrationTestProperties
             if (testingTable != null)
             {
                 testingTable.close();
+                testingTable = null;
             }
         }
     }
@@ -116,7 +123,7 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
-     * The table as created by our production code.
+     * The table as created by ice.submit(AbstractExour production code.
      *
      * @return the table created by our production code
      */
@@ -190,7 +197,6 @@ public class HTableResource extends IntegrationTestProperties
     public HTable getTestingTable() throws IOException
     {
         closeTables();
-        table = null;
         Configuration configuration = HBaseConfigurator.createConfiguration(
                 getProperty(ZOO_KEEPER_QUORUM_PROPERTY_NAME),
                 getProperty(ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME));

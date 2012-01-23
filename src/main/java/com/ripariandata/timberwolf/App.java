@@ -129,9 +129,10 @@ final class App implements PrivilegedAction<Integer>
     {
         MailWriter mailWriter;
         UserTimeUpdater timeUpdater;
+        HBaseManager hbaseManager = null;
         if (useHBase)
         {
-            HBaseManager hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
+            hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
             mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
             timeUpdater = new HBaseUserTimeUpdater(hbaseManager, hbaseMetadataTableName);
@@ -198,6 +199,13 @@ final class App implements PrivilegedAction<Integer>
         {
             System.out.println("There was a problem fetching a list of users from Active Directory. "
                                + e.getMessage() +  "See the log for more details.");
+        }
+        finally
+        {
+            if (hbaseManager != null)
+            {
+                hbaseManager.close();
+            }
         }
         return 1;
     }

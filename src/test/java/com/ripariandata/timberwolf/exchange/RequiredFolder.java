@@ -3,10 +3,13 @@ package com.ripariandata.timberwolf.exchange;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Helper class for required folders in exchange */
 public class RequiredFolder
 {
+    private static final Logger LOG = LoggerFactory.getLogger(RequiredFolder.class);
     private final String name;
     private final String emailAddress;
     private String id;
@@ -52,6 +55,8 @@ public class RequiredFolder
 
     public void initialize(ExchangePump pump, String user)
     {
+        LOG.debug("Initializing folder: " + getName() + " with " + folders.size() + " subfolders and " + emails.size()
+                  + " emails.");
         if (folders.size() > 0)
         {
             pump.createFolders(user, getId(), folders);

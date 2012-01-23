@@ -2,10 +2,13 @@ package com.ripariandata.timberwolf.exchange;
 
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Helper class for required emails in exchange */
 public class RequiredEmail
 {
+    private static final Logger LOG = LoggerFactory.getLogger(RequiredEmail.class);
     public static final String DISTINGUISHED_FOLDER_PREFIX = "Distinguished -- ";
     public static final String FOLDER_ID_SEPARATOR = "::";
     private String subject;
@@ -27,16 +30,17 @@ public class RequiredEmail
     {
         if (folderId != null)
         {
-            throw new UnsupportedOperationException("folder can only be set once on email");
+            throw new UnsupportedOperationException("folder can only be set once on email: " + toString());
         }
         folderId = folder.getId();
+        LOG.debug("New email in {}: {}", folder.getName(), toString());
     }
 
     public void initialize(final DistinguishedFolderIdNameType.Enum folder)
     {
         if (folderId != null)
         {
-            throw new UnsupportedOperationException("folder can only be set once on email");
+            throw new UnsupportedOperationException("folder can only be set once on email: " + toString());
         }
         folderId = DISTINGUISHED_FOLDER_PREFIX + folder;
     }
@@ -45,7 +49,7 @@ public class RequiredEmail
     {
         if (folderId == null)
         {
-            throw new UnsupportedOperationException("folder must be set on email");
+            throw new UnsupportedOperationException("folder must be set on email: " + toString());
         }
         return subject + FOLDER_ID_SEPARATOR + folderId;
     }

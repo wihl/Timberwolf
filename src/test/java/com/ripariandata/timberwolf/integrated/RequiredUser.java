@@ -107,7 +107,6 @@ public class RequiredUser
             pump.createFolders(user, distinguishedFolder, folders);
             for (RequiredFolder folder : folders)
             {
-                System.err.println(" Initialized folder: " + folder.getId());
                 folder.initialize(pump, user);
             }
         }

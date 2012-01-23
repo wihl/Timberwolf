@@ -31,6 +31,8 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
@@ -41,6 +43,8 @@ import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
  */
 public class ExchangePump
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangePump.class);
     private static final String DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
     private static final String SOAP_ENCODING = "UTF-8";
 
@@ -78,11 +82,13 @@ public class ExchangePump
             // Don't recreate folders that already exist
             if (folder.getId() == null)
             {
+                LOG.debug("Creating folder: {}", folder.getName());
                 requestedFolders.addNewFolder().setDisplayName(folder.getName());
             }
         }
         if (requestedFolders.sizeOfFolderArray() == 0)
         {
+            LOG.debug("All requested folders were already created.");
             return;
         }
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
@@ -92,6 +98,10 @@ public class ExchangePump
         {
             for (FolderType folder : folderResponse.getFolders().getFolderArray())
             {
+                while (folders.get(i).getId() != null)
+                {
+                    i++;
+                }
                 folders.get(i).setId(folder.getFolderId().getId());
                 i++;
             }

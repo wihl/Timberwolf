@@ -145,6 +145,10 @@ public class TestIntegration
         user2.moveEmails(pump);
         user3.moveEmails(pump);
 
+        if (hbase.getTable() == null)
+        {
+            hbase.regetTable();
+        }
 
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
@@ -308,6 +312,10 @@ public class TestIntegration
         runForEmails(exchangeURL, ldapDomain, ldapConfigEntry, keyHeader, senderUsername, ignoredUsername, user1, user2,
                      user3,
                      pump);
+
+        user1.nextRun();
+        user2.nextRun();
+        user3.nextRun();
 
         // TODO actually do that
         user1.addToInbox("An email after the first one", "A new email");
