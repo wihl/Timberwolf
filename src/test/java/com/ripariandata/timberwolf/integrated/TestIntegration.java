@@ -44,10 +44,6 @@ public class TestIntegration
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
 
-    RequiredUser user1;
-    RequiredUser user2;
-    RequiredUser user3;
-
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
                                                                                 EXCHANGE_USER1_PROPERTY_NAME,
@@ -60,26 +56,28 @@ public class TestIntegration
 
     @Rule
     public HTableResource hbase = new HTableResource();
-    ExchangePump pump;
 
-    String exchangeURL;
-    String ldapDomain;
-    String ldapConfigEntry;
+    private String exchangeURL;
+    private String ldapDomain;
+    private String ldapConfigEntry;
 
-    final String keyHeader = "Item ID";
-
-    // The emails of this user are not checked
-    String senderUsername;
-    String senderEmail;
+    private final String keyHeader = "Item ID";
 
     // The emails of this user are not checked
-    String ignoredUsername;
-    String ignoredEmail;
+    private String senderUsername;
+    private String senderEmail;
 
-    String username1;
-    String email1;
-    String username2;
-    String username3;
+    // The emails of this user are not checked
+    private String ignoredUsername;
+    private String ignoredEmail;
+
+    private String email1;
+
+
+    private RequiredUser user1;
+    private RequiredUser user2;
+    private RequiredUser user3;
+    private ExchangePump pump;
 
     private Get createGet(String row, String columnFamily, String[] headers)
     {
@@ -125,10 +123,7 @@ public class TestIntegration
         }
     }
 
-    private void runForEmails(final String exchangeURL, final String ldapDomain, final String ldapConfigEntry,
-                              final String keyHeader, final String senderUsername, final String ignoredUsername,
-                              final RequiredUser user1, final RequiredUser user2, final RequiredUser user3,
-                              final ExchangePump pump)
+    private void runForEmails()
             throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
                    ExchangePump.FailedToMoveMessage, LoginException, IOException
     {
@@ -198,15 +193,16 @@ public class TestIntegration
         ignoredUsername = IntegrationTestProperties.getProperty(EXCHANGE_IGNORED_USER_PROPERTY_NAME);
         ignoredEmail = email(ignoredUsername);
 
-        username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
+        final String username1 = IntegrationTestProperties.getProperty(EXCHANGE_USER1_PROPERTY_NAME);
         email1 = email(username1);
-        username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
-        username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
+        final String username2 = IntegrationTestProperties.getProperty(EXCHANGE_USER2_PROPERTY_NAME);
+        final String username3 = IntegrationTestProperties.getProperty(EXCHANGE_USER3_PROPERTY_NAME);
 
 
         user1 = new RequiredUser(username1, ldapDomain);
         user2 = new RequiredUser(username2, ldapDomain);
         user3 = new RequiredUser(username3, ldapDomain);
+        pump = new ExchangePump(exchangeURL, senderUsername);
     }
 
     @After
@@ -308,10 +304,7 @@ public class TestIntegration
         user3.addFolderToRoot("Barbara")
              .add("Concerning Barbara", "Something happened to her");
 
-        pump = new ExchangePump(exchangeURL, senderUsername);
-        runForEmails(exchangeURL, ldapDomain, ldapConfigEntry, keyHeader, senderUsername, ignoredUsername, user1, user2,
-                     user3,
-                     pump);
+        runForEmails();
 
         user1.nextRun();
         user2.nextRun();
@@ -323,9 +316,7 @@ public class TestIntegration
         RequiredFolder newFolder = middlerJr.addFolder("New folder");
         newFolder.add("this new email is in a new folder", "and it has a new body");
 
-        runForEmails(exchangeURL, ldapDomain, ldapConfigEntry, keyHeader, senderUsername, ignoredUsername, user1, user2,
-                     user3,
-                     pump);
+        runForEmails();
     }
 
 
