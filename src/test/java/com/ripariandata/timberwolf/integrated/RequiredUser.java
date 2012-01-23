@@ -173,6 +173,7 @@ public class RequiredUser
                 DistinguishedFolderIdNameType.INBOX,
                 DistinguishedFolderIdNameType.DRAFTS,
                 DistinguishedFolderIdNameType.SENTITEMS,
+                DistinguishedFolderIdNameType.DELETEDITEMS,
         };
         // We go through each folder in the list, query exchange for all items
         // in that list, and then add them to the accumulative allItems.
