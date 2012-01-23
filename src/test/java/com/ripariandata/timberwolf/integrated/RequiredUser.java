@@ -2,6 +2,8 @@ package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
+import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
+import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToDeleteMessage;
 import com.ripariandata.timberwolf.exchange.RequiredEmail;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.MessageId;
@@ -160,7 +162,7 @@ public class RequiredUser
      * also delete some emails which were already in exchange. But they
      * shouldn't be there anyway.
      */
-    public void deleteEmails(ExchangePump pump)
+    public void deleteEmails(ExchangePump pump) throws FailedToDeleteMessage, FailedToFindMessage
     {
         // First we start out by deleting all instantiated folders. This'll
         // delete anything that exists within those folders.
@@ -177,25 +179,19 @@ public class RequiredUser
                 DistinguishedFolderIdNameType.SENTITEMS,
                 DistinguishedFolderIdNameType.DELETEDITEMS,
         };
-        try
+
+        // We go through each folder in the list, query exchange for all items
+        // in that list, and then add them to the accumulative allItems.
+        for (DistinguishedFolderIdNameType.Enum currentFolder : foldersToClear)
         {
-            // We go through each folder in the list, query exchange for all items
-            // in that list, and then add them to the accumulative allItems.
-            for (DistinguishedFolderIdNameType.Enum currentFolder : foldersToClear)
+            HashMap<String, List<MessageId>> items = pump.findItems(user, currentFolder);
+            for (String subFolder : items.keySet())
             {
-                HashMap<String, List<MessageId>> items = pump.findItems(user, currentFolder);
-                for (String subFolder : items.keySet())
-                {
-                    allItems.addAll(items.get(subFolder));
-                }
+                allItems.addAll(items.get(subFolder));
             }
-            // Now we tell exchange to delete all accumulated items, all in one go.
-            pump.deleteEmails(user, allItems);
         }
-        catch (FailedToFindMessage e)
-        {
-            Assert.fail("An error occured while trying to cleanup test emails: " + e.getMessage());
-        }
+        // Now we tell exchange to delete all accumulated items, all in one go.
+        pump.deleteEmails(user, allItems);
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage

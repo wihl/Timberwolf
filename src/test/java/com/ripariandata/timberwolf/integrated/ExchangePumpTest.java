@@ -72,7 +72,14 @@ public class ExchangePumpTest
                 }
                 finally
                 {
-                    bkerr.deleteEmails(pump);
+                    try
+                    {
+                        bkerr.deleteEmails(pump);
+                    }
+                    catch (Exception e)
+                    {
+                        System.err.println("An error occured cleaning up the tests: " + e.getMessage());
+                    }
                 }
                 return 0;
             }

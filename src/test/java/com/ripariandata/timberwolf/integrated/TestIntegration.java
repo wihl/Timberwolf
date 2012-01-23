@@ -224,17 +224,24 @@ public class TestIntegration
     {
         if (pump != null)
         {
-            if (user1 != null)
+            try
             {
-                user1.deleteEmails(pump);
+                if (user1 != null)
+                {
+                    user1.deleteEmails(pump);
+                }
+                if (user2 != null)
+                {
+                    user2.deleteEmails(pump);
+                }
+                if (user3 != null)
+                {
+                    user3.deleteEmails(pump);
+                }
             }
-            if (user2 != null)
+            catch (Exception e)
             {
-                user2.deleteEmails(pump);
-            }
-            if (user3 != null)
-            {
-                user3.deleteEmails(pump);
+                System.err.println("An error occured cleaning up test emails: " + e.getMessage());
             }
             pump = null;
         }
