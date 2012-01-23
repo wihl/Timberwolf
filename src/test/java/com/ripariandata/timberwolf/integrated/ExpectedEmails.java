@@ -136,8 +136,10 @@ public class ExpectedEmails
         HTableInterface table = hbase.getTestingTable();
         Scan scan = createScan(hbase.getFamily(), new String[]{"Subject", "Sender", "Bcc", "Cc", "To", "Body"});
         ResultScanner scanner = table.getScanner(scan);
+        int countInHBase = 0;
         for (Result result = scanner.next(); result != null; result = scanner.next())
         {
+            countInHBase++;
             logResult(result);
             Iterator<RequiredEmail> p = temp.iterator();
             while (p.hasNext())
@@ -150,6 +152,7 @@ public class ExpectedEmails
             }
         }
         assertEmpty(temp);
+        Assert.assertEquals(requiredEmails.size(), countInHBase);
     }
 
 }

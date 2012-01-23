@@ -24,7 +24,6 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -104,7 +103,7 @@ public class TestIntegration
         return username + "@" + IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
     }
 
-    private void removeUsers(final Iterable<String> users, final String ignoredUsername1, final String ignoredUsername2)
+    private void removeUsers(final Iterable<String> users, final String ignoredEmail1, final String ignoredEmail2)
     {
         Iterator<String> p = users.iterator();
         // We are going to skip over the sender username to avoid double
@@ -112,11 +111,11 @@ public class TestIntegration
         while (p.hasNext())
         {
             String user = p.next();
-            if (user.equals(ignoredUsername1))
+            if (user.equals(ignoredEmail1))
             {
                 p.remove();
             }
-            else if (user.equals(ignoredUsername2))
+            else if (user.equals(ignoredEmail2))
             {
                 p.remove();
             }
@@ -157,12 +156,11 @@ public class TestIntegration
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
-                    removeUsers(users, senderUsername, ignoredUsername);
+                    removeUsers(users, senderEmail, ignoredEmail);
                     System.out.print("Users: ");
                     System.out.println(StringUtils.join(users.iterator(), ", "));
                     // TODO: actually pass something useful here
                     Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, new NoopUserTimeUpdater());
-                    Assert.assertTrue(mailboxItems.iterator().hasNext());
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)
