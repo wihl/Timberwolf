@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 /** Helper class for required users in exchange */
 public class RequiredUser
 {
@@ -158,7 +160,7 @@ public class RequiredUser
      * also delete some emails which were already in exchange. But they
      * shouldn't be there anyway.
      */
-    public void deleteEmails(ExchangePump pump) throws FailedToFindMessage
+    public void deleteEmails(ExchangePump pump)
     {
         // First we start out by deleting all instantiated folders. This'll
         // delete anything that exists within those folders.
@@ -175,18 +177,25 @@ public class RequiredUser
                 DistinguishedFolderIdNameType.SENTITEMS,
                 DistinguishedFolderIdNameType.DELETEDITEMS,
         };
-        // We go through each folder in the list, query exchange for all items
-        // in that list, and then add them to the accumulative allItems.
-        for (DistinguishedFolderIdNameType.Enum currentFolder : foldersToClear)
+        try
         {
-            HashMap<String, List<MessageId>> items = pump.findItems(user, currentFolder);
-            for (String subFolder : items.keySet())
+            // We go through each folder in the list, query exchange for all items
+            // in that list, and then add them to the accumulative allItems.
+            for (DistinguishedFolderIdNameType.Enum currentFolder : foldersToClear)
             {
-                allItems.addAll(items.get(subFolder));
+                HashMap<String, List<MessageId>> items = pump.findItems(user, currentFolder);
+                for (String subFolder : items.keySet())
+                {
+                    allItems.addAll(items.get(subFolder));
+                }
             }
+            // Now we tell exchange to delete all accumulated items, all in one go.
+            pump.deleteEmails(user, allItems);
         }
-        // Now we tell exchange to delete all accumulated items, all in one go.
-        pump.deleteEmails(user, allItems);
+        catch (FailedToFindMessage e)
+        {
+            Assert.fail("An error occured while trying to cleanup test emails: " + e.getMessage());
+        }
     }
 
     public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
