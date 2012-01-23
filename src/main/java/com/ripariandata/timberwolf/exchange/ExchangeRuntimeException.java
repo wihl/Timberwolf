@@ -16,7 +16,7 @@ public class ExchangeRuntimeException extends RuntimeException
      * @param e The ExchangeRuntimeException to log.
      * @return The ExchangeRuntimeException logged.
      */
-    public static ExchangeRuntimeException log(Logger logger, ExchangeRuntimeException e)
+    public static ExchangeRuntimeException log(final Logger logger, final ExchangeRuntimeException e)
     {
         logger.error(e.getMessage());
         logger.debug(e.getMessage(), e);

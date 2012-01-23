@@ -215,7 +215,7 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            throw ServiceCallException.log(LOG,new ServiceCallException(ServiceCallException.Reason.OTHER,
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
                     "There was an error getting the input stream for the response.", e));
         }
         return responseData;
@@ -230,7 +230,7 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            throw ServiceCallException.log(LOG,new ServiceCallException(ServiceCallException.Reason.OTHER,
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
                     "There was an error getting the HTTP status code for the response.", e));
         }
         return code;

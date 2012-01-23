@@ -25,7 +25,7 @@ public class PrincipalFetchException extends Exception
      * @param e The PrincipalFetchException to log.
      * @return The PrincipalFetchException logged.
      */
-    public static PrincipalFetchException log(Logger logger, PrincipalFetchException e)
+    public static PrincipalFetchException log(final Logger logger, final PrincipalFetchException e)
     {
         logger.error(e.getMessage());
         logger.debug(e.getMessage(), e);

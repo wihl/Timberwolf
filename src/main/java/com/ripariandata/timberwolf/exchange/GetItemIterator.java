@@ -49,11 +49,11 @@ public class GetItemIterator extends BaseChainIterator<MailboxItem>
         }
         catch (ServiceCallException e)
         {
-            throw ExchangeRuntimeException.log(LOG,new ExchangeRuntimeException("Failed to get emails.", e));
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to get emails.", e));
         }
         catch (HttpErrorException e)
         {
-            throw ExchangeRuntimeException.log(LOG,new ExchangeRuntimeException("Failed to get emails.", e));
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to get emails.", e));
         }
     }
 }

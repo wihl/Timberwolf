@@ -1,8 +1,5 @@
 package com.ripariandata.timberwolf.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,13 +15,16 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class fetches a list of principals through LDAP.
  * It tries to return as many as possible.
  */
 public class LdapFetcher implements PrincipalFetcher
 {
-    private final static Logger LOG = LoggerFactory.getLogger(PrincipalFetcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PrincipalFetcher.class);
     private final String domainName;
 
     public LdapFetcher(final String aDomainName)

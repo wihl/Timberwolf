@@ -62,11 +62,11 @@ public class FindItemIterator extends BaseChainIterator<MailboxItem>
         }
         catch (ServiceCallException e)
         {
-            throw ExchangeRuntimeException.log(LOG,new ExchangeRuntimeException("Failed to find item ids.", e));
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find item ids.", e));
         }
         catch (HttpErrorException e)
         {
-            throw ExchangeRuntimeException.log(LOG,new ExchangeRuntimeException("Failed to find item ids.", e));
+            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find item ids.", e));
         }
     }
 }

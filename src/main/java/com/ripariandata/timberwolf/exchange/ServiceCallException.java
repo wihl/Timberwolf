@@ -68,7 +68,7 @@ public class ServiceCallException extends Exception
      * @param e The ServiceCallException to log.
      * @return The ServiceCallException logged.
      */
-    public static ServiceCallException log(Logger logger, ServiceCallException e)
+    public static ServiceCallException log(final Logger logger, final ServiceCallException e)
     {
         logger.error(e.getMessage());
         logger.debug(e.getMessage(), e);
