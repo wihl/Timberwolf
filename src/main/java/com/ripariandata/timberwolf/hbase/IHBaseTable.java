@@ -13,5 +13,4 @@ public interface IHBaseTable
     Result get(Get get);
     void flush();
     String getName();
-    void close();
 }

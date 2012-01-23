@@ -24,7 +24,7 @@ public class HBaseManagerTest
      * @param name The name of the IHBaseTable.
      * @return A IHBaseTable with a specific name.
      */
-    private IHBaseTable createNamedTable(final String name)
+    private HBaseTable createNamedTable(final String name)
     {
         HBaseTable table = mock(HBaseTable.class);
         when(table.getName()).thenReturn(name);
@@ -47,7 +47,7 @@ public class HBaseManagerTest
     public void testAdd()
     {
         HBaseManager hbase = new HBaseManager();
-        IHBaseTable table = mock(HBaseTable.class);
+        HBaseTable table = mock(HBaseTable.class);
         hbase.addTable(table);
     }
 
@@ -60,7 +60,7 @@ public class HBaseManagerTest
     {
         String tableName = "defaultTableName";
         HBaseManager hbase = new HBaseManager();
-        IHBaseTable table = createNamedTable(tableName);
+        HBaseTable table = createNamedTable(tableName);
         hbase.addTable(table);
         IHBaseTable managerTable = hbase.getTable(tableName);
         Assert.assertEquals(table, managerTable);

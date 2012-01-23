@@ -143,7 +143,7 @@ public class HBaseMailWriterTest
         MockHTable mockHTable = MockHTable.create("defaultTableName");
         String tableName = Bytes.toString(mockHTable.getTableName());
 
-        IHBaseTable table = new HBaseTable(mockHTable);
+        HBaseTable table = new HBaseTable(mockHTable);
         Assert.assertEquals(tableName, table.getName());
         hbase.addTable(table);
 
