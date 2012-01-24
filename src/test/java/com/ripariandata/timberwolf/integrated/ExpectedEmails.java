@@ -102,6 +102,26 @@ public class ExpectedEmails
         }
     }
 
+    private void assertNoExtraResults(final List<Result> extraResults)
+    {
+        if (extraResults.size() > 0)
+        {
+            LOG.error("The following emails were in HBase but shouldn't be there:");
+            for (Result result : extraResults)
+            {
+                LOG.debug("  Result in HBase:");
+                LOG.debug("    Subject: {}", getString(result, "Subject"));
+                LOG.debug("    Body: {}", getString(result, "Body"));
+                LOG.debug("    To: {}", getString(result, "To"));
+                LOG.debug("    Sender: {}", getString(result, "Sender"));
+                LOG.debug("    Cc: {}", getString(result, "Cc"));
+                LOG.debug("    Bcc: {}", getString(result, "Bcc"));
+            }
+            Assert.fail("There were " + extraResults.size() + " unexpected emails in hbase in addition to the "
+                        + requiredEmails.size() + " required emails.");
+        }
+    }
+
     private Scan createScan(String columnFamily, String[] headers)
     {
         Scan scan = new Scan();
@@ -112,22 +132,25 @@ public class ExpectedEmails
         return scan;
     }
 
-    private void logResult(final Result result)
+    /**
+     * Removes the first RequiredEmail from the email list that matches result
+     * @param emails the list of emails to check against
+     * @param result the result from hbase to compare to the emails
+     * @return true if a RequiredEmail matched the given result
+     */
+    private boolean removeResult(final List<RequiredEmail> emails, final Result result)
     {
-        LOG.debug("Result in HBase:");
-        String subject = getString(result, "Subject");
-        LOG.debug("Subject: {}", subject);
-        String body = getString(result, "Body");
-        LOG.debug("Body: {}", body);
-        String to = getString(result, "To");
-        LOG.debug("To: {}", to);
-        String from = getString(result, "Sender");
-        LOG.debug("Sender: {}", from);
-        String cc = getString(result, "Cc");
-        LOG.debug("Cc: {}", cc);
-        String bcc = getString(result, "Bcc");
-        LOG.debug("Bcc: {}", bcc);
-
+        Iterator<RequiredEmail> p = emails.iterator();
+        while (p.hasNext())
+        {
+            RequiredEmail email = p.next();
+            if (matches(email, result))
+            {
+                p.remove();
+                return true;
+            }
+        }
+        return false;
     }
 
     public void checkHbase() throws IOException
@@ -137,22 +160,17 @@ public class ExpectedEmails
         Scan scan = createScan(hbase.getFamily(), new String[]{"Subject", "Sender", "Bcc", "Cc", "To", "Body"});
         ResultScanner scanner = table.getScanner(scan);
         int countInHBase = 0;
+        List<Result> extraResults = new LinkedList<Result>();
         for (Result result = scanner.next(); result != null; result = scanner.next())
         {
             countInHBase++;
-            logResult(result);
-            Iterator<RequiredEmail> p = temp.iterator();
-            while (p.hasNext())
+            if (!removeResult(temp, result))
             {
-                RequiredEmail email = p.next();
-                if (matches(email, result))
-                {
-                    p.remove();
-                }
+                extraResults.add(result);
             }
         }
         assertEmpty(temp);
-        Assert.assertEquals(requiredEmails.size(), countInHBase);
+        assertNoExtraResults(extraResults);
     }
 
 }
