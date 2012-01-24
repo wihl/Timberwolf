@@ -57,7 +57,11 @@ public class TestIntegration
                                                                                 LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
     @Rule
-    public HTableResource hbase = new HTableResource();
+    public HTableResource emailTable1 = new HTableResource();
+    @Rule
+    public HTableResource emailTable2 = new HTableResource();
+    @Rule
+    public HTableResource emailTable3 = new HTableResource();
 
     @Rule
     public HTableResource userTable = new HTableResource("t");
@@ -128,7 +132,7 @@ public class TestIntegration
         }
     }
 
-    private void runForEmails()
+    private void runForEmails(final HTableResource emailTable)
             throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
                    ExchangePump.FailedToMoveMessage, LoginException, IOException
     {
@@ -149,7 +153,7 @@ public class TestIntegration
         // HBaseMailWriter call CreateTable, so we can't have any
         // references to that open
         userTable.closeTables();
-        hbase.regetTable();
+        emailTable.regetTable();
         Auth.authenticateAndDo(new PrivilegedAction<Object>()
         {
             @Override
@@ -157,7 +161,8 @@ public class TestIntegration
             {
 
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
-                MailWriter mailWriter = HBaseMailWriter.create(hbase.getTable(), keyHeader, hbase.getFamily());
+                MailWriter mailWriter = HBaseMailWriter.create(emailTable.getTable(), keyHeader,
+                                                               emailTable.getFamily());
                 HBaseUserTimeUpdater timeUpdater =
                         new HBaseUserTimeUpdater(userTable.getManager(), userTable.getName());
 
@@ -177,9 +182,9 @@ public class TestIntegration
         }, ldapConfigEntry);
 
         expectedEmails = new ExpectedEmails();
-        expectedEmails.require(user1, hbase);
-        expectedEmails.require(user2, hbase);
-        expectedEmails.require(user3, hbase);
+        expectedEmails.require(user1, emailTable);
+        expectedEmails.require(user2, emailTable);
+        expectedEmails.require(user3, emailTable);
         expectedEmails.checkHbase();
     }
 
@@ -331,9 +336,8 @@ public class TestIntegration
         user3.addFolderToRoot("Barbara")
              .add("Concerning Barbara", "Something happened to her");
 
-        runForEmails();
+        runForEmails(emailTable1);
 
-        hbase.resetTable();
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
@@ -345,9 +349,8 @@ public class TestIntegration
 
         user2.addToInbox("A new email for User #2", "Hey user #2, what's up");
 
-        runForEmails();
+        runForEmails(emailTable2);
 
-        hbase.resetTable();
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
@@ -356,7 +359,7 @@ public class TestIntegration
                 .add("This email goes in the newest folder", "That's right");
         user3.addDraft(email1, "Some sort of draft", "With something non-committal");
 
-        runForEmails();
+        runForEmails(emailTable3);
     }
 
 
