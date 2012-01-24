@@ -81,11 +81,6 @@ public class HTableResource extends IntegrationTestProperties
                 {
                     inner.evaluate();
                 }
-                catch (Throwable e)
-                {
-                    e.printStackTrace();
-                    throw e;
-                }
                 finally
                 {
                     try
