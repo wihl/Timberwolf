@@ -146,4 +146,16 @@ public class RequiredFolder
             folder.getAllEmails(destination);
         }
     }
+
+    @Override
+    public String toString()
+    {
+        return "RequiredFolder{" +
+               "name='" + name + '\'' +
+               ", emailAddress='" + emailAddress + '\'' +
+               ", id='" + id + '\'' +
+               ", folders=" + folders +
+               ", emails=" + emails +
+               '}';
+    }
 }
