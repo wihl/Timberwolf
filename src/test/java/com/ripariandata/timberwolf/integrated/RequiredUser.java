@@ -168,11 +168,13 @@ public class RequiredUser
     {
         // First we start out by deleting all instantiated folders. This'll
         // delete anything that exists within those folders.
+        ArrayList<RequiredFolder> allFolders = new ArrayList<RequiredFolder>();
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
-            List<RequiredFolder> folders = distinguishedFolders.get(distinguishedFolder);
-            pump.deleteFolders(user, folders);
+            allFolders.addAll(distinguishedFolders.get(distinguishedFolder));
         }
+        pump.deleteFolders(user, allFolders);
+
         ArrayList<MessageId> allItems = new ArrayList<MessageId>();
         // This is a list of all folders we want to clear.
         DistinguishedFolderIdNameType.Enum[] foldersToClear = {
