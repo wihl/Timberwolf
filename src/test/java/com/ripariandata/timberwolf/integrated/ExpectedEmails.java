@@ -109,13 +109,13 @@ public class ExpectedEmails
             LOG.error("The following emails were in HBase but shouldn't be there:");
             for (Result result : extraResults)
             {
-                LOG.debug("  Result in HBase:");
-                LOG.debug("    Subject: {}", getString(result, "Subject"));
-                LOG.debug("    Body: {}", getString(result, "Body"));
-                LOG.debug("    To: {}", getString(result, "To"));
-                LOG.debug("    Sender: {}", getString(result, "Sender"));
-                LOG.debug("    Cc: {}", getString(result, "Cc"));
-                LOG.debug("    Bcc: {}", getString(result, "Bcc"));
+                LOG.error("  Result in HBase:");
+                LOG.error("    Subject: {}", getString(result, "Subject"));
+                LOG.error("    Body: {}", getString(result, "Body"));
+                LOG.error("    To: {}", getString(result, "To"));
+                LOG.error("    Sender: {}", getString(result, "Sender"));
+                LOG.error("    Cc: {}", getString(result, "Cc"));
+                LOG.error("    Bcc: {}", getString(result, "Bcc"));
             }
             Assert.fail("There were " + extraResults.size() + " unexpected emails in hbase in addition to the "
                         + requiredEmails.size() + " required emails.");
