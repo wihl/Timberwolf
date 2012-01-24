@@ -212,20 +212,20 @@ public class TestIntegration
             if (user1 != null)
             {
                 user1.deleteEmails(pump);
-                user1 = null;
             }
             if (user2 != null)
             {
                 user2.deleteEmails(pump);
-                user2 = null;
             }
             if (user3 != null)
             {
                 user3.deleteEmails(pump);
-                user3 = null;
             }
             pump = null;
         }
+        user1 = null;
+        user2 = null;
+        user3 = null;
     }
 
     @Test
@@ -318,6 +318,7 @@ public class TestIntegration
 
         runForEmails();
     }
+
 
 
 }

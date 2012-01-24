@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 /** Helper class for required users in exchange */
 public class RequiredUser
 {
@@ -152,36 +154,46 @@ public class RequiredUser
         }
     }
 
+    /**
+     * This deletes all created RequiredEmails and RequiredFolder. It may
+     * also delete some emails which were already in exchange. But they
+     * shouldn't be there anyway.
+     */
     public void deleteEmails(ExchangePump pump)
     {
+        // First we start out by deleting all instantiated folders. This'll
+        // delete anything that exists within those folders.
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
             List<RequiredFolder> folders = distinguishedFolders.get(distinguishedFolder);
             pump.deleteFolders(user, folders);
         }
-        try {
-            ArrayList<MessageId> allItems = new ArrayList<MessageId>();
-            HashMap<String, List<MessageId>> inboxItems = pump.findItems(user, DistinguishedFolderIdNameType.INBOX);
-            for (String folder : inboxItems.keySet())
+        ArrayList<MessageId> allItems = new ArrayList<MessageId>();
+        // This is a list of all folders we want to clear.
+        DistinguishedFolderIdNameType.Enum[] foldersToClear = {
+                DistinguishedFolderIdNameType.INBOX,
+                DistinguishedFolderIdNameType.DRAFTS,
+                DistinguishedFolderIdNameType.SENTITEMS,
+                DistinguishedFolderIdNameType.DELETEDITEMS,
+        };
+        try
+        {
+            // We go through each folder in the list, query exchange for all items
+            // in that list, and then add them to the accumulative allItems.
+            for (DistinguishedFolderIdNameType.Enum currentFolder : foldersToClear)
             {
-                allItems.addAll(inboxItems.get(folder));
+                HashMap<String, List<MessageId>> items = pump.findItems(user, currentFolder);
+                for (String subFolder : items.keySet())
+                {
+                    allItems.addAll(items.get(subFolder));
+                }
             }
-            HashMap<String, List<MessageId>> draftItems = pump.findItems(user, DistinguishedFolderIdNameType.DRAFTS);
-            for (String folder : draftItems.keySet())
-            {
-                allItems.addAll(draftItems.get(folder));
-            }
-            HashMap<String, List<MessageId>> sentItems = pump.findItems(user, DistinguishedFolderIdNameType.SENTITEMS);
-            for (String folder : sentItems.keySet())
-            {
-                allItems.addAll(sentItems.get(folder));
-            }
+            // Now we tell exchange to delete all accumulated items, all in one go.
             pump.deleteEmails(user, allItems);
         }
         catch (FailedToFindMessage e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Assert.fail("An error occured while trying to cleanup test emails: " + e.getMessage());
         }
     }
 
