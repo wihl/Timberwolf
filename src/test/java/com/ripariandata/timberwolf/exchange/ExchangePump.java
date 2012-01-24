@@ -137,6 +137,7 @@ public class ExchangePump
             if (folderId != null && folderId.length() > 0)
             {
                 doomedFolders.addNewFolderId().setId(folderId);
+                LOG.debug("Preparing to delete folder: {}", folderId);
             }
         }
         BodyType response = sendRequest(request);
@@ -146,7 +147,7 @@ public class ExchangePump
         {
             if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
             {
-                System.err.println(response);
+                LOG.debug(response.toString());
                 throw new FailedToDeleteMessage(
                         "ResponseCode some sort of error: " + resp.getResponseCode());
             }
@@ -162,6 +163,7 @@ public class ExchangePump
         for (MessageId email : emails)
         {
             doomedItems.addNewItemId().setId(email.getId());
+            LOG.debug("Preparing to delete email item: {}", folderId);
         }
         BodyType response = sendRequest(request);
         ResponseMessageType[] responses =
@@ -170,7 +172,7 @@ public class ExchangePump
         {
             if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
             {
-                System.err.println(response);
+                LOG.debug(response.toString());
                 throw new FailedToDeleteMessage(
                         "ResponseCode some sort of error: " + resp.getResponseCode());
             }
