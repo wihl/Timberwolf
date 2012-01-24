@@ -162,8 +162,9 @@ public class ExchangePump
         NonEmptyArrayOfBaseItemIdsType doomedItems = deleteItem.addNewItemIds();
         for (MessageId email : emails)
         {
-            doomedItems.addNewItemId().setId(email.getId());
-            LOG.debug("Preparing to delete email item: {}", folderId);
+            String emailId = email.getId();
+            doomedItems.addNewItemId().setId(emailId);
+            LOG.debug("Preparing to delete email item: {}", emailId);
         }
         BodyType response = sendRequest(request);
         ResponseMessageType[] responses =

@@ -26,12 +26,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Overall integration testing, from exchange server to hbase.
  */
 public class TestIntegration
 {
+    private static final Logger LOG = LoggerFactory.getLogger(TestIntegration.class);
+
     private static final String EXCHANGE_URI_PROPERTY_NAME = "ExchangeURI";
     private static final String EXCHANGE_USER1_PROPERTY_NAME = "ExchangeUser1";
     private static final String EXCHANGE_USER2_PROPERTY_NAME = "ExchangeUser2";
@@ -211,15 +215,39 @@ public class TestIntegration
         {
             if (user1 != null)
             {
-                user1.deleteEmails(pump);
+                try
+                {
+                    user1.deleteEmails(pump);
+                }
+                catch (Exception e)
+                {
+                    LOG.warn("An error occured deleting user1's content: {}",
+                             e.getMessage());
+                }
             }
             if (user2 != null)
             {
-                user2.deleteEmails(pump);
+                try
+                {
+                    user2.deleteEmails(pump);
+                }
+                catch (Exception e)
+                {
+                    LOG.warn("An error occured deleting user2's content: {}",
+                             e.getMessage());
+                }
             }
             if (user3 != null)
             {
-                user3.deleteEmails(pump);
+                try
+                {
+                    user3.deleteEmails(pump);
+                }
+                catch (Exception e)
+                {
+                    LOG.warn("An error occured deleting user3's content: {}",
+                             e.getMessage());
+                }
             }
             pump = null;
         }
