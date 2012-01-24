@@ -310,11 +310,23 @@ public class TestIntegration
         user2.nextRun();
         user3.nextRun();
 
-        // TODO actually do that
         user1.addToInbox("An email after the first one", "A new email");
         middlerJr.add("A new email in the middler Jr", "The body for this new email");
         RequiredFolder newFolder = middlerJr.addFolder("New folder");
         newFolder.add("this new email is in a new folder", "and it has a new body");
+
+        user2.addToInbox("A new email for User #2", "Hey user #2, what's up");
+
+        runForEmails();
+
+        hbase.resetTable();
+        user1.nextRun();
+        user2.nextRun();
+        user3.nextRun();
+
+        user2.addFolderToRoot("This is the newest folder")
+                .add("This email goes in the newest folder", "That's right");
+        user3.addDraft(email1, "Some sort of draft", "With something non-committal");
 
         runForEmails();
     }
