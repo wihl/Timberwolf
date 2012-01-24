@@ -92,10 +92,10 @@ public class ExpectedEmails
     {
         if (temp.size() > 0)
         {
-            System.out.println("Missing the following emails:");
+            LOG.error("Missing the following emails:");
             for (RequiredEmail email : temp)
             {
-                System.out.println("  " + email);
+                LOG.error("  " + email);
             }
             Assert.fail(
                     "Missing " + temp.size() + " required emails out of " + requiredEmails.size() + " expected emails");
@@ -114,19 +114,19 @@ public class ExpectedEmails
 
     private void logResult(final Result result)
     {
-        LOG.info("Result in HBase:");
+        LOG.debug("Result in HBase:");
         String subject = getString(result, "Subject");
-        LOG.info("Subject: {}", subject);
+        LOG.debug("Subject: {}", subject);
         String body = getString(result, "Body");
-        LOG.info("Body: {}", body);
+        LOG.debug("Body: {}", body);
         String to = getString(result, "To");
-        LOG.info("To: {}", to);
+        LOG.debug("To: {}", to);
         String from = getString(result, "Sender");
-        LOG.info("Sender: {}", from);
+        LOG.debug("Sender: {}", from);
         String cc = getString(result, "Cc");
-        LOG.info("Cc: {}", cc);
+        LOG.debug("Cc: {}", cc);
         String bcc = getString(result, "Bcc");
-        LOG.info("Bcc: {}", bcc);
+        LOG.debug("Bcc: {}", bcc);
 
     }
 

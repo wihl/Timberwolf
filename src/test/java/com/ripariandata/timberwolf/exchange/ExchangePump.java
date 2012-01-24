@@ -180,7 +180,7 @@ public class ExchangePump
                 response.getCreateItemResponse().getResponseMessages().getCreateItemResponseMessageArray();
         if (responses.length != emails.size())
         {
-            System.err.println(response);
+            LOG.debug(response.toString());
             throw new FailedToCreateMessage(
                     "There should have been " + emails.size() + " response message to createItem");
         }
@@ -188,7 +188,7 @@ public class ExchangePump
         {
             if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
             {
-                System.err.println(response);
+                LOG.debug(response.toString());
                 throw new FailedToCreateMessage(
                         "ResponseCode some sort of error: " + resp.getResponseCode());
             }
@@ -312,7 +312,7 @@ public class ExchangePump
         moveMessages(user, targetFolderId, messageIds);
     }
 
-    private BodyType sendRequest(final EnvelopeDocument envelope)
+    private BodyType sendRequest(final EnvelopeDocument envelope) throws SendRequestFailed
     {
         String request = DECLARATION + envelope.xmlText();
         try
@@ -332,16 +332,23 @@ public class ExchangePump
             }
             else
             {
-                System.err.println("HTTP_ERROR: " + code);
-                return null;
+                LOG.debug("HTTP Error: {}", code);
+                throw new HttpErrorException(code);
             }
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            return null;
+            throw new SendRequestFailed("Unexpected Exception: " + e.getMessage(), e);
         }
 
+    }
+
+    public class SendRequestFailed extends RuntimeException
+    {
+        public SendRequestFailed(final String message, final Throwable cause)
+        {
+            super(message, cause);
+        }
     }
 
     public class FailedToCreateMessage extends Exception

@@ -2,20 +2,23 @@ package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
-import com.ripariandata.timberwolf.exchange.RequiredEmail;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.MessageId;
+import com.ripariandata.timberwolf.exchange.RequiredEmail;
 import com.ripariandata.timberwolf.exchange.RequiredFolder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import junit.framework.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Helper class for required users in exchange */
 public class RequiredUser
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RequiredUser.class);
     private final String user;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredFolder>> distinguishedFolders;
     private final Map<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>> topLevelEmails;
@@ -136,7 +139,7 @@ public class RequiredUser
         {
             for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
             {
-                System.err.println(" Sending email for folder: " + folder.getId());
+                LOG.debug(" Sending email for folder: " + folder.getId());
                 folder.sendEmail(pump, user);
             }
         }
@@ -263,13 +266,8 @@ public class RequiredUser
         {
             for (RequiredFolder folder : distinguishedFolders.get(distinguishedFolder))
             {
-                if (folder.checkEmailsBeforeMove(items))
+                if (!folder.checkEmailsBeforeMove(items))
                 {
-                    System.err.println("Ready to move emails");
-                }
-                else
-                {
-                    System.err.println("Not ready, trying again");
                     return false;
                 }
             }
