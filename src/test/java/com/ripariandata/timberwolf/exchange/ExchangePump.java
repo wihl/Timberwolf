@@ -4,6 +4,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderRespon
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderType;
+import com.microsoft.schemas.exchange.services.x2006.messages.DeleteItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
@@ -11,6 +12,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FolderInfoResponse
 import com.microsoft.schemas.exchange.services.x2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.MoveItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.BodyTypeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DisposalType;
@@ -122,7 +124,7 @@ public class ExchangePump
         createFolders(user, parentFolder, folders);
     }
 
-    public void deleteFolders(String user, List<RequiredFolder> folders)
+    public void deleteFolders(String user, List<RequiredFolder> folders) throws FailedToDeleteMessage
     {
         EnvelopeDocument request = createEmptyRequest(user);
         DeleteFolderType deleteFolder = request.getEnvelope().addNewBody().addNewDeleteFolder();
@@ -137,10 +139,21 @@ public class ExchangePump
                 doomedFolders.addNewFolderId().setId(folderId);
             }
         }
-        sendRequest(request);
+        BodyType response = sendRequest(request);
+        ResponseMessageType[] responses =
+                response.getDeleteFolderResponse().getResponseMessages().getDeleteFolderResponseMessageArray();
+        for (ResponseMessageType resp : responses)
+        {
+            if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
+            {
+                System.err.println(response);
+                throw new FailedToDeleteMessage(
+                        "ResponseCode some sort of error: " + resp.getResponseCode());
+            }
+        }
     }
 
-    public void deleteEmails(String user, List<MessageId> emails)
+    public void deleteEmails(String user, List<MessageId> emails) throws FailedToDeleteMessage
     {
         EnvelopeDocument request = createEmptyRequest(user);
         DeleteItemType deleteItem = request.getEnvelope().addNewBody().addNewDeleteItem();
@@ -150,7 +163,18 @@ public class ExchangePump
         {
             doomedItems.addNewItemId().setId(email.getId());
         }
-        sendRequest(request);
+        BodyType response = sendRequest(request);
+        ResponseMessageType[] responses =
+                response.getDeleteItemResponse().getResponseMessages().getDeleteItemResponseMessageArray();
+        for (ResponseMessageType resp : responses)
+        {
+            if (resp.getResponseCode() != ResponseCodeType.NO_ERROR)
+            {
+                System.err.println(response);
+                throw new FailedToDeleteMessage(
+                        "ResponseCode some sort of error: " + resp.getResponseCode());
+            }
+        }
     }
 
     private void createEmails(final List<RequiredEmail> emails, final EnvelopeDocument request,
@@ -359,6 +383,19 @@ public class ExchangePump
         }
 
         public FailedToCreateMessage(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
+    public class FailedToDeleteMessage extends Exception
+    {
+        public FailedToDeleteMessage(String message)
+        {
+            super(message);
+        }
+
+        public FailedToDeleteMessage(String message, Throwable cause)
         {
             super(message, cause);
         }
