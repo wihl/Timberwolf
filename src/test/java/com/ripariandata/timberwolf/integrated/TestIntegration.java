@@ -121,6 +121,7 @@ public class TestIntegration
             throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
                    ExchangePump.FailedToMoveMessage, LoginException, IOException, InterruptedException
     {
+        LOG.info("Beginning new run of emails");
         final ExpectedEmails expectedEmails;
         user1.initialize(pump);
         user2.initialize(pump);
@@ -236,6 +237,7 @@ public class TestIntegration
             throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
                    ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage, InterruptedException
     {
+        LOG.info("Beginning integration test: testIntegrationNoCLI()");
         /*
         This test tests getting emails from an exchange server, and the breadth
         of what that entails, and then putting it all in Exchange. It depends
