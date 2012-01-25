@@ -31,6 +31,10 @@
       <level value="warn" />
     </logger>
 
+    <logger name="com.ripariandata.timberwolf.exchange.UserIterator">
+      <level value="error" />
+    </logger>
+
     <!-- ExchangeService and FindFolderIterator are particularly
          chatty during the integration test -->
     <logger name="com.ripariandata.timberwolf.exchange.ExchangeService">
