@@ -17,12 +17,6 @@
         </layout>
     </appender>
 
-    <root>
-        <priority value ="debug" />
-        <appender-ref ref="console" />
-        <appender-ref ref="logfile" />
-    </root>
-
     <logger name="org.apache.hadoop">
       <level value="warn" />
     </logger>
@@ -45,5 +39,11 @@
     <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator">
       <level value="fatal" />
     </logger>
+
+    <root>
+        <priority value ="debug" />
+        <appender-ref ref="console" />
+        <appender-ref ref="logfile" />
+    </root>
 
 </log4j:configuration>
