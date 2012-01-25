@@ -4,7 +4,6 @@ import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderRespon
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateFolderType;
 import com.microsoft.schemas.exchange.services.x2006.messages.CreateItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteFolderType;
-import com.microsoft.schemas.exchange.services.x2006.messages.DeleteItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.DeleteItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
@@ -54,13 +53,13 @@ public class ExchangePump
     private HttpUrlConnectionFactory connectionFactory = new SaslHttpUrlConnectionFactory();
     private String sender;
 
-    public ExchangePump(String exchangeUrl, String senderEmail)
+    public ExchangePump(final String exchangeUrl, final String senderEmail)
     {
         endpoint = exchangeUrl;
         sender = senderEmail;
     }
 
-    private EnvelopeDocument createEmptyRequest(String user)
+    private EnvelopeDocument createEmptyRequest(final String user)
     {
         EnvelopeDocument request = EnvelopeDocument.Factory.newInstance();
         EnvelopeType envelope = request.addNewEnvelope();
@@ -73,7 +72,8 @@ public class ExchangePump
      * The request is performed as 'user'.
      * Will not create folders that already have ids.
      */
-    private void createFolders(String user, TargetFolderIdType parentFolderId, List<RequiredFolder> folders)
+    private void createFolders(final String user, final TargetFolderIdType parentFolderId,
+                               final List<RequiredFolder> folders)
     {
         EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
@@ -95,7 +95,7 @@ public class ExchangePump
         }
         CreateFolderResponseType response = sendRequest(request).getCreateFolderResponse();
         FolderInfoResponseMessageType[] array = response.getResponseMessages().getCreateFolderResponseMessageArray();
-        int i=0;
+        int i = 0;
         for (FolderInfoResponseMessageType folderResponse : array)
         {
             for (FolderType folder : folderResponse.getFolders().getFolderArray())
@@ -110,21 +110,22 @@ public class ExchangePump
         }
     }
 
-    public void createFolders(String user, String parent, List<RequiredFolder> folders)
+    public void createFolders(final String user, final String parent, final List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewFolderId().setId(parent);
         createFolders(user, parentFolder, folders);
     }
 
-    public void createFolders(String user, DistinguishedFolderIdNameType.Enum parent, List<RequiredFolder> folders)
+    public void createFolders(final String user, final DistinguishedFolderIdNameType.Enum parent,
+                              final List<RequiredFolder> folders)
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
         createFolders(user, parentFolder, folders);
     }
 
-    public void deleteFolders(String user, List<RequiredFolder> folders) throws FailedToDeleteMessage
+    public void deleteFolders(final String user, final List<RequiredFolder> folders) throws FailedToDeleteMessage
     {
         EnvelopeDocument request = createEmptyRequest(user);
         DeleteFolderType deleteFolder = request.getEnvelope().addNewBody().addNewDeleteFolder();
@@ -154,7 +155,7 @@ public class ExchangePump
         }
     }
 
-    public void deleteEmails(String user, List<MessageId> emails) throws FailedToDeleteMessage
+    public void deleteEmails(final String user, final List<MessageId> emails) throws FailedToDeleteMessage
     {
         EnvelopeDocument request = createEmptyRequest(user);
         DeleteItemType deleteItem = request.getEnvelope().addNewBody().addNewDeleteItem();
@@ -222,7 +223,7 @@ public class ExchangePump
         }
     }
 
-    public void sendMessages(List<RequiredEmail> emails) throws FailedToCreateMessage
+    public void sendMessages(final List<RequiredEmail> emails) throws FailedToCreateMessage
     {
         EnvelopeDocument request = createEmptyRequest(sender);
         CreateItemType createItem = request.getEnvelope().addNewBody().addNewCreateItem();
@@ -257,7 +258,9 @@ public class ExchangePump
     }
 
 
-    public HashMap<String, List<MessageId>> findItems(String user, DistinguishedFolderIdNameType.Enum parent) throws FailedToFindMessage
+    public HashMap<String, List<MessageId>> findItems(final String user,
+                                                      final DistinguishedFolderIdNameType.Enum parent)
+            throws FailedToFindMessage
     {
         HashMap<String, List<MessageId>> emailResults = new HashMap<String, List<MessageId>>();
         EnvelopeDocument request = createEmptyRequest(user);
@@ -370,6 +373,7 @@ public class ExchangePump
 
     }
 
+    /** Exception for when sending a request to exchange fails. */
     public class SendRequestFailed extends RuntimeException
     {
         public SendRequestFailed(final String message, final Throwable cause)
@@ -378,69 +382,53 @@ public class ExchangePump
         }
     }
 
+    /** Exception for when creating messages fails. */
     public class FailedToCreateMessage extends Exception
     {
-        public FailedToCreateMessage(String message)
+        public FailedToCreateMessage(final String message)
         {
             super(message);
         }
-
-        public FailedToCreateMessage(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
     }
 
+    /** Exception for when deleting messages fails. */
     public class FailedToDeleteMessage extends Exception
     {
-        public FailedToDeleteMessage(String message)
+        public FailedToDeleteMessage(final String message)
         {
             super(message);
         }
-
-        public FailedToDeleteMessage(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
     }
 
+    /** Exception for when finding messages fails. */
     public class FailedToFindMessage extends Exception
     {
-        public FailedToFindMessage(String message)
+        public FailedToFindMessage(final String message)
         {
             super(message);
         }
-
-        public FailedToFindMessage(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
     }
 
+    /** Exception for when moving messages fails. */
     public class FailedToMoveMessage extends Exception
     {
-        public FailedToMoveMessage(String message)
+        public FailedToMoveMessage(final String message)
         {
             super(message);
-        }
-
-        public FailedToMoveMessage(String message, Throwable cause)
-        {
-            super(message, cause);
         }
     }
 
 
-    /** A simple class representing an email */
-    public class MessageId
+    /** A simple class representing an email. */
+    public final class MessageId
     {
         private final String id;
         private final String changeKey;
 
-        private MessageId(String id, String changeKey)
+        private MessageId(final String messageId, final String messageChangeKey)
         {
-            this.id = id;
-            this.changeKey = changeKey;
+            id = messageId;
+            changeKey = messageChangeKey;
         }
 
         private String getId()
@@ -456,10 +444,10 @@ public class ExchangePump
         @Override
         public String toString()
         {
-            return "MessageId{" +
-                   "id='" + id + '\'' +
-                   ", changeKey='" + changeKey + '\'' +
-                   '}';
+            return "MessageId{"
+                   + "id='" + id + '\''
+                   + ", changeKey='" + changeKey + '\''
+                   + '}';
         }
     }
 }

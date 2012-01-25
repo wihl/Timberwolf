@@ -30,7 +30,7 @@ public class ExpectedEmails
         requiredEmails = new ArrayList<RequiredEmail>();
     }
 
-    public void require(RequiredUser user, HTableResource hTableResource)
+    public void require(final RequiredUser user, final HTableResource hTableResource)
     {
         hbase = hTableResource;
         user.getAllEmails(requiredEmails);
@@ -122,10 +122,10 @@ public class ExpectedEmails
         }
     }
 
-    private Scan createScan(String columnFamily, String[] headers)
+    private Scan createScan(final String columnFamily, final String[] headers)
     {
         Scan scan = new Scan();
-        for( String header : headers)
+        for (String header : headers)
         {
             scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
         }
@@ -133,7 +133,8 @@ public class ExpectedEmails
     }
 
     /**
-     * Removes the first RequiredEmail from the email list that matches result
+     * Removes the first RequiredEmail from the email list that matches result.
+     *
      * @param emails the list of emails to check against
      * @param result the result from hbase to compare to the emails
      * @return true if a RequiredEmail matched the given result

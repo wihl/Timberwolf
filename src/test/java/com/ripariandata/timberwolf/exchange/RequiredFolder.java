@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Helper class for required folders in exchange */
+/** Helper class for required folders in exchange. */
 public class RequiredFolder
 {
     private static final Logger LOG = LoggerFactory.getLogger(RequiredFolder.class);
@@ -46,14 +46,14 @@ public class RequiredFolder
         return folder;
     }
 
-    public RequiredEmail add(String subject, String body)
+    public RequiredEmail add(final String subject, final String body)
     {
         RequiredEmail email = new RequiredEmail(emailAddress, subject, body);
         emails.add(email);
         return email;
     }
 
-    public void initialize(ExchangePump pump, String user)
+    public void initialize(final ExchangePump pump, final String user)
     {
         LOG.debug("Initializing folder: " + getName() + " with " + folders.size() + " subfolders and " + emails.size()
                   + " emails.");
@@ -71,7 +71,7 @@ public class RequiredFolder
         }
     }
 
-    public void sendEmail(ExchangePump pump, String user) throws ExchangePump.FailedToCreateMessage
+    public void sendEmail(final ExchangePump pump, final String user) throws ExchangePump.FailedToCreateMessage
     {
         if (emails.size() > 0)
         {
@@ -91,7 +91,7 @@ public class RequiredFolder
      * This confirms that the number of message ids in 'items' corresponds to
      * the number of messages this folder contains. This recursively performs
      * the same operation in all child folders as well.
-
+     *
      * @return true if all emails match up correctly, false otherwise
      */
     public boolean checkEmailsBeforeMove(final HashMap<String, List<ExchangePump.MessageId>> items)
@@ -126,9 +126,7 @@ public class RequiredFolder
         }
     }
 
-    /**
-     * Wipes out all the emails in this folder, for getting new emails.
-     */
+    /** Wipes out all the emails in this folder, for getting new emails. */
     public void nextRun()
     {
         emails.clear();
@@ -138,7 +136,7 @@ public class RequiredFolder
         }
     }
 
-    public void getAllEmails(List<RequiredEmail> destination)
+    public void getAllEmails(final List<RequiredEmail> destination)
     {
         destination.addAll(emails);
         for (RequiredFolder folder : folders)
@@ -150,12 +148,12 @@ public class RequiredFolder
     @Override
     public String toString()
     {
-        return "RequiredFolder{" +
-               "name='" + name + '\'' +
-               ", emailAddress='" + emailAddress + '\'' +
-               ", id='" + id + '\'' +
-               ", folders=" + folders +
-               ", emails=" + emails +
-               '}';
+        return "RequiredFolder{"
+               + "name='" + name + '\''
+               + ", emailAddress='" + emailAddress + '\''
+               + ", id='" + id + '\''
+               + ", folders=" + folders
+               + ", emails=" + emails
+               + '}';
     }
 }
