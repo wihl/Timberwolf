@@ -70,8 +70,14 @@ public class ServiceCallException extends Exception
      */
     public static ServiceCallException log(final Logger logger, final ServiceCallException e)
     {
-        logger.error(e.getMessage());
-        logger.debug(e.getMessage(), e);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(e.getMessage(), e);
+        }
+        else
+        {
+            logger.error(e.getMessage());
+        }
         return e;
     }
 

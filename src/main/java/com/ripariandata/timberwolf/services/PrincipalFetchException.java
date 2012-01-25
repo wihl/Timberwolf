@@ -27,8 +27,14 @@ public class PrincipalFetchException extends Exception
      */
     public static PrincipalFetchException log(final Logger logger, final PrincipalFetchException e)
     {
-        logger.error(e.getMessage());
-        logger.debug(e.getMessage(), e);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(e.getMessage(), e);
+        }
+        else
+        {
+            logger.error(e.getMessage());
+        }
         return e;
     }
 }
