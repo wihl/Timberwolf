@@ -206,40 +206,22 @@ public class TestIntegration
     {
         if (pump != null)
         {
-            if (user1 != null)
+            for (RequiredUser user : new RequiredUser[] {user1, user2, user3})
             {
-                try
+                if (user != null)
                 {
-                    user1.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user1's content: {}",
-                             e.getMessage());
-                }
-            }
-            if (user2 != null)
-            {
-                try
-                {
-                    user2.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user2's content: {}",
-                             e.getMessage());
-                }
-            }
-            if (user3 != null)
-            {
-                try
-                {
-                    user3.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user3's content: {}",
-                             e.getMessage());
+                    String name = user.getUser();
+                    try
+                    {
+                        LOG.info("Deleting test emails for user: {}", name);
+                        user.deleteEmails(pump);
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.warn("An error occured deleting {}'s content: {}",
+                                 name,
+                                 e.getMessage());
+                    }
                 }
             }
             pump = null;

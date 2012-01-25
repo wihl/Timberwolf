@@ -37,6 +37,11 @@ public class RequiredUser
         sentItems = new ArrayList<RequiredEmail>();
     }
 
+    public String getUser()
+    {
+        return user;
+    }
+
     private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder,
                                       final String subjectText, final String bodyText)
     {
