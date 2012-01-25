@@ -33,9 +33,9 @@ public class HTableResource extends IntegrationTestProperties
     private static final String ZOO_KEEPER_QUORUM_PROPERTY_NAME = "ZooKeeperQuorum";
     private static final String ZOO_KEEPER_CLIENT_PORT_PROPERTY_NAME = "ZooKeeperClientPort";
     private static final String COLUMN_FAMILY = "h";
-    /** A lock for safely creating the hbaseManager */
+    /** A lock for safely creating the hbaseManager. */
     private static final Object MANAGER_LOCK = new Object();
-    /** The hbaseManager shared among HTableResources */
+    /** The hbaseManager shared among HTableResources. */
     private static HBaseManager hbaseManager;
     private String name;
     private IHBaseTable table;
@@ -145,6 +145,7 @@ public class HTableResource extends IntegrationTestProperties
 
     /**
      * Closes the current table and regets the table from hbase.
+     *
      * @return a new instance of the table
      * @throws IOException if there was a problem closing or getting the table
      */
@@ -175,6 +176,7 @@ public class HTableResource extends IntegrationTestProperties
 
     /**
      * returns whether or not the table exists.
+     *
      * @return true if the table exists
      */
     public boolean exists()
@@ -184,6 +186,7 @@ public class HTableResource extends IntegrationTestProperties
 
     /**
      * Returns the name of the table.
+     *
      * @return the name of the table
      */
     public String getName()
@@ -198,9 +201,8 @@ public class HTableResource extends IntegrationTestProperties
      * because hbase client doesn't handle multiple references to the
      * same table.
      * <br/>
-     *
+     * <p/>
      * <b>NOTE:</b>You are responsible for closing the returned htable.
-     *
      *
      * @return the table used for testing
      * @throws IOException if there was an error creating the table object
@@ -216,7 +218,8 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
-     * Gets the hbaseManager used
+     * Gets the hbaseManager used.
+     *
      * @return the hbase manager that is managing tables for the tests
      */
     public HBaseManager getManager()

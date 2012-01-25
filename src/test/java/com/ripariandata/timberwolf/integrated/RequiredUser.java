@@ -2,7 +2,6 @@ package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
-import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToDeleteMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.MessageId;
@@ -12,11 +11,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Helper class for required users in exchange */
+/** Helper class for required users in exchange. */
 public class RequiredUser
 {
 
@@ -29,7 +27,7 @@ public class RequiredUser
     private static final int MAX_FIND_ITEM_ATTEMPTS = 10;
     private final String emailAddress;
 
-    public RequiredUser(String username, String domain)
+    public RequiredUser(final String username, final String domain)
     {
         user = username;
         emailAddress = username + "@" + domain;
@@ -37,6 +35,11 @@ public class RequiredUser
         topLevelEmails = new HashMap<DistinguishedFolderIdNameType.Enum, List<RequiredEmail>>();
         drafts = new ArrayList<RequiredEmail>();
         sentItems = new ArrayList<RequiredEmail>();
+    }
+
+    public String getUser()
+    {
+        return user;
     }
 
     private RequiredEmail addToFolder(final DistinguishedFolderIdNameType.Enum folder,
@@ -65,7 +68,7 @@ public class RequiredUser
 
     public RequiredEmail addDraft(final String toEmail, final String subject, final String body)
     {
-        RequiredEmail email = new RequiredEmail(toEmail,subject,body);
+        RequiredEmail email = new RequiredEmail(toEmail, subject, body);
         drafts.add(email);
         return email;
     }
@@ -87,7 +90,7 @@ public class RequiredUser
         return addFolder(DistinguishedFolderIdNameType.MSGFOLDERROOT, folderName);
     }
 
-    public RequiredFolder addFolder(DistinguishedFolderIdNameType.Enum parent, String folderName)
+    public RequiredFolder addFolder(final DistinguishedFolderIdNameType.Enum parent, final String folderName)
     {
         List<RequiredFolder> folders = distinguishedFolders.get(parent);
         if (folders == null)
@@ -104,9 +107,10 @@ public class RequiredUser
      * All RequiredEmails will have their folderId set to their containing
      * folder. All folders are created on exchange and their folderId is set
      * the the resulting folderId Exchange assigned.
-     * @param pump
+     *
+     * @param pump The ExchangePump used to manage exchange.
      */
-    public void initialize(ExchangePump pump)
+    public void initialize(final ExchangePump pump)
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
@@ -135,7 +139,7 @@ public class RequiredUser
         }
     }
 
-    public void sendEmail(ExchangePump pump) throws ExchangePump.FailedToCreateMessage
+    public void sendEmail(final ExchangePump pump) throws ExchangePump.FailedToCreateMessage
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
@@ -163,8 +167,10 @@ public class RequiredUser
      * This deletes all created RequiredEmails and RequiredFolder. It may
      * also delete some emails which were already in exchange. But they
      * shouldn't be there anyway.
+     *
+     * @param pump The pump used to manage Exchange
      */
-    public void deleteEmails(ExchangePump pump) throws FailedToDeleteMessage, FailedToFindMessage
+    public void deleteEmails(final ExchangePump pump) throws FailedToDeleteMessage, FailedToFindMessage
     {
         // First we start out by deleting all instantiated folders. This'll
         // delete anything that exists within those folders.
@@ -198,11 +204,13 @@ public class RequiredUser
         pump.deleteEmails(user, allItems);
     }
 
-    public void moveEmails(ExchangePump pump) throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
+    public void moveEmails(final ExchangePump pump)
+            throws ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage
     {
         for (int i = 0; i < MAX_FIND_ITEM_ATTEMPTS; i++)
         {
-            HashMap<String, List<ExchangePump.MessageId>> items = pump.findItems(user, DistinguishedFolderIdNameType.INBOX);
+            HashMap<String, List<ExchangePump.MessageId>> items =
+                    pump.findItems(user, DistinguishedFolderIdNameType.INBOX);
             if (!checkRequiredEmails(items))
             {
                 continue;
@@ -287,7 +295,7 @@ public class RequiredUser
      * This populates 'destination' with all emails of the user by recursively
      * walking through all the folders.
      */
-    public void getAllEmails(List<RequiredEmail> destination)
+    public void getAllEmails(final List<RequiredEmail> destination)
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {

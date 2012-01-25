@@ -15,12 +15,16 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class fetches a list of principals through LDAP.
  * It tries to return as many as possible.
  */
 public class LdapFetcher implements PrincipalFetcher
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PrincipalFetcher.class);
     private final String domainName;
 
     public LdapFetcher(final String aDomainName)
@@ -73,7 +77,7 @@ public class LdapFetcher implements PrincipalFetcher
         }
         catch (NamingException e)
         {
-            throw new PrincipalFetchException(e);
+            throw PrincipalFetchException.log(LOG, new PrincipalFetchException("Could not find users.", e));
         }
         return rtnList;
     }

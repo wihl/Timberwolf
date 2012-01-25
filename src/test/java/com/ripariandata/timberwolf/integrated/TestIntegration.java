@@ -19,9 +19,6 @@ import java.io.IOException;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import javax.security.auth.login.LoginException;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,9 +26,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Overall integration testing, from exchange server to hbase.
- */
+/** Overall integration testing, from exchange server to hbase. */
 public class TestIntegration
 {
     private static final Logger LOG = LoggerFactory.getLogger(TestIntegration.class);
@@ -52,6 +47,7 @@ public class TestIntegration
      */
     public static final int SLEEP_TIME = 10000;
 
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
                                                                                 EXCHANGE_USER1_PROPERTY_NAME,
@@ -62,13 +58,16 @@ public class TestIntegration
                                                                                 LDAP_DOMAIN_PROPERTY_NAME,
                                                                                 LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource emailTable1 = new HTableResource();
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource emailTable2 = new HTableResource();
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource emailTable3 = new HTableResource();
-
+    // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource userTable = new HTableResource("t");
 
@@ -94,27 +93,7 @@ public class TestIntegration
     private RequiredUser user3;
     private ExchangePump pump;
 
-    private Get createGet(String row, String columnFamily, String[] headers)
-    {
-            Get get = new Get(Bytes.toBytes(row));
-            for( String header : headers)
-            {
-                get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
-            }
-        return get;
-    }
-
-    private Scan createScan(String columnFamily, String[] headers)
-    {
-        Scan scan = new Scan();
-        for( String header : headers)
-        {
-            scan.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(header));
-        }
-        return scan;
-    }
-
-    private String email(String username)
+    private String email(final String username)
     {
         return username + "@" + IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
     }
@@ -142,6 +121,7 @@ public class TestIntegration
             throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
                    ExchangePump.FailedToMoveMessage, LoginException, IOException, InterruptedException
     {
+        LOG.info("Beginning new run of emails");
         final ExpectedEmails expectedEmails;
         user1.initialize(pump);
         user2.initialize(pump);
@@ -198,7 +178,7 @@ public class TestIntegration
     }
 
     @Before
-    public void SetupUsers() throws FailedToCreateMessage, FailedToFindMessage, FailedToMoveMessage
+    public void setupUsers() throws FailedToCreateMessage, FailedToFindMessage, FailedToMoveMessage
     {
         exchangeURL = IntegrationTestProperties.getProperty(EXCHANGE_URI_PROPERTY_NAME);
         ldapDomain = IntegrationTestProperties.getProperty(LDAP_DOMAIN_PROPERTY_NAME);
@@ -223,44 +203,26 @@ public class TestIntegration
     }
 
     @After
-    public void DeleteEmails()
+    public void deleteEmails()
     {
         if (pump != null)
         {
-            if (user1 != null)
+            for (RequiredUser user : new RequiredUser[] {user1, user2, user3})
             {
-                try
+                if (user != null)
                 {
-                    user1.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user1's content: {}",
-                             e.getMessage());
-                }
-            }
-            if (user2 != null)
-            {
-                try
-                {
-                    user2.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user2's content: {}",
-                             e.getMessage());
-                }
-            }
-            if (user3 != null)
-            {
-                try
-                {
-                    user3.deleteEmails(pump);
-                }
-                catch (Exception e)
-                {
-                    LOG.warn("An error occured deleting user3's content: {}",
-                             e.getMessage());
+                    String name = user.getUser();
+                    try
+                    {
+                        LOG.info("Deleting test emails for user: {}", name);
+                        user.deleteEmails(pump);
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.warn("An error occured deleting {}'s content: {}",
+                                 name,
+                                 e.getMessage());
+                    }
                 }
             }
             pump = null;
@@ -275,6 +237,7 @@ public class TestIntegration
             throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
                    ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage, InterruptedException
     {
+        LOG.info("Beginning integration test: testIntegrationNoCLI()");
         /*
         This test tests getting emails from an exchange server, and the breadth
         of what that entails, and then putting it all in Exchange. It depends
@@ -293,13 +256,13 @@ public class TestIntegration
         user1.addFolderToInbox("child of Inbox")
              .add("To the child of inbox", "here is the body of the email in the child of Inbox");
         RequiredFolder inboxJr = user1.addFolderToInbox("Inbox Jr");
-        inboxJr.add("books","Inbox Jr is getting lonely over here");
-        inboxJr.add("For Inbox Jr","some sort of body here");
-        user1.addDraft(senderEmail,"A draft", "with something I'll never tell you");
+        inboxJr.add("books", "Inbox Jr is getting lonely over here");
+        inboxJr.add("For Inbox Jr", "some sort of body here");
+        user1.addDraft(senderEmail, "A draft", "with something I'll never tell you");
         user1.addSentItem(senderEmail, "A message to semone else", "you can tell, because of the to field");
         user1.addSentItem(ignoredEmail, "To whom", "is this email going").bcc(senderEmail);
-        user1.addToDeletedItems("Whoops","This is going in the trash");
-        user1.addFolder(DistinguishedFolderIdNameType.DELETEDITEMS,"Deleted folder")
+        user1.addToDeletedItems("Whoops", "This is going in the trash");
+        user1.addFolder(DistinguishedFolderIdNameType.DELETEDITEMS, "Deleted folder")
              .add("Uh oh", "this is going in the recycling bin, which we're throwing out");
         RequiredFolder topper = user1.addFolderToRoot("Topper");
         topper.add("Hey hey Bobby McGee", "Makes me think of that Janis Joplin song").to(ignoredEmail).cc(email1);
@@ -318,13 +281,13 @@ public class TestIntegration
         // Page FindItems (29)
         for (int i = 0; i < 29; i++)
         {
-            findItems.add("Page FindItems" + (i+1), "Page FindItems #" + (i+1));
+            findItems.add("Page FindItems" + (i + 1), "Page FindItems #" + (i + 1));
         }
         RequiredFolder getItems = user1.addFolderToRoot("Page GetItems");
         // Page GetItems (11)
         for (int i = 0; i < 11; i++)
         {
-            getItems.add("Page GetItems" + (i+1), "Page GetItems #" + (i+1));
+            getItems.add("Page GetItems" + (i + 1), "Page GetItems #" + (i + 1));
         }
 
         /////////////
@@ -365,12 +328,11 @@ public class TestIntegration
         user3.nextRun();
 
         user2.addFolderToRoot("This is the newest folder")
-                .add("This email goes in the newest folder", "That's right");
+             .add("This email goes in the newest folder", "That's right");
         user3.addDraft(email1, "Some sort of draft", "With something non-committal");
 
         runForEmails(emailTable3);
     }
-
 
 
 }

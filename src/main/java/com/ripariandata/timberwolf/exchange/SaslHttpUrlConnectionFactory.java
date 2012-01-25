@@ -40,21 +40,18 @@ class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         }
         catch (MalformedURLException e)
         {
-            LOG.error("Improperly formed URL " + address, e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                "The given url was not properly formed.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "Improperly formed URL " + address, e));
         }
         catch (ProtocolException e)
         {
-            LOG.error("Protocol exception when contacting URL " + address + " with request " + new String(request), e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                "There was a protocol error while creating and sending the request.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "Protocol exception when contacting URL " + address + " with request " + new String(request), e));
         }
         catch (IOException e)
         {
-            LOG.error("IO exception when contacting URL " + address + " with request " + new String(request), e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                "There was an IO error while sending a request to the remote server.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "IO exception when contacting URL " + address + " with request " + new String(request), e));
         }
     }
 }

@@ -5,7 +5,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Helper class for required emails in exchange */
+/** Helper class for required emails in exchange. */
 public class RequiredEmail
 {
     private static final Logger LOG = LoggerFactory.getLogger(RequiredEmail.class);
@@ -19,14 +19,14 @@ public class RequiredEmail
     private String bcc;
     private String from;
 
-    public RequiredEmail(String toEmail, String subjectText, String bodyText)
+    public RequiredEmail(final String toEmail, final String subjectText, final String bodyText)
     {
         subject = subjectText;
         body = bodyText;
         to = toEmail;
     }
 
-    public void initialize(RequiredFolder folder, String username)
+    public void initialize(final RequiredFolder folder, final String username)
     {
         if (folderId != null)
         {
@@ -82,6 +82,7 @@ public class RequiredEmail
     {
         return cc;
     }
+
     public String getCcString()
     {
         return cc + ";";
@@ -97,7 +98,7 @@ public class RequiredEmail
         return bcc + ";";
     }
 
-    public static String getFolderId(String subject)
+    public static String getFolderId(final String subject)
     {
         String[] s = subject.split(FOLDER_ID_SEPARATOR);
         if (s.length != 2)
@@ -115,19 +116,19 @@ public class RequiredEmail
 
     }
 
-    public RequiredEmail cc(String ccEmail)
+    public RequiredEmail cc(final String ccEmail)
     {
         cc = ccEmail;
         return this;
     }
 
-    public RequiredEmail bcc(String bccEmail)
+    public RequiredEmail bcc(final String bccEmail)
     {
         bcc = bccEmail;
         return this;
     }
 
-    public RequiredEmail to(String toEmail)
+    public RequiredEmail to(final String toEmail)
     {
         to = toEmail;
         return this;
@@ -136,10 +137,11 @@ public class RequiredEmail
     /**
      * The checked sender of the given email.
      * This does not change the sender.
+     *
      * @param fromEmail the expected sender
      * @return this
      */
-    public RequiredEmail from(String fromEmail)
+    public RequiredEmail from(final String fromEmail)
     {
         from = fromEmail;
         return this;
@@ -148,14 +150,14 @@ public class RequiredEmail
     @Override
     public String toString()
     {
-        return "RequiredEmail{" +
-               "subject='" + subject + '\'' +
-               ", body='" + body + '\'' +
-               ", folderId='" + folderId + '\'' +
-               ", to='" + to + '\'' +
-               ", cc='" + cc + '\'' +
-               ", bcc='" + bcc + '\'' +
-               ", from='" + from + '\'' +
-               '}';
+        return "RequiredEmail{"
+               + "subject='" + subject + '\''
+               + ", body='" + body + '\''
+               + ", folderId='" + folderId + '\''
+               + ", to='" + to + '\''
+               + ", cc='" + cc + '\''
+               + ", bcc='" + bcc + '\''
+               + ", from='" + from + '\''
+               + '}';
     }
 }

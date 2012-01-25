@@ -17,4 +17,4 @@ ExchangeIgnoredUser = jenkinsIgnored
 EOF
 
 # jclouseau is the user who can impersonate everyone else.
-echo pass@word1 | kinit jclouseau@INT.TARTARUS.COM
+echo pass@word1 | kinit jenkinsSender@INT.TARTARUS.COM
