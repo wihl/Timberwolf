@@ -106,9 +106,8 @@ public final class FindItemHelper
         }
         catch (XmlException e)
         {
-            LOG.error("Unable to parse generated Restriction tag:");
-            LOG.error(xml);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Cannot construct restriction tag.");
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "Cannot construct restriction tag.\n" + xml));
         }
     }
 
@@ -119,8 +118,6 @@ public final class FindItemHelper
      * @param exchangeService the actual service to use when requesting ids
      * @param folder the distinguished folder to obtain ids for
      * @param offset the number of items to offset for paging
-     * @param maxEntries the maximum number of entries to add
-     * @param targetUser The user to impersonate for the Exchange FindItem request.
      * @return a list of exchange ids
      * @throws ServiceCallException If we can't connect to the exchange service
      * @throws HttpErrorException If the response cannot be parsed

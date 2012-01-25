@@ -97,8 +97,8 @@ public final class FindFolderHelper
 
         if (response == null)
         {
-            LOG.debug("Exchange service returned null find folder response.");
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "Exchange service returned null find folder response."));
         }
 
         ArrayOfResponseMessagesType array = response.getResponseMessages();

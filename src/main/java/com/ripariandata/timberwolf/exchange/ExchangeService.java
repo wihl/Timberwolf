@@ -112,9 +112,8 @@ public class ExchangeService
             }
             catch (IOException ioe)
             {
-                LOG.error("There was an error reading from the response stream.", ioe);
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                                               "Error reading response stream.", ioe);
+                throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                                "Error reading from the response stream.", ioe));
             }
         }
 
@@ -137,11 +136,11 @@ public class ExchangeService
         }
         else
         {
-            LOG.error("SOAP envelope did not contain a valid body");
+            LOG.error("SOAP envelope did not contain a valid body.");
             if (!LOG.isTraceEnabled())
             {
-                LOG.error("SOAP envelope:");
-                LOG.error(response.xmlText());
+                LOG.debug("SOAP envelope:");
+                LOG.debug(response.xmlText());
             }
             throw new ServiceCallException(ServiceCallException.Reason.OTHER,
                                            "SOAP response did not contain a body.");
@@ -171,8 +170,8 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            LOG.error("There was an error reading from the response stream.", e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading response stream.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "There was an error reading from the response stream.", e));
         }
         catch (XmlException e)
         {
@@ -185,9 +184,8 @@ public class ExchangeService
             }
             catch (IOException ioe)
             {
-                LOG.error("There was an error reading from the response stream.", ioe);
-                throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-                                               "Error reading response stream.", ioe);
+                throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                        "There was an error reading from the response stream.", ioe));
             }
         }
         return response;
@@ -202,8 +200,8 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            LOG.error("Cannot determine the number of available bytes in the response.");
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error reading available bytes.");
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "There was an error reading from the response stream."));
         }
         return amtAvailable;
     }
@@ -217,8 +215,8 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            LOG.error("There was an error getting the input stream for the response.", e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting input stream.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "There was an error getting the input stream for the response.", e));
         }
         return responseData;
     }
@@ -232,8 +230,8 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            LOG.error("There was an error getting the HTTP status code for the response.", e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error getting HTTP status code.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "There was an error getting the HTTP status code for the response.", e));
         }
         return code;
     }
@@ -247,8 +245,8 @@ public class ExchangeService
         }
         catch (UnsupportedEncodingException e)
         {
-            LOG.error("Request body could not be encoded into " + SOAP_ENCODING, e);
-            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error encoding request body.", e);
+            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "Request body could not be encoded into " + SOAP_ENCODING, e));
         }
         return conn;
     }

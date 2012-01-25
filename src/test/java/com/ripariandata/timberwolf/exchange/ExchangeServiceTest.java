@@ -295,7 +295,7 @@ public class ExchangeServiceTest
         }
         catch (ServiceCallException e)
         {
-            assertEquals("Error getting HTTP status code.", e.getMessage());
+            assertEquals("There was an error getting the HTTP status code for the response.", e.getMessage());
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }
     }
@@ -320,7 +320,7 @@ public class ExchangeServiceTest
         }
         catch (ServiceCallException e)
         {
-            assertEquals("Error getting input stream.", e.getMessage());
+            assertEquals("There was an error getting the input stream for the response.", e.getMessage());
             assertEquals(ServiceCallException.Reason.OTHER, e.getReason());
         }
     }
@@ -371,7 +371,7 @@ public class ExchangeServiceTest
         }
         catch (ServiceCallException e)
         {
-            assertEquals("Error reading available bytes.", e.getMessage());
+            assertEquals("There was an error reading from the response stream.", e.getMessage());
         }
     }
 
