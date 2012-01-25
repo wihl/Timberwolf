@@ -40,6 +40,11 @@
       <level value="fatal" />
     </logger>
 
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangePump">
+        <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
+        <level value="fatal" />
+    </logger>
+
     <root>
         <priority value ="debug" />
         <appender-ref ref="console" />
