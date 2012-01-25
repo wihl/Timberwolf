@@ -12,8 +12,15 @@ public class HBaseRuntimeException extends RuntimeException
 
     public static HBaseRuntimeException log(final Logger logger, final HBaseRuntimeException e)
     {
-        logger.error(e.getMessage());
-        logger.debug(e.getMessage(), e);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(e.getMessage(), e);
+        }
+        else
+        {
+            logger.error(e.getMessage());
+        }
+
         return e;
     }
 }
