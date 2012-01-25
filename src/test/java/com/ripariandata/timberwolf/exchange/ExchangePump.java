@@ -342,6 +342,10 @@ public class ExchangePump
     private BodyType sendRequest(final EnvelopeDocument envelope) throws SendRequestFailed
     {
         String request = DECLARATION + envelope.xmlText();
+
+        LOG.trace("Sending SOAP request to {}.  SOAP envelope:", endpoint);
+        LOG.trace(request);
+
         try
         {
             HttpURLConnection conn = connectionFactory.newInstance(endpoint, request.getBytes(SOAP_ENCODING));
@@ -355,6 +359,10 @@ public class ExchangePump
             if (code == HttpURLConnection.HTTP_OK)
             {
                 EnvelopeDocument response = EnvelopeDocument.Factory.parse(responseData);
+
+                LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
+                LOG.trace(response.xmlText());
+
                 return response.getEnvelope().getBody();
             }
             else
