@@ -118,8 +118,9 @@ public class TestIntegration
     }
 
     private void runForEmails(final HTableResource emailTable)
-            throws ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
-                   ExchangePump.FailedToMoveMessage, LoginException, IOException, InterruptedException
+            throws ExchangePump.FailedToCreateFolders, ExchangePump.FailedToCreateMessage,
+                   ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage, LoginException, IOException,
+                   InterruptedException
     {
         LOG.info("Beginning new run of emails");
         final ExpectedEmails expectedEmails;
@@ -234,8 +235,10 @@ public class TestIntegration
 
     @Test
     public void testIntegrationNoCLI()
-            throws PrincipalFetchException, LoginException, IOException, ExchangePump.FailedToCreateMessage,
-                   ExchangePump.FailedToFindMessage, ExchangePump.FailedToMoveMessage, InterruptedException
+            throws ExchangePump.FailedToCreateFolders, PrincipalFetchException, LoginException, IOException,
+                   ExchangePump.FailedToCreateMessage, ExchangePump.FailedToFindMessage,
+                   ExchangePump.FailedToMoveMessage, InterruptedException
+
     {
         LOG.info("Beginning integration test: testIntegrationNoCLI()");
         /*

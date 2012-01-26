@@ -110,7 +110,7 @@ public class RequiredUser
      *
      * @param pump The ExchangePump used to manage exchange.
      */
-    public void initialize(final ExchangePump pump)
+    public void initialize(final ExchangePump pump) throws ExchangePump.FailedToCreateFolders
     {
         for (DistinguishedFolderIdNameType.Enum distinguishedFolder : distinguishedFolders.keySet())
         {
