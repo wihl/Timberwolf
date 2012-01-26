@@ -53,7 +53,7 @@ public class RequiredFolder
         return email;
     }
 
-    public void initialize(final ExchangePump pump, final String user)
+    public void initialize(final ExchangePump pump, final String user) throws ExchangePump.FailedToCreateFolders
     {
         LOG.debug("Initializing folder: " + getName() + " with " + folders.size() + " subfolders and " + emails.size()
                   + " emails.");
