@@ -9,7 +9,6 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
  */
 public abstract class HBaseConfigurator
 {
-
     /**
      * The property name for the ZooKeeper quorum property.
      */

@@ -2,7 +2,7 @@ package com.ripariandata.timberwolf.hbase;
 
 import org.slf4j.Logger;
 
-/** Non-checked exception thrown by ExchangeMailStore iterator. */
+/** Non-checked exception thrown by classes that talk to HBase. */
 public class HBaseRuntimeException extends RuntimeException
 {
     public HBaseRuntimeException(final String message, final Throwable cause)
@@ -10,10 +10,12 @@ public class HBaseRuntimeException extends RuntimeException
         super(message, cause);
     }
 
-    public static HBaseRuntimeException create(final String message, final Throwable cause, final Logger logger)
+    public static HBaseRuntimeException log(final Logger logger, final HBaseRuntimeException e)
     {
-        logger.error(message);
-        return new HBaseRuntimeException(message, cause);
+        logger.error(e.getMessage());
+        logger.debug("", e);
+
+        return e;
     }
 }
 

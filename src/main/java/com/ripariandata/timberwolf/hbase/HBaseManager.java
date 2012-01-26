@@ -68,11 +68,11 @@ public class HBaseManager
         }
         catch (MasterNotRunningException e)
         {
-            throw HBaseRuntimeException.create("Unable to connect to Master!", e, LOG);
+            throw HBaseRuntimeException.log(LOG, new HBaseRuntimeException("Unable to connect to Master!", e));
         }
         catch (ZooKeeperConnectionException e)
         {
-            throw HBaseRuntimeException.create("Unable to connect to ZooKeeper!", e, LOG);
+            throw HBaseRuntimeException.log(LOG, new HBaseRuntimeException("Unable to connect to Zookeeper!", e));
         }
     }
 
@@ -148,7 +148,8 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                throw HBaseRuntimeException.create("Could not determine existence of table ", e, LOG);
+                throw HBaseRuntimeException.log(LOG,
+                    new HBaseRuntimeException("Could not determine existence of table!", e));
             }
         }
         return false;
@@ -174,8 +175,8 @@ public class HBaseManager
                 }
                 catch (IOException e)
                 {
-                    throw HBaseRuntimeException.create("Could not acquire reference to table " + tableName + "!",
-                            e, LOG);
+                    throw HBaseRuntimeException.log(LOG,
+                        new HBaseRuntimeException("Could not acquire reference to table " + tableName + "!", e));
                 }
             }
             else
@@ -228,8 +229,7 @@ public class HBaseManager
             {
                 if (hbase.tableExists(tableName))
                 {
-                    LOG.error("Cannot create table " + tableName + ", as "
-                            + "the table already exists!");
+                    LOG.warn("Cannot create table " + tableName + ", as the table already exists!");
                 }
                 else
                 {
@@ -242,7 +242,8 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                throw HBaseRuntimeException.create("Error creating table " + tableName + "!", e, LOG);
+                throw HBaseRuntimeException.log(LOG,
+                    new HBaseRuntimeException("Error creating table " + tableName + "!", e));
             }
         }
         if (tables.containsKey(tableName))
@@ -268,7 +269,8 @@ public class HBaseManager
             }
             catch (IOException e)
             {
-                throw HBaseRuntimeException.create("Error deleting table " + tableName + "!", e, LOG);
+                throw HBaseRuntimeException.log(LOG,
+                    new HBaseRuntimeException("Error deleting table " + tableName + "!", e));
             }
         }
         tables.remove(tableName);

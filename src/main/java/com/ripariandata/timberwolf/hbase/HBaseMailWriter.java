@@ -14,7 +14,6 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public final class HBaseMailWriter implements MailWriter
 {
-
     /** The HTableInterface to store MailboxItems into. */
     private IHBaseTable mailTable;
 
