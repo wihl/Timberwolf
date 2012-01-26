@@ -50,7 +50,7 @@ class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not get from HBase!", e, LOG);
+            throw HBaseRuntimeException.log(LOG, new HBaseRuntimeException("Could not get from HBase!", e));
         }
         return result;
     }
@@ -68,7 +68,7 @@ class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not write puts to HTable!", e, LOG);
+            throw HBaseRuntimeException.log(LOG, new HBaseRuntimeException("Could not write puts to HTable!", e));
         }
 
     }
@@ -96,7 +96,7 @@ class HBaseTable implements IHBaseTable
         }
         catch (IOException e)
         {
-            throw HBaseRuntimeException.create("Could not close table " + name + "!", e, LOG);
+            throw HBaseRuntimeException.log(LOG, new HBaseRuntimeException("Could not close table " + name + "!", e));
         }
     }
 }

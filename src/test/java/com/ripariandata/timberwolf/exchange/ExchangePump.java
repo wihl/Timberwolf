@@ -358,7 +358,7 @@ public class ExchangePump
         String request = DECLARATION + envelope.xmlText();
 
         LOG.trace("Sending SOAP request to {}.  SOAP envelope:", endpoint);
-        LOG.trace(request);
+        LOG.trace(envelope.toString());
 
         try
         {
@@ -375,7 +375,7 @@ public class ExchangePump
                 EnvelopeDocument response = EnvelopeDocument.Factory.parse(responseData);
 
                 LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
-                LOG.trace(response.xmlText());
+                LOG.trace(response.toString());
 
                 return response.getEnvelope().getBody();
             }

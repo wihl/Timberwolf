@@ -68,7 +68,7 @@ public class ExchangeService
     {
         String request = DECLARATION + envelope.xmlText();
         LOG.trace("Sending SOAP request to {}.  SOAP envelope:", endpoint);
-        LOG.trace(request);
+        LOG.trace(envelope.toString());
 
         HttpURLConnection conn = createConnection(request);
         int code = getResponseCode(conn);
@@ -83,7 +83,7 @@ public class ExchangeService
 
             EnvelopeDocument response = parseResponse(responseData);
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
-            LOG.trace(response.xmlText());
+            LOG.trace(response.toString());
             return getSoapBody(response);
         }
         else
