@@ -46,6 +46,11 @@
     <property name="influenceFormat" value="2"/>
   </module>
 
+  <!-- Filters specific checks against files. -->
+  <module name="SuppressionFilter">
+      <property name="file" value="suppressions.xml"/>
+  </module>
+
   <!-- Checks that a package-info.java file exists for each package.   -->
   <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage -->
   <module name="JavadocPackage"/>
