@@ -18,14 +18,9 @@ public class ExchangeRuntimeException extends RuntimeException
      */
     public static ExchangeRuntimeException log(final Logger logger, final ExchangeRuntimeException e)
     {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(e.getMessage(), e);
-        }
-        else
-        {
-            logger.error(e.getMessage());
-        }
+        logger.error(e.getMessage());
+        logger.debug("", e);
+
         return e;
     }
 }
