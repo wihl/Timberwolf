@@ -1,8 +1,8 @@
 package com.ripariandata.timberwolf.hbase;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HConstants;
 
 /**
  * Factory class for creating HBase-compatible Hadoop Configurations from
@@ -10,14 +10,13 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
  */
 public abstract class HBaseConfigurator
 {
-    /**
-     * The property name of the ZooKeeper client port property.
-     */
-     private static final String ZOOKEEPER_CLIENT_PORT = "hbase.zookeeper.property.clientPort";
+    /** The property name of the ZooKeeper client port property. */
+    private static final String ZOOKEEPER_CLIENT_PORT = "hbase.zookeeper.property.clientPort";
 
     /**
      * Creates a Hadoop Configuration for HBase using the specified
      * properties.
+     *
      * @param quorum The ZooKeeper quorum members.
      * @param clientPort The ZooKeeper client port.
      * @return A Hadoop Configuration object with the above parameters.
