@@ -73,7 +73,7 @@ public class ExchangePump
      * Will not create folders that already have ids.
      */
     private void createFolders(final String user, final TargetFolderIdType parentFolderId,
-                               final List<RequiredFolder> folders)
+                               final String parentFolderName, final List<RequiredFolder> folders) throws FailedToCreateFolders
     {
         EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
@@ -108,21 +108,32 @@ public class ExchangePump
                 i++;
             }
         }
+        if (i < folders.size())
+        {
+            LOG.error("Failed to create all folders for user: {}", user);
+            LOG.error("Requested Folders in {}:", parentFolderName);
+            for (RequiredFolder folder : folders)
+            {
+                LOG.error("  {}", folder.getName());
+            }
+            throw new FailedToCreateFolders("Failed to create all folders, perhaps some existed before running the test");
+        }
     }
 
     public void createFolders(final String user, final String parent, final List<RequiredFolder> folders)
+            throws FailedToCreateFolders
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewFolderId().setId(parent);
-        createFolders(user, parentFolder, folders);
+        createFolders(user, parentFolder, parent, folders);
     }
 
     public void createFolders(final String user, final DistinguishedFolderIdNameType.Enum parent,
-                              final List<RequiredFolder> folders)
+                              final List<RequiredFolder> folders) throws FailedToCreateFolders
     {
         TargetFolderIdType parentFolder = TargetFolderIdType.Factory.newInstance();
         parentFolder.addNewDistinguishedFolderId().setId(parent);
-        createFolders(user, parentFolder, folders);
+        createFolders(user, parentFolder, parent.toString(), folders);
     }
 
     public void deleteFolders(final String user, final List<RequiredFolder> folders) throws FailedToDeleteMessage
@@ -379,6 +390,15 @@ public class ExchangePump
         public SendRequestFailed(final String message, final Throwable cause)
         {
             super(message, cause);
+        }
+    }
+
+    /** Exception for when creating folders fails. */
+    public class FailedToCreateFolders extends Exception
+    {
+        public FailedToCreateFolders(final String message)
+        {
+            super(message);
         }
     }
 
