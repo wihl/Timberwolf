@@ -1,9 +1,9 @@
 # Welcome to Timberwolf
 
-Timberwolf is an open-source, command-line service to aid in importing emails
-from Microsoft Exchange into Apache HBase. It will locate all emails within an
-exchange instance which it has access to and upload them into HBase. By
-keeping track of when it was last run, Timberwolf can periodically update
+Timberwolf is an open-source, command-line program for importing emails from
+Microsoft Exchange into Apache HBase. It will locate all emails within an
+Exchange instance which it has access to and import them into HBase. By
+keeping track of when it was last run, Timberwolf can incrementally update
 HBase with new messages.
 
 ## Compiling Timberwolf
@@ -20,31 +20,33 @@ The final Timberwolf distribution artifacts will be in $project/target/.
 
 ## Contact us
 
-_Not yet._
+contact@ripariandata.com
 
 ## Bug and Issue tracker.
 
-_None._
+All bugs and features are reported and tracked at:
+<https://ripariandata.atlassian.net>
 
 ## Running Timberwolf
 
 ### Setting up an authorization configuration
 
-Timberwolf uses JAAS to perform its authentication. This means you will be
-required to supply a login configuration entry labeled "Timberwolf".
+Timberwolf uses JAAS to perform its authentication against Exchange. This
+means you will be required to supply a login configuration entry labeled
+"Timberwolf".
 
-We supply a sample_jaas.config file which contains a very basic kerberos
+We supply a sample_jaas.config file which contains a very basic Kerberos
 authentication configuration which may be suitable in your case. You can
-specify it either through the following java commandline option:
+specify it either through the following Java commandline option:
 
     -Djava.security.auth.login.config==sample_jaas.config
 
-(note, this is a command line option to java, not to the Timberwolf jar)
+(note, this is a command line option to Java, not to the Timberwolf jar)
 
 ...or you can copy the Timberwolf entry in that file into ~/.java.login.config
-where java will detect it automatically.
+where Java will detect it automatically.
 
-Information about where java configuration files can be placed can be found:
+Information about where Java configuration files can be placed can be found:
 <http://docs.oracle.com/javase/6/docs/jre/api/security/jaas/spec/com/sun/security/auth/login/ConfigFile.html>
 
 Information about configuration options are available at:
@@ -66,9 +68,9 @@ file and /etc/hosts file correctly describe your realm.
         --exchange-url ${yourExchangeUrl}/ews/exchange.asmx \
         --domain ${yourDomain}
 
-This will run Timberwolf at a very basic level and print all located emails to
-the console. In order to import the emails into an HBase instance, you must
-specify the required HBase arguments:
+This will run Timberwolf at and print all located emails to the console. In
+order to import the emails into an HBase instance, you must specify the
+required HBase arguments:
 
     java -jar ${project}/target/timberwolf-SNAPSHOT-jar-with-dependencies.jar \
         --exchange-url ${yourExchangeUrl}/ews/exchange.asmx \
@@ -84,7 +86,7 @@ your work in a topic branch. Once you're done, you can submit a pull request.
 
 ### Coding Conventions
 
-The Timberwolf code works off of the java sun coding conventions with a few
+The Timberwolf code works off of the Sun Java coding conventions with a few
 minor exceptions. Curly braces should always be on their own line and imports
 should be ordered alphabetically and broken up by groups.
 
