@@ -313,6 +313,7 @@ public class TestIntegration
 
         runForEmails(emailTable1);
 
+        Thread.sleep(SLEEP_TIME);
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
@@ -326,6 +327,7 @@ public class TestIntegration
 
         runForEmails(emailTable2);
 
+        Thread.sleep(SLEEP_TIME);
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
