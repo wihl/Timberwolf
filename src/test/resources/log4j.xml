@@ -42,4 +42,8 @@
       <level value="fatal" />
     </logger>
 
+    <logger name="com.ripariandata.timberwolf.hbase.HBaseManager">
+        <level value="error" />
+    </logger>
+
 </log4j:configuration>
