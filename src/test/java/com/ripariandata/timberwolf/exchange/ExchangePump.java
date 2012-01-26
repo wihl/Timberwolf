@@ -73,7 +73,8 @@ public class ExchangePump
      * Will not create folders that already have ids.
      */
     private void createFolders(final String user, final TargetFolderIdType parentFolderId,
-                               final String parentFolderName, final List<RequiredFolder> folders) throws FailedToCreateFolders
+                               final String parentFolderName, final List<RequiredFolder> folders)
+            throws FailedToCreateFolders
     {
         EnvelopeDocument request = createEmptyRequest(user);
         CreateFolderType createFolder = request.getEnvelope().addNewBody().addNewCreateFolder();
@@ -116,7 +117,8 @@ public class ExchangePump
             {
                 LOG.error("  {}", folder.getName());
             }
-            throw new FailedToCreateFolders("Failed to create all folders, perhaps some existed before running the test");
+            throw new FailedToCreateFolders(
+                    "Failed to create all folders, perhaps some existed before running the test");
         }
     }
 
