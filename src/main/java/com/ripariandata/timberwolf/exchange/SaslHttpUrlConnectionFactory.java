@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A HttpUrlConnectionFactory that works with Sasl.
  */
-public class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
+class SaslHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
     private static final Logger LOG = LoggerFactory.getLogger(SaslHttpUrlConnectionFactory.class);
 

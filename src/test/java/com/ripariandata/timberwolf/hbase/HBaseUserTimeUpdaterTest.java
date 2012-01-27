@@ -15,7 +15,7 @@ public class HBaseUserTimeUpdaterTest
     private IHBaseTable mockTable(final HBaseManager hbaseManager, final String tableName)
     {
         MockHTable table = MockHTable.create(tableName);
-        IHBaseTable hbaseTable = new HBaseTable(table);
+        HBaseTable hbaseTable = new HBaseTable(table);
         hbaseManager.addTable(hbaseTable);
         return hbaseTable;
     }

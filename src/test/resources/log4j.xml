@@ -13,15 +13,9 @@
     <appender name="logfile" class="org.apache.log4j.FileAppender">
         <param name="File" value="target/test.log"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%-5p %c{2} - %m%n"/>
+            <param name="ConversionPattern" value="%-5p [%d{HH:mm:ss:SSS}]: %c{2} - %m%n"/>
         </layout>
     </appender>
-
-    <root>
-        <priority value ="debug" />
-        <appender-ref ref="console" />
-        <appender-ref ref="logfile" />
-    </root>
 
     <logger name="org.apache.hadoop">
       <level value="warn" />
@@ -29,6 +23,10 @@
 
     <logger name="org.apache.zookeeper">
       <level value="warn" />
+    </logger>
+
+    <logger name="com.ripariandata.timberwolf.exchange.UserIterator">
+      <level value="error" />
     </logger>
 
     <!-- ExchangeService and FindFolderIterator are particularly
@@ -42,8 +40,19 @@
       <level value="fatal" />
     </logger>
 
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangePump">
+        <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
+        <level value="fatal" />
+    </logger>
+
     <logger name="com.ripariandata.timberwolf.hbase.HBaseManager">
         <level value="error" />
     </logger>
+
+    <root>
+        <priority value ="debug" />
+        <appender-ref ref="console" />
+        <appender-ref ref="logfile" />
+    </root>
 
 </log4j:configuration>

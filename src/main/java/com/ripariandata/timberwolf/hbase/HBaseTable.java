@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A proxy class for an HTable.
+ * This class should only be referenced and used by HBaseManager.
  */
-public class HBaseTable implements IHBaseTable
+class HBaseTable implements IHBaseTable
 {
     private static final Logger LOG = LoggerFactory.getLogger(HBaseTable.class);
     private HTableInterface table;
@@ -84,6 +85,7 @@ public class HBaseTable implements IHBaseTable
 
     /**
      * Closes the connection to the underlying table.
+     * This should only be called by HBaseManager.close().
      */
     public final void close()
     {

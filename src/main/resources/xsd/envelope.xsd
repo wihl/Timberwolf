@@ -52,6 +52,17 @@
       <xs:element ref="m:GetItemResponse" />
       <xs:element ref="m:FindFolder" />
       <xs:element ref="m:FindFolderResponse" />
+      <!-- The following are only used in testing -->
+      <xs:element ref="m:CreateFolder" />
+      <xs:element ref="m:CreateFolderResponse" />
+      <xs:element ref="m:CreateItem" />
+      <xs:element ref="m:CreateItemResponse" />
+      <xs:element ref="m:DeleteFolder" />
+      <xs:element ref="m:DeleteFolderResponse" />
+      <xs:element ref="m:DeleteItem" />
+      <xs:element ref="m:DeleteItemResponse" />
+      <xs:element ref="m:MoveItem" />
+      <xs:element ref="m:MoveItemResponse" />
     </xs:choice>
   </xs:complexType>
 </xs:schema>

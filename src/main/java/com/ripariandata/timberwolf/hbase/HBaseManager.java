@@ -29,8 +29,8 @@ public class HBaseManager
     /**
      * The underlying table collection.
      */
-    private Map<String, IHBaseTable> tables =
-            new HashMap<String, IHBaseTable>();
+    private Map<String, HBaseTable> tables =
+            new HashMap<String, HBaseTable>();
 
     /**
      * The underlying remote configuration.
@@ -91,7 +91,7 @@ public class HBaseManager
      * already exists, it will do nothing.
      * @param table The IHBaseTable to add.
      */
-    public final void addTable(final IHBaseTable table)
+    final void addTable(final HBaseTable table)
     {
         if (!tables.containsValue(table))
         {
@@ -111,7 +111,7 @@ public class HBaseManager
         {
             return tables.get(tableName);
         }
-        IHBaseTable table = getTableRemotely(tableName);
+        HBaseTable table = getTableRemotely(tableName);
         if (table != null)
         {
             addTable(table);
@@ -160,7 +160,7 @@ public class HBaseManager
      * @param tableName The name of the table.
      * @return An IHBaseTable for a remote table instance.
      */
-    private IHBaseTable getTableRemotely(final String tableName)
+    private HBaseTable getTableRemotely(final String tableName)
     {
         if (canRemote())
         {
@@ -236,7 +236,7 @@ public class HBaseManager
                     hbase.createTable(tableDescriptor);
                 }
                 HTableInterface table = new HTable(configuration, tableName);
-                IHBaseTable hbaseTable = new HBaseTable(table);
+                HBaseTable hbaseTable = new HBaseTable(table);
                 addTable(hbaseTable);
                 return hbaseTable;
             }
@@ -282,7 +282,7 @@ public class HBaseManager
      */
     public final void close()
     {
-        for (IHBaseTable table : tables.values())
+        for (HBaseTable table : tables.values())
         {
             table.close();
         }
