@@ -42,7 +42,6 @@
       <appender-ref ref="error-console" />
     </logger>
 
-
     <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator"
             additivity="false">
       <level value="debug" />

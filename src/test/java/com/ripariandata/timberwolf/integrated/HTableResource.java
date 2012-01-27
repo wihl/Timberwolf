@@ -134,7 +134,7 @@ public class HTableResource extends IntegrationTestProperties
     }
 
     /**
-     * The table as created by ice.submit(AbstractExour production code.
+     * The table as created by our production code.
      *
      * @return the table created by our production code
      */
