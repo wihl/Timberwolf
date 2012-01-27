@@ -39,11 +39,17 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
         }
         catch (ServiceCallException e)
         {
-            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find folder ids.", e));
+            throw new ExchangeRuntimeException(
+                String.format("Failed to find folder ids for %s: %s",
+                              user, e.getMessage()),
+                e);
         }
         catch (HttpErrorException e)
         {
-            throw ExchangeRuntimeException.log(LOG, new ExchangeRuntimeException("Failed to find folder ids.", e));
+            throw new ExchangeRuntimeException(
+                String.format("Failed to find folder ids for %s: %s",
+                              user, e.getMessage()),
+                e);
         }
 
         accessTime = new DateTime();
