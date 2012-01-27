@@ -9,7 +9,7 @@
 ## Necessary for the integration tests that hit an actual hbase
 ###############################################################
 ## The ZooKeeper quorum used to connect to HBase.
-# ZooKeeperQuorum = hdhbase01.int.softartisans.com
+# ZooKeeperQuorum = hbase.int.test
 ## The ZooKeeper client port used to connect to HBase.
 # ZooKeeperClientPort = 2181
 
@@ -26,3 +26,71 @@
 ## The jaas config entry to be used from the java login
 ## configuration usually located at ~/.java.login.config
 # LdapConfigEntry = Timberwolf
+#######
+## Users necessary for exchange tests
+#######
+## The following 5 users are required for the exchange integration
+## test. The authenticated user must be able to authenticate all
+## of these users in order to be able to run the test.
+## These users will create a bunch of folders and send a bunch of
+## emails amongst themselves and put them in said folders.
+## When the test ends wipe out the contents of their mailboxes.
+## I repeat at the end of the test these users loose ALL their
+## emails. DO NOT use real users here.
+
+## After the list of users is instructions on how to set up an
+## impersonation group so that the test will only get email
+## from a set of users
+
+
+## User #1 has a bunch of emails organized into many folders
+# ExchangeUser1 = testingUser1
+
+## User #2 has a few emails in a few folders
+# ExchangeUser2 = testingUser2
+
+## User #3 has a few emails in a few folders
+# ExchangeUser3 = testingUser3
+
+## Sender sends all the emails and recieves a few more emails
+# ExchangeSender = testingUserForSending
+
+## Ignored is just another account that can receives emails
+## like sender this account is ignored when putting emails in hbase
+# ExchangeIgnoredUser = testingUserForRecieving
+
+
+##############################################################
+## Creating an impersonation group
+##############################################################
+# In order to create a security group set up for impersonation:
+# One will have to log into our Exchange test server.
+# Once all the mailboxes are created for the required users,
+# open up the Exchange Management Console and select Recipient
+# Configuration and then Distribution Group. Right click inside
+# the pane and select New Distribution Group. On the first page,
+# select "new group". On the second page, one must specify the
+# group type as security. Don't specify an organization unit,
+# and the names and aliases are arbitrary but make them all the
+# same. We will refer to this unique name as the SecurityGroupName.
+# On the last page simply press the "New" button and the group
+# should be created. It's not instantaneous, but should appear
+# within the list fairly quickly.
+#
+# The users will then have to be added to the security group.
+# Right-click on the security group name and select Properties.
+# Under the members tab is a list of all the current members and
+# an Add button. Clicking the add button will bring up a list of
+# members. Multi-select the users that need to be in the
+# impersonation group.
+#
+# Once the members are added, create a ManagementScope. Open the
+# Exchange Management Shell. Then run the following to create a
+# ManagementScope
+# with name "ScopeName" for the security group "SecurityGroupName"
+#   New-ManagementScope -Name:ScopeName -RecipientRestrictionFilter {MemberOfGroup -eq "cn=SecurityGroupName,cn=Users,DC=int,DC=tartarus,DC=com"}
+# Then create a ManagementRoleAssignment for jclouseau. To create a
+# ManagementRoleAssignment named "ManagementRoleAssignmentName" over
+# scope "ScopeName" for user: "testingSender" (A prime candidate is
+# the username for the sender):
+#   New-ManagementRoleAssignment -Name:ManagementRoleAssignmentName -Role:ApplicationImpersonation -User:testingSender -CustomRecipientWriteScope:ScopeName

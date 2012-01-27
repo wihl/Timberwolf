@@ -15,8 +15,8 @@
     </root>
 
     <!-- uncomment the following to see all exchange http traffic -->
-    <!-- 
-    <logger name="com.softartisans.timberwolf.exchange.ExchangeService">
+    <!--
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangeService">
       <level value="trace" />
     </logger> -->
 
