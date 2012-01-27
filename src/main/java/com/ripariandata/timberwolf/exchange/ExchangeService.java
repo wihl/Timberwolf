@@ -215,8 +215,8 @@ public class ExchangeService
         }
         catch (IOException e)
         {
-            throw ServiceCallException.log(LOG, new ServiceCallException(ServiceCallException.Reason.OTHER,
-                    "There was an error getting the input stream for the response.", e));
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER,
+                    "There was an error getting the input stream for the response.", e);
         }
         return responseData;
     }

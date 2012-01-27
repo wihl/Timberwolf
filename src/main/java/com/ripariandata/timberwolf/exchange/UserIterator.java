@@ -33,8 +33,8 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             }
             catch (Exception e)
             {
-                LOG.warn("Failed to find folders for user: {}", user);
-                LOG.debug("Due to exception", e);
+                LOG.info("Could not find folders for {}", user);
+                LOG.trace("Due to exception", e);
             }
         }
         return null;
@@ -66,11 +66,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             catch (Exception e)
             {
                 LOG.warn("Failed to get email for user: {}", user);
-                if (LOG.isDebugEnabled())
-                {
-                    LOG.debug("Due to exception", e);
-                }
-
+                LOG.trace("Due to exception", e);
             }
             return false;
         }
@@ -85,7 +81,7 @@ public class UserIterator extends BaseChainIterator<MailboxItem>
             catch (Exception e)
             {
                 LOG.warn("Failed to get email for user: {}", user);
-                LOG.debug("Due to exception", e);
+                LOG.trace("Due to exception", e);
             }
             return null;
         }

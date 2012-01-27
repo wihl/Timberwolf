@@ -33,19 +33,13 @@
       <level value="warn" />
     </logger>
 
-    <!-- For UserIterator, only output error and above to the console
+    <!-- For FindFolderIterator, only output error and above to the console
          debug and above still goes to test.log -->
-    <logger name="com.ripariandata.timberwolf.exchange.UserIterator"
-            additivity="false">
-      <level value="debug" />
-      <appender-ref ref="logfile" />
-      <appender-ref ref="error-console" />
-    </logger>
-
     <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator"
             additivity="false">
-      <level value="debug" />
+      <level value="warn" />
       <appender-ref ref="logfile" />
+      <appender-ref ref="error-console" />
     </logger>
 
     <logger name="com.ripariandata.timberwolf.exchange.ExchangePump"
