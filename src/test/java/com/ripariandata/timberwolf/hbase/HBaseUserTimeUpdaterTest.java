@@ -65,12 +65,27 @@ public class HBaseUserTimeUpdaterTest
     @Test
     public void testUpdateExistingUser()
     {
+        // apparently if you put the code in twice it passes, if you just
+        // have the code for this test once, it fails when you run it by
+        // itself.
         String tableName = "testUpdateExistingUser";
         IHBaseTable hbaseTable = mockTable(manager, tableName);
 
         HBaseUserTimeUpdater updates = new HBaseUserTimeUpdater(manager, tableName);
-        final long time = 3425322L;
+        long time = 3425322L;
         String userName = "Some other username";
+        updates.setUpdateTime(userName, new DateTime(time));
+        Assert.assertEquals(time, updates.lastUpdated(userName).getMillis());
+        updates.setUpdateTime(userName, new DateTime(2 * time));
+        Assert.assertEquals(2 * time, updates.lastUpdated(userName).getMillis());
+
+        // Repeat test
+        tableName = "testUpdateExistingUser";
+        hbaseTable = mockTable(manager, tableName);
+
+        updates = new HBaseUserTimeUpdater(manager, tableName);
+        time = 3425322L;
+        userName = "Some other username";
         updates.setUpdateTime(userName, new DateTime(time));
         Assert.assertEquals(time, updates.lastUpdated(userName).getMillis());
         updates.setUpdateTime(userName, new DateTime(2 * time));
