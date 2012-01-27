@@ -33,6 +33,15 @@
       <level value="warn" />
     </logger>
 
+    <!-- For FindFolderIterator, only output error and above to the console
+         debug and above still goes to test.log -->
+    <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator"
+            additivity="false">
+      <level value="warn" />
+      <appender-ref ref="logfile" />
+      <appender-ref ref="error-console" />
+    </logger>
+
     <logger name="com.ripariandata.timberwolf.exchange.ExchangePump"
             additivity="false">
       <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
