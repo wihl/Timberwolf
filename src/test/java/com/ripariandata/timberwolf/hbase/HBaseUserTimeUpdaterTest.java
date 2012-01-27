@@ -72,6 +72,7 @@ public class HBaseUserTimeUpdaterTest
         final long time = 3425322L;
         String userName = "Some other username";
         updates.setUpdateTime(userName, new DateTime(time));
+        Assert.assertEquals(time, updates.lastUpdated(userName).getMillis());
         updates.setUpdateTime(userName, new DateTime(2 * time));
         Assert.assertEquals(2 * time, updates.lastUpdated(userName).getMillis());
     }
