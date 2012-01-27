@@ -10,6 +10,14 @@
         </layout>
     </appender>
 
+    <appender name="error-console" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <param name="Threshold" value="error"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p %c{2} - %m%n"/>
+        </layout>
+    </appender>
+
     <appender name="logfile" class="org.apache.log4j.FileAppender">
         <param name="File" value="target/test.log"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -25,28 +33,48 @@
       <level value="warn" />
     </logger>
 
-    <logger name="com.ripariandata.timberwolf.exchange.UserIterator">
-      <level value="error" />
+    <!-- For UserIterator, only output error and above to the console
+         debug and above still goes to test.log -->
+    <logger name="com.ripariandata.timberwolf.exchange.UserIterator"
+            additivity="false">
+      <level value="debug" />
+      <appender-ref ref="logfile" />
+      <appender-ref ref="error-console" />
     </logger>
 
-    <!-- ExchangeService and FindFolderIterator are particularly
-         chatty during the integration test -->
-    <logger name="com.ripariandata.timberwolf.exchange.ExchangeService">
+
+    <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator"
+            additivity="false">
+      <level value="debug" />
+      <appender-ref ref="logfile" />
+    </logger>
+
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangePump"
+            additivity="false">
+      <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
+      <level value="debug" />
+      <appender-ref ref="logfile" />
+      <appender-ref ref="error-console" />
+    </logger>
+
+    <logger name="com.ripariandata.timberwolf.hbase.HBaseManager"
+            additivity="false">
+      <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
+      <level value="debug" />
+      <appender-ref ref="logfile" />
+      <appender-ref ref="error-console" />
+    </logger>
+
+    <!-- Exchange service likes to spit out errors for expected behavior
+         we should fix that, but I'm doing it right now -->
+    <logger name="com.ripariandata.timberwolf.exchange.ExchangeService"
+            additivity="false">
       <!-- set this to trace to see all exchange http traffic -->
-      <level value="trace" />
-    </logger>
-
-    <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator">
-      <level value="fatal" />
-    </logger>
-
-    <logger name="com.ripariandata.timberwolf.exchange.ExchangePump">
-        <!-- Set this to 'trace' to see all test-only Exchange http traffic. -->
-        <level value="fatal" />
-    </logger>
-
-    <logger name="com.ripariandata.timberwolf.hbase.HBaseManager">
-        <level value="error" />
+      <level value="debug" />
+      <appender-ref ref="logfile" />
+      <!-- It would be nice if we could output to the console on unexpected
+           errors, but we can't, so ExchangeService only gets to go to the
+           file. -->
     </logger>
 
     <root>
