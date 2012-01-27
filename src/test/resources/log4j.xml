@@ -33,7 +33,7 @@
          chatty during the integration test -->
     <logger name="com.ripariandata.timberwolf.exchange.ExchangeService">
       <!-- set this to trace to see all exchange http traffic -->
-      <level value="trace" />
+      <level value="fatal" />
     </logger>
 
     <logger name="com.ripariandata.timberwolf.exchange.FindFolderIterator">
