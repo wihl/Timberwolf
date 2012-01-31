@@ -25,17 +25,19 @@ import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseTyp
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
-import static com.ripariandata.timberwolf.Utilities.inputStreamToString;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
+import static com.ripariandata.timberwolf.Utilities.inputStreamToString;
 
 /**
  * ExchangeService handles packing xmlbeans objects into a SOAP envelope,

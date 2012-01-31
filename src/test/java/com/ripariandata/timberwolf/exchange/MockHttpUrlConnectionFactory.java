@@ -24,10 +24,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * An http connection factory that returns mock connections.  These can be used
@@ -65,14 +66,15 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
                 "There was an IO exception while mocking the request.", null);
         }
 
-        LOG.debug("No mocked request matching the given url and data: URL: {}; Data:\n{}", address, new String(request));
+        LOG.debug("No mocked request matching the given url and data: URL: {}; Data:\n{}", address,
+                  new String(request));
         LOG.debug("mocked requests:");
         for (MockRequest mockRequest : requests)
         {
-            LOG.debug("For address:{}; Data:\n{}",mockRequest.url,new String(mockRequest.requestData));
+            LOG.debug("For address:{}; Data:\n{}", mockRequest.url, new String(mockRequest.requestData));
         }
         throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-            "There was no mocked request matching the given url and data.", null);
+                                       "There was no mocked request matching the given url and data.", null);
     }
 
     /**
