@@ -14,7 +14,7 @@ public class FieldSetterTest
     @Test
     public void testSetOneField() throws NoSuchFieldException
     {
-        TypeWithOneField target = new TypeWithOneField() { };
+        TypeWithOneField target = new TypeWithOneField();
         FieldSetter setter = new FieldSetter(target, TypeWithOneField.class.getField("x"));
 
         assertEquals(0, target.x);
@@ -25,7 +25,7 @@ public class FieldSetterTest
         setter.set(0);
         assertEquals(0, target.x);
 
-        TypeWithOneField target2 = new TypeWithOneField() { };
+        TypeWithOneField target2 = new TypeWithOneField();
         FieldSetter setter2 = new FieldSetter(target2, TypeWithOneField.class.getField("x"));
 
         setter2.set(-10);
@@ -41,7 +41,7 @@ public class FieldSetterTest
     @Test
     public void testIllegalFieldAccess() throws NoSuchFieldException
     {
-        TypeWithFinalField target = new TypeWithFinalField() { };
+        TypeWithFinalField target = new TypeWithFinalField();
         FieldSetter setter = new FieldSetter(target, TypeWithFinalField.class.getField("x"));
 
         assertEquals(0, target.x);
@@ -71,7 +71,7 @@ public class FieldSetterTest
     @Test
     public void testSetMultipleFields() throws NoSuchFieldException
     {
-        TypeWithManyFields target = new TypeWithManyFields() { };
+        TypeWithManyFields target = new TypeWithManyFields();
         FieldSetter intSetter = new FieldSetter(target, TypeWithManyFields.class.getField("i"));
         FieldSetter stringSetter = new FieldSetter(target, TypeWithManyFields.class.getField("s"));
         FieldSetter longSetter = new FieldSetter(target, TypeWithManyFields.class.getField("l"));
