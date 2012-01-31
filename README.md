@@ -103,6 +103,6 @@ must have a working instance of HBase test against.
 There is an additional integrated test which also requires a working instance
 of Microsoft Exchange.
 The integration tests require a set of properties that must be set in a
-`testing.properties` file, see `testing.properties.example` or [The online
+`testing.properties` file, see `testing.properties.example` or [the online
 documentation](https://github.com/RiparianData/Timberwolf/wiki/Running-the-tests)
 for more information.
