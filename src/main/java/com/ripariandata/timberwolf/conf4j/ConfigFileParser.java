@@ -4,6 +4,8 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
+import java.io.File;
+
 import java.lang.reflect.Field;
 
 import java.util.Iterator;
@@ -31,6 +33,12 @@ public class ConfigFileParser
 
     public void parseConfigFile(String configFile) throws ConfigFileException
     {
+        File f = new File(configFile);
+        if (!f.exists())
+        {
+            throw new ConfigFileMissingException(configFile);
+        }
+
         Configuration config;
         try
         {

@@ -19,6 +19,7 @@ package com.ripariandata.timberwolf;
 
 import com.ripariandata.timberwolf.conf4j.ConfigEntry;
 import com.ripariandata.timberwolf.conf4j.ConfigFileException;
+import com.ripariandata.timberwolf.conf4j.ConfigFileMissingException;
 import com.ripariandata.timberwolf.conf4j.ConfigFileParser;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangeRuntimeException;
@@ -124,9 +125,26 @@ final class App implements PrivilegedAction<Integer>
     {
         ConfigFileParser configParser = new ConfigFileParser(this);
         //CmdLineParser parser = new CmdLineParser(this);
+
         try
         {
             configParser.parseConfigFile(DEFAULT_CONFIG_LOCATION);
+        }
+        catch (ConfigFileMissingException _)
+        {
+            // Do nothing.  In the absence of a config file, we assume that all
+            // the arguments will be provided on the command line.  If they
+            // aren't, _then_ we'll fail and exit.
+        }
+        catch (ConfigFileException e)
+        {
+            System.err.println(e.getMessage());
+            // TODO: print a usage info for the config file?
+            System.exit(1);
+        }
+
+        try
+        {
             //parser.parseArgument(args);
 
             if (help)
@@ -161,11 +179,7 @@ final class App implements PrivilegedAction<Integer>
 
             Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
         }
-        catch (ConfigFileException e)
-        {
-            System.err.println(e.getMessage());
-            // TODO: print a usage info for the config file?
-        }
+
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
