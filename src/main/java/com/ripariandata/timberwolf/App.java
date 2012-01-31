@@ -17,6 +17,9 @@
  */
 package com.ripariandata.timberwolf;
 
+import com.ripariandata.timberwolf.conf4j.ConfigEntry;
+import com.ripariandata.timberwolf.conf4j.ConfigFileException;
+import com.ripariandata.timberwolf.conf4j.ConfigFileParser;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangeRuntimeException;
 import com.ripariandata.timberwolf.exchange.HttpErrorException;
@@ -49,8 +52,9 @@ import org.slf4j.LoggerFactory;
 final class App implements PrivilegedAction<Integer>
 {
     private static final String CONFIGURATION_ENTRY = "Timberwolf";
-
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
+    private static final String DEFAULT_CONFIG_LOCATION = "/etc/timberwolf.properties";
+
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
@@ -60,36 +64,44 @@ final class App implements PrivilegedAction<Integer>
 
     // @Option(required = true, name = "--domain",
     //         usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    @ConfigEntry(name = "domain")
     private String domain;
 
     // @Option(required = true, name = "--exchange-url",
     //         usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
     //                 + "https://example.com/ews/exchange.asmx")
+    @ConfigEntry(name = "exchange.url")
     private String exchangeUrl;
 
     // @Option(name = "--hbase-quorum",
     //         usage = "The ZooKeeper quorum used to connect to HBase.")
+    @ConfigEntry(name = "hbase.quorum")
     private String hbaseQuorum;
 
     // @Option(name = "--hbase-clientport",
     //         usage = "The ZooKeeper client port used to connect to HBase.")
+    @ConfigEntry(name = "hbase.clientport")
     private String hbaseclientPort;
 
     // @Option(name = "--hbase-table",
     //         usage = "The HBase table name that email data will be imported into.")
+    @ConfigEntry(name = "hbase.table")
     private String hbaseTableName;
 
     // @Option(name = "--hbase-metadata-table",
     //         usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
     //               + "email for each user.")
+    @ConfigEntry(name = "hbase.metadatatable")
     private String hbaseMetadataTableName;
 
     // @Option(name = "--hbase-key-header.",
     //         usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
+    @ConfigEntry(name = "hbase.key.header")
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
     // @Option(name = "--hbase-column-family.",
     //         usage = "The column family for the imported email data.  Default family is 'h'.")
+    @ConfigEntry(name = "hbase.column.family")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
@@ -110,9 +122,11 @@ final class App implements PrivilegedAction<Integer>
 
     private void beginEverything(final String[] args) throws IOException
     {
+        ConfigFileParser configParser = new ConfigFileParser(this);
         //CmdLineParser parser = new CmdLineParser(this);
         try
         {
+            configParser.parseConfigFile(DEFAULT_CONFIG_LOCATION);
             //parser.parseArgument(args);
 
             if (help)
@@ -146,6 +160,11 @@ final class App implements PrivilegedAction<Integer>
             useHBase = allHBaseArgs;
 
             Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
+        }
+        catch (ConfigFileException e)
+        {
+            System.err.println(e.getMessage());
+            // TODO: print a usage info for the config file?
         }
         catch (CmdLineException e)
         {
