@@ -46,7 +46,7 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         {
             for (MockRequest mockRequest : requests)
             {
-                if (mockRequest.url == address && Arrays.equals(mockRequest.requestData, request))
+                if (mockRequest.url.equals(address) && Arrays.equals(mockRequest.requestData, request))
                 {
                     HttpURLConnection mockConn = mock(HttpURLConnection.class);
                     when(mockConn.getResponseCode()).thenReturn(mockRequest.code);
