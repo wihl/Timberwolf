@@ -22,7 +22,7 @@ The final Timberwolf distribution artifacts will be in $project/target/.
 
 contact@ripariandata.com
 
-## Bug and Issue tracker.
+## Bug and Issue tracker
 
 All bugs and features are reported and tracked at:
 <https://ripariandata.atlassian.net>
@@ -37,11 +37,11 @@ means you will be required to supply a login configuration entry labeled
 
 We supply a sample_jaas.config file which contains a very basic Kerberos
 authentication configuration which may be suitable in your case. You can
-specify it either through the following Java commandline option:
+specify it either through the following Java command-line option:
 
-    -Djava.security.auth.login.config==sample_jaas.config
+    -Djava.security.auth.login.config=sample_jaas.config
 
-(note, this is a command line option to Java, not to the Timberwolf jar)
+(note, this is a command line option to Java, not to the Timberwolf JAR)
 
 ...or you can copy the Timberwolf entry in that file into ~/.java.login.config
 where Java will detect it automatically.
@@ -99,7 +99,7 @@ Before submitting a pull request for approval, you should run the tests with `mv
 
 There are a number of integrated tests that you can also run if you'd like,
 but they are ignored by default. In order to run the integrated tests, you
-must have a working instance of HBase test against.
+must have a working instance of HBase to test against.
 There is an additional integrated test which also requires a working instance
 of Microsoft Exchange.
 The integration tests require a set of properties that must be set in a
