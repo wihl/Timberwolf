@@ -97,8 +97,8 @@ public class ExchangeServiceTest
                 + "</m:ResponseMessages>\n"
                 + "</m:FindItemResponse>";
     private static final String SYNC_FOLDER_ITEMS_REQUEST =
-            "<SyncFolderItems xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n"
-            + "                 xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
+            "<SyncFolderItems xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+            + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
             + "    <ItemShape>\n"
             + "        <t:BaseShape>IdOnly</t:BaseShape>\n"
             + "    </ItemShape>\n"
@@ -115,8 +115,8 @@ public class ExchangeServiceTest
             + "    <MaxChangesReturned>512</MaxChangesReturned>\n"
             + "</SyncFolderItems>";
     private static final String SYNC_FOLDER_ITEMS_RESPONSE =
-            "<m:SyncFolderItemsResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n"
-            + "                           xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
+            "<m:SyncFolderItemsResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+            + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
             + "    <m:ResponseMessages>\n"
             + "        <m:SyncFolderItemsResponseMessage ResponseClass=\"Success\">\n"
             + "            <m:ResponseCode>NoError</m:ResponseCode>\n"
