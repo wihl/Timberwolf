@@ -64,13 +64,11 @@ public final class SyncFolderItemsHelper
      * @param exchangeService The actual service to use when requesting ids.
      * @param config The configuration for this instance of Timberwolf.
      * @param folder The folder to sync.
-     * @param syncState The state, the last time the given folder was synced. This may be null.
      * @return The SyncFolderItems result return from Exchange.
      */
     public static Vector<String> syncFolderItems(final ExchangeService exchangeService,
                                                  final Configuration config,
-                                                 final FolderContext folder,
-                                                 final String syncState)
+                                                 final FolderContext folder)
     {
         return syncFolderItems(exchangeService, getSyncFolderItemsRequest(config, folder), folder.getUser());
     }
