@@ -97,7 +97,7 @@ additions conform to the coding convention.
 
 Before submitting a pull request for approval, you should run the tests with `mvn test`.
 
-There are a number of integrated tests that you can also run if you'd like,
+There are a number of integrated tests that you can also run, if you'd like,
 but they are ignored by default. In order to run the integrated tests, you
 must have a working instance of HBase to test against.
 There is an additional integrated test which also requires a working instance

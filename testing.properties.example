@@ -38,7 +38,7 @@
 ## These users will create a bunch of folders and send a bunch of
 ## emails amongst themselves and put them in said folders.
 ## When the test ends wipe out the contents of their mailboxes.
-## I repeat at the end of the test these users loose ALL their
+## I repeat at the end of the test these users lose ALL their
 ## emails. DO NOT use real users here.
 
 ## Instructions for how to set up the users is available online:
