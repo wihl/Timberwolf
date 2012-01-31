@@ -48,6 +48,8 @@
     <xs:choice maxOccurs="1">
       <xs:element ref="m:FindItem" />
       <xs:element ref="m:FindItemResponse" />
+      <xs:element ref="m:SyncFolderItems" />
+      <xs:element ref="m:SyncFolderItemsResponse" />
       <xs:element ref="m:GetItem" />
       <xs:element ref="m:GetItemResponse" />
       <xs:element ref="m:FindFolder" />

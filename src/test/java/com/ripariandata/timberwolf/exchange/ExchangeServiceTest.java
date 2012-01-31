@@ -26,6 +26,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsDocument;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.ExchangeImpersonationType;
 
 import java.io.ByteArrayInputStream;
@@ -93,6 +96,58 @@ public class ExchangeServiceTest
                 + "   </m:FindItemResponseMessage>\n"
                 + "</m:ResponseMessages>\n"
                 + "</m:FindItemResponse>";
+    private static final String SYNC_FOLDER_ITEMS_REQUEST =
+            "<SyncFolderItems xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n"
+            + "                 xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
+            + "    <ItemShape>\n"
+            + "        <t:BaseShape>IdOnly</t:BaseShape>\n"
+            + "    </ItemShape>\n"
+            + "    <SyncFolderId>\n"
+            + "        <t:DistinguishedFolderId Id=\"inbox\"/>\n"
+            + "    </SyncFolderId>\n"
+            + "    <SyncState>H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcplVmV"
+            + "dZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In6NX+PX+TXoOfjF+w+P9+/d3znePnlwfLC9f3x"
+            + "yb/vJyZOT7Wd7Tw5Onjx49vD+/Z1f8t3X49fXy+nrNmvzk2yZ1de/xqP3f/NZVc7y+mz2azx8/3d/Mq+bolr+Gofv/+p36f/1IqvfypC"
+            + "TX+PX+C3oa0WmzRcNWv4avzl9tUP/H6NNeefx7/Rn/sLH3/77f/Vf/Wf9u7/p3/cv/Zq/xq/6i/7x3/rR7/4vfPG33Hv6F/2qP+zxf4R"
+            + "GP/1v/xq/xq/5a/wmv8avhVd+/V/j1/jV9OOL45dnXxy/wCe/xrP7z37y16afL+n/xa/hnn+N/v87en//3Z2/h5671WfPirpp0y/ri2x"
+            + "Z/CBriSJ3q/Vnp++m82x5kafHs0WxLJq2pq8u8/Tzulqv0q1nv8/TsydffvvZ3r3XL58+f3Pn7nT52at8WqyKfNk2+OtJNZkUefp75XU"
+            + "9fZD3BvvrUufl21e//e/wMv7V4slvn75kMvw/e+VtAVcCAAA=</SyncState>\n"
+            + "    <MaxChangesReturned>512</MaxChangesReturned>\n"
+            + "</SyncFolderItems>";
+    private static final String SYNC_FOLDER_ITEMS_RESPONSE =
+            "<m:SyncFolderItemsResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\"\n"
+            + "                           xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
+            + "    <m:ResponseMessages>\n"
+            + "        <m:SyncFolderItemsResponseMessage ResponseClass=\"Success\">\n"
+            + "            <m:ResponseCode>NoError</m:ResponseCode>\n"
+            + "          <m:SyncState>H4sIAAAAAAAEAO29B2AcSZYlJi9tynt/SvVK1+B0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcplVmV"
+            + "dZhZAzO2dvPfee++999577733ujudTif33/8/XGZkAWz2zkrayZ4hgKrIHz9+fB8/In6NX+PX+TXoOfjF+w+P9+/d3znePnlwfLC9f3x"
+            + "yb/vJyZOT7Wd7Tw5Onjx49vD+/Z1f8t3X49fXy+nrNmvzk2yZ1de/xqP3f/NZVc7y+mz2azx8/3d/Mq+bolr+Gofv/+p36f/1IqvfypC"
+            + "TX+PX+C3oa0WmzRcNWv4avzl9tUP/H6NNeefx7/Rn/sLH3/77f/Vf/Wf9u7/p3/cv/Zq/xq/6i/7x3/rR7/4vfPG33Hv6F/2qP+zxf4R"
+            + "GP/1v/xq/xq/5a/wmv8avhVd+/V/j1/iDfs1f49f44vjl2RfHL+jzX+PX+G3p/9/rvkhvlW9/+1/z2f1nP/lr0/f/I/2/+DXc85b+/wu"
+            + "8v1/S/39H7++hp9vNr0uflW9f/fa/08v4V4snv3365Hf/zV7+Gr/P07MnX3772d691y+fPn9z5+50+dmrfFqsinzZNvjrSTWZFHn6e+V"
+            + "1PX2QD3b0O2zo6OWvcbf67FlRN236ZX2RLYsfZC1N5t1q/dnpu+k8W17k6fFsUSyLpq3pq8s8/byu1qt069n7oocp/n8A8Vl5ttwCAAA"
+            + "=</m:SyncState>"
+            + "            <m:IncludesLastItemInRange>false</m:IncludesLastItemInRange>\n"
+            + "            <m:Changes>\n"
+            + "                <t:Create>\n"
+            + "                    <t:Message>\n"
+            + "                        <t:ItemId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ARgAAAAAAbCk8HJcmPEi9+6mY2w+80"
+            + "AcA+aDFFTolzk2yM0Sg+YQ84AAAAGxq2QAA+aDFFTolzk2yM0Sg+YQ84AAAAGxrGQAA\"\n"
+            + "                                  ChangeKey=\"CQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbG0Z\"/>\n"
+            + "                    </t:Message>\n"
+            + "                </t:Create>\n"
+            + "                <t:Create>\n"
+            + "                    <t:Message>\n"
+            + "                        <t:ItemId Id=\"AAAWAGJrZXJyQGludC50YXJ0YXJ1cy5jb20ARgAAAAAAbCk8HJcmPEi9+6mY2w+80"
+            + "AcA+aDFFTolzk2yM0Sg+YQ84AAAAGxq2QAA+aDFFTolzk2yM0Sg+YQ84AAAAGxrGgAA\"\n"
+            + "                                  ChangeKey=\"CQAAABYAAAD5oMUVOiXOTbIzRKD5hDzgAAAAbG0f\"/>\n"
+            + "                    </t:Message>\n"
+            + "                </t:Create>\n"
+            + "            </m:Changes>\n"
+            + "        </m:SyncFolderItemsResponseMessage>\n"
+            + "    </m:ResponseMessages>\n"
+            + "</m:SyncFolderItemsResponse>";
     private static final String GET_ITEM_REQUEST =
         "<GetItem"
                 + " xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\""
@@ -248,6 +303,26 @@ public class ExchangeServiceTest
 
         FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(FIND_ITEM_RESPONSE))
                                         .getEnvelope().getBody().getFindItemResponse();
+
+        assertEquals(expected.xmlText(), response.xmlText());
+    }
+
+    @Test
+    public void testSyncFolderItems()
+            throws XmlException, ServiceCallException, IOException, HttpErrorException
+    {
+        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
+        factory.forRequest(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))
+               .respondWith(HttpURLConnection.HTTP_OK, soap(SYNC_FOLDER_ITEMS_RESPONSE).getBytes("UTF-8"));
+
+        SyncFolderItemsType
+                syncRequest = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
+
+        ExchangeService service = new ExchangeService(URL, factory);
+        SyncFolderItemsResponseType response = service.syncFolderItems(syncRequest, "bkerr");
+
+        SyncFolderItemsResponseType expected = EnvelopeDocument.Factory.parse(soap(SYNC_FOLDER_ITEMS_RESPONSE))
+                                                                .getEnvelope().getBody().getSyncFolderItemsResponse();
 
         assertEquals(expected.xmlText(), response.xmlText());
     }
