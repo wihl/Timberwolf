@@ -22,7 +22,7 @@ The final Timberwolf distribution artifacts will be in $project/target/.
 
 contact@ripariandata.com
 
-## Bug and Issue tracker.
+## Bug and Issue tracker
 
 All bugs and features are reported and tracked at:
 <https://ripariandata.atlassian.net>
@@ -37,11 +37,11 @@ means you will be required to supply a login configuration entry labeled
 
 We supply a sample_jaas.config file which contains a very basic Kerberos
 authentication configuration which may be suitable in your case. You can
-specify it either through the following Java commandline option:
+specify it either through the following Java command-line option:
 
-    -Djava.security.auth.login.config==sample_jaas.config
+    -Djava.security.auth.login.config=sample_jaas.config
 
-(note, this is a command line option to Java, not to the Timberwolf jar)
+(note, this is a command line option to Java, not to the Timberwolf JAR)
 
 ...or you can copy the Timberwolf entry in that file into ~/.java.login.config
 where Java will detect it automatically.
@@ -97,29 +97,12 @@ additions conform to the coding convention.
 
 Before submitting a pull request for approval, you should run the tests with `mvn test`.
 
-There are a number of integrated tests that you can also run if you'd like,
+There are a number of integrated tests that you can also run, if you'd like,
 but they are ignored by default. In order to run the integrated tests, you
-must have a working instance of HBase test against. And then you must
-create the file {project}/testing.properties that specifies the following
-properties:
-
-* *ZooKeeperQuorum*
-* *ZooKeeperClientPort*
-
-There are additional integrated tests which also require a working instance of
-Microsoft Exchange. Those tests will require these additional properties:
-
-* *ExchangeURI*
-* *LdapDomain*
-* *LdapConfigEntry*
-
-"testing.properties.example" is a sample file you can use to get you started.
-It also contains information about what each property means. Just rename the
-properties appropriately and rename the file to
-"testing.properties". All of these properties directly correspond to command
-line arguments that Timberwolf accepts (except for LdapConfigEntry).
-
-Timberwolf runs integrated tests by creating a temporary table in HBase to
-test against and then deleting it once the tests are complete. The tests will
-not remove any existing data from HBase, nor will they leave any testing data
-behind.
+must have a working instance of HBase to test against.
+There is an additional integrated test which also requires a working instance
+of Microsoft Exchange.
+The integration tests require a set of properties that must be set in a
+`testing.properties` file, see `testing.properties.example` or [the online
+documentation](https://github.com/RiparianData/Timberwolf/wiki/Running-the-tests)
+for more information.

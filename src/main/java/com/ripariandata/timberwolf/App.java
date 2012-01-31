@@ -29,6 +29,7 @@ import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import java.net.HttpURLConnection;
 import java.security.PrivilegedAction;
@@ -53,13 +54,17 @@ final class App implements PrivilegedAction<Integer>
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
+    @Option(name = "-h", aliases = { "--help" },
+            usage = "Show this help text.")
+    private boolean help;
+
     @Option(required = true, name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
     private String domain;
 
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
-                    + "https://example.contoso.com/ews/exchange.asmx")
+                    + "https://example.com/ews/exchange.asmx")
     private String exchangeUrl;
 
     @Option(name = "--hbase-quorum",
@@ -91,6 +96,13 @@ final class App implements PrivilegedAction<Integer>
     {
     }
 
+    private static void printUsage(PrintStream output, CmdLineParser parser)
+    {
+        output.println("java -jar timberwolf.jar [options...] arguments...");
+        parser.printUsage(output);
+        output.println();
+    }
+
     public static void main(final String[] args) throws IOException
     {
         new App().beginEverything(args);
@@ -102,6 +114,12 @@ final class App implements PrivilegedAction<Integer>
         try
         {
             parser.parseArgument(args);
+
+            if (help)
+            {
+                printUsage(System.out, parser);
+                System.exit(0);
+            }
 
             LOG.debug("Timberwolf invoked with the following arguments:");
             LOG.debug("Domain: {}", domain);
@@ -132,9 +150,7 @@ final class App implements PrivilegedAction<Integer>
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            System.err.println("java timberwolf [options...] arguments...");
-            parser.printUsage(System.err);
-            System.err.println();
+            printUsage(System.err, parser);
         }
         catch (LoginException e)
         {
