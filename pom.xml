@@ -125,6 +125,38 @@
           <schemaDirectory>src/main/resources/xsd</schemaDirectory>
         </configuration>
       </plugin>
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>2.0.1</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>rpm</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <copyright>Apache v2</copyright>
+              <group>Applications/Databases</group>
+              <defineStatements>
+                  <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+              </defineStatements>
+              <mappings>
+                  <mapping>
+                      <directory>/tmp</directory>
+                      <filemode>644</filemode>
+                      <username>timberwolf</username>
+                      <groupname>timberwolf</groupname>
+                      <sources>
+                          <source>
+                              <location>target/timberwolf-${version}-jar-with-dependencies.jar</location>
+                          </source>
+                      </sources>
+                  </mapping>
+              </mappings>
+          </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
