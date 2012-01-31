@@ -64,7 +64,7 @@ final class App implements PrivilegedAction<Integer>
 
     @Option(required = true, name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
-                    + "https://example.contoso.com/ews/exchange.asmx")
+                    + "https://example.com/ews/exchange.asmx")
     private String exchangeUrl;
 
     @Option(name = "--hbase-quorum",
