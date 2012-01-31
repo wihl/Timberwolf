@@ -53,7 +53,7 @@ final class App implements PrivilegedAction<Integer>
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
-    @Option(name = "--domain",
+    @Option(required = true, name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
     private String domain;
 
