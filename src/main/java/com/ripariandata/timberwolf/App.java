@@ -54,42 +54,42 @@ final class App implements PrivilegedAction<Integer>
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
-    @Option(name = "-h", aliases = { "--help" },
-            usage = "Show this help text.")
+    // @Option(name = "-h", aliases = { "--help" },
+    //         usage = "Show this help text.")
     private boolean help;
 
-    @Option(required = true, name = "--domain",
-            usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    // @Option(required = true, name = "--domain",
+    //         usage = "The domain you wish to crawl. Users of this domain will be imported.")
     private String domain;
 
-    @Option(required = true, name = "--exchange-url",
-            usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
-                    + "https://example.com/ews/exchange.asmx")
+    // @Option(required = true, name = "--exchange-url",
+    //         usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+    //                 + "https://example.com/ews/exchange.asmx")
     private String exchangeUrl;
 
-    @Option(name = "--hbase-quorum",
-            usage = "The ZooKeeper quorum used to connect to HBase.")
+    // @Option(name = "--hbase-quorum",
+    //         usage = "The ZooKeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
-    @Option(name = "--hbase-clientport",
-            usage = "The ZooKeeper client port used to connect to HBase.")
+    // @Option(name = "--hbase-clientport",
+    //         usage = "The ZooKeeper client port used to connect to HBase.")
     private String hbaseclientPort;
 
-    @Option(name = "--hbase-table",
-            usage = "The HBase table name that email data will be imported into.")
+    // @Option(name = "--hbase-table",
+    //         usage = "The HBase table name that email data will be imported into.")
     private String hbaseTableName;
 
-    @Option(name = "--hbase-metadata-table",
-            usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
-                  + "email for each user.")
+    // @Option(name = "--hbase-metadata-table",
+    //         usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
+    //               + "email for each user.")
     private String hbaseMetadataTableName;
 
-    @Option(name = "--hbase-key-header.",
-            usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
+    // @Option(name = "--hbase-key-header.",
+    //         usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
-    @Option(name = "--hbase-column-family.",
-            usage = "The column family for the imported email data.  Default family is 'h'.")
+    // @Option(name = "--hbase-column-family.",
+    //         usage = "The column family for the imported email data.  Default family is 'h'.")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
@@ -110,14 +110,14 @@ final class App implements PrivilegedAction<Integer>
 
     private void beginEverything(final String[] args) throws IOException
     {
-        CmdLineParser parser = new CmdLineParser(this);
+        //CmdLineParser parser = new CmdLineParser(this);
         try
         {
-            parser.parseArgument(args);
+            //parser.parseArgument(args);
 
             if (help)
             {
-                printUsage(System.out, parser);
+                //printUsage(System.out, parser);
                 System.exit(0);
             }
 
@@ -139,7 +139,7 @@ final class App implements PrivilegedAction<Integer>
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
-                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                throw new CmdLineException(/*parser*/null, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
                                            + "Table Name must all be specified if at least one is specified");
             }
 
@@ -150,7 +150,7 @@ final class App implements PrivilegedAction<Integer>
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            printUsage(System.err, parser);
+            //printUsage(System.err, parser);
         }
         catch (LoginException e)
         {
