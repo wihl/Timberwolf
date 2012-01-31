@@ -21,6 +21,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
+import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
 
 /**
  * FolderContext class holds information about where a service call should be looking for
@@ -34,24 +35,38 @@ public class FolderContext
     private final String stringFolder;
     private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
     private final String user;
+    private String syncStateToken;
 
     private FolderContext(final String folder, final DistinguishedFolderIdNameType.Enum distinguishedFolder,
-                          final String targetUser)
+                          final String targetUser, final String syncState)
     {
         stringFolder = folder;
         distinguishedFolderId = distinguishedFolder;
         user = targetUser;
+        syncStateToken = syncState;
     }
 
     public FolderContext(final String folder, final String targetUser)
     {
-        this(folder, null, targetUser);
+        this(folder, null, targetUser, null);
     }
 
     public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser)
     {
-        this(null, distinguishedFolder, targetUser);
+        this(null, distinguishedFolder, targetUser, null);
     }
+
+    public FolderContext(final String folder, final String targetUser, final String syncState)
+    {
+        this(folder, null, targetUser, syncState);
+    }
+
+    public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser,
+                         final String syncState)
+    {
+        this(null, distinguishedFolder, targetUser, syncState);
+    }
+
 
     public NonEmptyArrayOfBaseFolderIdsType getFolderIds()
     {
@@ -74,5 +89,34 @@ public class FolderContext
     public String getUser()
     {
         return user;
+    }
+
+    /**
+     * Returns the sync token that should be used when syncing this folder.
+     *
+     * @return The sync token, or the empty string if there is no token.
+     */
+    public String getSyncStateToken()
+    {
+        return syncStateToken == null ? "" : syncStateToken;
+    }
+
+    /**
+     * Returns the target folder to be sent to exchange for this folder
+     * context.
+     * @return A TargetFolderIdType containing this folder context.
+     */
+    public TargetFolderIdType getTargetFolder()
+    {
+        TargetFolderIdType targetFolderId = TargetFolderIdType.Factory.newInstance();
+        if (stringFolder != null)
+        {
+            targetFolderId.addNewFolderId().setId(stringFolder);
+        }
+        else
+        {
+            targetFolderId.addNewDistinguishedFolderId().setId(distinguishedFolderId);
+        }
+        return targetFolderId;
     }
 }

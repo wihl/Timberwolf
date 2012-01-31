@@ -18,20 +18,22 @@
 package com.ripariandata.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
+import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Contains helper methods for SyncFolderItems requests.
- */
+/** Contains helper methods for SyncFolderItems requests. */
 public final class SyncFolderItemsHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(SyncFolderItemsHelper.class);
-
     /**
-     * Enforces not being able to create an instance.
+     * If you try to request a number of changes greater than this, exchange
+     * faults.
      */
+    private static final int MAX_SYNC_COUNT = 512;
+
+    /** Enforces not being able to create an instance. */
     private SyncFolderItemsHelper()
     {
 
@@ -40,44 +42,50 @@ public final class SyncFolderItemsHelper
     /**
      * Creates a SyncFolderItemsType to request all the new items under the
      * given folder context.
+     *
      * @param config The configuration for this instance of Timberwolf.
      * @param folder The current folder being searched.
-     * @param syncState The sync state from the last time SyncFolderItems was
-     * requested. This can be null.
      * @return The SyncFolderItemsType necessary to request new items from
-     * the given folder since the given sync state.
+     *         the given folder since the given sync state.
      */
-    public SyncFolderItemsType getSyncFolderItemsRequest(final Configuration config, final FolderContext folder,
-                                                         final String syncState)
+    public static SyncFolderItemsType getSyncFolderItemsRequest(final Configuration config, final FolderContext folder)
     {
-        return null;
+        SyncFolderItemsType syncFolderItems = SyncFolderItemsType.Factory.newInstance();
+        syncFolderItems.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
+        syncFolderItems.setSyncFolderId(folder.getTargetFolder());
+        syncFolderItems.setSyncState(folder.getSyncStateToken());
+        syncFolderItems.setMaxChangesReturned(Math.min(MAX_SYNC_COUNT, config.getFindItemPageSize()));
+        return syncFolderItems;
     }
 
     /**
      * Gets a list of all the new ids for the given folder of the current user.
+     *
      * @param exchangeService The actual service to use when requesting ids.
      * @param config The configuration for this instance of Timberwolf.
      * @param folder The folder to sync.
      * @param syncState The state, the last time the given folder was synced. This may be null.
      * @return The SyncFolderItems result return from Exchange.
      */
-    public Vector<String> syncFolderItems(final ExchangeService exchangeService,
-                                          final Configuration config,
-                                          final FolderContext folder,
-                                          final String syncState)
+    public static Vector<String> syncFolderItems(final ExchangeService exchangeService,
+                                                 final Configuration config,
+                                                 final FolderContext folder,
+                                                 final String syncState)
     {
-        return syncFolderItems(exchangeService,  getSyncFolderItemsRequest(config, folder, syncState), folder.getUser());
+        return syncFolderItems(exchangeService, getSyncFolderItemsRequest(config, folder), folder.getUser());
     }
 
     /**
      * Gets a list of all the new ids for the given folder of the current user.
+     *
      * @param exchangeService The actual service to use when requesting ids.
      * @param syncFolderItemsRequest The request to send to exchange.
      * @param targetUser The user to impersonate for this request.
      * @return The SyncFolderItems result return from Exchange.
      */
-    private Vector<String> syncFolderItems(final ExchangeService exchangeService,
-                                           final SyncFolderItemsType syncFolderItemsRequest, final String targetUser)
+    private static Vector<String> syncFolderItems(final ExchangeService exchangeService,
+                                                  final SyncFolderItemsType syncFolderItemsRequest,
+                                                  final String targetUser)
     {
         return null;
     }
