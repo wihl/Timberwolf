@@ -185,5 +185,46 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
 
+    @Test
+    public void testNoMessages()
+    {
+
+    }
+
+    @Test
+    public void testErrorResponseCode()
+    {
+
+    }
+
+    @Test
+    public void testUnsetIncludesLastItemInRange()
+    {
+
+    }
+
+    @Test
+    public void testUnsetSyncState()
+    {
+
+    }
+
+    @Test
+    public void testNoChanges()
+    {
+
+    }
+
+    @Test
+    public void testUnsetItem()
+    {
+
+    }
+
+    @Test
+    public void testUnsetItemId()
+    {
+
+    }
 
 }
