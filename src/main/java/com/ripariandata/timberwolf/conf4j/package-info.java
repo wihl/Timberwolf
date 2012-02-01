@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 /**
- *  This package handles managing the connection to an Exchange instance,
- *  as well as associated functions for mailbox item retrieval.
+ *  This package handles parsing configuration files.
  */
 package com.ripariandata.timberwolf.conf4j;

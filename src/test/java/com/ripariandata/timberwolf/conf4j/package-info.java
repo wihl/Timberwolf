@@ -15,8 +15,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- *  This package handles managing the connection to an Exchange instance,
- *  as well as associated functions for mailbox item retrieval.
- */
 package com.ripariandata.timberwolf.conf4j;
