@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +36,8 @@ import static org.mockito.Mockito.when;
  */
 public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MockHttpUrlConnectionFactory.class);
     private List<MockRequest> requests = new ArrayList<MockRequest>();
 
     public MockRequest forRequest(final String address, final byte[] request)
@@ -46,7 +51,7 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
         {
             for (MockRequest mockRequest : requests)
             {
-                if (mockRequest.url == address && Arrays.equals(mockRequest.requestData, request))
+                if (mockRequest.url.equals(address) && Arrays.equals(mockRequest.requestData, request))
                 {
                     HttpURLConnection mockConn = mock(HttpURLConnection.class);
                     when(mockConn.getResponseCode()).thenReturn(mockRequest.code);
@@ -61,8 +66,15 @@ public class MockHttpUrlConnectionFactory implements HttpUrlConnectionFactory
                 "There was an IO exception while mocking the request.", null);
         }
 
+        LOG.debug("No mocked request matching the given url and data: URL: {}; Data:\n{}", address,
+                  new String(request));
+        LOG.debug("mocked requests:");
+        for (MockRequest mockRequest : requests)
+        {
+            LOG.debug("For address:{}; Data:\n{}", mockRequest.url, new String(mockRequest.requestData));
+        }
         throw new ServiceCallException(ServiceCallException.Reason.OTHER,
-            "There was no mocked request matching the given url and data.", null);
+                                       "There was no mocked request matching the given url and data.", null);
     }
 
     /**

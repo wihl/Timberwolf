@@ -96,7 +96,7 @@ final class App implements PrivilegedAction<Integer>
     {
     }
 
-    private static void printUsage(PrintStream output, CmdLineParser parser)
+    private static void printUsage(final PrintStream output, final CmdLineParser parser)
     {
         output.println("java -jar timberwolf.jar [options...] arguments...");
         parser.printUsage(output);
