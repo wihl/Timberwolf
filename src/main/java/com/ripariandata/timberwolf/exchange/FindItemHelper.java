@@ -66,9 +66,7 @@ public final class FindItemHelper
      * given configuration. This limits the scope of the
      * search to the folder specified in the configuration.
      *
-     * @param folderId the folder from which to get ids
      * @param offset the number of entries to start from
-     * @param maxEntries the maximum number of ids to grab with this request
      * @return the FindItemType necessary to request the ids
      */
     static FindItemType getFindItemsRequest(final Configuration config, final FolderContext folder, final int offset)
