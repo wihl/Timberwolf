@@ -142,4 +142,27 @@ public class FieldSetterTest
         assertEquals("Jackdaws", target.s());
         assertEquals(500L, target.l());
     }
+
+    @Test
+    public void testSetWrongType() throws NoSuchFieldException
+    {
+        TypeWithOneField target = new TypeWithOneField();
+        FieldSetter setter = new FieldSetter(target, TypeWithOneField.class.getDeclaredField("x"));
+
+        try
+        {
+            setter.set("String");
+            fail("Setting an int field to a string should have thrown an exception.");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // The test is done here, but checkstyle doesn't like empty blocks.
+            assertEquals(true, true);
+        }
+        catch (Exception e)
+        {
+            fail("Wrong exception thrown: " + e.getMessage());
+        }
+
+    }
 }

@@ -39,6 +39,8 @@ public class FieldSetter
      *
      * @throws IllegalAccessException If the field cannot be assigned to, e.g.,
      *                                it is declared <tt>static</tt> and <tt>final</tt>.
+     * @throws IllegalArgumentException If the target field's type is not compatible
+     *                                  with <tt>value</tt>'s type.
      */
     public void set(final Object value)
     {
