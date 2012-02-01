@@ -7,6 +7,7 @@
 <!-- At the moment, this schema only supports a subset of the methods defined
      by EWS.  The operations this schema supports are:
         - FindItem request and response
+        - SyncFolderItems request and response
         - GetItem request and response
         - FindFolder request and response
 -->
