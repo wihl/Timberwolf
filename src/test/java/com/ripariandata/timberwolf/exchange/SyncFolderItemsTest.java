@@ -29,6 +29,7 @@ import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFol
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import static org.mockito.Matchers.eq;
@@ -151,6 +152,36 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(ids, result.getIds());
         assertTrue(result.includesLastItem());
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+    }
+
+    @Test
+    public void testSyncFolderItemsRespond0WithMore() throws ServiceCallException, HttpErrorException
+    {
+        String[] ids = new String[0];
+        final String myNewSyncState = "MyNewSyncState";
+        mockSyncFolderItems(ids, getDefaultFolder(),
+                            getDefaultConfig().getFindItemPageSize(), myNewSyncState, false);
+        SyncFolderItemsResult result = SyncFolderItemsHelper
+                .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        assertEquals(0, result.getIds().size());
+        assertFalse(result.includesLastItem());
+        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
+    }
+
+    @Test
+    public void testSyncFolderItems100WithMore() throws ServiceCallException, HttpErrorException
+    {
+        final int count = 100;
+        List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        mockSyncFolderItems(ids.toArray(new String[ids.size()]), getDefaultFolder(),
+                            getDefaultConfig().getFindItemPageSize(), newSyncState, false);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        assertEquals(ids, result.getIds());
+        assertFalse(result.includesLastItem());
         assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
 

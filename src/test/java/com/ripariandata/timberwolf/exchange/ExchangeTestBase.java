@@ -194,6 +194,16 @@ public class ExchangeTestBase
                                        final String newSyncState)
             throws ServiceCallException, HttpErrorException
     {
+        mockSyncFolderItems(ids, folder, maxIds, newSyncState, true);
+    }
+
+    protected void mockSyncFolderItems(final String[] ids,
+                                       final FolderContext folder,
+                                       final int maxIds,
+                                       final String newSyncState,
+                                       final boolean includesLastItemInRange)
+            throws ServiceCallException, HttpErrorException
+    {
         Configuration config = new Configuration(maxIds, 0);
         SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folder);
 
@@ -209,7 +219,7 @@ public class ExchangeTestBase
                 .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
         when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(syncFolderItemsResponseMessage.isSetIncludesLastItemInRange()).thenReturn(true);
-        when(syncFolderItemsResponseMessage.getIncludesLastItemInRange()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getIncludesLastItemInRange()).thenReturn(includesLastItemInRange);
         when(syncFolderItemsResponseMessage.isSetSyncState()).thenReturn(true);
         when(syncFolderItemsResponseMessage.getSyncState()).thenReturn(newSyncState);
         when(syncFolderItemsResponseMessage.isSetChanges()).thenReturn(true);
