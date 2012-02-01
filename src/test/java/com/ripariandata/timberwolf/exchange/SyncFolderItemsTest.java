@@ -21,6 +21,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsTyp
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 
+import java.util.List;
 import java.util.Vector;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
@@ -134,6 +135,21 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         Vector<String> expected = new Vector<String>(1);
         expected.add("onlyId");
         assertEquals(expected, result.getIds());
+        assertTrue(result.includesLastItem());
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+    }
+
+    @Test
+    public void testSyncFolderItems100() throws ServiceCallException, HttpErrorException
+    {
+        final int count = 100;
+        List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        mockSyncFolderItems(ids.toArray(new String[ids.size()]), newSyncState);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        assertEquals(ids, result.getIds());
         assertTrue(result.includesLastItem());
         assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
