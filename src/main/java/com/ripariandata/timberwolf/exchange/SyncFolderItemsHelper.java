@@ -17,8 +17,13 @@
  */
 package com.ripariandata.timberwolf.exchange;
 
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,23 +74,61 @@ public final class SyncFolderItemsHelper
     public static Vector<String> syncFolderItems(final ExchangeService exchangeService,
                                                  final Configuration config,
                                                  final FolderContext folder)
+            throws ServiceCallException, HttpErrorException
     {
-        return syncFolderItems(exchangeService, getSyncFolderItemsRequest(config, folder), folder.getUser());
+        return syncFolderItems(exchangeService, getSyncFolderItemsRequest(config, folder), folder.getUser(), folder);
     }
 
     /**
      * Gets a list of all the new ids for the given folder of the current user.
      *
+     *
      * @param exchangeService The actual service to use when requesting ids.
      * @param syncFolderItemsRequest The request to send to exchange.
      * @param targetUser The user to impersonate for this request.
+     * @param folder The folder to sync.
      * @return The SyncFolderItems result return from Exchange.
      */
     private static Vector<String> syncFolderItems(final ExchangeService exchangeService,
                                                   final SyncFolderItemsType syncFolderItemsRequest,
-                                                  final String targetUser)
+                                                  final String targetUser, final FolderContext folder)
+            throws ServiceCallException, HttpErrorException
     {
-        return null;
+        SyncFolderItemsResponseType response = exchangeService.syncFolderItems(syncFolderItemsRequest, targetUser);
+        if (response == null)
+        {
+            LOG.debug("Exchange service returned null sync folder items response.");
+            throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
+        }
+        ArrayOfResponseMessagesType array = response.getResponseMessages();
+        Vector<String> items = new Vector<String>();
+        for (SyncFolderItemsResponseMessageType message : array.getSyncFolderItemsResponseMessageArray())
+        {
+
+            ResponseCodeType.Enum errorCode = message.getResponseCode();
+            if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
+            {
+                LOG.debug(errorCode.toString());
+                throw new ServiceCallException(errorCode, "SOAP response contained an error.");
+            }
+
+            if (message.isSetSyncState())
+            {
+                folder.setSyncStateToken(message.getSyncState());
+            }
+
+            if (message.isSetChanges())
+            {
+                for (SyncFolderItemsCreateOrUpdateType create : message.getChanges().getCreateArray())
+                {
+                    if (create.isSetItem() && create.getItem().isSetItemId())
+                    {
+                        items.add(create.getItem().getItemId().getId());
+                    }
+                }
+            }
+        }
+        return items;
     }
 
 }

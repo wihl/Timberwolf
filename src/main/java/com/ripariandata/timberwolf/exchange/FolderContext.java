@@ -102,6 +102,15 @@ public class FolderContext
     }
 
     /**
+     * Sets the sync token returned from Exchange when syncing this folder.
+     * @param syncState The sync token from exchange. This should not be null.
+     */
+    public void setSyncStateToken(final String syncState)
+    {
+        syncStateToken = syncState;
+    }
+
+    /**
      * Returns the target folder to be sent to exchange for this folder
      * context.
      * @return A TargetFolderIdType containing this folder context.
