@@ -187,12 +187,10 @@ public class ExchangeTestBase
     protected void mockSyncFolderItems(final String[] ids, final String newSyncState)
             throws ServiceCallException, HttpErrorException
     {
-        mockSyncFolderItems(ids, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(),
-                            getDefaultUser(), newSyncState);
+        mockSyncFolderItems(ids, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState);
     }
 
-    protected void mockSyncFolderItems(final String[] ids,
-                                       final FolderContext folder, final int maxIds, final String user,
+    protected void mockSyncFolderItems(final String[] ids, final FolderContext folder, final int maxIds,
                                        final String newSyncState)
             throws ServiceCallException, HttpErrorException
     {
@@ -205,7 +203,7 @@ public class ExchangeTestBase
         SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
         SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[ids.length];
 
-        when(service.syncFolderItems(likeThis(syncItems), eq(user))).thenReturn(syncItemsResponse);
+        when(service.syncFolderItems(likeThis(syncItems), eq(folder.getUser()))).thenReturn(syncItemsResponse);
         when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
                 .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
@@ -221,6 +219,7 @@ public class ExchangeTestBase
             ItemIdType itemId = mock(ItemIdType.class);
             when(create.isSetItem()).thenReturn(true);
             when(create.getItem()).thenReturn(item);
+            when(item.isSetItemId()).thenReturn(true);
             when(item.getItemId()).thenReturn(itemId);
             when(itemId.getId()).thenReturn(ids[i]);
             creates[i] = create;

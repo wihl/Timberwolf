@@ -104,14 +104,12 @@ public final class SyncFolderItemsHelper
         Vector<String> items = new Vector<String>();
         for (SyncFolderItemsResponseMessageType message : array.getSyncFolderItemsResponseMessageArray())
         {
-
             ResponseCodeType.Enum errorCode = message.getResponseCode();
             if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
             {
                 LOG.debug(errorCode.toString());
                 throw new ServiceCallException(errorCode, "SOAP response contained an error.");
             }
-
             if (message.isSetSyncState())
             {
                 folder.setSyncStateToken(message.getSyncState());

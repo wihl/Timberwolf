@@ -107,10 +107,28 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     public void testSyncFolderItemsRespond0() throws ServiceCallException, HttpErrorException
     {
         String[] ids = new String[0];
-        mockSyncFolderItems(ids, "MyNewSyncStates");
+        final String myNewSyncState = "MyNewSyncState";
+        mockSyncFolderItems(ids, myNewSyncState);
         Vector<String> items = SyncFolderItemsHelper
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(0, items.size());
+        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
     }
+
+    @Test
+    public void testSyncFolderItems1() throws ServiceCallException, HttpErrorException
+    {
+        String[] ids = new String[]{"onlyId"};
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        mockSyncFolderItems(ids, newSyncState);
+        Vector<String> items =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        Vector<String> expected = new Vector<String>(1);
+        expected.add("onlyId");
+        assertEquals(expected, items);
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+    }
+
 
 }
