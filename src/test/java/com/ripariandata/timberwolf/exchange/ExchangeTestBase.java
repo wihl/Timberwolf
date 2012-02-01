@@ -208,6 +208,8 @@ public class ExchangeTestBase
         when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
                 .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
         when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(syncFolderItemsResponseMessage.isSetIncludesLastItemInRange()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getIncludesLastItemInRange()).thenReturn(true);
         when(syncFolderItemsResponseMessage.isSetSyncState()).thenReturn(true);
         when(syncFolderItemsResponseMessage.getSyncState()).thenReturn(newSyncState);
         when(syncFolderItemsResponseMessage.isSetChanges()).thenReturn(true);

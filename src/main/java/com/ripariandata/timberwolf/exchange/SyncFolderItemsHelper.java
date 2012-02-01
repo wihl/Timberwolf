@@ -69,11 +69,11 @@ public final class SyncFolderItemsHelper
      * @param exchangeService The actual service to use when requesting ids.
      * @param config The configuration for this instance of Timberwolf.
      * @param folder The folder to sync.
-     * @return The SyncFolderItems result return from Exchange.
+     * @return The SyncFolderItems result returned from Exchange.
      */
-    public static Vector<String> syncFolderItems(final ExchangeService exchangeService,
-                                                 final Configuration config,
-                                                 final FolderContext folder)
+    public static SyncFolderItemsResult syncFolderItems(final ExchangeService exchangeService,
+                                                        final Configuration config,
+                                                        final FolderContext folder)
             throws ServiceCallException, HttpErrorException
     {
         return syncFolderItems(exchangeService, getSyncFolderItemsRequest(config, folder), folder.getUser(), folder);
@@ -82,16 +82,15 @@ public final class SyncFolderItemsHelper
     /**
      * Gets a list of all the new ids for the given folder of the current user.
      *
-     *
      * @param exchangeService The actual service to use when requesting ids.
      * @param syncFolderItemsRequest The request to send to exchange.
      * @param targetUser The user to impersonate for this request.
      * @param folder The folder to sync.
      * @return The SyncFolderItems result return from Exchange.
      */
-    private static Vector<String> syncFolderItems(final ExchangeService exchangeService,
-                                                  final SyncFolderItemsType syncFolderItemsRequest,
-                                                  final String targetUser, final FolderContext folder)
+    private static SyncFolderItemsResult syncFolderItems(final ExchangeService exchangeService,
+                                                         final SyncFolderItemsType syncFolderItemsRequest,
+                                                         final String targetUser, final FolderContext folder)
             throws ServiceCallException, HttpErrorException
     {
         SyncFolderItemsResponseType response = exchangeService.syncFolderItems(syncFolderItemsRequest, targetUser);
@@ -101,7 +100,7 @@ public final class SyncFolderItemsHelper
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
         ArrayOfResponseMessagesType array = response.getResponseMessages();
-        Vector<String> items = new Vector<String>();
+        SyncFolderItemsResult result = null;
         for (SyncFolderItemsResponseMessageType message : array.getSyncFolderItemsResponseMessageArray())
         {
             ResponseCodeType.Enum errorCode = message.getResponseCode();
@@ -114,19 +113,56 @@ public final class SyncFolderItemsHelper
             {
                 folder.setSyncStateToken(message.getSyncState());
             }
+            if (message.isSetIncludesLastItemInRange())
+            {
+                result = new SyncFolderItemsResult(message.getIncludesLastItemInRange());
+            }
+            else
+            {
+                result = new SyncFolderItemsResult(false);
+            }
 
             if (message.isSetChanges())
             {
+                // There's also Update and Delete arrays, but we're not dealing with them yet
                 for (SyncFolderItemsCreateOrUpdateType create : message.getChanges().getCreateArray())
                 {
                     if (create.isSetItem() && create.getItem().isSetItemId())
                     {
-                        items.add(create.getItem().getItemId().getId());
+                        result.getIds().add(create.getItem().getItemId().getId());
                     }
                 }
             }
         }
-        return items;
+        if (result == null)
+        {
+            LOG.debug("Exchange responded without any messages");
+            // return true, so that it won't just call it again
+            return new SyncFolderItemsResult(true);
+        }
+        return result;
+    }
+
+    public static class SyncFolderItemsResult
+    {
+        private final Vector<String> ids;
+        private final boolean includesLastItem;
+
+        public SyncFolderItemsResult(final boolean includesLastItem)
+        {
+            ids = new Vector<String>();
+            this.includesLastItem = includesLastItem;
+        }
+
+        public Vector<String> getIds()
+        {
+            return ids;
+        }
+
+        public boolean includesLastItem()
+        {
+            return includesLastItem;
+        }
     }
 
 }

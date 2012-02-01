@@ -20,9 +20,14 @@ package com.ripariandata.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+
 import java.util.Vector;
+
+import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import static org.mockito.Matchers.eq;
@@ -94,7 +99,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultUser()))).thenReturn(null);
         try
         {
-            Vector<String> items = SyncFolderItemsHelper.syncFolderItems(getService(), config, defaultInboxFolder);
+            SyncFolderItemsResult result =
+                    SyncFolderItemsHelper.syncFolderItems(getService(), config, defaultInboxFolder);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -109,9 +115,10 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         String[] ids = new String[0];
         final String myNewSyncState = "MyNewSyncState";
         mockSyncFolderItems(ids, myNewSyncState);
-        Vector<String> items = SyncFolderItemsHelper
+        SyncFolderItemsResult result = SyncFolderItemsHelper
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
-        assertEquals(0, items.size());
+        assertEquals(0, result.getIds().size());
+        assertTrue(result.includesLastItem());
         assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
     }
 
@@ -122,11 +129,12 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         final String newSyncState = "MySweetNewSyncState";
         getDefaultFolder().setSyncStateToken("oldSyncState");
         mockSyncFolderItems(ids, newSyncState);
-        Vector<String> items =
+        SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         Vector<String> expected = new Vector<String>(1);
         expected.add("onlyId");
-        assertEquals(expected, items);
+        assertEquals(expected, result.getIds());
+        assertTrue(result.includesLastItem());
         assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
 
