@@ -135,4 +135,27 @@ public class ConfigFileParserTest
         assertEquals(100, target.intEntry);
         assertEquals("qwer", target.stringTwo);
     }
+
+    @Test
+    public void testMissingFile()
+    {
+        TypeWithNoEntries target = new TypeWithNoEntries();
+        ConfigFileParser parser = new ConfigFileParser(target);
+
+        try
+        {
+            parser.parseConfigFile("not/a/real/file.properties");
+            fail("Attempting to parse a file that doesn't exist should throw an exception.");
+        }
+        catch (ConfigFileMissingException e)
+        {
+            // Once we get there the test has passed, but checkstyle complains
+            // about a block with no statements.
+            assertEquals(true, true);
+        }
+        catch (Exception e)
+        {
+            fail("Wrong exception was thrown when attempting to parse missing file: " + e.getMessage());
+        }
+    }
 }
