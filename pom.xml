@@ -144,7 +144,7 @@
               </defineStatements>
               <mappings>
                   <mapping>
-                      <directory>/tmp</directory>
+                      <directory>/usr/share/java</directory>
                       <filemode>644</filemode>
                       <username>timberwolf</username>
                       <groupname>timberwolf</groupname>
