@@ -238,22 +238,28 @@ public class ExchangeTestBase
         when(syncFolderItemsChanges.getCreateArray()).thenReturn(syncFolderItemsCreateOrUpdate);
     }
 
-    private SyncFolderItemsCreateOrUpdateType[] createSyncFolderItemsCreateArray(final String[] ids)
+    protected SyncFolderItemsCreateOrUpdateType[] createSyncFolderItemsCreateArray(final String[] ids)
     {
         SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[ids.length];
         for (int i=0; i<ids.length; i++)
         {
-            SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
-            ItemType item = mock(ItemType.class);
-            ItemIdType itemId = mock(ItemIdType.class);
-            when(create.isSetItem()).thenReturn(true);
-            when(create.getItem()).thenReturn(item);
-            when(item.isSetItemId()).thenReturn(true);
-            when(item.getItemId()).thenReturn(itemId);
-            when(itemId.getId()).thenReturn(ids[i]);
+            SyncFolderItemsCreateOrUpdateType create = mockCreateItem(ids[i]);
             creates[i] = create;
         }
         return creates;
+    }
+
+    protected SyncFolderItemsCreateOrUpdateType mockCreateItem(final String id)
+    {
+        SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
+        ItemType item = mock(ItemType.class);
+        ItemIdType itemId = mock(ItemIdType.class);
+        when(create.isSetItem()).thenReturn(true);
+        when(create.getItem()).thenReturn(item);
+        when(item.isSetItemId()).thenReturn(true);
+        when(item.getItemId()).thenReturn(itemId);
+        when(itemId.getId()).thenReturn(id);
+        return create;
     }
 
     protected void defaultMockFindFolders() throws ServiceCallException, HttpErrorException

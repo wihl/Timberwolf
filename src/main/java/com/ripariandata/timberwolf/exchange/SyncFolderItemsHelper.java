@@ -143,15 +143,16 @@ public final class SyncFolderItemsHelper
         return result;
     }
 
+    /** The result returned from syncing a folder's items */
     public static class SyncFolderItemsResult
     {
         private final Vector<String> ids;
         private final boolean includesLastItem;
 
-        public SyncFolderItemsResult(final boolean includesLastItem)
+        public SyncFolderItemsResult(final boolean returnedAllItems)
         {
             ids = new Vector<String>();
-            this.includesLastItem = includesLastItem;
+            includesLastItem = returnedAllItems;
         }
 
         public Vector<String> getIds()

@@ -24,7 +24,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsRes
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
+import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
 import java.util.List;
@@ -223,7 +225,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
 
         SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage = mock(SyncFolderItemsResponseMessageType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage =
+                mock(SyncFolderItemsResponseMessageType.class);
         SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
 
         when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser()))).
@@ -246,33 +249,156 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     }
 
     @Test
-    public void testUnsetIncludesLastItemInRange()
+    public void testUnsetIncludesLastItemInRange() throws ServiceCallException, HttpErrorException
     {
+        String[] ids = new String[]{"onlyId"};
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
+                                                                                        getDefaultFolder());
+
+        SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage =
+                mock(SyncFolderItemsResponseMessageType.class);
+        SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
+
+        when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser())))
+                .thenReturn(syncItemsResponse);
+        when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
+                .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
+        when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(syncFolderItemsResponseMessage.isSetIncludesLastItemInRange()).thenReturn(false);
+        when(syncFolderItemsResponseMessage.isSetSyncState()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getSyncState()).thenReturn(newSyncState);
+        when(syncFolderItemsResponseMessage.isSetChanges()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getChanges()).thenReturn(syncFolderItemsChanges);
+        SyncFolderItemsCreateOrUpdateType[] creates = createSyncFolderItemsCreateArray(ids);
+        when(syncFolderItemsChanges.getCreateArray()).thenReturn(creates);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        Vector<String> expected = new Vector<String>(1);
+        expected.add("onlyId");
+        assertEquals(expected, result.getIds());
+        assertFalse(result.includesLastItem());
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
 
     }
 
     @Test
-    public void testUnsetSyncState()
+    public void testUnsetSyncState() throws ServiceCallException, HttpErrorException
     {
+        String[] ids = new String[]{"onlyId"};
+        final String oldSyncState = "oldSyncState";
+        getDefaultFolder().setSyncStateToken(oldSyncState);
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
+                                                                                        getDefaultFolder());
 
+        SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage =
+                mock(SyncFolderItemsResponseMessageType.class);
+        SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
+
+        when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser())))
+                .thenReturn(syncItemsResponse);
+        when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
+                .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
+        when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(syncFolderItemsResponseMessage.isSetIncludesLastItemInRange()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getIncludesLastItemInRange()).thenReturn(false);
+        when(syncFolderItemsResponseMessage.isSetSyncState()).thenReturn(false);
+        when(syncFolderItemsResponseMessage.isSetChanges()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getChanges()).thenReturn(syncFolderItemsChanges);
+        SyncFolderItemsCreateOrUpdateType[] creates = createSyncFolderItemsCreateArray(ids);
+        when(syncFolderItemsChanges.getCreateArray()).thenReturn(creates);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        Vector<String> expected = new Vector<String>(1);
+        expected.add("onlyId");
+        assertEquals(expected, result.getIds());
+        assertFalse(result.includesLastItem());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
     }
 
     @Test
-    public void testNoChanges()
+    public void testNoChanges() throws ServiceCallException, HttpErrorException
     {
+        String[] ids = new String[0];
+        final String myNewSyncState = "MyNewSyncState";
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
+                                                                                        getDefaultFolder());
 
+        SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage =
+                mock(SyncFolderItemsResponseMessageType.class);
+
+        when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser())))
+                .thenReturn(syncItemsResponse);
+        when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
+                .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
+        when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
+        when(syncFolderItemsResponseMessage.isSetIncludesLastItemInRange()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getIncludesLastItemInRange()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.isSetSyncState()).thenReturn(true);
+        when(syncFolderItemsResponseMessage.getSyncState()).thenReturn(myNewSyncState);
+        when(syncFolderItemsResponseMessage.isSetChanges()).thenReturn(false);
+
+
+        SyncFolderItemsResult result = SyncFolderItemsHelper
+                .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        assertEquals(0, result.getIds().size());
+        assertTrue(result.includesLastItem());
+        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
     }
 
     @Test
-    public void testUnsetItem()
+    public void testUnsetItem() throws ServiceCallException, HttpErrorException
     {
-
+        final int count = 3;
+        List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
+        creates[0] = mockCreateItem(ids.get(0));
+        creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
+        when(creates[1].isSetItem()).thenReturn(false);
+        creates[2] = mockCreateItem(ids.get(2));
+        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        ids.remove(1);
+        assertEquals(ids, result.getIds());
+        assertTrue(result.includesLastItem());
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
 
     @Test
-    public void testUnsetItemId()
+    public void testUnsetItemId() throws ServiceCallException, HttpErrorException
     {
-
+        final int count = 3;
+        List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String newSyncState = "MySweetNewSyncState";
+        getDefaultFolder().setSyncStateToken("oldSyncState");
+        final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
+        creates[0] = mockCreateItem(ids.get(0));
+        creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
+        when(creates[1].isSetItem()).thenReturn(true);
+        final ItemType item = mock(ItemType.class);
+        when(creates[1].getItem()).thenReturn(item);
+        when(item.isSetItemId()).thenReturn(false);
+        creates[2] = mockCreateItem(ids.get(2));
+        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
+        SyncFolderItemsResult result =
+                SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        ids.remove(1);
+        assertEquals(ids, result.getIds());
+        assertTrue(result.includesLastItem());
+        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
     }
 
 }
