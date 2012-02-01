@@ -17,22 +17,25 @@
  */
 package com.ripariandata.timberwolf.exchange;
 
+import com.microsoft.schemas.exchange.services.x2006.messages.ArrayOfResponseMessagesType;
+import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseMessageType;
+import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-
-import java.util.List;
-import java.util.Vector;
-
+import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
-
+import java.util.List;
+import java.util.Vector;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /** Test class for all the SyncFolderItems specific stuff. */
@@ -186,15 +189,60 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     }
 
     @Test
-    public void testNoMessages()
+    public void testNoMessages() throws ServiceCallException, HttpErrorException
     {
+        final String oldState = "old sync state";
+        getDefaultFolder().setSyncStateToken("old sync state");
 
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
+                                                                                        getDefaultFolder());
+
+        SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+
+        when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser()))).
+                thenReturn(syncItemsResponse);
+        when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
+                .thenReturn(new SyncFolderItemsResponseMessageType[]{});
+        SyncFolderItemsResult result = SyncFolderItemsHelper
+                .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+        assertEquals(0, result.getIds().size());
+        assertTrue(result.includesLastItem());
+        assertEquals(oldState, getDefaultFolder().getSyncStateToken());
     }
 
     @Test
-    public void testErrorResponseCode()
+    public void testErrorResponseCode() throws ServiceCallException, HttpErrorException
     {
+        final String oldState = "old sync state";
+        getDefaultFolder().setSyncStateToken("old sync state");
 
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
+                                                                                        getDefaultFolder());
+
+        SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
+        ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage = mock(SyncFolderItemsResponseMessageType.class);
+        SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
+
+        when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultFolder().getUser()))).
+                thenReturn(syncItemsResponse);
+        when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
+        when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
+                .thenReturn(new SyncFolderItemsResponseMessageType[]{syncFolderItemsResponseMessage});
+        when(syncFolderItemsResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.ERROR_ACCESS_DENIED);
+        try
+        {
+            SyncFolderItemsResult result = SyncFolderItemsHelper
+                    .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
+            fail("No exception was thrown");
+        }
+        catch (ServiceCallException e)
+        {
+            assertEquals("SOAP response contained an error.", e.getMessage());
+        }
+        assertEquals(oldState, getDefaultFolder().getSyncStateToken());
     }
 
     @Test
