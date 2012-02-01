@@ -1,10 +1,10 @@
 package com.ripariandata.timberwolf.conf4j;
 
+import java.util.Vector;
+
 import org.apache.commons.configuration.Configuration;
 
 import org.junit.Test;
-
-import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -12,9 +12,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/** Test for the ConfigFileParser that we use to read our configuration. */
 public class ConfigFileParserTest
 {
-    private Configuration mockConfiguration(Object... settings)
+    private Configuration mockConfiguration(final Object... settings)
     {
         if ((settings.length % 2) != 0)
         {
@@ -35,9 +36,15 @@ public class ConfigFileParserTest
         return config;
     }
 
+    /** Class for testing parsing no config entries on a class. */
     private class TypeWithNoEntries
     {
-        public int x = 0;
+        private int x = 0;
+
+        public int x()
+        {
+            return x;
+        }
     }
 
     @Test
@@ -48,17 +55,23 @@ public class ConfigFileParserTest
         Configuration mockConfig = mockConfiguration();
         parser.parseConfiguration(mockConfig);
 
-        assertEquals(0, target.x);
+        assertEquals(0, target.x());
 
         mockConfig = mockConfiguration("wrong.entry", 100);
         parser.parseConfiguration(mockConfig);
-        assertEquals(0, target.x);
+        assertEquals(0, target.x());
     }
 
+    /** Class for testing parsing one config entry on a class. */
     private class TypeWithOneEntry
     {
         @ConfigEntry(name = "my.entry")
-        public String entry = "";
+        private String entry = "";
+
+        public String entry()
+        {
+            return entry;
+        }
     }
 
     @Test
@@ -69,35 +82,56 @@ public class ConfigFileParserTest
 
         Configuration mockConfig = mockConfiguration();
         parser.parseConfiguration(mockConfig);
-        assertEquals("", target.entry);
+        assertEquals("", target.entry());
 
         mockConfig = mockConfiguration("wrong.entry", "value");
         parser.parseConfiguration(mockConfig);
-        assertEquals("", target.entry);
+        assertEquals("", target.entry());
 
         mockConfig = mockConfiguration("my.entry", "value");
         parser.parseConfiguration(mockConfig);
-        assertEquals("value", target.entry);
+        assertEquals("value", target.entry());
 
         mockConfig = mockConfiguration("wrong.entry", "foo",
                                        "my.entry", "bar",
                                        "another.entry", "baz");
         parser.parseConfiguration(mockConfig);
-        assertEquals("bar", target.entry);
+        assertEquals("bar", target.entry());
     }
 
+    /** Class for testing parsing multiple config entries on one class. */
     private class TypeWithManyEntries
     {
-        public String notAnEntry = "";
+        private String notAnEntry = "";
 
         @ConfigEntry(name = "entry.string")
-        public String stringEntry = "";
+        private String stringEntry = "";
 
         @ConfigEntry(name = "entry.int")
-        public int intEntry = 0;
+        private int intEntry = 0;
 
         @ConfigEntry(name = "entry.string.two")
-        public String stringTwo = "asdf";
+        private String stringTwo = "asdf";
+
+        public String notAnEntry()
+        {
+            return notAnEntry;
+        }
+
+        public String stringEntry()
+        {
+            return stringEntry;
+        }
+
+        public int intEntry()
+        {
+            return intEntry;
+        }
+
+        public String stringTwo()
+        {
+            return stringTwo;
+        }
     }
 
     @Test
@@ -109,10 +143,10 @@ public class ConfigFileParserTest
         Configuration mockConfig = mockConfiguration();
         parser.parseConfiguration(mockConfig);
 
-        assertEquals("", target.notAnEntry);
-        assertEquals("", target.stringEntry);
-        assertEquals(0, target.intEntry);
-        assertEquals("asdf", target.stringTwo);
+        assertEquals("", target.notAnEntry());
+        assertEquals("", target.stringEntry());
+        assertEquals(0, target.intEntry());
+        assertEquals("asdf", target.stringTwo());
 
         mockConfig = mockConfiguration("not.an.entry", "qwer",
                                        "entry.string", "string!",
@@ -120,20 +154,20 @@ public class ConfigFileParserTest
                                        "entry.string.two", "qwer");
         parser.parseConfiguration(mockConfig);
 
-        assertEquals("", target.notAnEntry);
-        assertEquals("string!", target.stringEntry);
-        assertEquals(10, target.intEntry);
-        assertEquals("qwer", target.stringTwo);
+        assertEquals("", target.notAnEntry());
+        assertEquals("string!", target.stringEntry());
+        assertEquals(10, target.intEntry());
+        assertEquals("qwer", target.stringTwo());
 
         mockConfig = mockConfiguration("not.an.entry", "qwer",
                                        "entry.string", "string?",
                                        "entry.int", 100);
         parser.parseConfiguration(mockConfig);
 
-        assertEquals("", target.notAnEntry);
-        assertEquals("string?", target.stringEntry);
-        assertEquals(100, target.intEntry);
-        assertEquals("qwer", target.stringTwo);
+        assertEquals("", target.notAnEntry());
+        assertEquals("string?", target.stringEntry());
+        assertEquals(100, target.intEntry());
+        assertEquals("qwer", target.stringTwo());
     }
 
     @Test

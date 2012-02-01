@@ -42,7 +42,7 @@ import javax.security.auth.login.LoginException;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+//import org.kohsuke.args4j.Option;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +109,7 @@ final class App implements PrivilegedAction<Integer>
     {
     }
 
-    private static void printUsage(PrintStream output, CmdLineParser parser)
+    private static void printUsage(final PrintStream output, final CmdLineParser parser)
     {
         output.println("java -jar timberwolf.jar [options...] arguments...");
         parser.printUsage(output);
@@ -124,23 +124,27 @@ final class App implements PrivilegedAction<Integer>
     private void beginEverything(final String[] args) throws IOException
     {
         ConfigFileParser configParser = new ConfigFileParser(this);
-        //CmdLineParser parser = new CmdLineParser(this);
+        CmdLineParser parser = new CmdLineParser(this);
 
         try
         {
             configParser.parseConfigFile(DEFAULT_CONFIG_LOCATION);
         }
-        catch (ConfigFileMissingException _)
+        catch (ConfigFileMissingException e)
         {
             // Do nothing.  In the absence of a config file, we assume that all
             // the arguments will be provided on the command line.  If they
             // aren't, _then_ we'll fail and exit.
+
+            // TODO: This empty block currently pitches a checkstyle error.  If
+            // it's still empty at the end of this story, either suppress the
+            // error for this one case or figure out a way around it.
         }
         catch (ConfigFileException e)
         {
             System.err.println(e.getMessage());
-            // TODO: print a usage info for the config file?
-            System.exit(1);
+            // TODO: print usage info for the config file?
+            return;
         }
 
         try
@@ -149,8 +153,8 @@ final class App implements PrivilegedAction<Integer>
 
             if (help)
             {
-                //printUsage(System.out, parser);
-                System.exit(0);
+                printUsage(System.out, parser);
+                return;
             }
 
             LOG.debug("Timberwolf invoked with the following arguments:");
@@ -171,7 +175,7 @@ final class App implements PrivilegedAction<Integer>
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
-                throw new CmdLineException(/*parser*/null, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
                                            + "Table Name must all be specified if at least one is specified");
             }
 
@@ -183,7 +187,7 @@ final class App implements PrivilegedAction<Integer>
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            //printUsage(System.err, parser);
+            printUsage(System.err, parser);
         }
         catch (LoginException e)
         {

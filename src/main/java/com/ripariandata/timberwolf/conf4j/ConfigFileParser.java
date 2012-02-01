@@ -1,22 +1,31 @@
 package com.ripariandata.timberwolf.conf4j;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-
 import java.io.File;
 
 import java.lang.reflect.Field;
 
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
+/**
+ * Inspired by the CmdLineParser of args4j, this takes a class with ConfigEntry
+ * annotations and a configuration file and sets the fields so annotated with
+ * the values from the config file.
+ * <p>
+ * Since our needs for configuration handling are pretty simple, this does a lot
+ * less than args4j.  It only handles fields, not methods, and doesn't do anything
+ * other than match names to values.
+ */
 public class ConfigFileParser
 {
     private Map<String, FieldSetter> fields = new HashMap<String, FieldSetter>();
 
-    public ConfigFileParser(Object bean)
+    public ConfigFileParser(final Object bean)
     {
         for (Class c = bean.getClass(); c != null; c = c.getSuperclass())
         {
@@ -31,7 +40,16 @@ public class ConfigFileParser
         }
     }
 
-    public void parseConfigFile(String configFile) throws ConfigFileException
+    /**
+     * Takes the values from the named configuration file and apply them to the
+     * target class.  Assumes that the file is a java properties file, readable
+     * by <a href="http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/PropertiesConfiguration.html">
+     * org.apache.commons.configuration.PropertiesConfiguration</a>.
+     *
+     * @throws ConfigFileMissingException If the named configuration file does not exist.
+     * @throws ConfigFileException If there was any other problem reading the configuration file.
+     */
+    public void parseConfigFile(final String configFile) throws ConfigFileException
     {
         File f = new File(configFile);
         if (!f.exists())
@@ -51,7 +69,14 @@ public class ConfigFileParser
         parseConfiguration(config);
     }
 
-    public void parseConfiguration(Configuration config)
+    /**
+     * Takes the values from the given Configuration instance and applies them to
+     * the target class.  Fields in the target class marked with ConfigEntry
+     * annotations that don't correspond to any properties in the given configuration
+     * are not modified.  Properties in the configuration that don't match any
+     * fields marked as ConfigEntry are ignored.
+     */
+    public void parseConfiguration(final Configuration config)
     {
         Iterator<String> keys = config.getKeys();
         while (keys.hasNext())
