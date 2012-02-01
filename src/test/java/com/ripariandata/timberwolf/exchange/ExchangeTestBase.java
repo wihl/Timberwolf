@@ -44,23 +44,26 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import com.ripariandata.timberwolf.UserTimeUpdater;
-import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.xmlbeans.XmlException;
 import org.joda.time.DateTime;
 import org.junit.Before;
-import static org.mockito.Matchers.eq;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-/**
- * Base class for fixtures that need to mock out Exchange services.
- */
+import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+
+/** Base class for fixtures that need to mock out Exchange services. */
 public class ExchangeTestBase
 {
     @Mock
@@ -90,7 +93,7 @@ public class ExchangeTestBase
      * This is needed anytime we'd like to look in a particular folder with mockFindItem.
      * This is reset at the start of the test, but otherwise syncState is maintained
      * throughout the test.
-     * */
+     */
     private FolderContext defaultFolder;
 
     protected FolderContext getDefaultFolder()
@@ -116,7 +119,7 @@ public class ExchangeTestBase
     }
 
     protected void mockFindItem(final MessageType[] messages)
-        throws ServiceCallException, HttpErrorException
+            throws ServiceCallException, HttpErrorException
     {
         mockFindItem(messages, DEFAULT_FOLDER_ID, 0, DEFAULT_PAGE_SIZE, defaultUser);
     }
@@ -158,7 +161,7 @@ public class ExchangeTestBase
 
     protected void mockFindItem(final MessageType[] messages, final String folder, final int offset, final int maxIds,
                                 final String user, final DateTime startDate)
-        throws ServiceCallException, HttpErrorException
+            throws ServiceCallException, HttpErrorException
     {
         Configuration config = new Configuration(maxIds, 0);
         UserTimeUpdater timeUpdater = mock(UserTimeUpdater.class);
@@ -175,7 +178,7 @@ public class ExchangeTestBase
         when(service.findItem(likeThis(findItem), eq(user))).thenReturn(findItemResponse);
         when(findItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getFindItemResponseMessageArray())
-            .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
+                .thenReturn(new FindItemResponseMessageType[]{findItemResponseMessage});
         when(findItemResponseMessage.getResponseCode()).thenReturn(ResponseCodeType.NO_ERROR);
         when(findItemResponseMessage.isSetRootFolder()).thenReturn(true);
         when(findItemResponseMessage.getRootFolder()).thenReturn(findItemParent);
@@ -221,7 +224,8 @@ public class ExchangeTestBase
 
         SyncFolderItemsResponseType syncItemsResponse = mock(SyncFolderItemsResponseType.class);
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
-        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage = mock(SyncFolderItemsResponseMessageType.class);
+        SyncFolderItemsResponseMessageType syncFolderItemsResponseMessage =
+                mock(SyncFolderItemsResponseMessageType.class);
         SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
 
         when(service.syncFolderItems(likeThis(syncItems), eq(folder.getUser()))).thenReturn(syncItemsResponse);
@@ -241,7 +245,7 @@ public class ExchangeTestBase
     protected SyncFolderItemsCreateOrUpdateType[] createSyncFolderItemsCreateArray(final String[] ids)
     {
         SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[ids.length];
-        for (int i=0; i<ids.length; i++)
+        for (int i = 0; i < ids.length; i++)
         {
             SyncFolderItemsCreateOrUpdateType create = mockCreateItem(ids[i]);
             creates[i] = create;

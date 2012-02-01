@@ -27,15 +27,19 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
-import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
-import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
+
 import java.util.List;
 import java.util.Vector;
+
+import org.junit.Test;
+
+import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
+import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

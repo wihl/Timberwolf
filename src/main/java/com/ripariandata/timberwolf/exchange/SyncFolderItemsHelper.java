@@ -143,7 +143,7 @@ public final class SyncFolderItemsHelper
         return result;
     }
 
-    /** The result returned from syncing a folder's items */
+    /** The result returned from syncing a folder's items. */
     public static class SyncFolderItemsResult
     {
         private final Vector<String> ids;
