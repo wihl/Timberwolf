@@ -44,20 +44,19 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import com.ripariandata.timberwolf.UserTimeUpdater;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.xmlbeans.XmlException;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -66,6 +65,8 @@ import static org.mockito.Mockito.when;
 /** Base class for fixtures that need to mock out Exchange services. */
 public class ExchangeTestBase
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeTestBase.class);
     @Mock
     private ExchangeService service;
 
@@ -200,6 +201,35 @@ public class ExchangeTestBase
         return mockSyncFolderItems(offset, maxIds, itemsInExchange, newSyncState, true);
     }
 
+
+    protected MessageType[] mockSyncFolderItems(final String folderId, final int offset, final int maxIds,
+                                                final int itemsInExchange, final String oldSyncState,
+                                                final String newSyncState, final boolean includesLastItem)
+            throws ServiceCallException, HttpErrorException
+    {
+        return mockSyncFolderItems(defaultUser, folderId, offset, maxIds, itemsInExchange, oldSyncState, newSyncState,
+                                   includesLastItem);
+    }
+
+    protected MessageType[] mockSyncFolderItems(final String user, final String folderId, final int offset,
+                                                final int maxIds, final int itemsInExchange, final String oldSyncState,
+                                                final String newSyncState, final boolean includesLastItem)
+            throws ServiceCallException, HttpErrorException
+    {
+        MessageType[] messages = new MessageType[itemsInExchange];
+        List<String> ids = generateIds(offset, itemsInExchange, folderId);
+        for (int i = 0; i < itemsInExchange; i++)
+        {
+            messages[i] = mockMessageItemId(ids.get(i));
+        }
+        FolderContext folder = new FolderContext(folderId, user);
+        folder.setSyncStateToken(oldSyncState);
+        mockSyncFolderItems(
+                generateIds(offset, itemsInExchange, folderId).toArray(new String[itemsInExchange]),
+                folder, maxIds, newSyncState, includesLastItem);
+        return messages;
+    }
+
     protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,
                                                 final String newSyncState, final boolean includesLastItem)
             throws ServiceCallException, HttpErrorException
@@ -251,6 +281,7 @@ public class ExchangeTestBase
                 mock(SyncFolderItemsResponseMessageType.class);
         SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
 
+        LOG.debug("Expecting SyncFolderItems with User:{} Request:\n{}",folder.getUser(), syncItems);
         when(service.syncFolderItems(likeThis(syncItems), eq(folder.getUser()))).thenReturn(syncItemsResponse);
         when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())

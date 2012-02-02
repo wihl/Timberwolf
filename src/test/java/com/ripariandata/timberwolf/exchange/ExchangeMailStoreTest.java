@@ -579,11 +579,11 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int countThree = 3;
         final int countFive = 5;
         final int countTen = 10;
-        mockFindItem("FOLDER-ONE-ID", offsetZero, maxIdTen, countTwo);
+        mockSyncFolderItems("FOLDER-ONE-ID", offsetZero, maxIdTen, countTwo, "", "FOLDER-ONE-SYNC2", true);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-ONE-ID:the #0 id"),
                 mockMessageItemId("FOLDER-ONE-ID:the #1 id")},
                     generateIds(offsetZero, countTwo, "FOLDER-ONE-ID"));
-        mockFindItem("FOLDER-TWO-ID", offsetZero, maxIdTen, countTen);
+        mockSyncFolderItems("FOLDER-TWO-ID", offsetZero, maxIdTen, countTen, null, "FOLDER-TWO-SYNC2", false);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-TWO-ID:the #0 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #1 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #2 id"),
@@ -596,12 +596,14 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                 mockMessageItemId("FOLDER-TWO-ID:the #8 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #9 id")},
                     generateIds(offsetFive, countFive, "FOLDER-TWO-ID"));
-        mockFindItem("FOLDER-TWO-ID", offsetTen, maxIdTen, countThree);
+        mockSyncFolderItems("FOLDER-TWO-ID", offsetTen, maxIdTen, countThree, "FOLDER-TWO-SYNC2", "FOLDER-TWO-SYNC3",
+                            true);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-TWO-ID:the #10 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #11 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #12 id")},
                     generateIds(offsetTen, countThree, "FOLDER-TWO-ID"));
-        mockFindItem("FOLDER-THREE-ID", offsetZero, maxIdTen, countTwo);
+        mockSyncFolderItems("FOLDER-THREE-ID", offsetZero, maxIdTen, countTwo, "", "FOLDER-THREE-SYNC2",
+                            true);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-THREE-ID:the #0 id"),
                 mockMessageItemId("FOLDER-THREE-ID:the #1 id")},
                     generateIds(offsetZero, countTwo, "FOLDER-THREE-ID"));
@@ -643,11 +645,11 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         mockFindFolders(new FolderType[]{bobFolder}, "bob");
         final int maxIdCount = 10;
         final int folderCount = 2;
-        mockFindItem("ALICE-FOLDER", 0, maxIdCount, folderCount, "alice");
+        mockSyncFolderItems("alice", "ALICE-FOLDER", 0, maxIdCount, folderCount, "", "ALICE-SYNC2", true);
         mockGetItem(new MessageType[]{mockMessageItemId("ALICE-FOLDER:the #0 id"),
                 mockMessageItemId("ALICE-FOLDER:the #1 id")},
                     generateIds(0, folderCount, "ALICE-FOLDER"), "alice");
-        mockFindItem("BOB-FOLDER", 0, maxIdCount, folderCount, "bob");
+        mockSyncFolderItems("bob", "BOB-FOLDER", 0, maxIdCount, folderCount, "", "BOB-SYNC2", true);
         mockGetItem(new MessageType[]{mockMessageItemId("BOB-FOLDER:the #0 id"),
                 mockMessageItemId("BOB-FOLDER:the #1 id")},
                     generateIds(0, folderCount, "BOB-FOLDER"), "bob");

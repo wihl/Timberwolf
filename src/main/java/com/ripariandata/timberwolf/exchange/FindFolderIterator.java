@@ -81,6 +81,6 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
             return null;
         }
         FolderContext folder = new FolderContext(folderQueue.poll(), user);
-        return new FindItemIterator(service, config, folder);
+        return new SyncFolderItemIterator(service, config, folder);
     }
 }
