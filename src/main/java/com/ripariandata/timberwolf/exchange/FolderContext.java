@@ -93,7 +93,8 @@ public class FolderContext
 
     /**
      * Returns the sync token that should be used when syncing this folder.
-     *
+     * This variable is cached, and only requires a call to the data store
+     * the first time it is accessed, if that.
      * @return The sync token, or the empty string if there is no token.
      */
     public String getSyncStateToken()
@@ -103,6 +104,8 @@ public class FolderContext
 
     /**
      * Sets the sync token returned from Exchange when syncing this folder.
+     * This should not be called until after all items are retrieved; this can
+     * be considered a permanent change; the old sync state is gone forever.
      * @param syncState The sync token from exchange. This should not be null.
      */
     public void setSyncStateToken(final String syncState)
