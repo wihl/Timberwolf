@@ -25,8 +25,8 @@ import java.lang.reflect.Field;
  */
 public class FieldSetter
 {
-    private Object bean;
-    private Field field;
+    protected Object bean;
+    protected Field field;
 
     public FieldSetter(final Object o, final Field f)
     {
@@ -37,8 +37,8 @@ public class FieldSetter
     /**
      * If possible, sets the field represented by this setter to the given value.
      *
-     * @throws IllegalAccessException If the field cannot be assigned to, e.g.,
-     *                                it is declared <tt>static</tt> and <tt>final</tt>.
+     * @throws IllegalAccessError If the field cannot be assigned to, e.g., it
+     *                            is declared <tt>static</tt> and <tt>final</tt>.
      * @throws IllegalArgumentException If the target field's type is not compatible
      *                                  with <tt>value</tt>'s type.
      */
