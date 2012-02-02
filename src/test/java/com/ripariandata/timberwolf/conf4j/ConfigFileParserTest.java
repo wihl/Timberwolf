@@ -210,6 +210,7 @@ public class ConfigFileParserTest
         }
     }
 
+    /** Class for testing the non-overwriting flag. */
     private class TypeThatRespectsDefaults
     {
         @ConfigEntry(name = "overwritable")

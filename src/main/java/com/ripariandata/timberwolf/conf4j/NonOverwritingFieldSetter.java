@@ -19,22 +19,30 @@ package com.ripariandata.timberwolf.conf4j;
 
 import java.lang.reflect.Field;
 
+/**
+ * NonOverwritingFieldSetter wraps around a single field in a single object, so
+ * so that later we can set the value of that field.  Calling <tt>set</tt> on a
+ * field whose value is not the default value for the field's type will do nothing.
+ * <p>
+ * The default value is 0 for numeric types, false for booleans, '\u0000' for chars,
+ * and null for everything else.
+ */
 class NonOverwritingFieldSetter extends FieldSetter
 {
-    public NonOverwritingFieldSetter(Object o, Field f)
+    public NonOverwritingFieldSetter(final Object o, final Field f)
     {
         super(o, f);
     }
 
-    private static Object getDefault(Class c)
+    private static Object getDefault(final Class c)
     {
         if (c.equals(byte.class))
         {
-            return new Byte((byte)0);
+            return new Byte((byte) 0);
         }
         else if (c.equals(short.class))
         {
-            return new Short((short)0);
+            return new Short((short) 0);
         }
         else if (c.equals(int.class))
         {
@@ -74,19 +82,19 @@ class NonOverwritingFieldSetter extends FieldSetter
      *                                  with <tt>value</tt>'s type.
      */
     @Override
-    public void set(Object value)
+    public void set(final Object value)
     {
         Object o;
         try
         {
-            o = field.get(bean);
+            o = field().get(bean());
         }
         catch (IllegalAccessException iae)
         {
             field.setAccessible(true);
             try
             {
-                o = field.get(bean);
+                o = field().get(bean());
             }
             catch (IllegalAccessException e)
             {
@@ -94,9 +102,9 @@ class NonOverwritingFieldSetter extends FieldSetter
             }
         }
 
-        Object defaultValue = getDefault(field.getType());
-        if ((defaultValue == null && o == null) ||
-            (defaultValue != null && o != null && defaultValue.equals(o)))
+        Object defaultValue = getDefault(field().getType());
+        if ((defaultValue == null && o == null)
+            || (defaultValue != null && o != null && defaultValue.equals(o)))
         {
             super.set(value);
         }

@@ -25,13 +25,23 @@ import java.lang.reflect.Field;
  */
 public class FieldSetter
 {
-    protected Object bean;
-    protected Field field;
+    private Object bean;
+    private Field field;
 
     public FieldSetter(final Object o, final Field f)
     {
         bean = o;
         field = f;
+    }
+
+    protected Object bean()
+    {
+        return bean;
+    }
+
+    protected Field field()
+    {
+        return field();
     }
 
     /**

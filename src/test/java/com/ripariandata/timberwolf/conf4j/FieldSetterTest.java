@@ -166,6 +166,7 @@ public class FieldSetterTest
 
     }
 
+    /** Class for testing that non-overwriting works on all types. */
     private class TypeWithAllKindsOfTypes
     {
         private byte b = 0;
@@ -231,10 +232,10 @@ public class FieldSetterTest
         FieldSetter dsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("d"));
         FieldSetter stsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("st"));
 
-        bsetter.set((byte)10);
-        shsetter.set((short)100);
-        isetter.set((int)1000);
-        lsetter.set((long)10000);
+        bsetter.set((byte) 10);
+        shsetter.set((short) 100);
+        isetter.set((int) 1000);
+        lsetter.set((long) 10000);
         fsetter.set(10.5f);
         dsetter.set(100.05);
         stsetter.set("string!");
