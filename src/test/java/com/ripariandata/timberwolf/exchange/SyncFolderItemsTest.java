@@ -130,7 +130,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(0, result.getIds().size());
         assertTrue(result.includesLastItem());
-        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals("", getDefaultFolder().getSyncStateToken());
+        assertEquals(myNewSyncState, result.getSyncState());
     }
 
     @Test
@@ -147,7 +148,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         expected.add("onlyId");
         assertEquals(expected, result.getIds());
         assertTrue(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
     @Test
@@ -163,7 +165,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(ids, result.getIds());
         assertTrue(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
     @Test
@@ -177,7 +180,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(0, result.getIds().size());
         assertFalse(result.includesLastItem());
-        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals("", getDefaultFolder().getSyncStateToken());
+        assertEquals(myNewSyncState, result.getSyncState());
     }
 
     @Test
@@ -194,7 +198,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(ids, result.getIds());
         assertFalse(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
     @Test
@@ -225,8 +230,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     public void testErrorResponseCode() throws ServiceCallException, HttpErrorException
     {
         final String oldState = "old sync state";
-        getDefaultFolder().setSyncStateToken("old sync state");
-
+        getDefaultFolder().setSyncStateToken(oldState);
         SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
                                                                                         getDefaultFolder());
 
@@ -290,8 +294,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         expected.add("onlyId");
         assertEquals(expected, result.getIds());
         assertFalse(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
-
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
     @Test
@@ -329,6 +333,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         assertEquals(expected, result.getIds());
         assertFalse(result.includesLastItem());
         assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, result.getSyncState());
     }
 
     @Test
@@ -361,7 +366,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(0, result.getIds().size());
         assertTrue(result.includesLastItem());
-        assertEquals(myNewSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals("", getDefaultFolder().getSyncStateToken());
+        assertEquals(myNewSyncState, result.getSyncState());
     }
 
     @Test
@@ -383,7 +389,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         ids.remove(1);
         assertEquals(ids, result.getIds());
         assertTrue(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
     @Test
@@ -408,7 +415,8 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         ids.remove(1);
         assertEquals(ids, result.getIds());
         assertTrue(result.includesLastItem());
-        assertEquals(newSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(oldSyncState, getDefaultFolder().getSyncStateToken());
+        assertEquals(newSyncState, result.getSyncState());
     }
 
 }

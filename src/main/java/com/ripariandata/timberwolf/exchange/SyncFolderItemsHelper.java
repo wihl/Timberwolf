@@ -101,8 +101,10 @@ public final class SyncFolderItemsHelper
         }
         ArrayOfResponseMessagesType array = response.getResponseMessages();
         SyncFolderItemsResult result = new SyncFolderItemsResult(folder.getSyncStateToken());
+        boolean hasMessages = false;
         for (SyncFolderItemsResponseMessageType message : array.getSyncFolderItemsResponseMessageArray())
         {
+            hasMessages = true;
             ResponseCodeType.Enum errorCode = message.getResponseCode();
             if (errorCode != null && errorCode != ResponseCodeType.NO_ERROR)
             {
@@ -130,12 +132,10 @@ public final class SyncFolderItemsHelper
                 }
             }
         }
-        // SyncFindItems always returns a new sync state, even if there's no changes
-        // so this implies that no sync state was in the response
-        if (result.getSyncState().equals(folder.getSyncStateToken()))
+        if (!hasMessages)
         {
             LOG.debug("Exchange responded without any messages");
-            // return true, so that it won't just call it again
+            // so that we don't keep calling over and over again
             result.setIncludesLastItem(true);
         }
         return result;
