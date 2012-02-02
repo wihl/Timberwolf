@@ -23,19 +23,16 @@ import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsRes
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
-
+import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
 import java.util.List;
 import java.util.Vector;
-
 import org.junit.Test;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -49,8 +46,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
 {
 
     private static final int DEFAULT_MAX_ENTRIES = 512;
-    private FolderContext defaultInboxFolder =
-            new FolderContext(DistinguishedFolderIdNameType.INBOX, getDefaultUser(), null);
+    private final String folderId = "A super unique folder id";
+    private final FolderContext folderContext =
+            new FolderContext(folderId, getDefaultUser(), new InMemoryUserFolderSyncStateStorage());
 
     @Test
     public void testGetSyncFolderItemsRequest() throws ServiceCallException
@@ -58,11 +56,11 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         SyncFolderItemsType syncFolderItems = SyncFolderItemsType.Factory.newInstance();
         syncFolderItems.setMaxChangesReturned(498);
         syncFolderItems.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        syncFolderItems.addNewSyncFolderId().addNewDistinguishedFolderId().setId(DistinguishedFolderIdNameType.INBOX);
+        syncFolderItems.addNewSyncFolderId().addNewFolderId().setId(folderId);
         syncFolderItems.setSyncState("");
 
         Configuration config = new Configuration(498, 0);
-        FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.INBOX, getDefaultUser(), null);
+        FolderContext folder = new FolderContext(folderId, getDefaultUser());
         assertEquals(syncFolderItems.xmlText(),
                      SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folder).xmlText());
     }
@@ -77,7 +75,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         syncFolderItems.setSyncState("MySweetSyncToken");
 
         Configuration config = new Configuration(4000, 200);
-        FolderContext folder = new FolderContext("MySweetExchangeId", getDefaultUser(), "MySweetSyncToken");
+        FolderContext folder = new FolderContext("MySweetExchangeId", getDefaultUser(),
+                                                 new InMemoryUserFolderSyncStateStorage());
+        folder.setSyncStateToken("MySweetSyncToken");
         assertEquals(syncFolderItems.xmlText(),
                      SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folder).xmlText());
     }
@@ -85,7 +85,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     private void assertSyncFolderItemsRequestMaxEntries(final int maxItems) throws ServiceCallException
     {
         Configuration config = new Configuration(maxItems, 0);
-        SyncFolderItemsType request = SyncFolderItemsHelper.getSyncFolderItemsRequest(config, defaultInboxFolder);
+        SyncFolderItemsType request = SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folderContext);
         assertEquals(Math.max(1, maxItems), request.getMaxChangesReturned());
     }
 
@@ -106,12 +106,12 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     public void testSyncFolderItemsInboxRespondNull() throws ServiceCallException, HttpErrorException
     {
         Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
-        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(config, defaultInboxFolder);
+        SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folderContext);
         when(getService().syncFolderItems(likeThis(syncItems), eq(getDefaultUser()))).thenReturn(null);
         try
         {
             SyncFolderItemsResult result =
-                    SyncFolderItemsHelper.syncFolderItems(getService(), config, defaultInboxFolder);
+                    SyncFolderItemsHelper.syncFolderItems(getService(), config, folderContext);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)

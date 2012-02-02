@@ -17,11 +17,10 @@
  */
 package com.ripariandata.timberwolf.exchange;
 
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
+import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 
 /**
@@ -34,39 +33,20 @@ import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 public class FolderContext
 {
     private final String stringFolder;
-    private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
     private final String user;
     private UserFolderSyncStateStorage syncStateStorage;
 
-    private FolderContext(final String folder, final DistinguishedFolderIdNameType.Enum distinguishedFolder,
-                          final String targetUser, final UserFolderSyncStateStorage userFolderSyncStateStorage)
+    public FolderContext(final String folder, final String targetUser,
+                         final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
         stringFolder = folder;
-        distinguishedFolderId = distinguishedFolder;
         user = targetUser;
         syncStateStorage = userFolderSyncStateStorage;
     }
 
     public FolderContext(final String folder, final String targetUser)
     {
-        this(folder, null, targetUser, null);
-    }
-
-    public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser)
-    {
-        this(null, distinguishedFolder, targetUser, null);
-    }
-
-    public FolderContext(final String folder, final String targetUser,
-                         final UserFolderSyncStateStorage syncStateStorage)
-    {
-        this(folder, null, targetUser, syncStateStorage);
-    }
-
-    public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser,
-                         final UserFolderSyncStateStorage syncStorage)
-    {
-        this(null, distinguishedFolder, targetUser, syncStorage);
+        this(folder, targetUser, new InMemoryUserFolderSyncStateStorage());
     }
 
 
@@ -74,17 +54,8 @@ public class FolderContext
     {
         NonEmptyArrayOfBaseFolderIdsType ids =
                 NonEmptyArrayOfBaseFolderIdsType.Factory.newInstance();
-        if (stringFolder != null)
-        {
-            FolderIdType folderType = ids.addNewFolderId();
-            folderType.setId(stringFolder);
-        }
-        else
-        {
-            DistinguishedFolderIdType folderId =
-                    ids.addNewDistinguishedFolderId();
-            folderId.setId(distinguishedFolderId);
-        }
+        FolderIdType folderType = ids.addNewFolderId();
+        folderType.setId(stringFolder);
         return ids;
     }
 
@@ -127,14 +98,7 @@ public class FolderContext
     public TargetFolderIdType getTargetFolder()
     {
         TargetFolderIdType targetFolderId = TargetFolderIdType.Factory.newInstance();
-        if (stringFolder != null)
-        {
-            targetFolderId.addNewFolderId().setId(stringFolder);
-        }
-        else
-        {
-            targetFolderId.addNewDistinguishedFolderId().setId(distinguishedFolderId);
-        }
+        targetFolderId.addNewFolderId().setId(stringFolder);
         return targetFolderId;
     }
 }

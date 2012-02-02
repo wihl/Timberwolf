@@ -25,10 +25,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BasePathToElementType;
 import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
+import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
 import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
@@ -37,21 +36,16 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
 import com.microsoft.schemas.exchange.services.x2006.types.SearchExpressionType;
-
 import java.util.Vector;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-
 import org.junit.Test;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -62,8 +56,8 @@ import static org.mockito.Mockito.when;
  */
 public class FindItemTest extends ExchangeTestBase
 {
-    private FolderContext inbox =
-            new FolderContext(DistinguishedFolderIdNameType.INBOX, getDefaultUser());
+    private final String id = "A super unique folder id";
+    private FolderContext folderContext = new FolderContext(id, getDefaultUser());
 
     private static final int DEFAULT_MAX_ENTRIES = 1000;
 
@@ -73,8 +67,8 @@ public class FindItemTest extends ExchangeTestBase
         FindItemType findItem = FindItemType.Factory.newInstance();
         findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
         findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
-        folderId.setId(DistinguishedFolderIdNameType.INBOX);
+        FolderIdType folderId = findItem.addNewParentFolderIds().addNewFolderId();
+        folderId.setId(id);
         IndexedPageViewType index = findItem.addNewIndexedPageItemView();
         index.setMaxEntriesReturned(DEFAULT_MAX_ENTRIES);
         index.setBasePoint(IndexBasePointType.BEGINNING);
@@ -82,26 +76,7 @@ public class FindItemTest extends ExchangeTestBase
         findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
         Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
         assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(config, inbox, 0).xmlText());
-    }
-
-    @Test
-    public void testGetFindItemsRequestDeletedItems() throws ServiceCallException
-    {
-        FindItemType findItem = FindItemType.Factory.newInstance();
-        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        DistinguishedFolderIdType folderId = findItem.addNewParentFolderIds().addNewDistinguishedFolderId();
-        folderId.setId(DistinguishedFolderIdNameType.DELETEDITEMS);
-        IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(DEFAULT_MAX_ENTRIES);
-        index.setBasePoint(IndexBasePointType.BEGINNING);
-        index.setOffset(0);
-        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
-        Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
-        FolderContext folder = new FolderContext(DistinguishedFolderIdNameType.DELETEDITEMS, getDefaultUser());
-        assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(config, folder, 0).xmlText());
+                     FindItemHelper.getFindItemsRequest(config, folderContext, 0).xmlText());
     }
 
     @Test
@@ -111,20 +86,20 @@ public class FindItemTest extends ExchangeTestBase
         Configuration config = new Configuration(maxEntries, 0);
 
         final int offset = 3;
-        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, offset);
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
         assertEquals(offset, request.getIndexedPageItemView().getOffset());
 
         final int unusualOffset = 13;
-        request = FindItemHelper.getFindItemsRequest(config, inbox, unusualOffset);
+        request = FindItemHelper.getFindItemsRequest(config, folderContext, unusualOffset);
         assertEquals(unusualOffset, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(config, inbox, 0);
+        request = FindItemHelper.getFindItemsRequest(config, folderContext, 0);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(config, inbox, -1);
+        request = FindItemHelper.getFindItemsRequest(config, folderContext, -1);
         assertEquals(0, request.getIndexedPageItemView().getOffset());
 
-        request = FindItemHelper.getFindItemsRequest(config, inbox, 1);
+        request = FindItemHelper.getFindItemsRequest(config, folderContext, 1);
         assertEquals(1, request.getIndexedPageItemView().getOffset());
     }
 
@@ -132,7 +107,7 @@ public class FindItemTest extends ExchangeTestBase
     {
         Configuration config = new Configuration(maxItems, 0);
         final int offset = 5;
-        FindItemType request = FindItemHelper.getFindItemsRequest(config, inbox, offset);
+        FindItemType request = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
         assertEquals(Math.max(1, maxItems), request.getIndexedPageItemView().getMaxEntriesReturned());
     }
 
@@ -154,12 +129,12 @@ public class FindItemTest extends ExchangeTestBase
             throws ServiceCallException, HttpErrorException
     {
         Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
-        FindItemType findItem = FindItemHelper.getFindItemsRequest(config, inbox, 0);
+        FindItemType findItem = FindItemHelper.getFindItemsRequest(config, folderContext, 0);
         when(getService().findItem(likeThis(findItem), eq(getDefaultUser()))).thenReturn(null);
 
         try
         {
-            Vector<String> items = FindItemHelper.findItems(getService(), config, inbox, 0);
+            Vector<String> items = FindItemHelper.findItems(getService(), config, folderContext, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -252,7 +227,7 @@ public class FindItemTest extends ExchangeTestBase
         try
         {
             Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
-            FindItemHelper.findItems(getService(), config, inbox, 0);
+            FindItemHelper.findItems(getService(), config, folderContext, 0);
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
