@@ -193,6 +193,29 @@ public class ExchangeTestBase
         mockSyncFolderItems(ids, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState);
     }
 
+    protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,
+                                                final String newSyncState)
+            throws ServiceCallException, HttpErrorException
+    {
+        return mockSyncFolderItems(offset, maxIds, itemsInExchange, newSyncState, true);
+    }
+
+    protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,
+                                              final String newSyncState, final boolean includesLastItem)
+            throws ServiceCallException, HttpErrorException
+    {
+        MessageType[] messages = new MessageType[itemsInExchange];
+        List<String> ids = generateIds(offset, itemsInExchange, getDefaultFolderId());
+        for (int i = 0; i < itemsInExchange; i++)
+        {
+            messages[i] = mockMessageItemId(ids.get(i));
+        }
+        mockSyncFolderItems(
+                generateIds(offset, itemsInExchange, getDefaultFolderId()).toArray(new String[itemsInExchange]),
+                getDefaultFolder(), maxIds, newSyncState, includesLastItem);
+        return messages;
+    }
+
     protected void mockSyncFolderItems(final String[] ids, final FolderContext folder, final int maxIds,
                                        final String newSyncState)
             throws ServiceCallException, HttpErrorException
