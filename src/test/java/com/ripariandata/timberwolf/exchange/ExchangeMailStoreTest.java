@@ -27,16 +27,15 @@ import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
+import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.MailboxItem;
-import com.ripariandata.timberwolf.NoopUserTimeUpdater;
-import com.ripariandata.timberwolf.UserTimeUpdater;
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import org.apache.xmlbeans.XmlException;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,6 +46,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** Test for ExchangeMailStore, uses mock exchange service. */
@@ -73,7 +73,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         mockFindItem(messages);
         defaultMockFindFolders();
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -87,7 +87,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -111,7 +111,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         try
         {
             ExchangeMailStore store = new ExchangeMailStore(getService());
-            Iterable<MailboxItem> mail = store.getMail(defaultUsers, new NoopUserTimeUpdater());
+            Iterable<MailboxItem> mail = store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage());
         }
         catch (ExchangeRuntimeException e)
         {
@@ -141,7 +141,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         mockGetItem(messages, requestedList);
         int i = 0;
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new NoopUserTimeUpdater()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
         {
             assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
@@ -166,13 +166,13 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         mockGetItem(findResults, 0, itemPageSize, 0, itemsInExchange, getDefaultFolderId());
         mockGetItem(findResults, 0, itemPageSize, 1, itemsInExchange, getDefaultFolderId());
 
-        FindItemIterator mailItor = new FindItemIterator(getService(), config, getDefaultFolder());
+        FindItemIterator mailIterator = new FindItemIterator(getService(), config, getDefaultFolder());
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
-        while (mailItor.hasNext())
+        while (mailIterator.hasNext())
         {
-            MailboxItem item = mailItor.next();
+            MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
         }
@@ -190,19 +190,19 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         Configuration config = new Configuration(idPageSize, itemPageSize);
         defaultMockFindFolders();
         MessageType[] findResults = mockFindItem(getDefaultFolderId(), 0, idPageSize, itemsInExchange);
-        final int pageIndexcount = 5;
-        for (int i = 0; i < pageIndexcount; i++)
+        final int pageIndexCount = 5;
+        for (int i = 0; i < pageIndexCount; i++)
         {
             mockGetItem(findResults, 0, itemPageSize, i, itemsInExchange, getDefaultFolderId());
         }
 
-        FindItemIterator mailItor = new FindItemIterator(getService(), config, getDefaultFolder());
+        FindItemIterator mailIterator = new FindItemIterator(getService(), config, getDefaultFolder());
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
-        while (mailItor.hasNext())
+        while (mailIterator.hasNext())
         {
-            MailboxItem item = mailItor.next();
+            MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
         }
@@ -234,13 +234,13 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             mockGetItem(findResults, idPageSize, itemPageSize, i, itemsInExchange, getDefaultFolderId());
         }
 
-        FindItemIterator mailItor = new FindItemIterator(getService(), config, getDefaultFolder());
+        FindItemIterator mailIterator = new FindItemIterator(getService(), config, getDefaultFolder());
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
-        while (mailItor.hasNext())
+        while (mailIterator.hasNext())
         {
-            MailboxItem item = mailItor.next();
+            MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
         }
@@ -270,13 +270,13 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         // because the idPageSize evenly divides the number of emails
         mockFindItem(getDefaultFolderId(), itemsInExchange, idPageSize, 0);
 
-        FindItemIterator mailItor = new FindItemIterator(getService(), config, getDefaultFolder());
+        FindItemIterator mailIterator = new FindItemIterator(getService(), config, getDefaultFolder());
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
-        while (mailItor.hasNext())
+        while (mailIterator.hasNext())
         {
-            MailboxItem item = mailItor.next();
+            MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
         }
@@ -611,7 +611,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int findItemPageSize = 10;
         final int getItemPageSize = 5;
         ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
-        Iterator<MailboxItem> mail = store.getMail(defaultUsers, new NoopUserTimeUpdater()).iterator();
+        Iterator<MailboxItem> mail = store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()).iterator();
         final int folderIdTwoCount = 13;
         final int folderIdOtherCount = 2;
         for (String folder : new String[]{"FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID"})
@@ -661,7 +661,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int findItemPageSize = 10;
         final int getItemPageSize = 5;
         ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
-        Iterator<MailboxItem> mail = store.getMail(users, new NoopUserTimeUpdater()).iterator();
+        Iterator<MailboxItem> mail = store.getMail(users, new InMemoryUserFolderSyncStateStorage()).iterator();
 
         final int count = 2;
         for (String folder : new String[]{"BOB-FOLDER", "ALICE-FOLDER"})

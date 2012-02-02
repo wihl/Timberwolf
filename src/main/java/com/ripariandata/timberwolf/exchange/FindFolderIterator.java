@@ -21,7 +21,6 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.ripariandata.timberwolf.MailboxItem;
 import java.util.Iterator;
 import java.util.Queue;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,6 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
     private Configuration config;
     private Queue<String> folderQueue;
     private String user;
-    private DateTime accessTime;
 
     public FindFolderIterator(final ExchangeService exchangeService, final Configuration configuration,
                               final String targetUser)
@@ -68,8 +66,6 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
                               user, e.getMessage()),
                 e);
         }
-
-        accessTime = new DateTime();
     }
 
     @Override
@@ -77,10 +73,9 @@ public class FindFolderIterator extends BaseChainIterator<MailboxItem>
     {
         if (folderQueue.size() == 0)
         {
-            config.setLastUpdated(user, accessTime);
             return null;
         }
-        FolderContext folder = new FolderContext(folderQueue.poll(), user);
+        FolderContext folder = new FolderContext(folderQueue.poll(), user, config.getSyncStateStorage());
         return new SyncFolderItemIterator(service, config, folder);
     }
 }
