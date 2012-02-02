@@ -22,6 +22,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderId
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 
 /**
  * FolderContext class holds information about where a service call should be looking for
@@ -35,15 +36,15 @@ public class FolderContext
     private final String stringFolder;
     private DistinguishedFolderIdNameType.Enum distinguishedFolderId;
     private final String user;
-    private String syncStateToken;
+    private UserFolderSyncStateStorage syncStateStorage;
 
     private FolderContext(final String folder, final DistinguishedFolderIdNameType.Enum distinguishedFolder,
-                          final String targetUser, final String syncState)
+                          final String targetUser, final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
         stringFolder = folder;
         distinguishedFolderId = distinguishedFolder;
         user = targetUser;
-        syncStateToken = syncState;
+        syncStateStorage = userFolderSyncStateStorage;
     }
 
     public FolderContext(final String folder, final String targetUser)
@@ -56,15 +57,16 @@ public class FolderContext
         this(null, distinguishedFolder, targetUser, null);
     }
 
-    public FolderContext(final String folder, final String targetUser, final String syncState)
+    public FolderContext(final String folder, final String targetUser,
+                         final UserFolderSyncStateStorage syncStateStorage)
     {
-        this(folder, null, targetUser, syncState);
+        this(folder, null, targetUser, syncStateStorage);
     }
 
     public FolderContext(final DistinguishedFolderIdNameType.Enum distinguishedFolder, final String targetUser,
-                         final String syncState)
+                         final UserFolderSyncStateStorage syncStorage)
     {
-        this(null, distinguishedFolder, targetUser, syncState);
+        this(null, distinguishedFolder, targetUser, syncStorage);
     }
 
 
@@ -95,10 +97,12 @@ public class FolderContext
      * Returns the sync token that should be used when syncing this folder.
      * This variable is cached, and only requires a call to the data store
      * the first time it is accessed, if that.
+     *
      * @return The sync token, or the empty string if there is no token.
      */
     public String getSyncStateToken()
     {
+        final String syncStateToken = syncStateStorage.getLastSyncState(user, stringFolder);
         return syncStateToken == null ? "" : syncStateToken;
     }
 
@@ -106,16 +110,18 @@ public class FolderContext
      * Sets the sync token returned from Exchange when syncing this folder.
      * This should not be called until after all items are retrieved; this can
      * be considered a permanent change; the old sync state is gone forever.
+     *
      * @param syncState The sync token from exchange. This should not be null.
      */
     public void setSyncStateToken(final String syncState)
     {
-        syncStateToken = syncState;
+        syncStateStorage.setSyncState(user, stringFolder, syncState);
     }
 
     /**
      * Returns the target folder to be sent to exchange for this folder
      * context.
+     *
      * @return A TargetFolderIdType containing this folder context.
      */
     public TargetFolderIdType getTargetFolder()

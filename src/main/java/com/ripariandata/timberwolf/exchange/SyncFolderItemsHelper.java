@@ -96,7 +96,8 @@ public final class SyncFolderItemsHelper
         SyncFolderItemsResponseType response = exchangeService.syncFolderItems(syncFolderItemsRequest, targetUser);
         if (response == null)
         {
-            LOG.debug("Exchange service returned null sync folder items response.");
+            LOG.debug("Exchange service returned null sync folder items response for request:\n{}",
+                      syncFolderItemsRequest);
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
         ArrayOfResponseMessagesType array = response.getResponseMessages();
