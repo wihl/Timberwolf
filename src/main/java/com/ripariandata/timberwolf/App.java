@@ -42,7 +42,7 @@ import javax.security.auth.login.LoginException;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-//import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.Option;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +58,11 @@ final class App implements PrivilegedAction<Integer>
 
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
+
+    @Option(name = "--config",
+            usage = "Sets the location to look for a configuration properties file.  Defaults to "
+                    + DEFAULT_CONFIG_LOCATION + ".")
+    private String configFileLocation = DEFAULT_CONFIG_LOCATION;
 
     // @Option(name = "-h", aliases = { "--help" },
     //         usage = "Show this help text.")
@@ -124,21 +129,33 @@ final class App implements PrivilegedAction<Integer>
     private void beginEverything(final String[] args) throws IOException
     {
         ConfigFileParser configParser = new ConfigFileParser(this);
-        CmdLineParser parser = new CmdLineParser(this);
+        CmdLineParser cliParser = new CmdLineParser(this);
 
         try
         {
-            configParser.parseConfigFile(DEFAULT_CONFIG_LOCATION);
+            cliParser.parseArgument(args);
+        }
+        catch (CmdLineException e)
+        {
+            System.err.println(e.getMessage());
+            printUsage(System.err, cliParser);
+        }
+
+        try
+        {
+            configParser.parseConfigFile(configFileLocation);
         }
         catch (ConfigFileMissingException e)
         {
-            // Do nothing.  In the absence of a config file, we assume that all
-            // the arguments will be provided on the command line.  If they
-            // aren't, _then_ we'll fail and exit.
+            if (configFileLocation != DEFAULT_CONFIG_LOCATION)
+            {
+                // Assume that this was specified explicitly.
+                System.err.println(e.getMessage());
+                return;
+            }
 
-            // TODO: This empty block currently pitches a checkstyle error.  If
-            // it's still empty at the end of this story, either suppress the
-            // error for this one case or figure out a way around it.
+            // If the config file was not explicitly named, assume that the user
+            // meant to specify everything on the command line.
         }
         catch (ConfigFileException e)
         {
@@ -149,11 +166,9 @@ final class App implements PrivilegedAction<Integer>
 
         try
         {
-            //parser.parseArgument(args);
-
             if (help)
             {
-                printUsage(System.out, parser);
+                printUsage(System.out, cliParser);
                 return;
             }
 
@@ -175,7 +190,7 @@ final class App implements PrivilegedAction<Integer>
 
             if (!noHBaseArgs && !allHBaseArgs)
             {
-                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
                                            + "Table Name must all be specified if at least one is specified");
             }
 
@@ -187,7 +202,7 @@ final class App implements PrivilegedAction<Integer>
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            printUsage(System.err, parser);
+            printUsage(System.err, cliParser);
         }
         catch (LoginException e)
         {
