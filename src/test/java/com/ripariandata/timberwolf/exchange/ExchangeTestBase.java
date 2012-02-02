@@ -167,7 +167,7 @@ public class ExchangeTestBase
         Configuration config = new Configuration(maxIds, 0);
         UserTimeUpdater timeUpdater = mock(UserTimeUpdater.class);
         when(timeUpdater.lastUpdated(user)).thenReturn(startDate);
-        config = config.withTimeUpdater(timeUpdater);
+//        config = config.withTimeUpdater(timeUpdater);
 
         FolderContext folderContext = new FolderContext(folder, user);
         FindItemType findItem = FindItemHelper.getFindItemsRequest(config, folderContext, offset);
@@ -281,7 +281,7 @@ public class ExchangeTestBase
                 mock(SyncFolderItemsResponseMessageType.class);
         SyncFolderItemsChangesType syncFolderItemsChanges = mock(SyncFolderItemsChangesType.class);
 
-        LOG.debug("Expecting SyncFolderItems with User:{} Request:\n{}",folder.getUser(), syncItems);
+        LOG.debug("Expecting SyncFolderItems with User:{} Request:\n{}", folder.getUser(), syncItems);
         when(service.syncFolderItems(likeThis(syncItems), eq(folder.getUser()))).thenReturn(syncItemsResponse);
         when(syncItemsResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getSyncFolderItemsResponseMessageArray())
@@ -399,6 +399,7 @@ public class ExchangeTestBase
         ArrayOfResponseMessagesType arrayOfResponseMessages = mock(ArrayOfResponseMessagesType.class);
         ItemInfoResponseMessageType itemInfoResponseMessage = mock(ItemInfoResponseMessageType.class);
         ArrayOfRealItemsType arrayOfRealItems = mock(ArrayOfRealItemsType.class);
+        LOG.debug("Expecting get item request for User:{}; Data:{}", user, getItem);
         when(service.getItem(likeThis(getItem), eq(user))).thenReturn(getItemResponse);
         when(getItemResponse.getResponseMessages()).thenReturn(arrayOfResponseMessages);
         when(arrayOfResponseMessages.getGetItemResponseMessageArray())

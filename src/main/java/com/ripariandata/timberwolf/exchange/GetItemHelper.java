@@ -30,16 +30,12 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Contains helper functions for GetItem requests.
- */
+/** Contains helper functions for GetItem requests. */
 public final class GetItemHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(GetItemHelper.class);
 
-    /**
-     * Enforces not being able to create an instance.
-     */
+    /** Enforces not being able to create an instance. */
     private GetItemHelper()
     {
 
@@ -79,8 +75,8 @@ public final class GetItemHelper
      * @return A list of mailbox items that correspond to the given ids.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error making the Exchange
-     *                              request, or if the SOAP find item response has a message
-     *                              with a response code other than "No Error".
+     * request, or if the SOAP find item response has a message
+     * with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService, final String targetUser)
@@ -97,7 +93,8 @@ public final class GetItemHelper
 
         if (response == null)
         {
-            LOG.debug("Exchange service returned null get item response.");
+            LOG.debug("Exchange service returned null get item response for request:\n{}",
+                      getGetItemsRequest(ids.subList(startIndex, max)).toString());
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
 

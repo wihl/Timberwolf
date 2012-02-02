@@ -24,14 +24,9 @@ import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.BasePathToElementType;
 import com.microsoft.schemas.exchange.services.x2006.types.ConstantValueType;
-import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
-import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexBasePointType;
-import com.microsoft.schemas.exchange.services.x2006.types.IndexedPageViewType;
 import com.microsoft.schemas.exchange.services.x2006.types.IsGreaterThanType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services.x2006.types.RestrictionType;
@@ -60,24 +55,6 @@ public class FindItemTest extends ExchangeTestBase
     private FolderContext folderContext = new FolderContext(id, getDefaultUser());
 
     private static final int DEFAULT_MAX_ENTRIES = 1000;
-
-    @Test
-    public void testGetFindItemsRequestInbox() throws ServiceCallException
-    {
-        FindItemType findItem = FindItemType.Factory.newInstance();
-        findItem.setTraversal(ItemQueryTraversalType.SHALLOW);
-        findItem.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
-        FolderIdType folderId = findItem.addNewParentFolderIds().addNewFolderId();
-        folderId.setId(id);
-        IndexedPageViewType index = findItem.addNewIndexedPageItemView();
-        index.setMaxEntriesReturned(DEFAULT_MAX_ENTRIES);
-        index.setBasePoint(IndexBasePointType.BEGINNING);
-        index.setOffset(0);
-        findItem.setRestriction(FindItemHelper.getAfterDateRestriction(new DateTime(0)));
-        Configuration config = new Configuration(DEFAULT_MAX_ENTRIES, 0);
-        assertEquals(findItem.xmlText(),
-                     FindItemHelper.getFindItemsRequest(config, folderContext, 0).xmlText());
-    }
 
     @Test
     public void testGetFindItemsRequestOffset() throws ServiceCallException
