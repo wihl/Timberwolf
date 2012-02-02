@@ -64,50 +64,50 @@ final class App implements PrivilegedAction<Integer>
                     + DEFAULT_CONFIG_LOCATION + ".")
     private String configFileLocation = DEFAULT_CONFIG_LOCATION;
 
-    // @Option(name = "-h", aliases = { "--help" },
-    //         usage = "Show this help text.")
+    @Option(name = "-h", aliases = { "--help" },
+            usage = "Show this help text.")
     private boolean help;
 
-    // @Option(required = true, name = "--domain",
-    //         usage = "The domain you wish to crawl. Users of this domain will be imported.")
-    @ConfigEntry(name = "domain")
+    @Option(name = "--domain",
+            usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    @ConfigEntry(name = "domain", overwriteNonDefault = false)
     private String domain;
 
-    // @Option(required = true, name = "--exchange-url",
-    //         usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
-    //                 + "https://example.com/ews/exchange.asmx")
-    @ConfigEntry(name = "exchange.url")
+    @Option(name = "--exchange-url",
+            usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+                    + "https://example.com/ews/exchange.asmx")
+    @ConfigEntry(name = "exchange.url", overwriteNonDefault = false)
     private String exchangeUrl;
 
-    // @Option(name = "--hbase-quorum",
-    //         usage = "The ZooKeeper quorum used to connect to HBase.")
-    @ConfigEntry(name = "hbase.quorum")
+    @Option(name = "--hbase-quorum",
+            usage = "The ZooKeeper quorum used to connect to HBase.")
+    @ConfigEntry(name = "hbase.quorum", overwriteNonDefault = false)
     private String hbaseQuorum;
 
-    // @Option(name = "--hbase-clientport",
-    //         usage = "The ZooKeeper client port used to connect to HBase.")
-    @ConfigEntry(name = "hbase.clientport")
+    @Option(name = "--hbase-clientport",
+            usage = "The ZooKeeper client port used to connect to HBase.")
+    @ConfigEntry(name = "hbase.clientport", overwriteNonDefault = false)
     private String hbaseclientPort;
 
-    // @Option(name = "--hbase-table",
-    //         usage = "The HBase table name that email data will be imported into.")
-    @ConfigEntry(name = "hbase.table")
+    @Option(name = "--hbase-table",
+            usage = "The HBase table name that email data will be imported into.")
+    @ConfigEntry(name = "hbase.table", overwriteNonDefault = false)
     private String hbaseTableName;
 
-    // @Option(name = "--hbase-metadata-table",
-    //         usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
-    //               + "email for each user.")
-    @ConfigEntry(name = "hbase.metadatatable")
+    @Option(name = "--hbase-metadata-table",
+            usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
+                  + "email for each user.")
+    @ConfigEntry(name = "hbase.metadatatable", overwriteNonDefault = false)
     private String hbaseMetadataTableName;
 
-    // @Option(name = "--hbase-key-header.",
-    //         usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
-    @ConfigEntry(name = "hbase.key.header")
+    @Option(name = "--hbase-key-header.",
+            usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
+    @ConfigEntry(name = "hbase.key.header", overwriteNonDefault = false)
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
-    // @Option(name = "--hbase-column-family.",
-    //         usage = "The column family for the imported email data.  Default family is 'h'.")
-    @ConfigEntry(name = "hbase.column.family")
+    @Option(name = "--hbase-column-family.",
+            usage = "The column family for the imported email data.  Default family is 'h'.")
+    @ConfigEntry(name = "hbase.column.family", overwriteNonDefault = false)
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
@@ -139,6 +139,13 @@ final class App implements PrivilegedAction<Integer>
         {
             System.err.println(e.getMessage());
             printUsage(System.err, cliParser);
+            return;
+        }
+
+        if (help)
+        {
+            printUsage(System.out, cliParser);
+            return;
         }
 
         try
@@ -164,45 +171,48 @@ final class App implements PrivilegedAction<Integer>
             return;
         }
 
-        try
+        LOG.debug("Timberwolf invoked with the following arguments:");
+        LOG.debug("Domain: {}", domain);
+        LOG.debug("Exchange URL: {}", exchangeUrl);
+        LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+        LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
+        LOG.debug("HBase Table Name: {}", hbaseTableName);
+        LOG.debug("HBase Metadata Table Name: {}", hbaseMetadataTableName);
+        LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
+        LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
+
+        if (domain == null)
         {
-            if (help)
-            {
-                printUsage(System.out, cliParser);
-                return;
-            }
-
-            LOG.debug("Timberwolf invoked with the following arguments:");
-            LOG.debug("Domain: {}", domain);
-            LOG.debug("Exchange URL: {}", exchangeUrl);
-            LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
-            LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
-            LOG.debug("HBase Table Name: {}", hbaseTableName);
-            LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
-            LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
-
-            boolean noHBaseArgs =
-                    hbaseQuorum == null && hbaseclientPort == null
-                    && hbaseTableName == null && hbaseMetadataTableName == null;
-            boolean allHBaseArgs =
-                    hbaseQuorum != null && hbaseclientPort != null
-                    && hbaseTableName != null && hbaseMetadataTableName != null;
-
-            if (!noHBaseArgs && !allHBaseArgs)
-            {
-                throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
-                                           + "Table Name must all be specified if at least one is specified");
-            }
-
-            useHBase = allHBaseArgs;
-
-            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
+            System.err.println("The domain must be specified either in the configuration file or on the command line.");
+            printUsage(System.err, cliParser);
+            return;
         }
 
-        catch (CmdLineException e)
+        if (exchangeUrl == null)
         {
-            System.err.println(e.getMessage());
+            System.err.println(
+                "The Exchange URL must be specified either in the configuration file or on the command line.");
             printUsage(System.err, cliParser);
+            return;
+        }
+
+        boolean noHBaseArgs = hbaseQuorum == null && hbaseclientPort == null && hbaseTableName == null
+                           && hbaseMetadataTableName == null;
+        boolean allHBaseArgs = hbaseQuorum != null && hbaseclientPort != null && hbaseTableName != null
+                            && hbaseMetadataTableName != null;
+
+        if (!noHBaseArgs && !allHBaseArgs)
+        {
+            System.err.println("HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase Table Name must all be "
+                             + "specified if at least one is specified");
+            printUsage(System.err, cliParser);
+            return;
+        }
+        useHBase = allHBaseArgs;
+
+        try
+        {
+            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
         }
         catch (LoginException e)
         {
