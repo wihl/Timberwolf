@@ -51,7 +51,16 @@ public class ConfigFileParser
                 ConfigEntry entry = f.getAnnotation(ConfigEntry.class);
                 if (entry != null)
                 {
-                    fields.put(entry.name(), new FieldSetter(bean, f));
+                    FieldSetter fs;
+                    if (entry.overwriteNonDefault())
+                    {
+                        fs = new FieldSetter(bean, f);
+                    }
+                    else
+                    {
+                        fs = new NonOverwritingFieldSetter(bean, f);
+                    }
+                    fields.put(entry.name(), fs);
                 }
             }
         }

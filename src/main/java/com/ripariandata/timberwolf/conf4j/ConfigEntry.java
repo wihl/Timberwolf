@@ -32,4 +32,11 @@ public @interface ConfigEntry
 {
     /** The key name in the configuration file for this entry. */
     String name();
+
+    /**
+     * If false, will silently fail to set values on fields that already have
+     * non-default values.  Default values are 0 for primitive numeric types,
+     * false for booleans, '\u0000' for chars and null for everything else.
+     */
+    boolean overwriteNonDefault() default true;
 }

@@ -209,4 +209,44 @@ public class ConfigFileParserTest
             fail("Wrong exception was thrown when attempting to parse missing file: " + e.getMessage());
         }
     }
+
+    private class TypeThatRespectsDefaults
+    {
+        @ConfigEntry(name = "overwritable")
+        private String overwritable = null;
+
+        @ConfigEntry(name = "non.overwritable", overwriteNonDefault = false)
+        private String nonOverwritable = null;
+
+        public String overwritable()
+        {
+            return overwritable;
+        }
+
+        public String nonOverwritable()
+        {
+            return nonOverwritable;
+        }
+    }
+
+    @Test
+    public void testNotOverwriting()
+    {
+        TypeThatRespectsDefaults target = new TypeThatRespectsDefaults();
+        ConfigFileParser parser = new ConfigFileParser(target);
+
+        Configuration mockConfig = mockConfiguration("overwritable", "new data",
+                                                     "non.overwritable", "new data");
+        parser.parseConfiguration(mockConfig);
+
+        assertEquals("new data", target.overwritable());
+        assertEquals("new data", target.nonOverwritable());
+
+        mockConfig = mockConfiguration("overwritable", "newer data",
+                                       "non.overwritable", "newer data");
+        parser.parseConfiguration(mockConfig);
+
+        assertEquals("newer data", target.overwritable());
+        assertEquals("new data", target.nonOverwritable());
+    }
 }
