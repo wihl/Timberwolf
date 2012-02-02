@@ -27,32 +27,24 @@ import com.microsoft.schemas.exchange.services.x2006.types.FindFolderParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
-
 import com.ripariandata.timberwolf.MailboxItem;
 import com.ripariandata.timberwolf.NoopUserTimeUpdater;
 import com.ripariandata.timberwolf.UserTimeUpdater;
-
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.xmlbeans.XmlException;
-
 import org.joda.time.DateTime;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -323,6 +315,15 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         assertEquals(itemsInExchange, index);
     }
 
+    private void assertFolderSyncState(final int index, final int itemsInExchange, final String expected)
+    {
+        if (index <= itemsInExchange)
+        {
+            assertEquals("SyncStateToken at Email: " + index + "/" + itemsInExchange,
+                         expected, getDefaultFolder().getSyncStateToken());
+        }
+    }
+
     @Test
     public void testSyncFolderItemsOneIdPageTwoItemPages()
             throws IOException, ServiceCallException,
@@ -346,7 +347,9 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
+            assertFolderSyncState(index, itemsInExchange, "");
         }
+        assertFolderSyncState(itemsInExchange, itemsInExchange, newSyncState);
         assertEquals(itemsInExchange, index);
     }
 
@@ -376,7 +379,9 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
+            assertFolderSyncState(index, itemsInExchange, "");
         }
+        assertFolderSyncState(itemsInExchange, itemsInExchange, newSyncState);
         assertEquals(itemsInExchange, index);
     }
 
@@ -418,7 +423,13 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
             index++;
+            assertFolderSyncState(index, idPageSize, "");
+            if (index > idPageSize)
+            {
+                assertFolderSyncState(index, itemsInExchange, secondSyncState);
+            }
         }
+        assertFolderSyncState(itemsInExchange, itemsInExchange, lastSyncState);
         assertEquals(itemsInExchange, index);
     }
 
@@ -433,12 +444,15 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         Configuration config = new Configuration(idPageSize, itemPageSize);
         final int syncOffsetCount = 5;
         final int getOffsetCount = 4;
+        Vector<String> syncStates = new Vector<String>();
+        syncStates.add("");
         for (int i = 0; i < syncOffsetCount; i++)
         {
             String newSyncState = "SyncState#" + i;
             boolean includesLastItem = i == syncOffsetCount - 1;
             MessageType[] syncResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
                                                             includesLastItem);
+            syncStates.add(newSyncState);
             getDefaultFolder().setSyncStateToken(newSyncState);
             for (int j = 0; j < getOffsetCount; j++)
             {
@@ -452,12 +466,20 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
+        String expected = syncStates.remove(0);
         while (mailIterator.hasNext())
         {
             MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
+            if (index > 0 && index % idPageSize == 0)
+            {
+                expected = syncStates.remove(0);
+            }
             index++;
+            assertFolderSyncState(index, itemsInExchange, expected);
         }
+        assertEquals(syncStates.remove(0), getDefaultFolder().getSyncStateToken());
+        assertEquals("Whoops, i think the test is messed up, syncStates should be empty", 0, syncStates.size());
         assertEquals(itemsInExchange, index);
     }
 
@@ -471,12 +493,15 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int itemPageSize = 10;
         Configuration config = new Configuration(idPageSize, itemPageSize);
         final int offsetCount = 4;
+        Vector<String> syncStates = new Vector<String>();
+        syncStates.add("");
         for (int i = 0; i < offsetCount; i++)
         {
             String newSyncState = "SyncState#" + i;
             boolean includesLastItem = i == offsetCount - 1;
             MessageType[] syncResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
                                                             includesLastItem);
+            syncStates.add(newSyncState);
             getDefaultFolder().setSyncStateToken(newSyncState);
             mockGetItem(syncResults, idPageSize * i, idPageSize, 0, itemsInExchange, getDefaultFolderId());
         }
@@ -487,12 +512,20 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         int index = 0;
         List<String> ids = generateIds(0, itemsInExchange, getDefaultFolderId());
+        String expected = syncStates.remove(0);
         while (mailIterator.hasNext())
         {
             MailboxItem item = mailIterator.next();
             assertEquals(ids.get(index), item.getHeader("Item ID"));
+            if (index > 0 && index % idPageSize == 0)
+            {
+                expected = syncStates.remove(0);
+            }
             index++;
+            assertFolderSyncState(index, itemsInExchange, expected);
         }
+        assertEquals(syncStates.remove(0), getDefaultFolder().getSyncStateToken());
+        assertEquals("Whoops, i think the test is messed up, syncStates should be empty", 0, syncStates.size());
         assertEquals(itemsInExchange, index);
     }
 
