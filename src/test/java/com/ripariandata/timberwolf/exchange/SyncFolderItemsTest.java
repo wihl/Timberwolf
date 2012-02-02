@@ -137,8 +137,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     public void testSyncFolderItems1() throws ServiceCallException, HttpErrorException
     {
         String[] ids = new String[]{"onlyId"};
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         mockSyncFolderItems(ids, newSyncState);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
@@ -154,8 +155,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     {
         final int count = 100;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         mockSyncFolderItems(ids.toArray(new String[ids.size()]), newSyncState);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
@@ -183,8 +185,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     {
         final int count = 100;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         mockSyncFolderItems(ids.toArray(new String[ids.size()]), getDefaultFolder(),
                             getDefaultConfig().getFindItemPageSize(), newSyncState, false);
         SyncFolderItemsResult result =
@@ -256,8 +259,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     public void testUnsetIncludesLastItemInRange() throws ServiceCallException, HttpErrorException
     {
         String[] ids = new String[]{"onlyId"};
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         SyncFolderItemsType syncItems = SyncFolderItemsHelper.getSyncFolderItemsRequest(getDefaultConfig(),
                                                                                         getDefaultFolder());
 
@@ -365,8 +369,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     {
         final int count = 3;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
         creates[0] = mockCreateItem(ids.get(0));
         creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
@@ -386,8 +391,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     {
         final int count = 3;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
+        final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
-        getDefaultFolder().setSyncStateToken("oldSyncState");
+        getDefaultFolder().setSyncStateToken(oldSyncState);
         final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
         creates[0] = mockCreateItem(ids.get(0));
         creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);

@@ -100,7 +100,7 @@ public final class SyncFolderItemsHelper
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
         ArrayOfResponseMessagesType array = response.getResponseMessages();
-        SyncFolderItemsResult result = null;
+        SyncFolderItemsResult result = new SyncFolderItemsResult(folder.getSyncStateToken());
         for (SyncFolderItemsResponseMessageType message : array.getSyncFolderItemsResponseMessageArray())
         {
             ResponseCodeType.Enum errorCode = message.getResponseCode();
@@ -111,15 +111,11 @@ public final class SyncFolderItemsHelper
             }
             if (message.isSetSyncState())
             {
-                folder.setSyncStateToken(message.getSyncState());
+                result.setSyncState(message.getSyncState());
             }
             if (message.isSetIncludesLastItemInRange())
             {
-                result = new SyncFolderItemsResult(message.getIncludesLastItemInRange());
-            }
-            else
-            {
-                result = new SyncFolderItemsResult(false);
+                result.setIncludesLastItem(message.getIncludesLastItemInRange());
             }
 
             if (message.isSetChanges())
@@ -134,11 +130,13 @@ public final class SyncFolderItemsHelper
                 }
             }
         }
-        if (result == null)
+        // SyncFindItems always returns a new sync state, even if there's no changes
+        // so this implies that no sync state was in the response
+        if (result.getSyncState().equals(folder.getSyncStateToken()))
         {
             LOG.debug("Exchange responded without any messages");
             // return true, so that it won't just call it again
-            return new SyncFolderItemsResult(true);
+            result.setIncludesLastItem(true);
         }
         return result;
     }
@@ -147,23 +145,54 @@ public final class SyncFolderItemsHelper
     public static class SyncFolderItemsResult
     {
         private final Vector<String> ids;
-        private final boolean includesLastItem;
+        private boolean includesLastItem;
+        private String syncState;
 
-        public SyncFolderItemsResult(final boolean returnedAllItems)
+        private SyncFolderItemsResult(final String oldSyncState)
         {
             ids = new Vector<String>();
-            includesLastItem = returnedAllItems;
+            syncState = oldSyncState;
         }
 
+        /** The ids returned by the sync request. */
         public Vector<String> getIds()
         {
             return ids;
         }
 
+        /**
+         * The sync state returned by the request.
+         * If there was a problem, this will be the same sync state
+         * as the one passed in.
+         *
+         * @return The sync state returned by the request.
+         */
+        public String getSyncState()
+        {
+            return syncState;
+        }
+
+        /**
+         * Whether or not the sync response included
+         * the last item to be synced.
+         *
+         * @return true if all items have been returned.
+         */
         public boolean includesLastItem()
         {
             return includesLastItem;
         }
+
+        private void setIncludesLastItem(final boolean includesLastItem)
+        {
+            this.includesLastItem = includesLastItem;
+        }
+
+        private void setSyncState(final String syncState)
+        {
+            this.syncState = syncState;
+        }
+
     }
 
 }

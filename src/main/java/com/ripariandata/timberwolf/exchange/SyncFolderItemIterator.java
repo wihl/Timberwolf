@@ -34,6 +34,7 @@ public class SyncFolderItemIterator extends BaseChainIterator<MailboxItem>
     private Configuration config;
     private FolderContext folder;
     private boolean retrievedLastItem;
+    private String syncState;
 
     public SyncFolderItemIterator(final ExchangeService exchangeService,
                                   final Configuration configuration,
@@ -49,12 +50,24 @@ public class SyncFolderItemIterator extends BaseChainIterator<MailboxItem>
     {
         try
         {
+            if (syncState == null)
+            {
+                // if this is the first run, just get the stored sync state
+                syncState = folder.getSyncStateToken();
+            }
+            else
+            {
+                // We have successfully retrieved all the items for the given sync state,
+                // so we can now store that sync state in the folder context.
+                folder.setSyncStateToken(syncState);
+            }
             if (retrievedLastItem)
             {
                 return null;
             }
             SyncFolderItemsHelper.SyncFolderItemsResult result =
                     SyncFolderItemsHelper.syncFolderItems(service, config, folder);
+            syncState = result.getSyncState();
             LOG.debug("Got {} email ids, which was {}the last them.", result.getIds().size(),
                       result.includesLastItem() ? "" : "not ");
             retrievedLastItem = result.includesLastItem();

@@ -201,7 +201,7 @@ public class ExchangeTestBase
     }
 
     protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,
-                                              final String newSyncState, final boolean includesLastItem)
+                                                final String newSyncState, final boolean includesLastItem)
             throws ServiceCallException, HttpErrorException
     {
         MessageType[] messages = new MessageType[itemsInExchange];
