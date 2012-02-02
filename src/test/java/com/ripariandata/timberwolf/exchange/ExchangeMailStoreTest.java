@@ -445,7 +445,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int syncOffsetCount = 5;
         final int getOffsetCount = 4;
         Vector<String> syncStates = new Vector<String>();
-        syncStates.add("");
+        syncStates.add("Original Sync State");
+        getDefaultFolder().setSyncStateToken(syncStates.get(0));
         for (int i = 0; i < syncOffsetCount; i++)
         {
             String newSyncState = "SyncState#" + i;
@@ -461,7 +462,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         }
 
         // reset sync state
-        getDefaultFolder().setSyncStateToken(null);
+        getDefaultFolder().setSyncStateToken(syncStates.get(0));
         SyncFolderItemIterator mailIterator = new SyncFolderItemIterator(getService(), config, getDefaultFolder());
 
         int index = 0;
