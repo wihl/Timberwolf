@@ -360,12 +360,11 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int itemPageSize = 5;
         final String newSyncState = "New sync state";
         Configuration config = new Configuration(idPageSize, itemPageSize);
-        defaultMockFindFolders();
-        MessageType[] findResults = mockSyncFolderItems(0, idPageSize, itemsInExchange, newSyncState);
+        MessageType[] syncResults = mockSyncFolderItems(0, idPageSize, itemsInExchange, newSyncState);
         final int pageIndexCount = 5;
         for (int i = 0; i < pageIndexCount; i++)
         {
-            mockGetItem(findResults, 0, itemPageSize, i, itemsInExchange, getDefaultFolderId());
+            mockGetItem(syncResults, 0, itemPageSize, i, itemsInExchange, getDefaultFolderId());
         }
 
         SyncFolderItemIterator mailIterator = new SyncFolderItemIterator(getService(), config, getDefaultFolder());
@@ -389,24 +388,23 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int idPageSize = 30;
         final int itemPageSize = 5;
         Configuration config = new Configuration(idPageSize, itemPageSize);
-        defaultMockFindFolders();
         // SyncFolderItem #1
         final String secondSyncState = "The second sync state";
         final String lastSyncState = "The last sync state";
-        MessageType[] findResults = mockSyncFolderItems(0, idPageSize, idPageSize, secondSyncState, false);
-        final int findItemCount = 6;
-        for (int i = 0; i < findItemCount; i++)
+        MessageType[] syncResults = mockSyncFolderItems(0, idPageSize, idPageSize, secondSyncState, false);
+        final int syncItemCount = 6;
+        for (int i = 0; i < syncItemCount; i++)
         {
-            mockGetItem(findResults, 0, itemPageSize, i, itemsInExchange, getDefaultFolderId());
+            mockGetItem(syncResults, 0, itemPageSize, i, itemsInExchange, getDefaultFolderId());
         }
 
-        // FindItem #2
+        // SyncItem #2
         getDefaultFolder().setSyncStateToken(secondSyncState);
-        findResults = mockSyncFolderItems(idPageSize, idPageSize, itemsInExchange - idPageSize, lastSyncState, true);
-        final int mockFindItemCount2 = 4;
-        for (int i = 0; i < mockFindItemCount2; i++)
+        syncResults = mockSyncFolderItems(idPageSize, idPageSize, itemsInExchange - idPageSize, lastSyncState, true);
+        final int mockSyncItemCount2 = 4;
+        for (int i = 0; i < mockSyncItemCount2; i++)
         {
-            mockGetItem(findResults, idPageSize, itemPageSize, i, itemsInExchange, getDefaultFolderId());
+            mockGetItem(syncResults, idPageSize, itemPageSize, i, itemsInExchange, getDefaultFolderId());
         }
 
         // set the default folder back to a sync state of null
@@ -433,19 +431,18 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int idPageSize = 20;
         final int itemPageSize = 5;
         Configuration config = new Configuration(idPageSize, itemPageSize);
-        defaultMockFindFolders();
-        final int findOffsetCount = 5;
+        final int syncOffsetCount = 5;
         final int getOffsetCount = 4;
-        for (int i = 0; i < findOffsetCount; i++)
+        for (int i = 0; i < syncOffsetCount; i++)
         {
             String newSyncState = "SyncState#" + i;
-            boolean includesLastItem = i == findOffsetCount - 1;
-            MessageType[] findResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
+            boolean includesLastItem = i == syncOffsetCount - 1;
+            MessageType[] syncResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
                                                             includesLastItem);
             getDefaultFolder().setSyncStateToken(newSyncState);
             for (int j = 0; j < getOffsetCount; j++)
             {
-                mockGetItem(findResults, idPageSize * i, itemPageSize, j, itemsInExchange, getDefaultFolderId());
+                mockGetItem(syncResults, idPageSize * i, itemPageSize, j, itemsInExchange, getDefaultFolderId());
             }
         }
 
@@ -473,16 +470,15 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int idPageSize = 5;
         final int itemPageSize = 10;
         Configuration config = new Configuration(idPageSize, itemPageSize);
-        defaultMockFindFolders();
         final int offsetCount = 4;
         for (int i = 0; i < offsetCount; i++)
         {
             String newSyncState = "SyncState#" + i;
             boolean includesLastItem = i == offsetCount - 1;
-            MessageType[] findResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
+            MessageType[] syncResults = mockSyncFolderItems(i * idPageSize, idPageSize, idPageSize, newSyncState,
                                                             includesLastItem);
             getDefaultFolder().setSyncStateToken(newSyncState);
-            mockGetItem(findResults, idPageSize * i, idPageSize, 0, itemsInExchange, getDefaultFolderId());
+            mockGetItem(syncResults, idPageSize * i, idPageSize, 0, itemsInExchange, getDefaultFolderId());
         }
 
         // reset sync state
