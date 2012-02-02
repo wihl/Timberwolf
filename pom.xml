@@ -125,6 +125,43 @@
           <schemaDirectory>src/main/resources/xsd</schemaDirectory>
         </configuration>
       </plugin>
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>2.0.1</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>rpm</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <copyright>The Apache Software License Version 2.0</copyright>
+              <group>Applications/Databases</group>
+              <packager>Riparian Data</packager>
+              <vendor>Riparian Data</vendor>
+              <url>https://github.com/RiparianData/Timberwolf</url>
+              <defineStatements>
+                  <!-- This prevents the rpm plugin from failing because of any extra files in target that are
+                  not being packaged. -->
+                  <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+              </defineStatements>
+              <mappings>
+                  <mapping>
+                      <directory>/usr/share/java</directory>
+                      <filemode>644</filemode>
+                      <username>root</username>
+                      <groupname>root</groupname>
+                      <sources>
+                          <source>
+                              <location>target/timberwolf-${version}-jar-with-dependencies.jar</location>
+                          </source>
+                      </sources>
+                  </mapping>
+              </mappings>
+          </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
