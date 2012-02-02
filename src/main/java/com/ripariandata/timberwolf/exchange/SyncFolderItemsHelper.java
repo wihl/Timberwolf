@@ -142,7 +142,7 @@ public final class SyncFolderItemsHelper
     }
 
     /** The result returned from syncing a folder's items. */
-    public static class SyncFolderItemsResult
+    public static final class SyncFolderItemsResult
     {
         private final Vector<String> ids;
         private boolean includesLastItem;
@@ -183,14 +183,14 @@ public final class SyncFolderItemsHelper
             return includesLastItem;
         }
 
-        private void setIncludesLastItem(final boolean includesLastItem)
+        private void setIncludesLastItem(final boolean includesLastItemFromResponse)
         {
-            this.includesLastItem = includesLastItem;
+            includesLastItem = includesLastItemFromResponse;
         }
 
-        private void setSyncState(final String syncState)
+        private void setSyncState(final String newSyncState)
         {
-            this.syncState = syncState;
+            syncState = newSyncState;
         }
 
     }

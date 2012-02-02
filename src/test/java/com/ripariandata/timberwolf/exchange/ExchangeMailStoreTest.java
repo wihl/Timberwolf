@@ -593,12 +593,12 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                 mockMessageItemId("FOLDER-TWO-ID:the #6 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #7 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #8 id"),
-                mockMessageItemId("FOLDER-TWO-ID:the #9 id"),},
+                mockMessageItemId("FOLDER-TWO-ID:the #9 id")},
                     generateIds(offsetFive, countFive, "FOLDER-TWO-ID"));
         mockFindItem("FOLDER-TWO-ID", offsetTen, maxIdTen, countThree);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-TWO-ID:the #10 id"),
                 mockMessageItemId("FOLDER-TWO-ID:the #11 id"),
-                mockMessageItemId("FOLDER-TWO-ID:the #12 id"),},
+                mockMessageItemId("FOLDER-TWO-ID:the #12 id")},
                     generateIds(offsetTen, countThree, "FOLDER-TWO-ID"));
         mockFindItem("FOLDER-THREE-ID", offsetZero, maxIdTen, countTwo);
         mockGetItem(new MessageType[]{mockMessageItemId("FOLDER-THREE-ID:the #0 id"),
