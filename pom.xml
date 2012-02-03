@@ -182,6 +182,14 @@
                     <prefix>/usr/share/java</prefix>
                   </mapper>
                 </data>
+                <data>
+                  <src>${project.basedir}/src/main/resources/timberwolf.conf</src>
+                  <type>file</type>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/etc</prefix>
+                  </mapper>
+                </data>
               </dataSet>
             </configuration>
           </execution>
