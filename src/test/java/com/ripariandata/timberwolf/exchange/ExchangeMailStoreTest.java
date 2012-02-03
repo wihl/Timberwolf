@@ -99,12 +99,12 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         // Exchange returns 0 mail even though you asked for some mail
         final int count = 100;
-        MessageType[] messages = new MessageType[count];
+        String[] ids = new String[count];
         for (int i = 0; i < count; i++)
         {
-            messages[i] = mockMessageItemId("the" + i + "id");
+            ids[i] = "the" + i + "id";
         }
-        mockFindItem(messages);
+        mockSyncFolderItems(ids, "new sync state");
         defaultMockFindFolders();
 
         try

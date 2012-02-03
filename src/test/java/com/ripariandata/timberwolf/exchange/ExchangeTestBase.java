@@ -90,7 +90,7 @@ public class ExchangeTestBase
     }
 
     /**
-     * This is needed anytime we'd like to look in a particular folder with mockFindItem.
+     * This is needed anytime we'd like to look in a particular folder with mockSyncFolderItems.
      * This is reset at the start of the test, but otherwise syncState is maintained
      * throughout the test.
      */
