@@ -31,29 +31,29 @@ public class Configuration
     private UserFolderSyncStateStorage syncStateStorage;
 
     /**
-     * @param idPageSize Must be greater than or equal to 1.
-     * @param itemPageSize Must be greater than or equal to 1.
+     * @param sizeOfIdPages Must be greater than or equal to 1.
+     * @param sizeOfItemPages Must be greater than or equal to 1.
      * @param userFolderSyncStateStorage The storage that maintains sync states
      * for all the folders for all the users.
      */
-    public Configuration(final int idPageSize, final int itemPageSize,
+    public Configuration(final int sizeOfIdPages, final int sizeOfItemPages,
                          final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
         // Asking for negative or zero max items is nonsensical.
-        this.idPageSize = Math.max(idPageSize, 1);
-        this.itemPageSize = Math.max(itemPageSize, 1);
+        idPageSize = Math.max(sizeOfIdPages, 1);
+        itemPageSize = Math.max(sizeOfItemPages, 1);
         syncStateStorage = userFolderSyncStateStorage;
     }
 
     /**
      * Creates a configuration with the startDate set to the beginning of the epoch.
      *
-     * @param idPageSize Must be greater than or equal to 1.
-     * @param itemPageSize Must be greater than or equal to 1.
+     * @param sizeOfIdPages Must be greater than or equal to 1.
+     * @param sizeOfItemPages Must be greater than or equal to 1.
      */
-    public Configuration(final int idPageSize, final int itemPageSize)
+    public Configuration(final int sizeOfIdPages, final int sizeOfItemPages)
     {
-        this(idPageSize, itemPageSize, new InMemoryUserFolderSyncStateStorage());
+        this(sizeOfIdPages, sizeOfItemPages, new InMemoryUserFolderSyncStateStorage());
     }
 
     public int getIdPageSize()
