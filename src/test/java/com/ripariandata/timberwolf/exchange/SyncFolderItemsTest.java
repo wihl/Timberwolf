@@ -60,7 +60,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         syncFolderItems.setSyncState("");
 
         Configuration config = new Configuration(498, 0);
-        FolderContext folder = new FolderContext(folderId, getDefaultUser());
+        FolderContext folder = folderContext(getDefaultUser(), folderId);
         assertEquals(syncFolderItems.xmlText(),
                      SyncFolderItemsHelper.getSyncFolderItemsRequest(config, folder).xmlText());
     }
