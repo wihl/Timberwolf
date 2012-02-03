@@ -218,6 +218,7 @@
                   <mapper>
                     <type>perm</type>
                     <prefix>/usr/bin</prefix>
+                    <filemode>755</filemode>
                   </mapper>
                 </data>
               </dataSet>
