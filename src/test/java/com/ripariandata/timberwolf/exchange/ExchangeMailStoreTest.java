@@ -126,10 +126,10 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         // Exchange returns 30 in SyncFolderItems and 30 in GetItems
         final int count = 30;
-        List<String> requestedList = generateIds(0, count,getDefaultFolderId());
+        List<String> requestedList = generateIds(0, count, getDefaultFolderId());
         defaultMockFindFolders();
         MessageType[] messages = mockSyncFolderItems(0, 512, count, "newSyncState");
-        mockGetItem(messages,0, count,0, count,getDefaultFolderId());
+        mockGetItem(messages, 0, count, 0, count, getDefaultFolderId());
         int i = 0;
         ExchangeMailStore store = new ExchangeMailStore(getService());
         for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
@@ -690,7 +690,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         // First call to get mail
         when(mockSyncStates.getLastSyncState(aliceUsername, aliceFolderId)).thenReturn(null);
         MessageType[] firstMessages = mockSyncFolderItems(aliceUsername, aliceFolderId, 0, findItemPageSize,
-                                                        totalMessageCount, "", "syncState2", true);
+                                                          totalMessageCount, "", "syncState2", true);
         mockGetItem(firstMessages, generateIds(0, totalMessageCount, aliceFolderId), aliceUsername);
 
 

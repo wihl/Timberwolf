@@ -309,12 +309,12 @@ public class ExchangeTestBase
     protected SyncFolderItemsCreateOrUpdateType mockCreateItem(final String id)
     {
         SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
-        MessageType message = mock(MessageType.class);
+        MessageType item = mock(MessageType.class);
         ItemIdType itemId = mock(ItemIdType.class);
         when(create.isSetMessage()).thenReturn(true);
-        when(create.getMessage()).thenReturn(message);
-        when(message.isSetItemId()).thenReturn(true);
-        when(message.getItemId()).thenReturn(itemId);
+        when(create.getMessage()).thenReturn(item);
+        when(item.isSetItemId()).thenReturn(true);
+        when(item.getItemId()).thenReturn(itemId);
         when(itemId.getId()).thenReturn(id);
         return create;
     }

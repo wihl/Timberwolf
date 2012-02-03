@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class InMemoryUserFolderSyncStateStorage implements UserFolderSyncStateStorage
 {
-    Map<String,Map<String, String>> syncStates;
+    private Map<String, Map<String, String>> syncStates;
 
     public InMemoryUserFolderSyncStateStorage()
     {
@@ -53,7 +53,7 @@ public class InMemoryUserFolderSyncStateStorage implements UserFolderSyncStateSt
             folders = new HashMap<String, String>();
             syncStates.put(user, folders);
         }
-        folders.put(folderId,syncState);
+        folders.put(folderId, syncState);
 
     }
 }
