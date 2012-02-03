@@ -192,7 +192,7 @@ public class ExchangeTestBase
             throws ServiceCallException, HttpErrorException
     {
         mockSyncFolderItems(createSyncFolderItemsCreateArray(ids), getDefaultFolder(),
-                            getDefaultConfig().getFindItemPageSize(), newSyncState, true);
+                            getDefaultConfig().getIdPageSize(), newSyncState, true);
     }
 
     protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,

@@ -58,7 +58,7 @@ public class GetItemIterator extends BaseChainIterator<MailboxItem>
         }
         try
         {
-            int pageSize = config.getGetItemPageSize();
+            int pageSize = config.getItemPageSize();
             Vector<MailboxItem> ret = GetItemHelper.getItems(pageSize, currentStart, ids, service, folder.getUser());
             LOG.debug("Got {} email ids.", ret.size());
             currentStart += pageSize;

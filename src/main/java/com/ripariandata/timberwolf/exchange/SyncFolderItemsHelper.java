@@ -36,7 +36,7 @@ public final class SyncFolderItemsHelper
      * If you try to request a number of changes greater than this, exchange
      * faults.
      */
-    private static final int MAX_SYNC_COUNT = 512;
+    public static final int MAX_SYNC_COUNT = 512;
 
     /** Enforces not being able to create an instance. */
     private SyncFolderItemsHelper()
@@ -59,7 +59,7 @@ public final class SyncFolderItemsHelper
         syncFolderItems.addNewItemShape().setBaseShape(DefaultShapeNamesType.ID_ONLY);
         syncFolderItems.setSyncFolderId(folder.getTargetFolder());
         syncFolderItems.setSyncState(folder.getSyncStateToken());
-        syncFolderItems.setMaxChangesReturned(Math.min(MAX_SYNC_COUNT, config.getFindItemPageSize()));
+        syncFolderItems.setMaxChangesReturned(Math.min(MAX_SYNC_COUNT, config.getIdPageSize()));
         return syncFolderItems;
     }
 

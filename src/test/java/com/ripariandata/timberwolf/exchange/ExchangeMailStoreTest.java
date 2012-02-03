@@ -435,9 +435,9 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                 mockMessageItemId("FOLDER-THREE-ID:the #1 id")},
                     generateIds(offsetZero, countTwo, "FOLDER-THREE-ID"));
 
-        final int findItemPageSize = 10;
+        final int idPageSize = 10;
         final int getItemPageSize = 5;
-        ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
+        ExchangeMailStore store = new ExchangeMailStore(getService(), idPageSize, getItemPageSize);
         Iterator<MailboxItem> mail = store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()).iterator();
         final int folderIdTwoCount = 13;
         final int folderIdOtherCount = 2;
@@ -497,9 +497,9 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         users.add("bob");
         users.add("alice");
 
-        final int findItemPageSize = 10;
+        final int idPageSize = 10;
         final int getItemPageSize = 5;
-        ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
+        ExchangeMailStore store = new ExchangeMailStore(getService(), idPageSize, getItemPageSize);
         Iterator<MailboxItem> mail = store.getMail(users, new InMemoryUserFolderSyncStateStorage()).iterator();
 
         final int count = 2;
@@ -520,7 +520,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     {
         final String aliceFolderId = "ALICE-FOLDER";
         final String aliceUsername = "alice";
-        final int findItemPageSize = 10;
+        final int idPageSize = 10;
         final int getItemPageSize = 5;
         final int totalMessageCount = 5;
 
@@ -540,14 +540,14 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         MessageType[] firstMessages = mockSyncFolderItems(createMockMessages(aliceFolderId, 0, totalMessageCount),
                                                           folderContext(aliceUsername, aliceFolderId),
-                                                          findItemPageSize, "syncState2", true);
+                                                          idPageSize, "syncState2", true);
         mockGetItem(firstMessages, generateIds(0, totalMessageCount, aliceFolderId), aliceUsername);
 
 
         ArrayList<String> users = new ArrayList<String>();
         users.add(aliceUsername);
 
-        ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
+        ExchangeMailStore store = new ExchangeMailStore(getService(), idPageSize, getItemPageSize);
         Iterator<MailboxItem> mail = store.getMail(users, mockSyncStates).iterator();
         for (int i = 0; i < totalMessageCount; i++)
         {
@@ -562,7 +562,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         MessageType[] newMessages =
                 mockSyncFolderItems(createMockMessages(aliceFolderId, 10, 2),
                                     folderContext(aliceUsername, aliceFolderId, "newSyncState"),
-                                    findItemPageSize, "lastSyncState", true);
+                                    idPageSize, "lastSyncState", true);
         mockGetItem(newMessages,
                     generateIds(10, 2, aliceFolderId),
                     aliceUsername);

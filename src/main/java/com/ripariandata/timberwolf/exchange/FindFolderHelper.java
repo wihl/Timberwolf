@@ -55,7 +55,7 @@ public final class FindFolderHelper
      * Creates a FindFolderType for the given distinguished folder.
      *
      * @param folder The distinguished folder.
-     * @return The FindItemType for the distinguished folder.
+     * @return The FindFolderType for the distinguished folder.
      */
     static FindFolderType getFindFoldersRequest(final DistinguishedFolderIdNameType.Enum folder)
     {
@@ -73,6 +73,7 @@ public final class FindFolderHelper
      * @param folderId The folder id for the folder from which to get ids.
      * @return The FindFolderType for the given folder..
      */
+    // TODO remove this
     static FindFolderType getFindFoldersRequest(final String folderId)
     {
         FindFolderType findFolder = getFindFolderType();
