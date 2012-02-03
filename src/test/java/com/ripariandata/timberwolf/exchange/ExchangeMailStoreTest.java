@@ -53,14 +53,14 @@ import static org.mockito.Mockito.when;
 public class ExchangeMailStoreTest extends ExchangeTestBase
 {
     private final String idHeaderKey = "Item ID";
-    private ArrayList<String> defaultUsers;
+    private ArrayList<String> defaultUser;
 
     @Before
     public void setUp() throws Exception
     {
         super.setUp();
-        defaultUsers = new ArrayList<String>();
-        defaultUsers.add("bkerr");
+        defaultUser = new ArrayList<String>();
+        defaultUser.add(getDefaultUser());
     }
 
     @Test
@@ -69,11 +69,10 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
                    ServiceCallException
     {
         // Exchange returns 0 mail when findItem is called
-        MessageType[] messages = new MessageType[0];
-        mockFindItem(messages);
         defaultMockFindFolders();
+        mockSyncFolderItems(new String[0], "newSyncState");
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -87,7 +86,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         // Exchange returns 0 mail when findItem is called
         mockFindFolders(new FolderType[0]);
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()))
         {
             fail("There shouldn't be any mailBoxItems");
         }
@@ -111,7 +110,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         try
         {
             ExchangeMailStore store = new ExchangeMailStore(getService());
-            Iterable<MailboxItem> mail = store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage());
+            Iterable<MailboxItem> mail = store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage());
         }
         catch (ExchangeRuntimeException e)
         {
@@ -132,7 +131,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         mockGetItem(messages, 0, count, 0, count, getDefaultFolderId());
         int i = 0;
         ExchangeMailStore store = new ExchangeMailStore(getService());
-        for (MailboxItem mailboxItem : store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()))
+        for (MailboxItem mailboxItem : store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()))
         {
             assertEquals(requestedList.get(i), mailboxItem.getHeader(idHeaderKey));
             i++;
@@ -602,7 +601,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         final int findItemPageSize = 10;
         final int getItemPageSize = 5;
         ExchangeMailStore store = new ExchangeMailStore(getService(), findItemPageSize, getItemPageSize);
-        Iterator<MailboxItem> mail = store.getMail(defaultUsers, new InMemoryUserFolderSyncStateStorage()).iterator();
+        Iterator<MailboxItem> mail = store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()).iterator();
         final int folderIdTwoCount = 13;
         final int folderIdOtherCount = 2;
         for (String folder : new String[]{"FOLDER-ONE-ID", "FOLDER-TWO-ID", "FOLDER-THREE-ID"})
