@@ -166,7 +166,7 @@
                       <groupname>root</groupname>
                       <sources>
                           <source>
-                              <location>${project.basedir}/src/main/resources/timberwolf.conf</location>
+                              <location>${project.basedir}/src/main/resources/timberwolf.properties</location>
                           </source>
                       </sources>
                   </mapping>
@@ -194,7 +194,7 @@
                   </mapper>
                 </data>
                 <data>
-                  <src>${project.basedir}/src/main/resources/timberwolf.conf</src>
+                  <src>${project.basedir}/src/main/resources/timberwolf.properties</src>
                   <type>file</type>
                   <mapper>
                     <type>perm</type>
