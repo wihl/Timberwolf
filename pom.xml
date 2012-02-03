@@ -161,7 +161,6 @@
                   </mapping>
                   <mapping>
                       <directory>/etc</directory>
-                      <filemode>755</filemode>
                       <username>root</username>
                       <groupname>root</groupname>
                       <sources>
