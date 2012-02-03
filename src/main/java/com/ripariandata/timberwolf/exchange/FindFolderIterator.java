@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runs a FindItemIterator for each folder found with findFolders.
+ * Runs a SyncFolderItemsIterator for each folder found with findFolders.
  */
 public class FindFolderIterator extends BaseChainIterator<MailboxItem>
 {
