@@ -159,6 +159,17 @@
                           </source>
                       </sources>
                   </mapping>
+                  <mapping>
+                      <directory>/etc</directory>
+                      <filemode>644</filemode>
+                      <username>root</username>
+                      <groupname>root</groupname>
+                      <sources>
+                          <source>
+                              <location>${project.basedir}/src/main/resources/timberwolf.properties</location>
+                          </source>
+                      </sources>
+                  </mapping>
               </mappings>
           </configuration>
       </plugin>
@@ -175,11 +186,19 @@
             <configuration>
               <dataSet>
                 <data>
-                  <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                  <src>${project.build.directory}/timberwolf-${version}-jar-with-dependencies.jar</src>
                   <type>file</type>
                   <mapper>
                     <type>perm</type>
                     <prefix>/usr/share/java</prefix>
+                  </mapper>
+                </data>
+                <data>
+                  <src>${project.basedir}/src/main/resources/timberwolf.properties</src>
+                  <type>file</type>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/etc</prefix>
                   </mapper>
                 </data>
               </dataSet>
