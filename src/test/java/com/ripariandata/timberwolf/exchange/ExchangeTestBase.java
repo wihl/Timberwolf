@@ -190,7 +190,8 @@ public class ExchangeTestBase
     protected void mockSyncFolderItems(final String[] ids, final String newSyncState)
             throws ServiceCallException, HttpErrorException
     {
-        mockSyncFolderItems(ids, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState);
+        mockSyncFolderItems(createSyncFolderItemsCreateArray(ids), getDefaultFolder(),
+                            getDefaultConfig().getFindItemPageSize(), newSyncState, true);
     }
 
     protected MessageType[] mockSyncFolderItems(final int offset, final int maxIds, final int itemsInExchange,
@@ -206,14 +207,22 @@ public class ExchangeTestBase
                                                 final String newSyncState, final boolean includesLastItem)
             throws ServiceCallException, HttpErrorException
     {
-        return mockSyncFolderItems(defaultUser, folderId, offset, maxIds, itemsInExchange, oldSyncState, newSyncState,
-                                   includesLastItem);
+        return mockSyncFolderItems(createMockMessages(folderId, offset, itemsInExchange),
+                                   defaultUser, folderId, maxIds, oldSyncState, newSyncState, includesLastItem);
     }
 
-    protected MessageType[] mockSyncFolderItems(final String user, final String folderId, final int offset,
-                                                final int maxIds, final int itemsInExchange, final String oldSyncState,
+    protected MessageType[] mockSyncFolderItems(final MessageType[] messages, final String user, final String folderId,
+                                                final int maxIds, final String oldSyncState,
                                                 final String newSyncState, final boolean includesLastItem)
             throws ServiceCallException, HttpErrorException
+    {
+        FolderContext folder = new FolderContext(folderId, user);
+        folder.setSyncStateToken(oldSyncState);
+        mockSyncFolderItems(messages, folder, maxIds, newSyncState, includesLastItem);
+        return messages;
+    }
+
+    protected MessageType[] createMockMessages(final String folderId, final int offset, final int itemsInExchange)
     {
         MessageType[] messages = new MessageType[itemsInExchange];
         List<String> ids = generateIds(offset, itemsInExchange, folderId);
@@ -221,11 +230,6 @@ public class ExchangeTestBase
         {
             messages[i] = mockMessageItemId(ids.get(i));
         }
-        FolderContext folder = new FolderContext(folderId, user);
-        folder.setSyncStateToken(oldSyncState);
-        mockSyncFolderItems(
-                generateIds(offset, itemsInExchange, folderId).toArray(new String[itemsInExchange]),
-                folder, maxIds, newSyncState, includesLastItem);
         return messages;
     }
 
@@ -233,33 +237,19 @@ public class ExchangeTestBase
                                                 final String newSyncState, final boolean includesLastItem)
             throws ServiceCallException, HttpErrorException
     {
-        MessageType[] messages = new MessageType[itemsInExchange];
-        List<String> ids = generateIds(offset, itemsInExchange, getDefaultFolderId());
-        for (int i = 0; i < itemsInExchange; i++)
-        {
-            messages[i] = mockMessageItemId(ids.get(i));
-        }
-        mockSyncFolderItems(
-                generateIds(offset, itemsInExchange, getDefaultFolderId()).toArray(new String[itemsInExchange]),
-                getDefaultFolder(), maxIds, newSyncState, includesLastItem);
+        MessageType[] messages = createMockMessages(getDefaultFolderId(), offset, itemsInExchange);
+        mockSyncFolderItems(messages, getDefaultFolder(), maxIds, newSyncState, includesLastItem);
         return messages;
     }
 
-    protected void mockSyncFolderItems(final String[] ids, final FolderContext folder, final int maxIds,
-                                       final String newSyncState)
-            throws ServiceCallException, HttpErrorException
-    {
-        mockSyncFolderItems(ids, folder, maxIds, newSyncState, true);
-    }
-
-    protected void mockSyncFolderItems(final String[] ids,
+    protected void mockSyncFolderItems(final MessageType[] messages,
                                        final FolderContext folder,
                                        final int maxIds,
                                        final String newSyncState,
                                        final boolean includesLastItemInRange)
             throws ServiceCallException, HttpErrorException
     {
-        mockSyncFolderItems(createSyncFolderItemsCreateArray(ids),
+        mockSyncFolderItems(createSyncFolderItemsCreateArray(messages),
                             folder, maxIds, newSyncState, includesLastItemInRange);
     }
 
@@ -305,18 +295,33 @@ public class ExchangeTestBase
         }
         return creates;
     }
+    protected SyncFolderItemsCreateOrUpdateType[] createSyncFolderItemsCreateArray(final MessageType[] messages)
+    {
+        SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[messages.length];
+        for (int i = 0; i < messages.length; i++)
+        {
+            SyncFolderItemsCreateOrUpdateType create = mockCreateItem(messages[i]);
+            creates[i] = create;
+        }
+        return creates;
+    }
+
+    private SyncFolderItemsCreateOrUpdateType mockCreateItem(final MessageType message)
+    {
+        SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
+        when(create.isSetMessage()).thenReturn(true);
+        when(create.getMessage()).thenReturn(message);
+        return create;
+    }
 
     protected SyncFolderItemsCreateOrUpdateType mockCreateItem(final String id)
     {
-        SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
-        MessageType item = mock(MessageType.class);
+        MessageType message = mock(MessageType.class);
         ItemIdType itemId = mock(ItemIdType.class);
-        when(create.isSetMessage()).thenReturn(true);
-        when(create.getMessage()).thenReturn(item);
-        when(item.isSetItemId()).thenReturn(true);
-        when(item.getItemId()).thenReturn(itemId);
+        when(message.isSetItemId()).thenReturn(true);
+        when(message.getItemId()).thenReturn(itemId);
         when(itemId.getId()).thenReturn(id);
-        return create;
+        return mockCreateItem(message);
     }
 
     protected void defaultMockFindFolders() throws ServiceCallException, HttpErrorException

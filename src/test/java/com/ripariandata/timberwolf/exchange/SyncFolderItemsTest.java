@@ -172,9 +172,9 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     @Test
     public void testSyncFolderItemsRespond0WithMore() throws ServiceCallException, HttpErrorException
     {
-        String[] ids = new String[0];
+        MessageType[] messages = new MessageType[0];
         final String myNewSyncState = "MyNewSyncState";
-        mockSyncFolderItems(ids, getDefaultFolder(),
+        mockSyncFolderItems(messages, getDefaultFolder(),
                             getDefaultConfig().getFindItemPageSize(), myNewSyncState, false);
         SyncFolderItemsResult result = SyncFolderItemsHelper
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
@@ -189,11 +189,12 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     {
         final int count = 100;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
+        MessageType[] messages = createMockMessages(getDefaultFolderId(), 0, count);
         final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
         getDefaultFolder().setSyncStateToken(oldSyncState);
-        mockSyncFolderItems(ids.toArray(new String[ids.size()]), getDefaultFolder(),
-                            getDefaultConfig().getFindItemPageSize(), newSyncState, false);
+        mockSyncFolderItems(messages, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(),
+                            newSyncState, false);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(ids, result.getIds());

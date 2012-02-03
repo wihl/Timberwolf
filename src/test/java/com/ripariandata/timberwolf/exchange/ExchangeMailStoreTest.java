@@ -620,30 +620,34 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
     @Test
     public void testGetMailMultipleUsers() throws ServiceCallException, HttpErrorException, XmlException, IOException
     {
+        final String aliceFolderId = "ALICE-FOLDER";
+        final String bobFolderId = "BOB-FOLDER";
         FolderType aliceFolder = mock(FolderType.class);
         FolderIdType aliceId = mock(FolderIdType.class);
         when(aliceFolder.isSetFolderId()).thenReturn(true);
         when(aliceFolder.getFolderId()).thenReturn(aliceId);
-        when(aliceId.getId()).thenReturn("ALICE-FOLDER");
+        when(aliceId.getId()).thenReturn(aliceFolderId);
 
         FolderType bobFolder = mock(FolderType.class);
         FolderIdType bobId = mock(FolderIdType.class);
         when(bobFolder.isSetFolderId()).thenReturn(true);
         when(bobFolder.getFolderId()).thenReturn(bobId);
-        when(bobId.getId()).thenReturn("BOB-FOLDER");
+        when(bobId.getId()).thenReturn(bobFolderId);
 
         mockFindFolders(new FolderType[]{aliceFolder}, "alice");
         mockFindFolders(new FolderType[]{bobFolder}, "bob");
         final int maxIdCount = 10;
         final int folderCount = 2;
-        mockSyncFolderItems("alice", "ALICE-FOLDER", 0, maxIdCount, folderCount, "", "ALICE-SYNC2", true);
-        mockGetItem(new MessageType[]{mockMessageItemId("ALICE-FOLDER:the #0 id"),
+        mockSyncFolderItems(createMockMessages(aliceFolderId, 0, folderCount),
+                            "alice", aliceFolderId, maxIdCount, "", "ALICE-SYNC2", true);
+        mockGetItem(new MessageType[]{mockMessageItemId(aliceFolderId + ":the #0 id"),
                 mockMessageItemId("ALICE-FOLDER:the #1 id")},
-                    generateIds(0, folderCount, "ALICE-FOLDER"), "alice");
-        mockSyncFolderItems("bob", "BOB-FOLDER", 0, maxIdCount, folderCount, "", "BOB-SYNC2", true);
+                    generateIds(0, folderCount, aliceFolderId), "alice");
+        mockSyncFolderItems(createMockMessages(bobFolderId, 0, folderCount),
+                            "bob", bobFolderId, maxIdCount, "", "BOB-SYNC2", true);
         mockGetItem(new MessageType[]{mockMessageItemId("BOB-FOLDER:the #0 id"),
                 mockMessageItemId("BOB-FOLDER:the #1 id")},
-                    generateIds(0, folderCount, "BOB-FOLDER"), "bob");
+                    generateIds(0, folderCount, bobFolderId), "bob");
 
         ArrayList<String> users = new ArrayList<String>();
         users.add("bob");
@@ -655,7 +659,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
         Iterator<MailboxItem> mail = store.getMail(users, new InMemoryUserFolderSyncStateStorage()).iterator();
 
         final int count = 2;
-        for (String folder : new String[]{"BOB-FOLDER", "ALICE-FOLDER"})
+        for (String folder : new String[]{bobFolderId, aliceFolderId})
         {
             for (int i = 0; i < count; i++)
             {
@@ -689,8 +693,10 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         // First call to get mail
         when(mockSyncStates.getLastSyncState(aliceUsername, aliceFolderId)).thenReturn(null);
-        MessageType[] firstMessages = mockSyncFolderItems(aliceUsername, aliceFolderId, 0, findItemPageSize,
-                                                          totalMessageCount, "", "syncState2", true);
+
+        MessageType[] firstMessages = mockSyncFolderItems(createMockMessages(aliceFolderId, 0, totalMessageCount),
+                                                          aliceUsername, aliceFolderId, findItemPageSize,
+                                                          "", "syncState2", true);
         mockGetItem(firstMessages, generateIds(0, totalMessageCount, aliceFolderId), aliceUsername);
 
 
@@ -710,7 +716,8 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
 
         when(mockSyncStates.getLastSyncState(aliceUsername, aliceFolderId)).thenReturn("newSyncState");
         MessageType[] newMessages =
-                mockSyncFolderItems(aliceUsername, aliceFolderId, 10, findItemPageSize, 2, "newSyncState",
+                mockSyncFolderItems(createMockMessages(aliceFolderId, 10, 2),
+                                    aliceUsername, aliceFolderId, findItemPageSize, "newSyncState",
                                     "lastSyncState", true);
         mockGetItem(newMessages,
                     generateIds(10, 2, aliceFolderId),
