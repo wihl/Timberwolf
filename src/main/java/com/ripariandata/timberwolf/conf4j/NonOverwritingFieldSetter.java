@@ -37,7 +37,7 @@ class NonOverwritingFieldSetter extends FieldSetter
         defaultValue = get(o, f);
     }
 
-    private static Object get(Object bean, Field field)
+    private static Object get(final Object bean, final Field field)
     {
         Object val;
         try
