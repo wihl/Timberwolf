@@ -49,7 +49,7 @@ final class App implements PrivilegedAction<Integer>
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
-    @Option(name = "-h", aliases = {"--help"},
+    @Option(name = "-h", aliases = { "--help" },
             usage = "Show this help text.")
     private boolean help;
 
@@ -156,7 +156,6 @@ final class App implements PrivilegedAction<Integer>
     public Integer run()
     {
         MailWriter mailWriter;
-        UserTimeUpdater timeUpdater;
         UserFolderSyncStateStorage syncStateStorage;
         HBaseManager hbaseManager = null;
         if (useHBase)
