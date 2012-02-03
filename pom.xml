@@ -125,6 +125,87 @@
           <schemaDirectory>src/main/resources/xsd</schemaDirectory>
         </configuration>
       </plugin>
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>2.0.1</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>rpm</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <copyright>The Apache Software License Version 2.0</copyright>
+              <group>Applications/Databases</group>
+              <packager>Riparian Data</packager>
+              <vendor>Riparian Data</vendor>
+              <url>https://github.com/RiparianData/Timberwolf</url>
+              <defineStatements>
+                  <!-- This prevents the rpm plugin from failing because of any extra files in target that are
+                  not being packaged. -->
+                  <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+              </defineStatements>
+              <mappings>
+                  <mapping>
+                      <directory>/usr/share/java</directory>
+                      <filemode>644</filemode>
+                      <username>root</username>
+                      <groupname>root</groupname>
+                      <sources>
+                          <source>
+                              <location>target/timberwolf-${version}-jar-with-dependencies.jar</location>
+                          </source>
+                      </sources>
+                  </mapping>
+                  <mapping>
+                      <directory>/etc</directory>
+                      <filemode>644</filemode>
+                      <username>root</username>
+                      <groupname>root</groupname>
+                      <sources>
+                          <source>
+                              <location>${project.basedir}/src/main/resources/timberwolf.conf</location>
+                          </source>
+                      </sources>
+                  </mapping>
+              </mappings>
+          </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>jdeb</artifactId>
+        <groupId>org.vafer</groupId>
+        <version>0.9</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jdeb</goal>
+            </goals>
+            <configuration>
+              <dataSet>
+                <data>
+                  <src>${project.build.directory}/timberwolf-${version}-jar-with-dependencies.jar</src>
+                  <type>file</type>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/usr/share/java</prefix>
+                  </mapper>
+                </data>
+                <data>
+                  <src>${project.basedir}/src/main/resources/timberwolf.conf</src>
+                  <type>file</type>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/etc</prefix>
+                  </mapper>
+                </data>
+              </dataSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <resources>
       <resource>
