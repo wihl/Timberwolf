@@ -1,5 +1,5 @@
-Package: timberwolf
-Version: 0.1
+Package: [[name]]
+Version: [[version]]
 Section: misc
 Priority: optional
 Architecture: all

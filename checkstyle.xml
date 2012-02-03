@@ -39,6 +39,11 @@
     <property name="basedir" value="${basedir}"/>
   -->
 
+    <module name="Header">
+      <property name="headerFile" value="riparian-copyright.header"/>
+      <property name="fileExtensions" value="java"/>
+    </module>
+
   <!-- Disables VisibilityModifierChecks around JUnit rules properties. -->
   <module name="SuppressWithNearbyCommentFilter">
     <property name="commentFormat" value="@junitRule"/>
@@ -212,7 +217,6 @@
     <module name="FinalParameters"/>
     <module name="TodoComment"/>
     <module name="UpperEll"/>
-
   </module>
 
 </module>
