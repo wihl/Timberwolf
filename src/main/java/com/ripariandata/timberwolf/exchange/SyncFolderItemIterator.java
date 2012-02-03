@@ -68,7 +68,7 @@ public class SyncFolderItemIterator extends BaseChainIterator<MailboxItem>
             SyncFolderItemsHelper.SyncFolderItemsResult result =
                     SyncFolderItemsHelper.syncFolderItems(service, config, folder);
             syncState = result.getSyncState();
-            LOG.debug("Got {} email ids, which was {}the last of them.", result.getIds().size(),
+            LOG.debug("Got {} email ids, which were {}the last of them.", result.getIds().size(),
                       result.includesLastItem() ? "" : "not ");
             retrievedLastItem = result.includesLastItem();
             if (result.getIds().size() > 0)
