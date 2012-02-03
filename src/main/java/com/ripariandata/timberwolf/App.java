@@ -23,14 +23,12 @@ import com.ripariandata.timberwolf.exchange.HttpErrorException;
 import com.ripariandata.timberwolf.exchange.ServiceCallException;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.hbase.HBaseManager;
-import com.ripariandata.timberwolf.hbase.HBaseUserTimeUpdater;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
 
 import java.io.IOException;
 import java.io.PrintStream;
-
 import java.net.HttpURLConnection;
 import java.security.PrivilegedAction;
 
@@ -39,13 +37,10 @@ import javax.security.auth.login.LoginException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Driver class to grab emails and put them in HBase.
- */
+/** Driver class to grab emails and put them in HBase. */
 final class App implements PrivilegedAction<Integer>
 {
     private static final String CONFIGURATION_ENTRY = "Timberwolf";
@@ -54,7 +49,7 @@ final class App implements PrivilegedAction<Integer>
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
 
-    @Option(name = "-h", aliases = { "--help" },
+    @Option(name = "-h", aliases = {"--help"},
             usage = "Show this help text.")
     private boolean help;
 
@@ -81,7 +76,7 @@ final class App implements PrivilegedAction<Integer>
 
     @Option(name = "--hbase-metadata-table",
             usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
-                  + "email for each user.")
+                    + "email for each user.")
     private String hbaseMetadataTableName;
 
     @Option(name = "--hbase-key-header.",
@@ -140,7 +135,7 @@ final class App implements PrivilegedAction<Integer>
             if (!noHBaseArgs && !allHBaseArgs)
             {
                 throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
-                                           + "Table Name must all be specified if at least one is specified");
+                                                   + "Table Name must all be specified if at least one is specified");
             }
 
             useHBase = allHBaseArgs;
@@ -162,18 +157,20 @@ final class App implements PrivilegedAction<Integer>
     {
         MailWriter mailWriter;
         UserTimeUpdater timeUpdater;
+        UserFolderSyncStateStorage syncStateStorage;
         HBaseManager hbaseManager = null;
         if (useHBase)
         {
             hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
             mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
-            timeUpdater = new HBaseUserTimeUpdater(hbaseManager, hbaseMetadataTableName);
+            // TODO: switch to an HBase version
+            syncStateStorage = new InMemoryUserFolderSyncStateStorage();
         }
         else
         {
             mailWriter = new ConsoleMailWriter();
-            timeUpdater = new NoopUserTimeUpdater();
+            syncStateStorage = new InMemoryUserFolderSyncStateStorage();
         }
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
@@ -182,7 +179,7 @@ final class App implements PrivilegedAction<Integer>
             PrincipalFetcher userLister = new LdapFetcher(domain);
             Iterable<String> users = userLister.getPrincipals();
 
-            mailWriter.write(mailStore.getMail(users, timeUpdater));
+            mailWriter.write(mailStore.getMail(users, syncStateStorage));
             return 0;
         }
         catch (ExchangeRuntimeException e)
@@ -231,7 +228,7 @@ final class App implements PrivilegedAction<Integer>
         catch (PrincipalFetchException e)
         {
             System.out.println("There was a problem fetching a list of users from Active Directory. "
-                               + e.getMessage() +  "See the log for more details.");
+                               + e.getMessage() + "See the log for more details.");
         }
         finally
         {
