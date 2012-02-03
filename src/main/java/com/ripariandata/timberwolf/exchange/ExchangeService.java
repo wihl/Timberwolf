@@ -19,8 +19,6 @@ package com.ripariandata.timberwolf.exchange;
 
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
@@ -37,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.xmlsoap.schemas.soap.envelope.BodyType;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeDocument;
 import org.xmlsoap.schemas.soap.envelope.EnvelopeType;
+
 import static com.ripariandata.timberwolf.Utilities.inputStreamToString;
 
 /**
@@ -276,27 +275,6 @@ public class ExchangeService
         EnvelopeType envelope = request.addNewEnvelope();
         envelope.addNewHeader().addNewExchangeImpersonation().addNewConnectingSID().setPrincipalName(targetUser);
         return request;
-    }
-
-    /**
-     * Returns the results of a find item request.
-     *
-     * @param findItem A FindItemType object that specifies the set of items to
-     *                 gather from the Exchange server.
-     * @param targetUser The principal name of the user to find items for.
-     * @return A FindItemResponseType object with the requested items.
-     * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
-     * @throws ServiceCallException If there was a non-HTTP error sending the response,
-     *                              such as an improper encoding or IO error.
-     */
-    public FindItemResponseType findItem(final FindItemType findItem, final String targetUser)
-        throws ServiceCallException, HttpErrorException
-    {
-        EnvelopeDocument request = createEmptyRequest(targetUser);
-        EnvelopeType envelope = request.getEnvelope();
-        envelope.addNewBody().setFindItem(findItem);
-
-        return sendRequest(request).getFindItemResponse();
     }
 
     /**

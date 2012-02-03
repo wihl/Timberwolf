@@ -6,7 +6,6 @@
      specification. -->
 <!-- At the moment, this schema only supports a subset of the methods defined
      by EWS.  The operations this schema supports are:
-        - FindItem request and response
         - SyncFolderItems request and response
         - GetItem request and response
         - FindFolder request and response
@@ -47,8 +46,6 @@
   </xs:complexType>
   <xs:complexType name="BodyType">
     <xs:choice maxOccurs="1">
-      <xs:element ref="m:FindItem" />
-      <xs:element ref="m:FindItemResponse" />
       <xs:element ref="m:SyncFolderItems" />
       <xs:element ref="m:SyncFolderItemsResponse" />
       <xs:element ref="m:GetItem" />
@@ -56,6 +53,8 @@
       <xs:element ref="m:FindFolder" />
       <xs:element ref="m:FindFolderResponse" />
       <!-- The following are only used in testing -->
+      <xs:element ref="m:FindItem" />
+      <xs:element ref="m:FindItemResponse" />
       <xs:element ref="m:CreateFolder" />
       <xs:element ref="m:CreateFolderResponse" />
       <xs:element ref="m:CreateItem" />

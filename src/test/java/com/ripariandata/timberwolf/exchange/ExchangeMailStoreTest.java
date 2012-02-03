@@ -68,7 +68,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             throws XmlException, IOException, HttpErrorException,
                    ServiceCallException
     {
-        // Exchange returns 0 mail when findItem is called
+        // Exchange returns 0 mail when syncFolderItems is called
         defaultMockFindFolders();
         mockSyncFolderItems(new String[0], "newSyncState");
         ExchangeMailStore store = new ExchangeMailStore(getService());
@@ -83,7 +83,7 @@ public class ExchangeMailStoreTest extends ExchangeTestBase
             throws XmlException, IOException, HttpErrorException,
                    ServiceCallException
     {
-        // Exchange returns 0 mail when findItem is called
+        // Exchange returns 0 mail when syncFolderItems is called
         mockFindFolders(new FolderType[0]);
         ExchangeMailStore store = new ExchangeMailStore(getService());
         for (MailboxItem mailboxItem : store.getMail(defaultUser, new InMemoryUserFolderSyncStateStorage()))
