@@ -25,7 +25,6 @@ import com.microsoft.schemas.exchange.services.x2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderQueryTraversalType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 
@@ -63,23 +62,6 @@ public final class FindFolderHelper
 
         DistinguishedFolderIdType folderId = findFolder.addNewParentFolderIds().addNewDistinguishedFolderId();
         folderId.setId(folder);
-
-        return findFolder;
-    }
-
-    /**
-     * Creates a FindFolderType for the given folder.
-     *
-     * @param folderId The folder id for the folder from which to get ids.
-     * @return The FindFolderType for the given folder..
-     */
-    // TODO remove this
-    static FindFolderType getFindFoldersRequest(final String folderId)
-    {
-        FindFolderType findFolder = getFindFolderType();
-
-        FolderIdType folder = findFolder.addNewParentFolderIds().addNewFolderId();
-        folder.setId(folderId);
 
         return findFolder;
     }
