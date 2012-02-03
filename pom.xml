@@ -161,12 +161,23 @@
                   </mapping>
                   <mapping>
                       <directory>/etc</directory>
-                      <filemode>644</filemode>
+                      <filemode>755</filemode>
                       <username>root</username>
                       <groupname>root</groupname>
                       <sources>
                           <source>
                               <location>${project.basedir}/src/main/resources/timberwolf.properties</location>
+                          </source>
+                      </sources>
+                  </mapping>
+                  <mapping>
+                      <directory>/usr/bin</directory>
+                      <filemode>755</filemode>
+                      <username>root</username>
+                      <groupname>root</groupname>
+                      <sources>
+                          <source>
+                              <location>${project.basedir}/src/main/resources/timberwolf</location>
                           </source>
                       </sources>
                   </mapping>
@@ -199,6 +210,14 @@
                   <mapper>
                     <type>perm</type>
                     <prefix>/etc</prefix>
+                  </mapper>
+                </data>
+                <data>
+                  <src>${project.basedir}/src/main/resources/timberwolf</src>
+                  <type>file</type>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/usr/bin</prefix>
                   </mapper>
                 </data>
               </dataSet>
