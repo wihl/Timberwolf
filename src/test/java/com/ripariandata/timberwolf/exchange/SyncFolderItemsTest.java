@@ -23,7 +23,7 @@ import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsRes
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
+import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
@@ -371,7 +371,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
     }
 
     @Test
-    public void testUnsetItem() throws ServiceCallException, HttpErrorException
+    public void testUnsetMessage() throws ServiceCallException, HttpErrorException
     {
         final int count = 3;
         List<String> ids = generateIds(0, count, getDefaultFolderId());
@@ -381,7 +381,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
         creates[0] = mockCreateItem(ids.get(0));
         creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
-        when(creates[1].isSetItem()).thenReturn(false);
+        when(creates[1].isSetMessage()).thenReturn(false);
         creates[2] = mockCreateItem(ids.get(2));
         mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
         SyncFolderItemsResult result =
@@ -404,10 +404,10 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         final SyncFolderItemsCreateOrUpdateType[] creates = new SyncFolderItemsCreateOrUpdateType[3];
         creates[0] = mockCreateItem(ids.get(0));
         creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
-        when(creates[1].isSetItem()).thenReturn(true);
-        final ItemType item = mock(ItemType.class);
-        when(creates[1].getItem()).thenReturn(item);
-        when(item.isSetItemId()).thenReturn(false);
+        when(creates[1].isSetMessage()).thenReturn(true);
+        final MessageType message = mock(MessageType.class);
+        when(creates[1].getMessage()).thenReturn(message);
+        when(message.isSetItemId()).thenReturn(false);
         creates[2] = mockCreateItem(ids.get(2));
         mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
         SyncFolderItemsResult result =

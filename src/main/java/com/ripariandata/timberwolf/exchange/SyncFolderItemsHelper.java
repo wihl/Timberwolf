@@ -126,9 +126,9 @@ public final class SyncFolderItemsHelper
                 // There's also Update and Delete arrays, but we're not dealing with them yet
                 for (SyncFolderItemsCreateOrUpdateType create : message.getChanges().getCreateArray())
                 {
-                    if (create.isSetItem() && create.getItem().isSetItemId())
+                    if (create.isSetMessage() && create.getMessage().isSetItemId())
                     {
-                        result.getIds().add(create.getItem().getItemId().getId());
+                        result.getIds().add(create.getMessage().getItemId().getId());
                     }
                 }
             }

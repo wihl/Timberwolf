@@ -39,7 +39,6 @@ import com.microsoft.schemas.exchange.services.x2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderType;
 import com.microsoft.schemas.exchange.services.x2006.types.ItemIdType;
-import com.microsoft.schemas.exchange.services.x2006.types.ItemType;
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
@@ -310,12 +309,12 @@ public class ExchangeTestBase
     protected SyncFolderItemsCreateOrUpdateType mockCreateItem(final String id)
     {
         SyncFolderItemsCreateOrUpdateType create = mock(SyncFolderItemsCreateOrUpdateType.class);
-        ItemType item = mock(ItemType.class);
+        MessageType message = mock(MessageType.class);
         ItemIdType itemId = mock(ItemIdType.class);
-        when(create.isSetItem()).thenReturn(true);
-        when(create.getItem()).thenReturn(item);
-        when(item.isSetItemId()).thenReturn(true);
-        when(item.getItemId()).thenReturn(itemId);
+        when(create.isSetMessage()).thenReturn(true);
+        when(create.getMessage()).thenReturn(message);
+        when(message.isSetItemId()).thenReturn(true);
+        when(message.getItemId()).thenReturn(itemId);
         when(itemId.getId()).thenReturn(id);
         return create;
     }
