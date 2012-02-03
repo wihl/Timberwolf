@@ -37,6 +37,8 @@ import org.apache.commons.configuration.PropertiesConfiguration;
  * Since our needs for configuration handling are pretty simple, this does a lot
  * less than args4j.  It only handles fields, not methods, and doesn't do anything
  * other than match names to values.
+ *
+ * @throws IllegalAccessError If the default value of a field cannot be read.
  */
 public class ConfigFileParser
 {

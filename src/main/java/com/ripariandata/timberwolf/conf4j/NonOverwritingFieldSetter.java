@@ -29,82 +29,51 @@ import java.lang.reflect.Field;
  */
 class NonOverwritingFieldSetter extends FieldSetter
 {
+    private Object defaultValue;
+
     public NonOverwritingFieldSetter(final Object o, final Field f)
     {
         super(o, f);
+        defaultValue = get(o, f);
     }
 
-    private static Object getDefault(final Class c)
+    private static Object get(Object bean, Field field)
     {
-        if (c.equals(byte.class))
+        Object val;
+        try
         {
-            return new Byte((byte) 0);
+            val = field.get(bean);
         }
-        else if (c.equals(short.class))
+        catch (IllegalAccessException e)
         {
-            return new Short((short) 0);
+            field.setAccessible(true);
+            try
+            {
+                val = field.get(bean);
+            }
+            catch (IllegalAccessException iae)
+            {
+                throw new IllegalAccessError(iae.getMessage());
+            }
         }
-        else if (c.equals(int.class))
-        {
-            return new Integer(0);
-        }
-        else if (c.equals(long.class))
-        {
-            return new Long(0);
-        }
-        else if (c.equals(float.class))
-        {
-            return new Float(0.0);
-        }
-        else if (c.equals(double.class))
-        {
-            return new Double(0.0);
-        }
-        else if (c.equals(boolean.class))
-        {
-            return false;
-        }
-        else if (c.equals(char.class))
-        {
-            return '\u0000';
-        }
-
-        return null;
+        return val;
     }
 
     /**
      * Sets the field represented by this setter to the given value as long as
      * the field currently contains the default value for its type.
      *
-     * @throws IllegalAccessError If the field cannot read from, or if the field
-     *                            cannot be assigned to.
+     * @throws IllegalAccessError If the field cannot be assigned to.
      * @throws IllegalArgumentException If the target field's type is not compatible
      *                                  with <tt>value</tt>'s type.
      */
     @Override
     public void set(final Object value)
     {
-        Object o;
-        try
-        {
-            o = field().get(bean());
-        }
-        catch (IllegalAccessException iae)
-        {
-            field.setAccessible(true);
-            try
-            {
-                o = field().get(bean());
-            }
-            catch (IllegalAccessException e)
-            {
-                throw new IllegalAccessError(e.getMessage());
-            }
-        }
+        Object val = get(bean(), field());
 
-        Object defaultValue = getDefault(field().getType());
-        if ((defaultValue == null && o == null)
-            || (defaultValue != null && o != null && defaultValue.equals(o)))
+        if ((defaultValue == null && val == null)
+            || (defaultValue != null && val != null && defaultValue.equals(val)))
         {
             super.set(value);
         }

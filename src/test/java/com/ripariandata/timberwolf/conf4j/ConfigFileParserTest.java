@@ -219,6 +219,9 @@ public class ConfigFileParserTest
         @ConfigEntry(name = "non.overwritable", overwriteNonDefault = false)
         private String nonOverwritable = null;
 
+        @ConfigEntry(name = "has.default", overwriteNonDefault = false)
+        private String hasDefault = "default";
+
         public String overwritable()
         {
             return overwritable;
@@ -227,6 +230,11 @@ public class ConfigFileParserTest
         public String nonOverwritable()
         {
             return nonOverwritable;
+        }
+
+        public String hasDefault()
+        {
+            return hasDefault;
         }
     }
 
@@ -237,17 +245,21 @@ public class ConfigFileParserTest
         ConfigFileParser parser = new ConfigFileParser(target);
 
         Configuration mockConfig = mockConfiguration("overwritable", "new data",
-                                                     "non.overwritable", "new data");
+                                                     "non.overwritable", "new data",
+                                                     "has.default", "non default");
         parser.parseConfiguration(mockConfig);
 
         assertEquals("new data", target.overwritable());
         assertEquals("new data", target.nonOverwritable());
+        assertEquals("non default", target.hasDefault());
 
         mockConfig = mockConfiguration("overwritable", "newer data",
-                                       "non.overwritable", "newer data");
+                                       "non.overwritable", "newer data",
+                                       "has.default", "more non default");
         parser.parseConfiguration(mockConfig);
 
         assertEquals("newer data", target.overwritable());
         assertEquals("new data", target.nonOverwritable());
+        assertEquals("non default", target.hasDefault());
     }
 }

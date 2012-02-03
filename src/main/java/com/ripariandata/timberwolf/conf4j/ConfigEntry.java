@@ -35,8 +35,10 @@ public @interface ConfigEntry
 
     /**
      * If false, will silently fail to set values on fields that already have
-     * non-default values.  Default values are 0 for primitive numeric types,
-     * false for booleans, '\u0000' for chars and null for everything else.
+     * non-default values.  The default value for a field is whatever it was set
+     * to when the ConfigFileParser was constructed.  If not explicitly initialized,
+     * the default values are 0 for numeric types, false for booleans, '\u0000'
+     * for chars and null for everything else.
      */
     boolean overwriteNonDefault() default true;
 }

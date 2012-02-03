@@ -41,7 +41,7 @@ public class FieldSetter
 
     protected Field field()
     {
-        return field();
+        return field;
     }
 
     /**
