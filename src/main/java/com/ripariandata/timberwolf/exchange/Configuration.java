@@ -17,10 +17,8 @@
  */
 package com.ripariandata.timberwolf.exchange;
 
-import com.ripariandata.timberwolf.NoopUserTimeUpdater;
-import com.ripariandata.timberwolf.UserTimeUpdater;
-
-import org.joda.time.DateTime;
+import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 
 /**
  * This class contains any configurable settings
@@ -30,31 +28,32 @@ public class Configuration
 {
     private final int findPageSize;
     private final int getPageSize;
-    private final UserTimeUpdater timeUpdater;
+    private UserFolderSyncStateStorage syncStateStorage;
 
     /**
      * @param findItemPageSize Must be greater than or equal to 1.
-     * @param getItemPageSize
-     * @param userTimeUpdater The UserTimeUpdater that defines the time range for each user.
+     * @param getItemPageSize Must be greater than or equal to 1.
+     * @param userFolderSyncStateStorage The storage that maintains sync states
+     * for all the folders for all the users.
      */
     public Configuration(final int findItemPageSize, final int getItemPageSize,
-                         final UserTimeUpdater userTimeUpdater)
+                         final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
         // Asking for negative or zero max items is nonsensical.
         this.findPageSize = Math.max(findItemPageSize, 1);
         this.getPageSize = Math.max(getItemPageSize, 1);
-        this.timeUpdater = userTimeUpdater;
+        syncStateStorage = userFolderSyncStateStorage;
     }
 
     /**
      * Creates a configuration with the startDate set to the beginning of the epoch.
      *
      * @param findItemPageSize Must be greater than or equal to 1.
-     * @param getItemPageSize
+     * @param getItemPageSize Must be greater than or equal to 1.
      */
     public Configuration(final int findItemPageSize, final int getItemPageSize)
     {
-        this(findItemPageSize, getItemPageSize, new NoopUserTimeUpdater());
+        this(findItemPageSize, getItemPageSize, new InMemoryUserFolderSyncStateStorage());
     }
 
     public int getFindItemPageSize()
@@ -67,18 +66,13 @@ public class Configuration
         return getPageSize;
     }
 
-    public Configuration withTimeUpdater(final UserTimeUpdater userTimeUpdater)
+    public UserFolderSyncStateStorage getSyncStateStorage()
     {
-        return new Configuration(findPageSize, getPageSize, userTimeUpdater);
+        return syncStateStorage;
     }
 
-    public DateTime getLastUpdated(final String user)
+    public Configuration withSyncStateStorage(final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
-        return timeUpdater.lastUpdated(user);
-    }
-
-    public void setLastUpdated(final String user, final DateTime time)
-    {
-        timeUpdater.setUpdateTime(user, time);
+        return new Configuration(findPageSize,  getPageSize, userFolderSyncStateStorage);
     }
 }

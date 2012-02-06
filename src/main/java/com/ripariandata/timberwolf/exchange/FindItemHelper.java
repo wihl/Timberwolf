@@ -81,12 +81,12 @@ public final class FindItemHelper
         index.setBasePoint(FIND_ITEMS_BASE_POINT);
         // Negative offsets are nonsensical.
         index.setOffset(Math.max(offset, 0));
-
-        DateTime startDate = config.getLastUpdated(folder.getUser());
-        if (startDate != null)
-        {
-            findItem.setRestriction(getAfterDateRestriction(startDate));
-        }
+//       TODO: remove
+//        DateTime startDate = config.getLastUpdated(folder.getUser());
+//        if (startDate != null)
+//        {
+//            findItem.setRestriction(getAfterDateRestriction(startDate));
+//        }
 
         findItem.setParentFolderIds(folder.getFolderIds());
 

@@ -96,7 +96,8 @@ public final class SyncFolderItemsHelper
         SyncFolderItemsResponseType response = exchangeService.syncFolderItems(syncFolderItemsRequest, targetUser);
         if (response == null)
         {
-            LOG.debug("Exchange service returned null sync folder items response.");
+            LOG.debug("Exchange service returned null sync folder items response for request:\n{}",
+                      syncFolderItemsRequest);
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
         ArrayOfResponseMessagesType array = response.getResponseMessages();
@@ -125,9 +126,9 @@ public final class SyncFolderItemsHelper
                 // There's also Update and Delete arrays, but we're not dealing with them yet
                 for (SyncFolderItemsCreateOrUpdateType create : message.getChanges().getCreateArray())
                 {
-                    if (create.isSetItem() && create.getItem().isSetItemId())
+                    if (create.isSetMessage() && create.getMessage().isSetItemId())
                     {
-                        result.getIds().add(create.getItem().getItemId().getId());
+                        result.getIds().add(create.getMessage().getItemId().getId());
                     }
                 }
             }
