@@ -71,7 +71,7 @@ public class ConfigFileParser
         File f = new File(configFile);
         if (!f.exists())
         {
-            throw new ConfigFileMissingException(configFile);
+            throw new ConfigFileMissingException(configFile, this);
         }
 
         Configuration config;
@@ -81,7 +81,7 @@ public class ConfigFileParser
         }
         catch (ConfigurationException e)
         {
-            throw new ConfigFileException("There was an error loading the configuration file at " + configFile, e);
+            throw new ConfigFileException("There was an error loading the configuration file at " + configFile, e, this);
         }
         parseConfiguration(config);
     }

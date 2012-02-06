@@ -68,12 +68,12 @@ final class App implements PrivilegedAction<Integer>
             usage = "Show this help text.")
     private boolean help;
 
-    @Option(required = true, name = "--domain",
+    @Option(name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
     @ConfigEntry(name = "domain")
     private String domain;
 
-    @Option(required = true, name = "--exchange-url",
+    @Option(name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
                     + "https://example.com/ews/exchange.asmx")
     @ConfigEntry(name = "exchange.url")
@@ -121,31 +121,58 @@ final class App implements PrivilegedAction<Integer>
         output.println();
     }
 
-    public static void main(final String[] args) throws IOException
+    private static void printUsage(final PrintStream output, final ConfigFileParser parser)
     {
-        new App().beginEverything(args);
+        output.println("Timberwolf configuration files are java properties files, using the syntax described here: "
+                     + "http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/"
+                     + "PropertiesConfiguration.html");
+        // TODO: parser.printUsage(output);
+        output.println();
     }
 
-    private void beginEverything(final String[] args) throws IOException
+    public static void main(final String[] args) throws IOException
     {
-        ConfigFileParser configParser = new ConfigFileParser(this);
-        CmdLineParser cliParser = new CmdLineParser(this);
+        App app = new App();
 
+        boolean shouldContinue = true;
         try
         {
-            cliParser.parseArgument(args);
+            shouldContinue = app.beginEverything(args);
         }
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            printUsage(System.err, cliParser);
+            printUsage(System.err, e.getParser());
             return;
         }
+        catch (ConfigFileException e)
+        {
+            System.err.println(e.getMessage());
+            printUsage(System.err, e.getParser());
+            return;
+        }
+
+        try
+        {
+            Auth.authenticateAndDo(app, CONFIGURATION_ENTRY);
+        }
+        catch (LoginException e)
+        {
+            System.err.println("Authentication failed: " + e.getMessage());
+        }
+    }
+
+    private boolean beginEverything(final String[] args) throws IOException, CmdLineException, ConfigFileException
+    {
+        ConfigFileParser configParser = new ConfigFileParser(this);
+        CmdLineParser cliParser = new CmdLineParser(this);
+
+        cliParser.parseArgument(args);
 
         if (help)
         {
             printUsage(System.out, cliParser);
-            return;
+            return false;
         }
 
         try
@@ -157,30 +184,14 @@ final class App implements PrivilegedAction<Integer>
             if (configFileLocation != DEFAULT_CONFIG_LOCATION)
             {
                 // Assume that this was specified explicitly.
-                System.err.println(e.getMessage());
-                return;
+                throw e;
             }
 
             // If the config file was not explicitly named, assume that the user
             // meant to specify everything on the command line.
         }
-        catch (ConfigFileException e)
-        {
-            System.err.println(e.getMessage());
-            // TODO: print usage info for the config file?
-            return;
-        }
 
-        try
-        {
-            cliParser.parseArgument(args);
-        }
-        catch (CmdLineException e)
-        {
-            System.err.println(e.getMessage());
-            printUsage(System.err, cliParser);
-            return;
-        }
+        cliParser.parseArgument(args);
 
         LOG.debug("Timberwolf invoked with the following arguments:");
         LOG.debug("Domain: {}", domain);
@@ -201,22 +212,22 @@ final class App implements PrivilegedAction<Integer>
 
         if (!noHBaseArgs && !allHBaseArgs)
         {
-            System.err.println("HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
-                             + "Table Name must all be specified if at least one is specified");
-            printUsage(System.err, cliParser);
-            return;
+            throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                                                + "Table Name must all be specified if at least one is specified");
+        }
+
+        if (domain == null)
+        {
+            throw new CmdLineException(cliParser, "The domain must be specified.");
+        }
+
+        if (exchangeUrl == null)
+        {
+            throw new CmdLineException(cliParser, "The Exchange URL must be specified.");
         }
 
         useHBase = allHBaseArgs;
-
-        try
-        {
-            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
-        }
-        catch (LoginException e)
-        {
-            System.err.println("Authentication failed: " + e.getMessage());
-        }
+        return true;
     }
 
     public Integer run()
