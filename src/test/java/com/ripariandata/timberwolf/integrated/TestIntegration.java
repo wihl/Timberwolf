@@ -31,7 +31,7 @@ import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToMoveMessage;
 import com.ripariandata.timberwolf.exchange.RequiredFolder;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
-import com.ripariandata.timberwolf.hbase.HBaseUserTimeUpdater;
+import com.ripariandata.timberwolf.hbase.HBaseUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import java.io.IOException;
@@ -173,16 +173,14 @@ public class TestIntegration
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
                 MailWriter mailWriter = HBaseMailWriter.create(emailTable.getTable(), keyHeader,
                                                                emailTable.getFamily());
-                // TODO: instantiate a hbaseSyncStateStorage instead
-                HBaseUserTimeUpdater timeUpdater =
-                        new HBaseUserTimeUpdater(userTable.getManager(), userTable.getName());
+                HBaseUserFolderSyncStateStorage timeUpdater =
+                        new HBaseUserFolderSyncStateStorage(userTable.getManager(), userTable.getName());
 
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
                     removeUsers(users, senderEmail, ignoredEmail);
-                    // TODO: replace this with an hbase version
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, inMemorySyncStateStorage);
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, timeUpdater);
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)
