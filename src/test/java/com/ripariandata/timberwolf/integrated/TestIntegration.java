@@ -59,12 +59,6 @@ public class TestIntegration
 
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
-    /**
-     * The time to sleep between sending emails and calling GetMails.
-     * This is because sometimes we're so fast that we reget the old emails.
-     * This is in milliseconds.
-     */
-    public static final int SLEEP_TIME = 1000;
 
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
@@ -151,9 +145,6 @@ public class TestIntegration
         user1.sendEmail(pump);
         user2.sendEmail(pump);
         user3.sendEmail(pump);
-        // Sleep a few seconds to make sure all the emails are received
-        // before we continue on to organize and calling GetMail
-        Thread.sleep(SLEEP_TIME);
 
         user1.moveEmails(pump);
         user2.moveEmails(pump);
