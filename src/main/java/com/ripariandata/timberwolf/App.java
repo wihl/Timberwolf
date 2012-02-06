@@ -23,6 +23,7 @@ import com.ripariandata.timberwolf.exchange.HttpErrorException;
 import com.ripariandata.timberwolf.exchange.ServiceCallException;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.hbase.HBaseManager;
+import com.ripariandata.timberwolf.hbase.HBaseUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
@@ -163,8 +164,7 @@ final class App implements PrivilegedAction<Integer>
             hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
             mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
-            // TODO: switch to an HBase version
-            syncStateStorage = new InMemoryUserFolderSyncStateStorage();
+            syncStateStorage = new HBaseUserFolderSyncStateStorage(hbaseManager, hbaseMetadataTableName);
         }
         else
         {
