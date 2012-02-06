@@ -30,5 +30,9 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 public @interface ConfigEntry
 {
+    /** The key name in the configuration file for this entry. */
     String name();
+
+    /** Short description of the entry, suitable for printing to the console. */
+    String usage() default "";
 }
