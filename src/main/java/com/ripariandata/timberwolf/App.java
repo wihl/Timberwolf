@@ -166,6 +166,16 @@ final class App implements PrivilegedAction<Integer>
 
         try
         {
+            cliParser.parseArgument(args);
+        }
+        catch (CmdLineException e)
+        {
+            System.err.println(e.getMessage());
+            printUsage(System.err, cliParser);
+        }
+
+        try
+        {
             if (help)
             {
                 printUsage(System.out, cliParser);
