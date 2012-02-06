@@ -152,6 +152,11 @@ final class App implements PrivilegedAction<Integer>
             return;
         }
 
+        if (!shouldContinue)
+        {
+            return;
+        }
+
         try
         {
             Auth.authenticateAndDo(app, CONFIGURATION_ENTRY);
