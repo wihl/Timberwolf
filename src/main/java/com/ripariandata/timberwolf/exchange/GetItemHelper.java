@@ -68,15 +68,15 @@ public final class GetItemHelper
      * @param count The number of items to get.
      * @param startIndex The index in ids of the first item to get
      * @param ids A list of ids to get
-     * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
-     * items will be returned
+     *            If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
+     *            items will be returned
      * @param exchangeService The backend service used for contacting Exchange.
      * @param targetUser The user to impersonate for the Exchange GetItem request.
      * @return A list of mailbox items that correspond to the given ids.
      * @throws HttpErrorException If the HTTP response from Exchange has a non-200 status code.
      * @throws ServiceCallException If there was a non-HTTP error making the Exchange
-     * request, or if the SOAP find item response has a message
-     * with a response code other than "No Error".
+     *                              request, or if the SOAP find item response has a message
+     *                              with a response code other than "No Error".
      */
     static Vector<MailboxItem> getItems(final int count, final int startIndex, final Vector<String> ids,
                                         final ExchangeService exchangeService, final String targetUser)
