@@ -17,13 +17,14 @@
  */
 package com.ripariandata.timberwolf.hbase;
 
+import com.ripariandata.timberwolf.MockHTable;
+
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.ripariandata.timberwolf.MockHTable;
-
+/** Runs mocked tests against the HBaseUserFolderSyncStateStorage class. */
 public class HBaseUserFolderSyncStateStorageTest
 {
     private HBaseManager manager = new HBaseManager();
@@ -35,8 +36,10 @@ public class HBaseUserFolderSyncStateStorageTest
         hbaseManager.addTable(hbaseTable);
         return hbaseTable;
     }
-    
-    private Put statePut(String userName, String folderId, String state)
+
+    private Put statePut(final String userName,
+                         final String folderId,
+                         final String state)
     {
         Put put = new Put(Bytes.toBytes(userName + " " + folderId));
         put.add(Bytes.toBytes("s"), Bytes.toBytes("v"), Bytes.toBytes(state));
@@ -70,7 +73,7 @@ public class HBaseUserFolderSyncStateStorageTest
         String state = updates.getLastSyncState("not actually a username", "NoId");
         Assert.assertEquals(null, state);
     }
-    
+
     @Test
     public void testLastUpdatedNoFolderId()
     {
@@ -82,7 +85,7 @@ public class HBaseUserFolderSyncStateStorageTest
         final String state = "ExistingFolderState";
         hbaseTable.put(statePut(userName, folderId, state));
         hbaseTable.flush();
-        
+
         HBaseUserFolderSyncStateStorage updates = new HBaseUserFolderSyncStateStorage(manager, tableName);
         String retrievedState = updates.getLastSyncState(userName, "NonExistingAAFolderAA");
         Assert.assertEquals(null, retrievedState);

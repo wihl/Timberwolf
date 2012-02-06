@@ -1,5 +1,7 @@
 package com.ripariandata.timberwolf.hbase;
 
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,16 +10,15 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
-
+/** Maintains the userFolder sync state on hbase tables. */
 public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStorage
 {
     /** The table wherein our sync states are stored. */
     private IHBaseTable table;
-    
+
     private static final String SYNC_COLUMN_FAMILY = "s";
     private static final String SYNC_COLUMN_QUALIFIER = "v";
-    
+
     /**
      * Constructs a HBaseUserFolderSyncStateStorage
      * from a HBaseManager and a given table name.
@@ -34,7 +35,7 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
         /** If the table already exists it will be simply grabbed not recreated. */
         table = hBaseManager.createTable(updateTable, columnFamilies);
     }
-    
+
     /**
      * Determines the last sync state of this user for the given folder.
      * @param user The username.
@@ -42,7 +43,7 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
      * @return The last recorded sync state for that folder.
      */
     @Override
-    public String getLastSyncState(String user, String folderId)
+    public String getLastSyncState(final String user, final String folderId)
     {
         Get get = new Get(primaryKey(user, folderId));
         Result result = table.get(get);
@@ -62,7 +63,9 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
      * @param syncState The new folder state to record for later.
      */
     @Override
-    public void setSyncState(String user, String folderId, String syncState)
+    public void setSyncState(final String user,
+                             final String folderId,
+                             final String syncState)
     {
         Put put = new Put(primaryKey(user, folderId));
         put.add(Bytes.toBytes(SYNC_COLUMN_FAMILY), Bytes.toBytes(SYNC_COLUMN_QUALIFIER),
@@ -71,9 +74,9 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
         table.put(put);
         table.flush();
     }
-    
-    /** Given the user and the folderId of interest, return the expected key */
-    private byte[] primaryKey(String user, String folderId)
+
+    /** Given the user and folderId of interest, return the expected key. */
+    private byte[] primaryKey(final String user, final String folderId)
     {
         return Bytes.toBytes(user + " " + folderId);
     }
