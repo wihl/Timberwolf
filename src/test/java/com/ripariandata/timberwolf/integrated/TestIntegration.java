@@ -64,7 +64,7 @@ public class TestIntegration
      * This is because sometimes we're so fast that we reget the old emails.
      * This is in milliseconds.
      */
-    public static final int SLEEP_TIME = 10000;
+    public static final int SLEEP_TIME = 1000;
 
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
