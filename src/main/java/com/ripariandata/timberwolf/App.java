@@ -180,39 +180,35 @@ final class App implements PrivilegedAction<Integer>
             printUsage(System.err, cliParser);
         }
 
-        try
+        LOG.debug("Timberwolf invoked with the following arguments:");
+        LOG.debug("Domain: {}", domain);
+        LOG.debug("Exchange URL: {}", exchangeUrl);
+        LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+        LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
+        LOG.debug("HBase Table Name: {}", hbaseTableName);
+        LOG.debug("HBase Metadata Table Name: {}", hbaseMetadataTableName);
+        LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
+        LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
+
+        boolean noHBaseArgs =
+                hbaseQuorum == null && hbaseclientPort == null
+                && hbaseTableName == null && hbaseMetadataTableName == null;
+        boolean allHBaseArgs =
+                hbaseQuorum != null && hbaseclientPort != null
+                && hbaseTableName != null && hbaseMetadataTableName != null;
+
+        if (!noHBaseArgs && !allHBaseArgs)
         {
-            LOG.debug("Timberwolf invoked with the following arguments:");
-            LOG.debug("Domain: {}", domain);
-            LOG.debug("Exchange URL: {}", exchangeUrl);
-            LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
-            LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
-            LOG.debug("HBase Table Name: {}", hbaseTableName);
-            LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
-            LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
-
-            boolean noHBaseArgs =
-                    hbaseQuorum == null && hbaseclientPort == null
-                    && hbaseTableName == null && hbaseMetadataTableName == null;
-            boolean allHBaseArgs =
-                    hbaseQuorum != null && hbaseclientPort != null
-                    && hbaseTableName != null && hbaseMetadataTableName != null;
-
-            if (!noHBaseArgs && !allHBaseArgs)
-            {
-                throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
-                                           + "Table Name must all be specified if at least one is specified");
-            }
-
-            useHBase = allHBaseArgs;
-
-            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
+            System.err.println("HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                             + "Table Name must all be specified if at least one is specified");
+            printUsage(System.err, cliParser);
         }
 
-        catch (CmdLineException e)
+        useHBase = allHBaseArgs;
+
+        try
         {
-            System.err.println(e.getMessage());
-            printUsage(System.err, cliParser);
+            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
         }
         catch (LoginException e)
         {
