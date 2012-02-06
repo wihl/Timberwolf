@@ -64,49 +64,49 @@ final class App implements PrivilegedAction<Integer>
                     + DEFAULT_CONFIG_LOCATION + ".")
     private String configFileLocation = DEFAULT_CONFIG_LOCATION;
 
-    // @Option(name = "-h", aliases = { "--help" },
-    //         usage = "Show this help text.")
+    @Option(name = "-h", aliases = { "--help" },
+            usage = "Show this help text.")
     private boolean help;
 
-    // @Option(required = true, name = "--domain",
-    //         usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    @Option(required = true, name = "--domain",
+            usage = "The domain you wish to crawl. Users of this domain will be imported.")
     @ConfigEntry(name = "domain")
     private String domain;
 
-    // @Option(required = true, name = "--exchange-url",
-    //         usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
-    //                 + "https://example.com/ews/exchange.asmx")
+    @Option(required = true, name = "--exchange-url",
+            usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+                    + "https://example.com/ews/exchange.asmx")
     @ConfigEntry(name = "exchange.url")
     private String exchangeUrl;
 
-    // @Option(name = "--hbase-quorum",
-    //         usage = "The ZooKeeper quorum used to connect to HBase.")
+    @Option(name = "--hbase-quorum",
+            usage = "The ZooKeeper quorum used to connect to HBase.")
     @ConfigEntry(name = "hbase.quorum")
     private String hbaseQuorum;
 
-    // @Option(name = "--hbase-clientport",
-    //         usage = "The ZooKeeper client port used to connect to HBase.")
+    @Option(name = "--hbase-clientport",
+            usage = "The ZooKeeper client port used to connect to HBase.")
     @ConfigEntry(name = "hbase.clientport")
     private String hbaseclientPort;
 
-    // @Option(name = "--hbase-table",
-    //         usage = "The HBase table name that email data will be imported into.")
+    @Option(name = "--hbase-table",
+            usage = "The HBase table name that email data will be imported into.")
     @ConfigEntry(name = "hbase.table")
     private String hbaseTableName;
 
-    // @Option(name = "--hbase-metadata-table",
-    //         usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
-    //               + "email for each user.")
+    @Option(name = "--hbase-metadata-table",
+            usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
+                  + "email for each user.")
     @ConfigEntry(name = "hbase.metadatatable")
     private String hbaseMetadataTableName;
 
-    // @Option(name = "--hbase-key-header.",
-    //         usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
+    @Option(name = "--hbase-key-header.",
+            usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
     @ConfigEntry(name = "hbase.key.header")
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
-    // @Option(name = "--hbase-column-family.",
-    //         usage = "The column family for the imported email data.  Default family is 'h'.")
+    @Option(name = "--hbase-column-family.",
+            usage = "The column family for the imported email data.  Default family is 'h'.")
     @ConfigEntry(name = "hbase.column.family")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
