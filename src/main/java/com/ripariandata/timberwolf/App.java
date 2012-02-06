@@ -141,6 +141,12 @@ final class App implements PrivilegedAction<Integer>
             printUsage(System.err, cliParser);
         }
 
+        if (help)
+        {
+            printUsage(System.out, cliParser);
+            return;
+        }
+
         try
         {
             configParser.parseConfigFile(configFileLocation);
@@ -176,12 +182,6 @@ final class App implements PrivilegedAction<Integer>
 
         try
         {
-            if (help)
-            {
-                printUsage(System.out, cliParser);
-                return;
-            }
-
             LOG.debug("Timberwolf invoked with the following arguments:");
             LOG.debug("Domain: {}", domain);
             LOG.debug("Exchange URL: {}", exchangeUrl);
