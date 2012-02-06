@@ -302,11 +302,11 @@ public class TestIntegration
         RequiredFolder msChild = middlerIII.addFolder("Middler IV").addFolder("Ms child");
         msChild.add("Ms child", "is way nicer than MJ");
         msChild.add("Super nesting", "The child of Ms child is so deep");
-        RequiredFolder findItems = user1.addFolderToRoot("Page FindItems");
-        // Page FindItems (29)
+        RequiredFolder syncFolderItems = user1.addFolderToRoot("Page SyncFolderItems");
+        // Page SyncFolderItems (29)
         for (int i = 0; i < 29; i++)
         {
-            findItems.add("Page FindItems" + (i + 1), "Page FindItems #" + (i + 1));
+            syncFolderItems.add("Page SyncFolderItems" + (i + 1), "Page SyncFolderItems #" + (i + 1));
         }
         RequiredFolder getItems = user1.addFolderToRoot("Page GetItems");
         // Page GetItems (11)

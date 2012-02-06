@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runs a GetItemIterator over many ids, retrieved more efficiently with findItems.
+ * Runs a GetItemIterator over many ids, retrieved more efficiently with syncFolderItems.
  * <p/>
- * This class pages the calls to findItems.
+ * This class pages the calls to syncFolderItems.
  */
 public class SyncFolderItemIterator extends BaseChainIterator<MailboxItem>
 {

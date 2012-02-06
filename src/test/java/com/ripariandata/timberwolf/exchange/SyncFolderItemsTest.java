@@ -178,7 +178,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         MessageType[] messages = new MessageType[0];
         final String myNewSyncState = "MyNewSyncState";
         mockSyncFolderItems(messages, getDefaultFolder(),
-                            getDefaultConfig().getFindItemPageSize(), myNewSyncState, false);
+                            getDefaultConfig().getIdPageSize(), myNewSyncState, false);
         SyncFolderItemsResult result = SyncFolderItemsHelper
                 .syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         assertEquals(0, result.getIds().size());
@@ -196,7 +196,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         final String oldSyncState = "oldSyncState";
         final String newSyncState = "MySweetNewSyncState";
         getDefaultFolder().setSyncStateToken(oldSyncState);
-        mockSyncFolderItems(messages, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(),
+        mockSyncFolderItems(messages, getDefaultFolder(), getDefaultConfig().getIdPageSize(),
                             newSyncState, false);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
@@ -387,7 +387,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         creates[1] = mock(SyncFolderItemsCreateOrUpdateType.class);
         when(creates[1].isSetMessage()).thenReturn(false);
         creates[2] = mockCreateItem(ids.get(2));
-        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
+        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getIdPageSize(), newSyncState, true);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         ids.remove(1);
@@ -413,7 +413,7 @@ public class SyncFolderItemsTest extends ExchangeTestBase
         when(creates[1].getMessage()).thenReturn(message);
         when(message.isSetItemId()).thenReturn(false);
         creates[2] = mockCreateItem(ids.get(2));
-        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getFindItemPageSize(), newSyncState, true);
+        mockSyncFolderItems(creates, getDefaultFolder(), getDefaultConfig().getIdPageSize(), newSyncState, true);
         SyncFolderItemsResult result =
                 SyncFolderItemsHelper.syncFolderItems(getService(), getDefaultConfig(), getDefaultFolder());
         ids.remove(1);

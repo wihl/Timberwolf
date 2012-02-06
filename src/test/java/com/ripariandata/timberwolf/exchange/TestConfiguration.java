@@ -32,15 +32,15 @@ public class TestConfiguration
     @Test
     public void testConstructingConfiguration()
     {
-        final int findItemSize = 100;
+        final int idPageSize = 100;
         final int getItemSize = 10;
-        Configuration config = new Configuration(findItemSize, getItemSize);
-        assertEquals(findItemSize, config.getFindItemPageSize());
-        assertEquals(getItemSize, config.getGetItemPageSize());
+        Configuration config = new Configuration(idPageSize, getItemSize);
+        assertEquals(idPageSize, config.getIdPageSize());
+        assertEquals(getItemSize, config.getItemPageSize());
 
         config = new Configuration(0, 0);
-        assertEquals(1, config.getFindItemPageSize());
-        assertEquals(1, config.getGetItemPageSize());
+        assertEquals(1, config.getIdPageSize());
+        assertEquals(1, config.getItemPageSize());
     }
 
     @Test
@@ -53,16 +53,16 @@ public class TestConfiguration
     @Test
     public void testConfigurationWithNewSyncStateStorage()
     {
-        final int findItemSize = 13;
+        final int idPageSize = 13;
         final int getItemSize = 3;
-        Configuration config = new Configuration(findItemSize, getItemSize);
+        Configuration config = new Configuration(idPageSize, getItemSize);
         Assert.assertTrue(config.getSyncStateStorage() instanceof InMemoryUserFolderSyncStateStorage);
         InMemoryUserFolderSyncStateStorage newSyncStorage = new InMemoryUserFolderSyncStateStorage();
         final UserFolderSyncStateStorage oldSyncStateStorage = config.getSyncStateStorage();
         assertNotSame(oldSyncStateStorage, newSyncStorage);
         Configuration newConfig = config.withSyncStateStorage(newSyncStorage);
-        assertEquals(findItemSize, newConfig.getFindItemPageSize());
-        assertEquals(getItemSize, newConfig.getGetItemPageSize());
+        assertEquals(idPageSize, newConfig.getIdPageSize());
+        assertEquals(getItemSize, newConfig.getItemPageSize());
         assertSame(newSyncStorage, newConfig.getSyncStateStorage());
         assertSame(oldSyncStateStorage, config.getSyncStateStorage());
     }

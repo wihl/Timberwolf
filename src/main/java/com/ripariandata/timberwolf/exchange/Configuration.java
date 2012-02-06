@@ -26,44 +26,44 @@ import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
  */
 public class Configuration
 {
-    private final int findPageSize;
-    private final int getPageSize;
+    private final int idPageSize;
+    private final int itemPageSize;
     private UserFolderSyncStateStorage syncStateStorage;
 
     /**
-     * @param findItemPageSize Must be greater than or equal to 1.
-     * @param getItemPageSize Must be greater than or equal to 1.
+     * @param sizeOfIdPages Must be greater than or equal to 1.
+     * @param sizeOfItemPages Must be greater than or equal to 1.
      * @param userFolderSyncStateStorage The storage that maintains sync states
      * for all the folders for all the users.
      */
-    public Configuration(final int findItemPageSize, final int getItemPageSize,
+    public Configuration(final int sizeOfIdPages, final int sizeOfItemPages,
                          final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
         // Asking for negative or zero max items is nonsensical.
-        this.findPageSize = Math.max(findItemPageSize, 1);
-        this.getPageSize = Math.max(getItemPageSize, 1);
+        idPageSize = Math.max(sizeOfIdPages, 1);
+        itemPageSize = Math.max(sizeOfItemPages, 1);
         syncStateStorage = userFolderSyncStateStorage;
     }
 
     /**
      * Creates a configuration with the startDate set to the beginning of the epoch.
      *
-     * @param findItemPageSize Must be greater than or equal to 1.
-     * @param getItemPageSize Must be greater than or equal to 1.
+     * @param sizeOfIdPages Must be greater than or equal to 1.
+     * @param sizeOfItemPages Must be greater than or equal to 1.
      */
-    public Configuration(final int findItemPageSize, final int getItemPageSize)
+    public Configuration(final int sizeOfIdPages, final int sizeOfItemPages)
     {
-        this(findItemPageSize, getItemPageSize, new InMemoryUserFolderSyncStateStorage());
+        this(sizeOfIdPages, sizeOfItemPages, new InMemoryUserFolderSyncStateStorage());
     }
 
-    public int getFindItemPageSize()
+    public int getIdPageSize()
     {
-        return findPageSize;
+        return idPageSize;
     }
 
-    public int getGetItemPageSize()
+    public int getItemPageSize()
     {
-        return getPageSize;
+        return itemPageSize;
     }
 
     public UserFolderSyncStateStorage getSyncStateStorage()
@@ -73,6 +73,6 @@ public class Configuration
 
     public Configuration withSyncStateStorage(final UserFolderSyncStateStorage userFolderSyncStateStorage)
     {
-        return new Configuration(findPageSize,  getPageSize, userFolderSyncStateStorage);
+        return new Configuration(idPageSize, itemPageSize, userFolderSyncStateStorage);
     }
 }

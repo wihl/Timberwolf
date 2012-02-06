@@ -20,9 +20,6 @@ package com.ripariandata.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.FindFolderType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemDocument;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services.x2006.messages.FindItemType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemDocument;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services.x2006.messages.GetItemType;
@@ -68,34 +65,6 @@ public class ExchangeServiceTest
     private static final String SOAP_FINALE =
         "</soapenv:Body>"
                 + "</soapenv:Envelope>";
-    private static final String FIND_ITEMS_REQUEST =
-        "<FindItem Traversal=\"Shallow\" "
-                + "xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
-                + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
-                + "      <ItemShape>"
-                + "        <t:BaseShape>IdOnly</t:BaseShape>"
-                + "      </ItemShape>"
-                + "      <ParentFolderIds>"
-                + "        <t:DistinguishedFolderId Id=\"inbox\"/>"
-                + "      </ParentFolderIds>"
-                + "    </FindItem>";
-    private static final String FIND_ITEM_RESPONSE =
-        "    <m:FindItemResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
-                + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" "
-                + "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\">\n"
-                + "<m:ResponseMessages>\n"
-                + "  <m:FindItemResponseMessage ResponseClass=\"Success\">\n"
-                + "    <m:ResponseCode>NoError</m:ResponseCode>\n"
-                + "    <m:RootFolder TotalItemsInView=\"10\" IncludesLastItemInRange=\"true\">\n"
-                + "      <t:Items>\n"
-                + "        <t:Message>\n"
-                + "          <t:ItemId Id=\"AS4AUn=\"/>\n"
-                + "        </t:Message>\n"
-                + "      </t:Items>\n"
-                + "    </m:RootFolder>\n"
-                + "   </m:FindItemResponseMessage>\n"
-                + "</m:ResponseMessages>\n"
-                + "</m:FindItemResponse>";
     private static final String SYNC_FOLDER_ITEMS_REQUEST =
             "<SyncFolderItems xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
             + "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">\n"
@@ -288,26 +257,6 @@ public class ExchangeServiceTest
     }
 
     @Test
-    public void testFindItem()
-        throws UnsupportedEncodingException, XmlException, ServiceCallException,
-               IOException, HttpErrorException
-    {
-        MockHttpUrlConnectionFactory factory = new MockHttpUrlConnectionFactory();
-        factory.forRequest(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))
-               .respondWith(HttpURLConnection.HTTP_OK, soap(FIND_ITEM_RESPONSE).getBytes("UTF-8"));
-
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
-
-        ExchangeService service = new ExchangeService(URL, factory);
-        FindItemResponseType response = service.findItem(findReq, "bkerr");
-
-        FindItemResponseType expected = EnvelopeDocument.Factory.parse(soap(FIND_ITEM_RESPONSE))
-                                        .getEnvelope().getBody().getFindItemResponse();
-
-        assertEquals(expected.xmlText(), response.xmlText());
-    }
-
-    @Test
     public void testSyncFolderItems()
             throws XmlException, ServiceCallException, IOException, HttpErrorException
     {
@@ -374,15 +323,16 @@ public class ExchangeServiceTest
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
         HttpURLConnection conn = mock(HttpURLConnection.class);
         stub(conn.getResponseCode()).toThrow(new IOException("Cannot read code."));
-        when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8")))
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8")))
             .thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
 
         try
         {
-            service.findItem(findReq, "bkerr");
+            service.syncFolderItems(request, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -400,14 +350,15 @@ public class ExchangeServiceTest
         HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
         HttpURLConnection conn = mock(HttpURLConnection.class);
         stub(conn.getInputStream()).toThrow(new IOException("Cannot read code."));
-        when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
 
         try
         {
-            service.findItem(findReq, "bkerr");
+            service.syncFolderItems(request, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -425,14 +376,15 @@ public class ExchangeServiceTest
         HttpURLConnection conn = mock(HttpURLConnection.class);
         when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {}));
-        when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
 
         try
         {
-            service.findItem(findReq, "bkerr");
+            service.syncFolderItems(request, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -451,14 +403,15 @@ public class ExchangeServiceTest
         stub(response.available()).toThrow(new IOException());
         when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         when(conn.getInputStream()).thenReturn(response);
-        when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
 
         try
         {
-            service.findItem(findReq, "bkerr");
+            service.syncFolderItems(request, "bkerr");
             fail("No exception was thrown.");
         }
         catch (ServiceCallException e)
@@ -544,14 +497,15 @@ public class ExchangeServiceTest
         final int defaultBufValue = 64;
         when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {defaultBufValue, defaultBufValue,
                 defaultBufValue }));
-        when(factory.newInstance(URL, soap(FIND_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
 
         ExchangeService service = new ExchangeService(URL, factory);
-        FindItemType findReq = FindItemDocument.Factory.parse(FIND_ITEMS_REQUEST).getFindItem();
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
 
         try
         {
-            service.findItem(findReq, "bkerr");
+            service.syncFolderItems(request, "bkerr");
             fail("No exception was thrown.");
         }
         catch (HttpErrorException e)
