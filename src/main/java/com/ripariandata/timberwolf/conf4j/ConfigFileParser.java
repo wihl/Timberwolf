@@ -55,6 +55,7 @@ public class ConfigFileParser
                 if (entry != null)
                 {
                     fields.put(entry.name(), new FieldSetter(bean, f));
+                    entries.add(entry);
                 }
             }
         }
@@ -126,11 +127,24 @@ public class ConfigFileParser
                 String line = "";
                 for (String token : tokens)
                 {
-                    String proposedLine = line + " " + token;
+                    String proposedLine = line + (line == "" ? "" : " ") + token;
                     if (proposedLine.length() > width)
                     {
                         lines.add(line);
-                        line = token;
+
+                        if (token.length() > width)
+                        {
+                            int fullLinesForToken = token.length() / width;
+                            for (int i = 0; i < fullLinesForToken; i++)
+                            {
+                                lines.add(token.substring(i * width, (i + 1) * width));
+                            }
+                            line = token.substring(fullLinesForToken * width);
+                        }
+                        else
+                        {
+                            line = token;
+                        }
                     }
                     else
                     {
@@ -143,6 +157,16 @@ public class ConfigFileParser
         return lines;
     }
 
+    private static String ofChars(char c, int length)
+    {
+        char[] cs = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            cs[i] = c;
+        }
+        return new String(cs);
+    }
+
     private static String splitAndPad(String s, int totalWidth, int targetWidth)
     {
         Vector<String> lines = splitIntoLines(s, targetWidth);
@@ -153,17 +177,13 @@ public class ConfigFileParser
         }
         else
         {
-            char[] spaces = new char[totalWidth - targetWidth];
-            for (int i = 0; i < spaces.length; i++)
-            {
-                spaces[i] = ' ';
-            }
-            String prefix = new String(spaces);
-            String ret = lines.get(0);
+            String prefix = ofChars(' ', totalWidth - targetWidth);
+            String ret = lines.get(0) + "\n";
             for (int i = 1; i < lines.size(); i++)
             {
                 ret += prefix;
                 ret += lines.get(i);
+                ret += "\n";
             }
             return ret;
         }
@@ -172,11 +192,22 @@ public class ConfigFileParser
     public void printUsage(PrintStream out)
     {
         out.println("Valid properties in the configuration file:");
+
+        int longestNameLength = 0;
+        for (ConfigEntry entry : entries)
+        {
+            if (entry.name().length() > longestNameLength)
+            {
+                longestNameLength = entry.name().length();
+            }
+        }
+
         for (ConfigEntry entry : entries)
         {
             out.print(entry.name());
+            out.print(ofChars(' ', longestNameLength - entry.name().length()));
             out.print(" - ");
-            out.println(splitAndPad(entry.usage(), 80, 77 - entry.name().length()));
+            out.println(splitAndPad(entry.usage(), 80, 77 - longestNameLength));
         }
     }
 }

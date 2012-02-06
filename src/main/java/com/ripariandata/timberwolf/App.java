@@ -70,44 +70,48 @@ final class App implements PrivilegedAction<Integer>
 
     @Option(name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
-    @ConfigEntry(name = "domain")
+    @ConfigEntry(name = "domain", usage = "The domain you wish to crawl. Users of this domain will be imported.")
     private String domain;
 
     @Option(name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
                     + "https://example.com/ews/exchange.asmx")
-    @ConfigEntry(name = "exchange.url")
+    @ConfigEntry(name = "exchange.url", usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+                                              + "https://example.com/ews/exchange.asmx")
     private String exchangeUrl;
 
     @Option(name = "--hbase-quorum",
             usage = "The ZooKeeper quorum used to connect to HBase.")
-    @ConfigEntry(name = "hbase.quorum")
+    @ConfigEntry(name = "hbase.quorum", usage = "The ZooKeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
     @Option(name = "--hbase-clientport",
             usage = "The ZooKeeper client port used to connect to HBase.")
-    @ConfigEntry(name = "hbase.clientport")
+    @ConfigEntry(name = "hbase.clientport", usage = "The ZooKeeper client port used to connect to HBase.")
     private String hbaseclientPort;
 
     @Option(name = "--hbase-table",
             usage = "The HBase table name that email data will be imported into.")
-    @ConfigEntry(name = "hbase.table")
+    @ConfigEntry(name = "hbase.table", usage = "The HBase table name that email data will be imported into.")
     private String hbaseTableName;
 
     @Option(name = "--hbase-metadata-table",
             usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
                   + "email for each user.")
-    @ConfigEntry(name = "hbase.metadatatable")
+    @ConfigEntry(name = "hbase.metadatatable", usage = "The HBase table that will store timberwolf metatdata, such as "
+                                                     + "the last time that we gathered email for each user.")
     private String hbaseMetadataTableName;
 
     @Option(name = "--hbase-key-header.",
             usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
-    @ConfigEntry(name = "hbase.key.header")
+    @ConfigEntry(name = "hbase.key.header", usage = "The header id to use as a row key for the imported email data.  "
+                                                  + "Default row key is 'Item ID'.")
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
     @Option(name = "--hbase-column-family.",
             usage = "The column family for the imported email data.  Default family is 'h'.")
-    @ConfigEntry(name = "hbase.column.family")
+    @ConfigEntry(name = "hbase.column.family", usage = "The column family for the imported email data.  "
+                                                     + "Default family is 'h'.")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
@@ -125,8 +129,8 @@ final class App implements PrivilegedAction<Integer>
     {
         output.println("Timberwolf configuration files are java properties files, using the syntax described here: "
                      + "http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/"
-                     + "PropertiesConfiguration.html");
-        // TODO: parser.printUsage(output);
+                     + "PropertiesConfiguration.html\n");
+        TODO: parser.printUsage(output);
         output.println();
     }
 
