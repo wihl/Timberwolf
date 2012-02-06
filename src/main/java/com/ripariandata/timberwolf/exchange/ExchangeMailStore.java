@@ -19,7 +19,7 @@ package com.ripariandata.timberwolf.exchange;
 
 import com.ripariandata.timberwolf.MailStore;
 import com.ripariandata.timberwolf.MailboxItem;
-import com.ripariandata.timberwolf.UserTimeUpdater;
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 
 import java.util.Iterator;
 
@@ -63,6 +63,7 @@ public class ExchangeMailStore implements MailStore
 
     /**
      * Creates an ExchangeMailStore with custom page size.
+     *
      * @param exchangeUrl the url to the exchange web service such as
      * https://devexch01.int.tartarus.com/ews/exchange.asmx.
      * @param findItemPageSize the number of ids to request at a time.
@@ -75,6 +76,7 @@ public class ExchangeMailStore implements MailStore
 
     /**
      * Creates a new ExchangeMailStore for getting mail.
+     *
      * @param service The exchange service to use
      */
     ExchangeMailStore(final ExchangeService service)
@@ -89,14 +91,15 @@ public class ExchangeMailStore implements MailStore
     }
 
     @Override
-    public final Iterable<MailboxItem> getMail(final Iterable<String> users, final UserTimeUpdater timeUpdater)
+    public final Iterable<MailboxItem> getMail(final Iterable<String> users,
+                                               final UserFolderSyncStateStorage syncStateStorage)
     {
         return new Iterable<MailboxItem>()
         {
             @Override
             public Iterator<MailboxItem> iterator()
             {
-                return new UserIterator(exchangeService, config.withTimeUpdater(timeUpdater), users);
+                return new UserIterator(exchangeService, config.withSyncStateStorage(syncStateStorage), users);
             }
         };
     }

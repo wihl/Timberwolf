@@ -24,7 +24,9 @@ public interface MailStore
 {
     /**
      * Returns some mail for the given users, only getting the mail for each user since the
-     * time returned by timeUpdater.lastUpdated.
+     * last sync according to syncStateStorage.
+     * @param targetUsers The users whose email will be returned.
+     * @param syncStateStorage The sync states for all folders for all the target users.
      */
-    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserTimeUpdater timeUpdater);
+    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserFolderSyncStateStorage syncStateStorage);
 }

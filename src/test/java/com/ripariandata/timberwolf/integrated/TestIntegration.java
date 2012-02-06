@@ -19,9 +19,11 @@ package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.ripariandata.timberwolf.Auth;
+import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.MailStore;
 import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
+import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
@@ -87,6 +89,7 @@ public class TestIntegration
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
     public HTableResource userTable = new HTableResource("t");
+    private UserFolderSyncStateStorage inMemorySyncStateStorage = new InMemoryUserFolderSyncStateStorage();
 
     private String exchangeURL;
     private String ldapDomain;
@@ -170,6 +173,7 @@ public class TestIntegration
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
                 MailWriter mailWriter = HBaseMailWriter.create(emailTable.getTable(), keyHeader,
                                                                emailTable.getFamily());
+                // TODO: instantiate a hbaseSyncStateStorage instead
                 HBaseUserTimeUpdater timeUpdater =
                         new HBaseUserTimeUpdater(userTable.getManager(), userTable.getName());
 
@@ -177,7 +181,8 @@ public class TestIntegration
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
                     removeUsers(users, senderEmail, ignoredEmail);
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, timeUpdater);
+                    // TODO: replace this with an hbase version
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, inMemorySyncStateStorage);
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)

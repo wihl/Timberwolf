@@ -30,16 +30,12 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Contains helper functions for GetItem requests.
- */
+/** Contains helper functions for GetItem requests. */
 public final class GetItemHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(GetItemHelper.class);
 
-    /**
-     * Enforces not being able to create an instance.
-     */
+    /** Enforces not being able to create an instance. */
     private GetItemHelper()
     {
 
@@ -72,8 +68,8 @@ public final class GetItemHelper
      * @param count The number of items to get.
      * @param startIndex The index in ids of the first item to get
      * @param ids A list of ids to get
-     * If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
-     * items will be returned
+     *            If <tt>startIndex + count > ids.size()</tt> then only <tt>ids.size() - startIndex</tt>
+     *            items will be returned
      * @param exchangeService The backend service used for contacting Exchange.
      * @param targetUser The user to impersonate for the Exchange GetItem request.
      * @return A list of mailbox items that correspond to the given ids.
@@ -97,7 +93,8 @@ public final class GetItemHelper
 
         if (response == null)
         {
-            LOG.debug("Exchange service returned null get item response.");
+            LOG.debug("Exchange service returned null get item response for request:\n{}",
+                      getGetItemsRequest(ids.subList(startIndex, max)).toString());
             throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Null response from Exchange service.");
         }
 
