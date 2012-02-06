@@ -44,7 +44,7 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
     @Override
     public String getLastSyncState(String user, String folderId)
     {
-        Get get = new Get(Bytes.toBytes(primaryKey(user, folderId)));
+        Get get = new Get(primaryKey(user, folderId));
         Result result = table.get(get);
         String stateString = null;
         if (!result.isEmpty())
@@ -64,7 +64,7 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
     @Override
     public void setSyncState(String user, String folderId, String syncState)
     {
-        Put put = new Put(Bytes.toBytes(primaryKey(user, folderId)));
+        Put put = new Put(primaryKey(user, folderId));
         put.add(Bytes.toBytes(SYNC_COLUMN_FAMILY), Bytes.toBytes(SYNC_COLUMN_QUALIFIER),
                 Bytes.toBytes(syncState));
 
@@ -73,8 +73,8 @@ public class HBaseUserFolderSyncStateStorage implements UserFolderSyncStateStora
     }
     
     /** Given the user and the folderId of interest, return the expected key */
-    private String primaryKey(String user, String folderId)
+    private byte[] primaryKey(String user, String folderId)
     {
-        return user + " " + folderId;
+        return Bytes.toBytes(user + " " + folderId);
     }
 }
