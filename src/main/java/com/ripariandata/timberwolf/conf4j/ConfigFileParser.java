@@ -18,12 +18,14 @@
 package com.ripariandata.timberwolf.conf4j;
 
 import java.io.File;
+import java.io.PrintStream;
 
 import java.lang.reflect.Field;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -41,6 +43,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 public class ConfigFileParser
 {
     private Map<String, FieldSetter> fields = new HashMap<String, FieldSetter>();
+    private Vector<ConfigEntry> entries = new Vector<ConfigEntry>();
 
     public ConfigFileParser(final Object bean)
     {
@@ -71,7 +74,7 @@ public class ConfigFileParser
         File f = new File(configFile);
         if (!f.exists())
         {
-            throw new ConfigFileMissingException(configFile);
+            throw new ConfigFileMissingException(configFile, this);
         }
 
         Configuration config;
@@ -81,7 +84,8 @@ public class ConfigFileParser
         }
         catch (ConfigurationException e)
         {
-            throw new ConfigFileException("There was an error loading the configuration file at " + configFile, e);
+            throw new ConfigFileException("There was an error loading the configuration file at " + configFile,
+                                          e, this);
         }
         parseConfiguration(config);
     }
@@ -103,6 +107,76 @@ public class ConfigFileParser
             {
                 fields.get(key).set(config.getProperty(key));
             }
+        }
+    }
+
+    private static Vector<String> splitIntoLines(String s, int width)
+    {
+        String[] logicalLines = s.split("\\n");
+        Vector<String> lines = new Vector<String>();
+        for (String logicalLine : logicalLines)
+        {
+            if (logicalLine.length() <= width)
+            {
+                lines.add(logicalLine);
+            }
+            else
+            {
+                String[] tokens = logicalLine.split("\\s");
+                String line = "";
+                for (String token : tokens)
+                {
+                    String proposedLine = line + " " + token;
+                    if (proposedLine.length() > width)
+                    {
+                        lines.add(line);
+                        line = token;
+                    }
+                    else
+                    {
+                        line = proposedLine;
+                    }
+                }
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    private static String splitAndPad(String s, int totalWidth, int targetWidth)
+    {
+        Vector<String> lines = splitIntoLines(s, targetWidth);
+
+        if (lines.size() == 0)
+        {
+            return "";
+        }
+        else
+        {
+            char[] spaces = new char[totalWidth - targetWidth];
+            for (int i = 0; i < spaces.length; i++)
+            {
+                spaces[i] = ' ';
+            }
+            String prefix = new String(spaces);
+            String ret = lines.get(0);
+            for (int i = 1; i < lines.size(); i++)
+            {
+                ret += prefix;
+                ret += lines.get(i);
+            }
+            return ret;
+        }
+    }
+
+    public void printUsage(PrintStream out)
+    {
+        out.println("Valid properties in the configuration file:");
+        for (ConfigEntry entry : entries)
+        {
+            out.print(entry.name());
+            out.print(" - ");
+            out.println(splitAndPad(entry.usage(), 80, 77 - entry.name().length()));
         }
     }
 }

@@ -20,8 +20,16 @@ package com.ripariandata.timberwolf.conf4j;
 /** Thrown when ConfigFileParser fails to load a configuration file. */
 public class ConfigFileException extends Exception
 {
-    public ConfigFileException(final String message, final Throwable cause)
+    private ConfigFileParser parser;
+
+    public ConfigFileException(final String message, final Throwable cause, final ConfigFileParser cfp)
     {
         super(message, cause);
+        parser = cfp;
+    }
+
+    public ConfigFileParser getParser()
+    {
+        return parser;
     }
 }
