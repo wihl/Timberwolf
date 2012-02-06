@@ -139,6 +139,7 @@ final class App implements PrivilegedAction<Integer>
         {
             System.err.println(e.getMessage());
             printUsage(System.err, cliParser);
+            return;
         }
 
         if (help)
@@ -178,6 +179,7 @@ final class App implements PrivilegedAction<Integer>
         {
             System.err.println(e.getMessage());
             printUsage(System.err, cliParser);
+            return;
         }
 
         LOG.debug("Timberwolf invoked with the following arguments:");
@@ -202,6 +204,7 @@ final class App implements PrivilegedAction<Integer>
             System.err.println("HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
                              + "Table Name must all be specified if at least one is specified");
             printUsage(System.err, cliParser);
+            return;
         }
 
         useHBase = allHBaseArgs;
