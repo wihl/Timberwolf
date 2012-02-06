@@ -42,8 +42,11 @@ import org.apache.commons.configuration.PropertiesConfiguration;
  */
 public class ConfigFileParser
 {
+    static final int DEFAULT_OUTPUT_WIDTH = 80;
+
     private Map<String, FieldSetter> fields = new HashMap<String, FieldSetter>();
     private Vector<ConfigEntry> entries = new Vector<ConfigEntry>();
+
 
     public ConfigFileParser(final Object bean)
     {
@@ -111,7 +114,7 @@ public class ConfigFileParser
         }
     }
 
-    private static Vector<String> splitIntoLines(String s, int width)
+    private static Vector<String> splitIntoLines(final String s, final int width)
     {
         String[] logicalLines = s.split("\\n");
         Vector<String> lines = new Vector<String>();
@@ -157,7 +160,7 @@ public class ConfigFileParser
         return lines;
     }
 
-    private static String ofChars(char c, int length)
+    private static String ofChars(final char c, final int length)
     {
         char[] cs = new char[length];
         for (int i = 0; i < length; i++)
@@ -167,7 +170,7 @@ public class ConfigFileParser
         return new String(cs);
     }
 
-    private static String splitAndPad(String s, int totalWidth, int targetWidth)
+    private static String splitAndPad(final String s, final int totalWidth, final int targetWidth)
     {
         Vector<String> lines = splitIntoLines(s, targetWidth);
 
@@ -189,7 +192,7 @@ public class ConfigFileParser
         }
     }
 
-    public void printUsage(PrintStream out)
+    public void printUsage(final PrintStream out)
     {
         out.println("Valid properties in the configuration file:");
 
@@ -206,8 +209,10 @@ public class ConfigFileParser
         {
             out.print(entry.name());
             out.print(ofChars(' ', longestNameLength - entry.name().length()));
-            out.print(" - ");
-            out.println(splitAndPad(entry.usage(), 80, 77 - longestNameLength));
+            String separator = " - ";
+            out.print(separator);
+            out.println(splitAndPad(entry.usage(), DEFAULT_OUTPUT_WIDTH, DEFAULT_OUTPUT_WIDTH - longestNameLength
+                                                                         - separator.length()));
         }
     }
 }
