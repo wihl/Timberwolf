@@ -37,7 +37,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testSetOneField() throws NoSuchFieldException
+    public void testSetOneField() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithOneField target = new TypeWithOneField();
         FieldSetter setter = new FieldSetter(target, TypeWithOneField.class.getDeclaredField("x"));
@@ -70,7 +70,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testIllegalFieldAccess() throws NoSuchFieldException
+    public void testIllegalFieldAccess() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithFinalField target = new TypeWithFinalField();
         FieldSetter setter = new FieldSetter(target, TypeWithFinalField.class.getDeclaredField("X"));
@@ -117,7 +117,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testSetMultipleFields() throws NoSuchFieldException
+    public void testSetMultipleFields() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithManyFields target = new TypeWithManyFields();
         FieldSetter intSetter = new FieldSetter(target, TypeWithManyFields.class.getDeclaredField("i"));
@@ -164,104 +164,5 @@ public class FieldSetterTest
             fail("Wrong exception thrown: " + e.getMessage());
         }
 
-    }
-
-    /** Class for testing that non-overwriting works on all types. */
-    private class TypeWithAllKindsOfTypes
-    {
-        private byte b = 0;
-        private short sh = 0;
-        private int i = 0;
-        private long l = 0;
-        private float f = 0.0f;
-        private double d = 0.0;
-        private char c = '\u0000';
-        private String st = null;
-
-        public byte b()
-        {
-            return b;
-        }
-
-        public short sh()
-        {
-            return sh;
-        }
-
-        public int i()
-        {
-            return i;
-        }
-
-        public long l()
-        {
-            return l;
-        }
-
-        public float f()
-        {
-            return f;
-        }
-
-        public double d()
-        {
-            return d;
-        }
-
-        public char c()
-        {
-            return c;
-        }
-
-        public String st()
-        {
-            return st;
-        }
-    }
-
-    @Test
-    public void testNonOverwritingFieldSetter() throws NoSuchFieldException
-    {
-        TypeWithAllKindsOfTypes target = new TypeWithAllKindsOfTypes();
-        Class c = TypeWithAllKindsOfTypes.class;
-        FieldSetter bsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("b"));
-        FieldSetter shsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("sh"));
-        FieldSetter isetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("i"));
-        FieldSetter lsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("l"));
-        FieldSetter fsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("f"));
-        FieldSetter dsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("d"));
-        FieldSetter stsetter = new NonOverwritingFieldSetter(target, c.getDeclaredField("st"));
-
-        bsetter.set((byte) 10);
-        shsetter.set((short) 100);
-        isetter.set((int) 1000);
-        lsetter.set((long) 10000);
-        fsetter.set(10.5f);
-        dsetter.set(100.05);
-        stsetter.set("string!");
-
-        assertEquals(10, target.b());
-        assertEquals(100, target.sh());
-        assertEquals(1000, target.i());
-        assertEquals(10000, target.l());
-        assertEquals(10.5, target.f(), .001);
-        assertEquals(100.05, target.d(), .001);
-        assertEquals("string!", target.st());
-
-        bsetter.set(20);
-        shsetter.set(200);
-        isetter.set(2000);
-        lsetter.set(20000);
-        fsetter.set(20.8);
-        dsetter.set(200.08);
-        stsetter.set("more string?");
-
-        assertEquals(10, target.b());
-        assertEquals(100, target.sh());
-        assertEquals(1000, target.i());
-        assertEquals(10000, target.l());
-        assertEquals(10.5, target.f(), .001);
-        assertEquals(100.05, target.d(), .001);
-        assertEquals("string!", target.st());
     }
 }

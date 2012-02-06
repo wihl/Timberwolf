@@ -23,25 +23,15 @@ import java.lang.reflect.Field;
  * FieldSetter wraps around a single field in a single object, so that later
  * we can set the value of the that field.
  */
-public class FieldSetter
+public class FieldSetter implements Setter
 {
-    private Object bean;
+    private Object obj;
     private Field field;
 
     public FieldSetter(final Object o, final Field f)
     {
-        bean = o;
+        obj = o;
         field = f;
-    }
-
-    protected Object bean()
-    {
-        return bean;
-    }
-
-    protected Field field()
-    {
-        return field;
     }
 
     /**
@@ -52,18 +42,18 @@ public class FieldSetter
      * @throws IllegalArgumentException If the target field's type is not compatible
      *                                  with <tt>value</tt>'s type.
      */
-    public void set(final Object value)
+    public void set(final Object value) throws ConfigFileException
     {
         try
         {
-            field.set(bean, value);
+            field.set(obj, value);
         }
         catch (IllegalAccessException iae)
         {
             field.setAccessible(true);
             try
             {
-                field.set(bean, value);
+                field.set(obj, value);
             }
             catch (IllegalAccessException e)
             {

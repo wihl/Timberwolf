@@ -65,7 +65,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithNoEntries()
+    public void testTypeWithNoEntries() throws ConfigFileException
     {
         TypeWithNoEntries target = new TypeWithNoEntries();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -92,7 +92,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithOneEntry()
+    public void testTypeWithOneEntry() throws ConfigFileException
     {
         TypeWithOneEntry target = new TypeWithOneEntry();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -152,7 +152,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithManyEntries()
+    public void testTypeWithManyEntries() throws ConfigFileException
     {
         TypeWithManyEntries target = new TypeWithManyEntries();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -188,7 +188,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testMissingFile()
+    public void testMissingFile() throws ConfigFileException
     {
         TypeWithNoEntries target = new TypeWithNoEntries();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -208,58 +208,5 @@ public class ConfigFileParserTest
         {
             fail("Wrong exception was thrown when attempting to parse missing file: " + e.getMessage());
         }
-    }
-
-    /** Class for testing the non-overwriting flag. */
-    private class TypeThatRespectsDefaults
-    {
-        @ConfigEntry(name = "overwritable")
-        private String overwritable = null;
-
-        @ConfigEntry(name = "non.overwritable", overwriteNonDefault = false)
-        private String nonOverwritable = null;
-
-        @ConfigEntry(name = "has.default", overwriteNonDefault = false)
-        private String hasDefault = "default";
-
-        public String overwritable()
-        {
-            return overwritable;
-        }
-
-        public String nonOverwritable()
-        {
-            return nonOverwritable;
-        }
-
-        public String hasDefault()
-        {
-            return hasDefault;
-        }
-    }
-
-    @Test
-    public void testNotOverwriting()
-    {
-        TypeThatRespectsDefaults target = new TypeThatRespectsDefaults();
-        ConfigFileParser parser = new ConfigFileParser(target);
-
-        Configuration mockConfig = mockConfiguration("overwritable", "new data",
-                                                     "non.overwritable", "new data",
-                                                     "has.default", "non default");
-        parser.parseConfiguration(mockConfig);
-
-        assertEquals("new data", target.overwritable());
-        assertEquals("new data", target.nonOverwritable());
-        assertEquals("non default", target.hasDefault());
-
-        mockConfig = mockConfiguration("overwritable", "newer data",
-                                       "non.overwritable", "newer data",
-                                       "has.default", "more non default");
-        parser.parseConfiguration(mockConfig);
-
-        assertEquals("newer data", target.overwritable());
-        assertEquals("new data", target.nonOverwritable());
-        assertEquals("non default", target.hasDefault());
     }
 }
