@@ -67,17 +67,6 @@ public class FindFolderTest extends ExchangeTestBase
     }
 
     @Test
-    public void testGetFindFoldersRequest()
-    {
-        String folderId = "Totally Not A Legit Folder Id";
-
-        FindFolderType findFolder = FindFolderHelper.getFindFoldersRequest(folderId);
-        assertEquals("IdOnly", findFolder.getFolderShape().getBaseShape().toString());
-        assertTrue(findFolder.getParentFolderIds().getFolderIdArray().length == 1);
-        assertEquals(folderId, findFolder.getParentFolderIds().getFolderIdArray()[0].getId());
-    }
-
-    @Test
     public void testFindFolders() throws ServiceCallException, HttpErrorException
     {
         final int count = 10;

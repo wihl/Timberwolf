@@ -31,19 +31,19 @@ import java.util.Iterator;
 public class ExchangeMailStore implements MailStore
 {
     /*
-     * When FindItems is run, you can limit the number of items to get at a time
-     * and page, starting with 1000, but we'll probably want to profile this a
-     * bit to figure out if we want more or less
+     * When you get the ids for messages you can control the number of items
+     * returned at a time,
      */
-    private static final int MAX_FIND_ITEMS_ENTRIES = 1000;
+    private static final int DEFAULT_ID_PAGE_SIZE = SyncFolderItemsHelper.MAX_SYNC_COUNT;
 
     /**
      * GetItems takes multiple ids, but we don't want to call GetItems on all
-     * MaxFindItemEntries at a time, because those could be massive responses
+     * DEFAULT_ID_PAGE_SIZE at a time, because those could be massive responses
      * Instead, get a smaller number at a time.
-     * This should evenly divide MaxFindItemEntries
+     * This should evenly divide DEFAULT_ID_PAGE_SIZE.
+     *
      */
-    private static final int MAX_GET_ITEMS_ENTRIES = 50;
+    private static final int DEFAULT_ITEM_PAGE_SIZE = 64;
 
     /** The service that does the sending of soap packages to exchange. */
     private final ExchangeService exchangeService;
@@ -58,7 +58,7 @@ public class ExchangeMailStore implements MailStore
      */
     public ExchangeMailStore(final String exchangeUrl)
     {
-        this(exchangeUrl, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+        this(exchangeUrl, DEFAULT_ID_PAGE_SIZE, DEFAULT_ITEM_PAGE_SIZE);
     }
 
     /**
@@ -66,12 +66,12 @@ public class ExchangeMailStore implements MailStore
      *
      * @param exchangeUrl the url to the exchange web service such as
      * https://devexch01.int.tartarus.com/ews/exchange.asmx.
-     * @param findItemPageSize the number of ids to request at a time.
-     * @param getItemPageSize the number of actual emails to request at a time.
+     * @param idPagesSize the number of ids to request at a time.
+     * @param itemPageSize the number of actual emails to request at a time.
      */
-    public ExchangeMailStore(final String exchangeUrl, final int findItemPageSize, final int getItemPageSize)
+    public ExchangeMailStore(final String exchangeUrl, final int idPagesSize, final int itemPageSize)
     {
-        this(new ExchangeService(exchangeUrl), findItemPageSize, getItemPageSize);
+        this(new ExchangeService(exchangeUrl), idPagesSize, itemPageSize);
     }
 
     /**
@@ -81,13 +81,13 @@ public class ExchangeMailStore implements MailStore
      */
     ExchangeMailStore(final ExchangeService service)
     {
-        this(service, MAX_FIND_ITEMS_ENTRIES, MAX_GET_ITEMS_ENTRIES);
+        this(service, DEFAULT_ID_PAGE_SIZE, DEFAULT_ITEM_PAGE_SIZE);
     }
 
-    ExchangeMailStore(final ExchangeService service, final int findItemPageSize, final int getItemPageSize)
+    ExchangeMailStore(final ExchangeService service, final int idPageSize, final int itemPageSize)
     {
         exchangeService = service;
-        config = new Configuration(findItemPageSize, getItemPageSize);
+        config = new Configuration(idPageSize, itemPageSize);
     }
 
     @Override
