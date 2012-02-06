@@ -137,7 +137,7 @@ final class App implements PrivilegedAction<Integer>
         boolean shouldContinue = true;
         try
         {
-            shouldContinue = app.beginEverything(args);
+            shouldContinue = app.parseArguments(args);
         }
         catch (CmdLineException e)
         {
@@ -167,7 +167,7 @@ final class App implements PrivilegedAction<Integer>
         }
     }
 
-    private boolean beginEverything(final String[] args) throws IOException, CmdLineException, ConfigFileException
+    private boolean parseArguments(final String[] args) throws IOException, CmdLineException, ConfigFileException
     {
         ConfigFileParser configParser = new ConfigFileParser(this);
         CmdLineParser cliParser = new CmdLineParser(this);
