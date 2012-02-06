@@ -27,12 +27,15 @@ import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
 import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
+
 import java.util.List;
 import java.util.Vector;
+
 import org.junit.Test;
 
 import static com.ripariandata.timberwolf.exchange.IsXmlBeansRequest.likeThis;
 import static com.ripariandata.timberwolf.exchange.SyncFolderItemsHelper.SyncFolderItemsResult;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
