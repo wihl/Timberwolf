@@ -34,5 +34,5 @@ public @interface ConfigEntry
     String name();
 
     /** Short description of the entry, suitable for printing to the console. */
-    String usage();
+    String usage() default "";
 }
