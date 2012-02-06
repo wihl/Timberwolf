@@ -65,7 +65,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithNoEntries()
+    public void testTypeWithNoEntries() throws ConfigFileException
     {
         TypeWithNoEntries target = new TypeWithNoEntries();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -92,7 +92,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithOneEntry()
+    public void testTypeWithOneEntry() throws ConfigFileException
     {
         TypeWithOneEntry target = new TypeWithOneEntry();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -152,7 +152,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testTypeWithManyEntries()
+    public void testTypeWithManyEntries() throws ConfigFileException
     {
         TypeWithManyEntries target = new TypeWithManyEntries();
         ConfigFileParser parser = new ConfigFileParser(target);
@@ -188,7 +188,7 @@ public class ConfigFileParserTest
     }
 
     @Test
-    public void testMissingFile()
+    public void testMissingFile() throws ConfigFileException
     {
         TypeWithNoEntries target = new TypeWithNoEntries();
         ConfigFileParser parser = new ConfigFileParser(target);

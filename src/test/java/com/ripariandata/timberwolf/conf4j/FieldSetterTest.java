@@ -37,7 +37,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testSetOneField() throws NoSuchFieldException
+    public void testSetOneField() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithOneField target = new TypeWithOneField();
         FieldSetter setter = new FieldSetter(target, TypeWithOneField.class.getDeclaredField("x"));
@@ -70,7 +70,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testIllegalFieldAccess() throws NoSuchFieldException
+    public void testIllegalFieldAccess() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithFinalField target = new TypeWithFinalField();
         FieldSetter setter = new FieldSetter(target, TypeWithFinalField.class.getDeclaredField("X"));
@@ -117,7 +117,7 @@ public class FieldSetterTest
     }
 
     @Test
-    public void testSetMultipleFields() throws NoSuchFieldException
+    public void testSetMultipleFields() throws NoSuchFieldException, ConfigFileException
     {
         TypeWithManyFields target = new TypeWithManyFields();
         FieldSetter intSetter = new FieldSetter(target, TypeWithManyFields.class.getDeclaredField("i"));

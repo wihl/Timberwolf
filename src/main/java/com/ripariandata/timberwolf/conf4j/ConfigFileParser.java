@@ -20,6 +20,7 @@ package com.ripariandata.timberwolf.conf4j;
 import java.io.File;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,21 +38,32 @@ import org.apache.commons.configuration.PropertiesConfiguration;
  * Since our needs for configuration handling are pretty simple, this does a lot
  * less than args4j.  It only handles fields, not methods, and doesn't do anything
  * other than match names to values.
+ *
+ * @throws IllegalAccessError If the default value of a field cannot be read.
  */
 public class ConfigFileParser
 {
-    private Map<String, FieldSetter> fields = new HashMap<String, FieldSetter>();
+    private Map<String, Setter> setters = new HashMap<String, Setter>();
 
-    public ConfigFileParser(final Object bean)
+    public ConfigFileParser(final Object obj)
     {
-        for (Class c = bean.getClass(); c != null; c = c.getSuperclass())
+        for (Class c = obj.getClass(); c != null; c = c.getSuperclass())
         {
             for (Field f : c.getDeclaredFields())
             {
                 ConfigEntry entry = f.getAnnotation(ConfigEntry.class);
                 if (entry != null)
                 {
-                    fields.put(entry.name(), new FieldSetter(bean, f));
+                    setters.put(entry.name(), new FieldSetter(obj, f));
+                }
+            }
+
+            for (Method m : c.getDeclaredMethods())
+            {
+                ConfigEntry entry = m.getAnnotation(ConfigEntry.class);
+                if (entry != null)
+                {
+                    setters.put(entry.name(), new MethodSetter(obj, m));
                 }
             }
         }
@@ -93,15 +105,15 @@ public class ConfigFileParser
      * are not modified.  Properties in the configuration that don't match any
      * fields marked as ConfigEntry are ignored.
      */
-    public void parseConfiguration(final Configuration config)
+    public void parseConfiguration(final Configuration config) throws ConfigFileException
     {
         Iterator<String> keys = config.getKeys();
         while (keys.hasNext())
         {
             String key = keys.next();
-            if (fields.containsKey(key))
+            if (setters.containsKey(key))
             {
-                fields.get(key).set(config.getProperty(key));
+                setters.get(key).set(config.getProperty(key));
             }
         }
     }

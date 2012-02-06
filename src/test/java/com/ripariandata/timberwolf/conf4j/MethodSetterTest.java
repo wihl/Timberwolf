@@ -17,16 +17,38 @@
  */
 package com.ripariandata.timberwolf.conf4j;
 
-/** Thrown when ConfigFileParser fails to load a configuration file. */
-public class ConfigFileException extends Exception
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class MethodSetterTest
 {
-    public ConfigFileException(final String message, final Throwable cause)
+    private class TypeWithOneMethod()
     {
-        super(message, cause);
+        private int i = 0;
+
+        private int setX(int x)
+        {
+            i = x;
+        }
+
+        public int x()
+        {
+            return i;
+        }
     }
 
-    public ConfigFileException(Throwable cause)
+    @Test
+    public void testSetOneMethod()
     {
-        super(cause);
+        TypeWithOneMethod target = new TypeWithOneMethod();
+        MethodSetter setter = new MethodSetter(target, target.getClass().getDeclaredMethod("setX", int.class));
+
+        assertEquals(0, target.x());
+        setter.set(10);
+        assertEquals(10, target.x());
+        setter.set(0);
+        assertEquals(0, target.x());
     }
 }
