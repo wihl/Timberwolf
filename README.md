@@ -18,6 +18,10 @@ To build a distribution, run `mvn package`.
 
 The final Timberwolf distribution artifacts will be in $project/target/.
 
+To build a .deb package, run `mvn package -P deb`.  To build a .rpm package,
+run `mvn package -P rpm`.  Note that building an RPM package on Ubuntu requires
+installing rpm: `sudo apt-get install rpm`.
+
 ## Contact us
 
 contact@ripariandata.com
