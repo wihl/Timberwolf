@@ -59,12 +59,6 @@ public class TestIntegration
 
     private static final String LDAP_DOMAIN_PROPERTY_NAME = "LdapDomain";
     private static final String LDAP_CONFIG_ENTRY_PROPERTY_NAME = "LdapConfigEntry";
-    /**
-     * The time to sleep between sending emails and calling GetMails.
-     * This is because sometimes we're so fast that we reget the old emails.
-     * This is in milliseconds.
-     */
-    public static final int SLEEP_TIME = 10000;
 
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
@@ -151,9 +145,6 @@ public class TestIntegration
         user1.sendEmail(pump);
         user2.sendEmail(pump);
         user3.sendEmail(pump);
-        // Sleep a few seconds to make sure all the emails are received
-        // before we continue on to organize and calling GetMail
-        Thread.sleep(SLEEP_TIME);
 
         user1.moveEmails(pump);
         user2.moveEmails(pump);
@@ -173,14 +164,14 @@ public class TestIntegration
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
                 MailWriter mailWriter = HBaseMailWriter.create(emailTable.getTable(), keyHeader,
                                                                emailTable.getFamily());
-                HBaseUserFolderSyncStateStorage timeUpdater =
+                HBaseUserFolderSyncStateStorage syncStateHandler =
                         new HBaseUserFolderSyncStateStorage(userTable.getManager(), userTable.getName());
 
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
                     removeUsers(users, senderEmail, ignoredEmail);
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, timeUpdater);
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, syncStateHandler);
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)
@@ -333,7 +324,6 @@ public class TestIntegration
 
         runForEmails(emailTable1);
 
-        Thread.sleep(SLEEP_TIME);
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();
@@ -347,7 +337,6 @@ public class TestIntegration
 
         runForEmails(emailTable2);
 
-        Thread.sleep(SLEEP_TIME);
         user1.nextRun();
         user2.nextRun();
         user3.nextRun();

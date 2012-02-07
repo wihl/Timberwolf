@@ -1,0 +1,8 @@
+Package: [[name]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Maintainer: Riparian Data <contact@ripariandata.com>
+Description: Microsoft Exchange ingester for Hadoop HBase ingester
+Distribution: development

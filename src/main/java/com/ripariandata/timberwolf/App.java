@@ -17,6 +17,10 @@
  */
 package com.ripariandata.timberwolf;
 
+import com.ripariandata.timberwolf.conf4j.ConfigEntry;
+import com.ripariandata.timberwolf.conf4j.ConfigFileException;
+import com.ripariandata.timberwolf.conf4j.ConfigFileMissingException;
+import com.ripariandata.timberwolf.conf4j.ConfigFileParser;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangeRuntimeException;
 import com.ripariandata.timberwolf.exchange.HttpErrorException;
@@ -45,10 +49,16 @@ import org.slf4j.LoggerFactory;
 final class App implements PrivilegedAction<Integer>
 {
     private static final String CONFIGURATION_ENTRY = "Timberwolf";
-
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
+    private static final String DEFAULT_CONFIG_LOCATION = "/etc/timberwolf.properties";
+
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
+
+    @Option(name = "--config",
+            usage = "Sets the location to look for a configuration properties file.  Defaults to "
+                    + DEFAULT_CONFIG_LOCATION + ".")
+    private String configFileLocation = DEFAULT_CONFIG_LOCATION;
 
     @Option(name = "-h", aliases = { "--help" },
             usage = "Show this help text.")
@@ -56,36 +66,48 @@ final class App implements PrivilegedAction<Integer>
 
     @Option(name = "--domain",
             usage = "The domain you wish to crawl. Users of this domain will be imported.")
+    @ConfigEntry(name = "domain", usage = "The domain you wish to crawl. Users of this domain will be imported.")
     private String domain;
 
-    @Option(required = true, name = "--exchange-url",
+    @Option(name = "--exchange-url",
             usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
                     + "https://example.com/ews/exchange.asmx")
+    @ConfigEntry(name = "exchange.url", usage = "The URL of your Exchange Web Services endpoint.\nFor example: "
+                                              + "https://example.com/ews/exchange.asmx")
     private String exchangeUrl;
 
     @Option(name = "--hbase-quorum",
             usage = "The ZooKeeper quorum used to connect to HBase.")
+    @ConfigEntry(name = "hbase.quorum", usage = "The ZooKeeper quorum used to connect to HBase.")
     private String hbaseQuorum;
 
     @Option(name = "--hbase-clientport",
             usage = "The ZooKeeper client port used to connect to HBase.")
+    @ConfigEntry(name = "hbase.clientport", usage = "The ZooKeeper client port used to connect to HBase.")
     private String hbaseclientPort;
 
     @Option(name = "--hbase-table",
             usage = "The HBase table name that email data will be imported into.")
+    @ConfigEntry(name = "hbase.table", usage = "The HBase table name that email data will be imported into.")
     private String hbaseTableName;
 
     @Option(name = "--hbase-metadata-table",
             usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
-                    + "email for each user.")
+                  + "email for each user.")
+    @ConfigEntry(name = "hbase.metadatatable", usage = "The HBase table that will store timberwolf metatdata, such as "
+                                                     + "the last time that we gathered email for each user.")
     private String hbaseMetadataTableName;
 
     @Option(name = "--hbase-key-header.",
             usage = "The header id to use as a row key for the imported email data.  Default row key is 'Item ID'.")
+    @ConfigEntry(name = "hbase.key.header", usage = "The header id to use as a row key for the imported email data.  "
+                                                  + "Default row key is 'Item ID'.")
     private String hbaseKeyHeader = HBaseMailWriter.DEFAULT_KEY_HEADER;
 
     @Option(name = "--hbase-column-family.",
             usage = "The column family for the imported email data.  Default family is 'h'.")
+    @ConfigEntry(name = "hbase.column.family", usage = "The column family for the imported email data.  "
+                                                     + "Default family is 'h'.")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
 
     private App()
@@ -99,59 +121,118 @@ final class App implements PrivilegedAction<Integer>
         output.println();
     }
 
-    public static void main(final String[] args) throws IOException
+    private static void printUsage(final PrintStream output, final ConfigFileParser parser)
     {
-        new App().beginEverything(args);
+        output.println("Timberwolf configuration files are java properties files, using the syntax described here: "
+                     + "http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/"
+                     + "PropertiesConfiguration.html\n");
+        parser.printUsage(output);
+        output.println();
     }
 
-    private void beginEverything(final String[] args) throws IOException
+    public static void main(final String[] args) throws IOException
     {
-        CmdLineParser parser = new CmdLineParser(this);
+        App app = new App();
+
+        boolean shouldContinue = true;
         try
         {
-            parser.parseArgument(args);
-
-            if (help)
-            {
-                printUsage(System.out, parser);
-                System.exit(0);
-            }
-
-            LOG.debug("Timberwolf invoked with the following arguments:");
-            LOG.debug("Domain: {}", domain);
-            LOG.debug("Exchange URL: {}", exchangeUrl);
-            LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
-            LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
-            LOG.debug("HBase Table Name: {}", hbaseTableName);
-            LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
-            LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
-
-            boolean noHBaseArgs =
-                    hbaseQuorum == null && hbaseclientPort == null
-                    && hbaseTableName == null && hbaseMetadataTableName == null;
-            boolean allHBaseArgs =
-                    hbaseQuorum != null && hbaseclientPort != null
-                    && hbaseTableName != null && hbaseMetadataTableName != null;
-
-            if (!noHBaseArgs && !allHBaseArgs)
-            {
-                throw new CmdLineException(parser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
-                                                   + "Table Name must all be specified if at least one is specified");
-            }
-
-            useHBase = allHBaseArgs;
-
-            Auth.authenticateAndDo(this, CONFIGURATION_ENTRY);
+            shouldContinue = app.parseArguments(args);
         }
         catch (CmdLineException e)
         {
             System.err.println(e.getMessage());
-            printUsage(System.err, parser);
+            printUsage(System.err, e.getParser());
+            return;
+        }
+        catch (ConfigFileException e)
+        {
+            System.err.println(e.getMessage());
+            printUsage(System.err, e.getParser());
+            return;
+        }
+
+        if (!shouldContinue)
+        {
+            return;
+        }
+
+        try
+        {
+            Auth.authenticateAndDo(app, CONFIGURATION_ENTRY);
         }
         catch (LoginException e)
         {
             System.err.println("Authentication failed: " + e.getMessage());
         }
+    }
+
+    private boolean parseArguments(final String[] args) throws IOException, CmdLineException, ConfigFileException
+    {
+        ConfigFileParser configParser = new ConfigFileParser(this);
+        CmdLineParser cliParser = new CmdLineParser(this);
+
+        cliParser.parseArgument(args);
+
+        if (help)
+        {
+            printUsage(System.out, cliParser);
+            return false;
+        }
+
+        try
+        {
+            configParser.parseConfigFile(configFileLocation);
+        }
+        catch (ConfigFileMissingException e)
+        {
+            if (configFileLocation != DEFAULT_CONFIG_LOCATION)
+            {
+                // Assume that this was specified explicitly.
+                throw e;
+            }
+
+            // If the config file was not explicitly named, assume that the user
+            // meant to specify everything on the command line.
+        }
+
+        cliParser.parseArgument(args);
+
+        LOG.debug("Timberwolf invoked with the following arguments:");
+        LOG.debug("Domain: {}", domain);
+        LOG.debug("Exchange URL: {}", exchangeUrl);
+        LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
+        LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
+        LOG.debug("HBase Table Name: {}", hbaseTableName);
+        LOG.debug("HBase Metadata Table Name: {}", hbaseMetadataTableName);
+        LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
+        LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
+
+        boolean noHBaseArgs =
+                hbaseQuorum == null && hbaseclientPort == null
+                && hbaseTableName == null && hbaseMetadataTableName == null;
+        boolean allHBaseArgs =
+                hbaseQuorum != null && hbaseclientPort != null
+                && hbaseTableName != null && hbaseMetadataTableName != null;
+
+        if (!noHBaseArgs && !allHBaseArgs)
+        {
+            throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
+                                                + "Table Name must all be specified if at least one is specified");
+        }
+
+        if (domain == null)
+        {
+            throw new CmdLineException(cliParser, "The domain must be specified.");
+        }
+
+        if (exchangeUrl == null)
+        {
+            throw new CmdLineException(cliParser, "The Exchange URL must be specified.");
+        }
+
+        useHBase = allHBaseArgs;
+        return true;
     }
 
     public Integer run()
