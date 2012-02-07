@@ -192,6 +192,20 @@ public class ConfigFileParser
         }
     }
 
+    /**
+     * Prints usage information for the config entries to the given stream.
+     * Wraps usage information to 80 characters wide.
+     * <p>
+     * Example output:
+     * <pre>
+     * my.property          - This is how to use this property.
+     *
+     * longer.property.name - All the hyphens line up.
+     *
+     * long.usage           - Long usage descriptions will wrap at 80 characters wide
+     *                        and remain lined up like this.
+     * </pre>
+     */
     public void printUsage(final PrintStream out)
     {
         out.println("Valid properties in the configuration file:");
