@@ -173,14 +173,14 @@ public class TestIntegration
                 MailStore mailStore = new ExchangeMailStore(exchangeURL, 12, 4);
                 MailWriter mailWriter = HBaseMailWriter.create(emailTable.getTable(), keyHeader,
                                                                emailTable.getFamily());
-                HBaseUserFolderSyncStateStorage timeUpdater =
+                HBaseUserFolderSyncStateStorage syncStateHandler =
                         new HBaseUserFolderSyncStateStorage(userTable.getManager(), userTable.getName());
 
                 try
                 {
                     Iterable<String> users = new LdapFetcher(ldapDomain).getPrincipals();
                     removeUsers(users, senderEmail, ignoredEmail);
-                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, timeUpdater);
+                    Iterable<MailboxItem> mailboxItems = mailStore.getMail(users, syncStateHandler);
                     mailWriter.write(mailboxItems);
                 }
                 catch (PrincipalFetchException e)
