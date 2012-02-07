@@ -1,5 +1,6 @@
 package com.ripariandata.timberwolf.hbase;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +12,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.ripariandata.timberwolf.MockHTable;
-import com.ripariandata.timberwolf.hbase.HBaseManager;
-import com.ripariandata.timberwolf.hbase.HBaseTable;
-import com.ripariandata.timberwolf.hbase.IHBaseTable;
 
 public class MockHTableTest
 {
@@ -22,30 +20,39 @@ public class MockHTableTest
     private static final byte[] SYNC_COLUMN_QUALIFIER = Bytes.toBytes("v");
     private static final String TEST_TABLE_NAME = "mockTable";
     
-    private IHBaseTable mockTable(final HBaseManager hbaseManager)
-    {
-        MockHTable table = MockHTable.create(TEST_TABLE_NAME);
-        HBaseTable hbaseTable = new HBaseTable(table);
-        hbaseManager.addTable(hbaseTable);
-        return hbaseTable;
-    }
-    
-    public void setSyncState(IHBaseTable table,
+    public static void setSyncState(MockHTable table,
                              final byte[] key,
                              final String value)
     {
+        List<Put> puts = new ArrayList<Put>();
         Put put = new Put(key);
         put.add(SYNC_COLUMN_FAMILY, SYNC_COLUMN_QUALIFIER,
         Bytes.toBytes(value));
         
-        table.put(put);
-        table.flush();
+        puts.add(put);
+        try
+        {
+            table.put(puts);
+            puts.clear();
+        }
+        catch (IOException e)
+        {
+            throw new HBaseRuntimeException("Could not write puts to HTable!", e);
+        }
     }
     
-    public String get(IHBaseTable table, final byte[] key)
+    public static String get(MockHTable table, final byte[] key)
     {
         Get get = new Get(key);
-        Result result = table.get(get);
+        Result result = null;
+        try
+        {
+            result = table.get(get);
+        }
+        catch (IOException e)
+        {
+            throw new HBaseRuntimeException("Could not get from HBase!", e);
+        }
         Assert.assertFalse(result.isEmpty());
         return Bytes.toString(result.getValue(SYNC_COLUMN_FAMILY,
                                               SYNC_COLUMN_QUALIFIER));
@@ -54,17 +61,13 @@ public class MockHTableTest
     @Test
     public void testResetValue()
     {
-        HBaseManager manager = new HBaseManager();
-        mockTable(manager);
-        
-        List<String> columnFamilies = new ArrayList<String>();
-        columnFamilies.add(TEST_COLUMN_FAMILY_STRING);
-        /** If the table already exists it will be simply grabbed not recreated. */
-        IHBaseTable table = manager.createTable(TEST_TABLE_NAME, columnFamilies);
-
         final String value1 = "val1";
         final String value2 = "val2";
         final byte[] key = Bytes.toBytes("key");
+
+        MockHTable table = MockHTable.create(TEST_TABLE_NAME);
+        table.getTableName();
+
         setSyncState(table, key, value1);
         Assert.assertEquals(value1, get(table, key));
         setSyncState(table, key, value2);
