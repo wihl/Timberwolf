@@ -130,7 +130,7 @@ final class App implements PrivilegedAction<Integer>
         output.println("Timberwolf configuration files are java properties files, using the syntax described here: "
                      + "http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/"
                      + "PropertiesConfiguration.html\n");
-        TODO: parser.printUsage(output);
+        parser.printUsage(output);
         output.println();
     }
 
