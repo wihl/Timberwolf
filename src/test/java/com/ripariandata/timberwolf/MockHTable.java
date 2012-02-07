@@ -189,6 +189,8 @@ public final class MockHTable implements HTableInterface
     {
       for (byte[] qualifier : rowdata.get(family).keySet())
       {
+        Long chosenTimestamp = 0L;
+        byte[] value = null;
         for (Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).entrySet())
         {
           Long timestamp = tsToVal.getKey();
@@ -200,8 +202,19 @@ public final class MockHTable implements HTableInterface
           {
             continue;
           }
-          byte[] value = tsToVal.getValue();
-          ret.add(new KeyValue(row, family, qualifier, timestamp, value));
+          // We're specifically looking for the latest value to use.
+          if (timestamp < chosenTimestamp)
+          {
+            continue;
+          }
+          // If we got this far, we found an entry within the acceptable range
+          // which was added later than any other entry we've found so far.
+          value = tsToVal.getValue();
+          chosenTimestamp = timestamp;
+        }
+        if (value != null)
+        {
+          ret.add(new KeyValue(row, family, qualifier, chosenTimestamp, value));
         }
        }
     }
