@@ -88,7 +88,7 @@ public class TestIntegration
     public HTableResource emailTable3 = new HTableResource();
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
-    public HTableResource userTable = new HTableResource("t");
+    public HTableResource userTable = new HTableResource("s");
     private UserFolderSyncStateStorage inMemorySyncStateStorage = new InMemoryUserFolderSyncStateStorage();
 
     private String exchangeURL;
