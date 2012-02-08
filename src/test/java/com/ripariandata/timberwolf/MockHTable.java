@@ -159,12 +159,16 @@ public final class MockHTable implements HTableInterface
    *          row value of the KeyValue's
    * @param rowdata
    *          data to decode
+   * @param maxVersions
+   *          number of versions to return
    * @return List of KeyValue's
    */
-  private static List<KeyValue> toKeyValue(final byte[] row, final NavigableMap<byte[], NavigableMap<byte[],
-          NavigableMap<Long, byte[]>>> rowdata)
+  private static List<KeyValue> toKeyValue(final byte[] row,
+                                           final NavigableMap<byte[], NavigableMap<byte[],
+          NavigableMap<Long, byte[]>>> rowdata,
+                                           final int maxVersions)
   {
-    return toKeyValue(row, rowdata, 0, Long.MAX_VALUE);
+    return toKeyValue(row, rowdata, 0, Long.MAX_VALUE, maxVersions);
   }
 
   /**
@@ -179,20 +183,29 @@ public final class MockHTable implements HTableInterface
    *          start of the timestamp constraint
    * @param timestampEnd
    *          end of the timestamp constraint
+   * @param maxVersions
+   *          number of versions to return
    * @return List of KeyValue's
    */
-  private static List<KeyValue> toKeyValue(final byte[] row, final NavigableMap<byte[], NavigableMap<byte[],
-          NavigableMap<Long, byte[]>>> rowdata, final long timestampStart, final long timestampEnd)
+  private static List<KeyValue> toKeyValue(final byte[] row,
+                                           final NavigableMap<byte[], NavigableMap<byte[],
+          NavigableMap<Long, byte[]>>> rowdata,
+                                           final long timestampStart,
+                                           final long timestampEnd,
+                                           final int maxVersions)
   {
     List<KeyValue> ret = new ArrayList<KeyValue>();
     for (byte[] family : rowdata.keySet())
     {
       for (byte[] qualifier : rowdata.get(family).keySet())
       {
-        Long chosenTimestamp = 0L;
-        byte[] value = null;
-        for (Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).entrySet())
+        int versionsAdded = 0;
+        for (Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).descendingMap().entrySet())
         {
+          if (versionsAdded++ == maxVersions)
+          {
+            break;
+          }
           Long timestamp = tsToVal.getKey();
           if (timestamp < timestampStart)
           {
@@ -202,21 +215,10 @@ public final class MockHTable implements HTableInterface
           {
             continue;
           }
-          // We're specifically looking for the latest value to use.
-          if (timestamp < chosenTimestamp)
-          {
-            continue;
-          }
-          // If we got this far, we found an entry within the acceptable range
-          // which was added later than any other entry we've found so far.
-          value = tsToVal.getValue();
-          chosenTimestamp = timestamp;
+          byte[] value = tsToVal.getValue();
+          ret.add(new KeyValue(row, family, qualifier, timestamp, value));
         }
-        if (value != null)
-        {
-          ret.add(new KeyValue(row, family, qualifier, chosenTimestamp, value));
-        }
-       }
+      }
     }
     return ret;
   }
@@ -273,7 +275,7 @@ public final class MockHTable implements HTableInterface
     List<KeyValue> kvs = new ArrayList<KeyValue>();
     if (!get.hasFamilies())
     {
-      kvs = toKeyValue(row, data.get(row));
+      kvs = toKeyValue(row, data.get(row), get.getMaxVersions());
     }
     else
     {
@@ -372,7 +374,11 @@ public final class MockHTable implements HTableInterface
       List<KeyValue> kvs = null;
       if (!scan.hasFamilies())
       {
-        kvs = toKeyValue(row, data.get(row), scan.getTimeRange().getMin(), scan.getTimeRange().getMax());
+        kvs = toKeyValue(row,
+                         data.get(row),
+                         scan.getTimeRange().getMin(),
+                         scan.getTimeRange().getMax(),
+                         scan.getMaxVersions());
       }
       else
       {
