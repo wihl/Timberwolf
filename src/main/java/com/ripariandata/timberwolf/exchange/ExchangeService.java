@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
@@ -91,6 +92,8 @@ public class ExchangeService
         HttpURLConnection conn = createConnection(request);
         int code = getResponseCode(conn);
 
+        String charset = getCharset(conn);
+
         InputStream responseData = getInputStream(conn);
 
         int amtAvailable = getAmountAvailable(responseData);
@@ -99,19 +102,58 @@ public class ExchangeService
         {
             checkNonEmptyResponse(request, amtAvailable);
 
-            EnvelopeDocument response = parseResponse(responseData);
+            EnvelopeDocument response = parseResponse(responseData, charset);
             LOG.trace("SOAP response received from {}.  SOAP envelope:", endpoint);
             LOG.trace(response.toString());
             return getSoapBody(response);
         }
         else
         {
-            return logAndThrowHttpErrorCode(request, code, responseData, amtAvailable);
+            return logAndThrowHttpErrorCode(request, code, responseData, amtAvailable, charset);
         }
     }
 
+    /**
+     * If for whatever reason we fail to get the charset, this logs that fact,
+     * and returns UTF-8.
+     * @param connection the connection with a response
+     * @return the character encoding for that response
+     */
+    private static String getCharset(final HttpURLConnection connection)
+    {
+        final String defaultCharset = "UTF-8";
+        String contentType = connection.getHeaderField("Content-Type");
+        if (contentType == null)
+        {
+            LOG.debug("Error getting charset for response, no Content-Type specified, falling back to \"{}\"",
+                      contentType, defaultCharset);
+            return defaultCharset;
+        }
+        for (String part : contentType.replace(" ", "").split(";"))
+        {
+            if (part.startsWith("charset="))
+            {
+                String charset = part.split("=", 2)[1].trim();
+                if (Charset.isSupported(charset))
+                {
+                    return charset;
+                }
+                else
+                {
+                    LOG.debug("Error getting charset from Content-Type: \"{}\", falling back to \"{}\"", contentType,
+                              defaultCharset);
+                    LOG.debug("Charset: \"{}\" is not supported", charset);
+                    return defaultCharset;
+                }
+            }
+        }
+        LOG.debug("Could not find charset in Content-Type: \"{}\", falling back to \"{}\"", contentType,
+                  defaultCharset);
+        return defaultCharset;
+    }
+
     private BodyType logAndThrowHttpErrorCode(final String request, final int code, final InputStream responseData,
-                                              final int amtAvailable)
+                                              final int amtAvailable, final String charset)
             throws ServiceCallException, HttpErrorException
     {
         LOG.error("Server responded with HTTP error code {}.", code);
@@ -126,7 +168,7 @@ public class ExchangeService
             LOG.debug("Error response body:");
             try
             {
-                LOG.debug(inputStreamToString(responseData));
+                LOG.debug(inputStreamToString(responseData, charset));
             }
             catch (IOException ioe)
             {
@@ -179,7 +221,8 @@ public class ExchangeService
         }
     }
 
-    private EnvelopeDocument parseResponse(final InputStream responseData) throws ServiceCallException
+    private EnvelopeDocument parseResponse(final InputStream responseData, final String charset)
+            throws ServiceCallException
     {
         EnvelopeDocument response;
         try
@@ -197,7 +240,7 @@ public class ExchangeService
             LOG.debug("Response body:");
             try
             {
-                LOG.debug(inputStreamToString(responseData));
+                LOG.debug(inputStreamToString(responseData, charset));
                 throw new ServiceCallException(ServiceCallException.Reason.OTHER, "Error parsing SOAP response.", e);
             }
             catch (IOException ioe)
