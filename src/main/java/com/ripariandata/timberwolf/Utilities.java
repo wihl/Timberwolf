@@ -40,13 +40,15 @@ public final class Utilities
 
     /**
      * Reads an entire input stream into a string, one line at a time.
+     *
      * @param stream the input stream to read in
+     * @param charset the charset that the input stream is encoded in
      * @return the contents of the stream as a string
      * @throws IOException if something goes wrong reading from the input stream
      */
-    public static String inputStreamToString(final InputStream stream) throws IOException
+    public static String inputStreamToString(final InputStream stream, final String charset) throws IOException
     {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, charset));
         StringBuilder text = new StringBuilder();
         for (String line = reader.readLine(); line != null; line = reader.readLine())
         {
