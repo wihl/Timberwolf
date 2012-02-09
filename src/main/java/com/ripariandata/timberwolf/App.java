@@ -28,6 +28,7 @@ import com.ripariandata.timberwolf.exchange.ServiceCallException;
 import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.hbase.HBaseManager;
 import com.ripariandata.timberwolf.hbase.HBaseUserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.hive.HiveMailWriter;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
@@ -109,6 +110,9 @@ final class App implements PrivilegedAction<Integer>
     @ConfigEntry(name = "hbase.column.family", usage = "The column family for the imported email data.  "
                                                      + "Default family is 'h'.")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
+
+    @Option(name = "--hive")
+    private boolean hive = false;
 
     private App()
     {
@@ -240,6 +244,7 @@ final class App implements PrivilegedAction<Integer>
         MailWriter mailWriter;
         UserFolderSyncStateStorage syncStateStorage;
         HBaseManager hbaseManager = null;
+
         if (useHBase)
         {
             hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
@@ -251,6 +256,11 @@ final class App implements PrivilegedAction<Integer>
         {
             mailWriter = new ConsoleMailWriter();
             syncStateStorage = new InMemoryUserFolderSyncStateStorage();
+        }
+
+        if (hive)
+        {
+            mailWriter = new HiveMailWriter();
         }
 
         ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
