@@ -24,77 +24,64 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 
 public class HiveMailWriter implements MailWriter
 {
-    // Both of these are non-whitespace control characters, so they should, I
+    // This is a non-whitespace control characters, so it should, I
     // hope, not show up in any of our data.
     private static final char COLUMN_SEPARATOR = 0x1F;
-    private static final char ROW_SEPARATOR = 0x1E;
     private static final String ENCODING = "UTF-8";
+    private static final String KEY_HEADER = "Item ID";
 
     public HiveMailWriter()
     {
     }
 
-    private void write(String value, OutputStream output, boolean separate)
-        throws UnsupportedEncodingException, IOException
+    private ArrayList<String> valueHeaders(MailboxItem mail)
     {
-        if (separate)
+        ArrayList<String> headers = new ArrayList<String>();
+        for (String header : mail.possibleHeaderKeys())
         {
-            output.write((int)COLUMN_SEPARATOR);
+            if (header != KEY_HEADER)
+            {
+                headers.add(mail.getHeader(header));
+            }
         }
-
-        if (value != null)
-        {
-            output.write(value.getBytes(ENCODING));
-        }
+        return headers;
     }
 
-    private void write(MailboxItem mail, OutputStream output, boolean separate)
+    private void write(Iterable<MailboxItem> mails, SequenceFile.Writer writer)
         throws UnsupportedEncodingException, IOException
     {
-        if (separate)
+        for (MailboxItem mail : mails)
         {
-            output.write((int)ROW_SEPARATOR);
-        }
-
-        String[] keys = mail.possibleHeaderKeys();
-        if (keys.length > 0)
-        {
-            write(mail.getHeader(keys[0]), output, false);
-        }
-
-        for (int i = 1; i < keys.length; i++)
-        {
-            write(mail.getHeader(keys[i]), output, true);
-        }
-    }
-
-    private void write(Iterator<MailboxItem> mails, OutputStream output)
-        throws UnsupportedEncodingException, IOException
-    {
-        if (mails.hasNext())
-        {
-            MailboxItem mail = mails.next();
-            write(mail, output, false);
-        }
-
-        while(mails.hasNext())
-        {
-            MailboxItem mail = mails.next();
-            write(mail, output, true);
+            Text key = new Text(mail.getHeader(KEY_HEADER));
+            Text value = new Text(StringUtils.join(valueHeaders(mail), COLUMN_SEPARATOR));
+            writer.append(key, value);
         }
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void write(Iterable<MailboxItem> mails)
     {
         // Obviously, this is for testing, not reals.
         try
         {
-            write(mails.iterator(), System.out);
+            SequenceFile.Writer writer = SequenceFile.createWriter(new Configuration(),
+                                                                   new FSDataOutputStream(System.out), Text.class,
+                                                                   Text.class, SequenceFile.CompressionType.NONE, null);
+            write(mails, writer);
+            writer.syncFs();
+            writer.close();
         }
         catch (UnsupportedEncodingException e)
         {
