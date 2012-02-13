@@ -67,7 +67,7 @@ public class MaildirEmail implements MailboxItem
         while (true)
         {
             String line = reader.readLine();
-            if (line == null || line.trim() == "")
+            if (line == null || line.trim().equals(""))
             {
                 break;
             }

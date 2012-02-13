@@ -274,7 +274,6 @@ final class App implements PrivilegedAction<Integer>
         }
         else
         {
-            System.err.println("Mail dir is " + maildir);
             mailStore = new MaildirMailStore(maildir);
         }
 
