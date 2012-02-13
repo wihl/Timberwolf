@@ -35,7 +35,7 @@ import org.apache.hadoop.io.Text;
 
 public class HiveMailWriter implements MailWriter
 {
-    // This is a non-whitespace control characters, so it should, I
+    // This is a non-whitespace control character, so it should, I
     // hope, not show up in any of our data.
     private static final char COLUMN_SEPARATOR = 0x1F;
     private static final String ENCODING = "UTF-8";

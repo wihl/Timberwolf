@@ -29,6 +29,7 @@ import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.hbase.HBaseManager;
 import com.ripariandata.timberwolf.hbase.HBaseUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.hive.HiveMailWriter;
+import com.ripariandata.timberwolf.maildir.MaildirMailStore;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
@@ -113,6 +114,9 @@ final class App implements PrivilegedAction<Integer>
 
     @Option(name = "--hive")
     private boolean hive = false;
+
+    @Option(name = "--maildir")
+    private String maildir;
 
     private App()
     {
@@ -263,7 +267,17 @@ final class App implements PrivilegedAction<Integer>
             mailWriter = new HiveMailWriter();
         }
 
-        ExchangeMailStore mailStore = new ExchangeMailStore(exchangeUrl);
+        MailStore mailStore;
+        if (maildir == null)
+        {
+            mailStore = new ExchangeMailStore(exchangeUrl);
+        }
+        else
+        {
+            System.err.println("Mail dir is " + maildir);
+            mailStore = new MaildirMailStore(maildir);
+        }
+
         try
         {
             PrincipalFetcher userLister = new LdapFetcher(domain);
