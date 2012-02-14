@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -40,9 +42,28 @@ public class HiveMailWriter implements MailWriter
     private static final char COLUMN_SEPARATOR = 0x1F;
     private static final String ENCODING = "UTF-8";
     private static final String KEY_HEADER = "Item ID";
+    private static final Map<String, String> escapes = new HashMap<String, String>();
 
     public HiveMailWriter()
     {
+        // Hive doesn't handle newlines well at all, and they aren't particularly
+        // useful from an analytics standpoint.
+        escapes.put("\n", " ");
+    }
+
+    private String escape(String value)
+    {
+        if (value == null)
+        {
+            return value;
+        }
+
+        String ret = value;
+        for (String s : escapes.keySet())
+        {
+            ret = ret.replace(s, escapes.get(s));
+        }
+        return ret;
     }
 
     private ArrayList<String> valueHeaders(MailboxItem mail)
@@ -52,7 +73,7 @@ public class HiveMailWriter implements MailWriter
         {
             if (header != KEY_HEADER)
             {
-                headers.add(mail.getHeader(header));
+                headers.add(escape(mail.getHeader(header)));
             }
         }
         return headers;
