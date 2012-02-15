@@ -77,9 +77,9 @@ public class MaildirEmail implements MailboxItem
     public MaildirEmail(File file) throws IOException, FileNotFoundException
     {
         BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = reader.readLine();
         while (true)
         {
-            String line = reader.readLine();
             if (line == null || line.trim().equals(""))
             {
                 break;
@@ -94,7 +94,25 @@ public class MaildirEmail implements MailboxItem
             String[] parts = line.split(":", 2);
             if (maildirkeys.containsKey(parts[0]))
             {
-                headers.put(maildirkeys.get(parts[0]), parts[1]);
+                String header = parts[1] != null ? parts[1].trim() : "";
+                while (true)
+                {
+                    line = reader.readLine();
+                    if (line == null || !(line.startsWith(" ") || line.startsWith("\t")))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        header += line != null ? (" " + line.trim()) : "";
+                    }
+                }
+
+                headers.put(maildirkeys.get(parts[0]), header);
+            }
+            else
+            {
+                line = reader.readLine();
             }
         }
 
