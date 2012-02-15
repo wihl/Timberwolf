@@ -32,6 +32,7 @@ public class MaildirEmail implements MailboxItem
 {
     private static Map<String, String> maildirkeys = new HashMap<String, String>();
     private Map<String, String> headers = new HashMap<String, String>();
+    private boolean skipThisEmail = false;
 
     static
     {
@@ -44,7 +45,7 @@ public class MaildirEmail implements MailboxItem
         maildirkeys.put("Bcc", "Bcc");
     }
 
-    private static String readToEnd(BufferedReader reader) throws IOException
+    private String readToEnd(BufferedReader reader) throws IOException
     {
         String s = reader.readLine();
         while (true)
@@ -55,10 +56,22 @@ public class MaildirEmail implements MailboxItem
                 break;
             }
 
+            if (isMultipartHeader(line))
+            {
+                skipThisEmail = true;
+                return s;
+            }
+
             s += "\n";
             s += line;
         }
         return s;
+    }
+
+    private static boolean isMultipartHeader(String line)
+    {
+        String[] parts = line.split(":", 2);
+        return parts[0].equals("Content-type") && parts[1].trim().startsWith("multipart");
     }
 
     public MaildirEmail(File file) throws IOException, FileNotFoundException
@@ -72,6 +85,12 @@ public class MaildirEmail implements MailboxItem
                 break;
             }
 
+            if (isMultipartHeader(line))
+            {
+                skipThisEmail = true;
+                return;
+            }
+
             String[] parts = line.split(":", 2);
             if (maildirkeys.containsKey(parts[0]))
             {
@@ -80,6 +99,11 @@ public class MaildirEmail implements MailboxItem
         }
 
         headers.put("Body", readToEnd(reader));
+    }
+
+    public boolean skip()
+    {
+        return skipThisEmail;
     }
 
     @Override

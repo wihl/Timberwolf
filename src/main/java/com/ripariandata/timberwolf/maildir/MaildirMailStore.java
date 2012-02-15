@@ -69,22 +69,33 @@ public class MaildirMailStore implements MailStore
         @Override
         public MailboxItem next()
         {
-            try
+            while (hasNext())
             {
-                return new MaildirEmail(files.next());
+                MaildirEmail mail;
+                try
+                {
+                    mail = new MaildirEmail(files.next());
+                }
+                catch (FileNotFoundException e)
+                {
+                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("Bad things happened.");
+                }
+                catch (IOException e)
+                {
+                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("Bad things happened.");
+                }
+
+                if (!mail.skip())
+                {
+                    return mail;
+                }
             }
-            catch (FileNotFoundException e)
-            {
-                System.err.println(e.getMessage());
-                e.printStackTrace();
-                throw new RuntimeException("Bad things happened.");
-            }
-            catch (IOException e)
-            {
-                System.err.println(e.getMessage());
-                e.printStackTrace();
-                throw new RuntimeException("Bad things happened.");
-            }
+
+            return null;
         }
 
         @Override
