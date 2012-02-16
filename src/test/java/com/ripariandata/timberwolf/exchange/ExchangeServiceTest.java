@@ -514,6 +514,55 @@ public class ExchangeServiceTest
         }
     }
 
+    public void charsetTestHelper(final String charset)
+            throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException
+    {
+        HttpUrlConnectionFactory factory = mock(HttpUrlConnectionFactory.class);
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        final int defaultBufValue = 64;
+        when(conn.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {defaultBufValue, defaultBufValue,
+                defaultBufValue }));
+        when(conn.getHeaderField("Content-Type")).thenReturn(charset);
+        when(factory.newInstance(URL, soap(SYNC_FOLDER_ITEMS_REQUEST).getBytes("UTF-8"))).thenReturn(conn);
+
+        ExchangeService service = new ExchangeService(URL, factory);
+        SyncFolderItemsType
+                request = SyncFolderItemsDocument.Factory.parse(SYNC_FOLDER_ITEMS_REQUEST).getSyncFolderItems();
+
+        try
+        {
+            service.syncFolderItems(request, "bkerr");
+            fail("No exception was thrown.");
+        }
+        catch (HttpErrorException e)
+        {
+            // we're mostly asserting here that getting the charset didn't throw a fit
+            assertEquals("There was an HTTP 500 error while sending a request.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUnsupportedCharset() throws XmlException, ServiceCallException, IOException
+    {
+        charsetTestHelper("Content-Type: text/html; charset=gibberish");
+    }
+
+
+    @Test
+    public void testCharsetNotInContentType()
+            throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException
+    {
+        charsetTestHelper("Content-Type: text/html; gibberish=utf-8");
+    }
+
+    @Test
+    public void testOnePart()
+            throws UnsupportedEncodingException, XmlException, ServiceCallException, IOException
+    {
+        charsetTestHelper("Content-Type: text/html");
+    }
+
     @Test
     public void testEmptyRequest()
     {

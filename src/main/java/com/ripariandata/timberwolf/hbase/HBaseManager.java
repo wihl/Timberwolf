@@ -78,6 +78,7 @@ public class HBaseManager
     public HBaseManager(final Configuration hbaseConfiguration)
     {
         configuration = hbaseConfiguration;
+        configuration.setLong("hbase.client.write.buffer", HBaseMailWriter.BUFFER_SIZE);
 
         try
         {

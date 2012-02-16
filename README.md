@@ -24,7 +24,10 @@ installing rpm: `sudo apt-get install rpm`.
 
 ## Contact us
 
-contact@ripariandata.com
+For questions or comments, you can write and/or subscribe to the 
+[Timberwolf mailing list](http://www.ripariandata.com/mailing-list/).
+
+If you would prefer, you can contact us privately at contact@ripariandata.com
 
 ## Bug and Issue tracker
 
