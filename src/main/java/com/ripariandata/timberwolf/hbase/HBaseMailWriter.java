@@ -46,6 +46,9 @@ public final class HBaseMailWriter implements MailWriter
     /** The default header, whose value will be used as a rowkey. */
     public static final String DEFAULT_KEY_HEADER = "Item ID";
 
+    /** The number of puts to buffer on the client before flushing them to HBase. */
+    public static final long BUFFER_SIZE = 10000;
+
     private HBaseMailWriter(final IHBaseTable table,
                             final String mailboxItemKeyHeader,
                             final String hbaseColumnFamily)
@@ -105,6 +108,7 @@ public final class HBaseMailWriter implements MailWriter
     @Override
     public void write(final Iterable<MailboxItem> mails)
     {
+        long n = 0;
         for (MailboxItem mailboxItem : mails)
         {
             Put mailboxItemPut = new Put(Bytes.toBytes(
@@ -119,6 +123,13 @@ public final class HBaseMailWriter implements MailWriter
             }
 
             mailTable.put(mailboxItemPut);
+
+            if (n == BUFFER_SIZE)
+            {
+                mailTable.flush();
+                n = 0;
+            }
+            n++;
         }
         mailTable.flush();
     }
