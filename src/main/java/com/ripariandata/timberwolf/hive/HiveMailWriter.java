@@ -44,11 +44,14 @@ public class HiveMailWriter implements MailWriter
     private static final String KEY_HEADER = "Item ID";
     private static final Map<String, String> escapes = new HashMap<String, String>();
 
-    public HiveMailWriter()
+    private FSDataOutputStream outStream;
+
+    public HiveMailWriter(FSDataOutputStream output)
     {
         // Hive doesn't handle newlines well at all, and they aren't particularly
         // useful from an analytics standpoint.
         escapes.put("\n", " ");
+        outStream = output;
     }
 
     private String escape(String value)
@@ -91,14 +94,13 @@ public class HiveMailWriter implements MailWriter
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void write(Iterable<MailboxItem> mails)
     {
         // Obviously, this is for testing, not reals.
         try
         {
             SequenceFile.Writer writer = SequenceFile.createWriter(new Configuration(),
-                                                                   new FSDataOutputStream(System.out), Text.class,
+                                                                   outStream, Text.class,
                                                                    Text.class, SequenceFile.CompressionType.NONE, null);
             write(mails, writer);
             writer.syncFs();
