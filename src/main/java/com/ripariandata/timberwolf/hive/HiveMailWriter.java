@@ -102,8 +102,7 @@ public class HiveMailWriter implements MailWriter
         // Obviously, this is for testing, not reals.
         try
         {
-            SequenceFile.Writer writer = SequenceFile.createWriter(new Configuration(),
-                                                                   outStream, Text.class,
+            SequenceFile.Writer writer = SequenceFile.createWriter(new Configuration(), outStream, Text.class,
                                                                    Text.class, SequenceFile.CompressionType.NONE, null);
             write(mails, writer);
             writer.syncFs();
