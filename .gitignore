@@ -6,3 +6,5 @@ bin
 .project
 .settings
 testing.properties
+*.sublime-project
+*.sublime-workspace
