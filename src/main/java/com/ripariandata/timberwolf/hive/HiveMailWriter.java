@@ -46,11 +46,14 @@ public class HiveMailWriter implements MailWriter
 
     private FSDataOutputStream outStream;
 
-    public HiveMailWriter(FSDataOutputStream output)
-    {
+    static {
         // Hive doesn't handle newlines well at all, and they aren't particularly
         // useful from an analytics standpoint.
         escapes.put("\n", " ");
+    }
+
+    public HiveMailWriter(FSDataOutputStream output)
+    {
         outStream = output;
     }
 
