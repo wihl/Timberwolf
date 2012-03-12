@@ -149,6 +149,12 @@ public class ExchangeEmail implements MailboxItem
         return headers.keySet().toArray(new String[headers.keySet().size()]);
     }
 
+    public final String[] possibleHeaderKeys()
+    {
+        return new String[] { BODY_KEY, SUBJECT_KEY, TIME_SENT_KEY, ID_KEY, SENDER_KEY, TORECIPIENT_KEY,
+                              CCRECIPIENT_KEY, BCCRECIPIENT_KEY };
+    }
+
     public final boolean hasKey(final String key)
     {
         return headers.containsKey(key);
