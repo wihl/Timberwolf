@@ -118,29 +118,63 @@ public class HiveMailWriterTest
         }
     }
 
+    @SuppressWarnings("deprecation")
     private FileSystem mockFileSystem(String path, byte[] data) throws IOException
     {
         FileSystem fs = mock(FileSystem.class);
-        when(fs.open(eq(new Path(path)), any(int.class)))
+        Path fsPath = new Path(path);
+        when(fs.open(eq(fsPath), any(int.class)))
             .thenReturn(new FSDataInputStream(new SeekablePositionedReadableByteArrayInputStream(data)));
+        when(fs.getLength(eq(fsPath))).thenReturn((long)data.length);
         return fs;
     }
 
-    @Test
     @SuppressWarnings("deprecation")
-    public void testWriteNothing() throws IOException
+    private SequenceFile.Reader writeMails(Iterable<MailboxItem> mails) throws IOException
     {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         FSDataOutputStream output = new FSDataOutputStream(byteOut);
         HiveMailWriter writer = new HiveMailWriter(output);
 
-        writer.write(new ArrayList<MailboxItem>());
+        writer.write(mails);
 
         FileSystem fs = mockFileSystem("file", byteOut.toByteArray());
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("file"), new Configuration());
+        return new SequenceFile.Reader(fs, new Path("file"), new Configuration());
+    }
+
+    @Test
+    public void testWriteNothing() throws IOException
+    {
+        SequenceFile.Reader reader = writeMails(new ArrayList<MailboxItem>());
 
         Text key = new Text();
         Text value = new Text();
+        assertFalse(reader.next(key, value));
+    }
+
+    @Test
+    public void testWriteAllHeaders() throws IOException
+    {
+        MailboxItem mail = mock(MailboxItem.class);
+        String[] headers = { "Item ID", "Alpha", "Beta", "Gamma" };
+        when(mail.getHeaderKeys()).thenReturn(headers);
+        when(mail.possibleHeaderKeys()).thenReturn(headers);
+        when(mail.hasKey(any(String.class))).thenReturn(true);
+        when(mail.getHeader("Item ID")).thenReturn("key");
+        when(mail.getHeader("Alpha")).thenReturn("One");
+        when(mail.getHeader("Beta")).thenReturn("Two");
+        when(mail.getHeader("Gamma")).thenReturn("Three");
+
+        ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
+        mails.add(mail);
+        SequenceFile.Reader reader = writeMails(mails);
+
+        char separator = 0x1F;
+        Text key = new Text();
+        Text value = new Text();
+        assertTrue(reader.next(key, value));
+        assertEquals("key", key.toString());
+        assertEquals("One" + separator + "Two" + separator + "Three", value.toString());
         assertFalse(reader.next(key, value));
     }
 }
