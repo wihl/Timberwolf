@@ -48,11 +48,11 @@ import static org.mockito.Matchers.any;
 
 public class HiveMailWriterTest
 {
-    private class SeekablePositionableByteArrayInputStream
+    private class SeekablePositionedReadableByteArrayInputStream
         extends ByteArrayInputStream
         implements Seekable, PositionedReadable
     {
-        public SeekablePositionableByteArrayInputStream(byte[] data)
+        public SeekablePositionedReadableByteArrayInputStream(byte[] data)
         {
             super(data);
         }
@@ -122,7 +122,7 @@ public class HiveMailWriterTest
     {
         FileSystem fs = mock(FileSystem.class);
         when(fs.open(eq(new Path(path)), any(int.class)))
-            .thenReturn(new FSDataInputStream(new SeekablePositionableByteArrayInputStream(data)));
+            .thenReturn(new FSDataInputStream(new SeekablePositionedReadableByteArrayInputStream(data)));
         return fs;
     }
 
