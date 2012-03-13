@@ -232,4 +232,24 @@ public class HiveMailWriterTest
         assertEquals("Dee" + separator + "Eee" + separator + "Eff", value.toString());
         assertFalse(reader.next(key, value));
     }
+
+    @Test
+    public void testWriteMailWithNoHeaders() throws IOException
+    {
+        MailboxItem mail = mock(MailboxItem.class);
+        String[] headers = { "Item ID" };
+        when(mail.getHeaderKeys()).thenReturn(headers);
+        when(mail.possibleHeaderKeys()).thenReturn(headers);
+        when(mail.hasKey(any(String.class))).thenReturn(true);
+        when(mail.getHeader("Item ID")).thenReturn("key");
+        ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
+        mails.add(mail);
+        SequenceFile.Reader reader = writeMails(mails);
+
+        Text key = new Text();
+        Text value = new Text();
+        assertTrue(reader.next(key, value));
+        assertEquals("key", key.toString());
+        assertEquals("", value.toString());
+    }
 }
