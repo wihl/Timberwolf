@@ -99,7 +99,6 @@ public class HiveMailWriter implements MailWriter
     @Override
     public void write(Iterable<MailboxItem> mails)
     {
-        // Obviously, this is for testing, not reals.
         try
         {
             SequenceFile.Writer writer = SequenceFile.createWriter(new Configuration(), outStream, Text.class,
