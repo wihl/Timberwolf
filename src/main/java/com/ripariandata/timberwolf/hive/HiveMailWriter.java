@@ -35,11 +35,16 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * An implementation of MailWriter that creates files suitable for use with Hive.
  */
 public class HiveMailWriter implements MailWriter
 {
+    private static Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
+
     // This is a non-whitespace control character, so it should, I
     // hope, not show up in any of our data.
     private static final char COLUMN_SEPARATOR = 0x1F;
@@ -89,7 +94,7 @@ public class HiveMailWriter implements MailWriter
     }
 
     private void write(Iterable<MailboxItem> mails, SequenceFile.Writer writer)
-        throws UnsupportedEncodingException, IOException
+        throws IOException
     {
         for (MailboxItem mail : mails)
         {
@@ -110,15 +115,11 @@ public class HiveMailWriter implements MailWriter
             writer.syncFs();
             writer.close();
         }
-        catch (UnsupportedEncodingException e)
-        {
-            System.out.println("There was an Unsupported Encoding Exception!");
-            System.out.println(e.getMessage());
-        }
         catch (IOException e)
         {
-            System.out.println("There was an IO Exception!");
-            System.out.println(e.getMessage());
+            LOG.error("There was an error writing to the Hive file.");
+            throw HiveMailWriterException.log(LOG,
+                new HiveMailWriterException("There was an error writing to the Hive file", e));
         }
     }
 }
