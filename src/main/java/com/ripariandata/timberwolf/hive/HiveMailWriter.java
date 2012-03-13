@@ -35,6 +35,9 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 
+/**
+ * An implementation of MailWriter that creates files suitable for use with Hive.
+ */
 public class HiveMailWriter implements MailWriter
 {
     // This is a non-whitespace control character, so it should, I
@@ -57,7 +60,7 @@ public class HiveMailWriter implements MailWriter
         outStream = output;
     }
 
-    private String escape(String value)
+    private static String escape(String value)
     {
         if (value == null)
         {
@@ -72,7 +75,7 @@ public class HiveMailWriter implements MailWriter
         return ret;
     }
 
-    private ArrayList<String> valueHeaders(MailboxItem mail)
+    private static ArrayList<String> valueHeaders(MailboxItem mail)
     {
         ArrayList<String> headers = new ArrayList<String>();
         for (String header : mail.possibleHeaderKeys())
