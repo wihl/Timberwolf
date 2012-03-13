@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 /** Exception thrown on errors while writing data for Hive. */
 public class HiveMailWriterException extends RuntimeException
 {
-    public HiveMailWriterException(String message, Throwable cause)
+    public HiveMailWriterException(final String message, final Throwable cause)
     {
         super(message, cause);
     }

@@ -21,11 +21,8 @@ import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,29 +40,28 @@ import org.slf4j.LoggerFactory;
  */
 public class HiveMailWriter implements MailWriter
 {
-    private static Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
 
     // This is a non-whitespace control character, so it should, I
     // hope, not show up in any of our data.
     private static final char COLUMN_SEPARATOR = 0x1F;
-    private static final String ENCODING = "UTF-8";
     private static final String KEY_HEADER = "Item ID";
-    private static final Map<String, String> escapes = new HashMap<String, String>();
+    private static final Map<String, String> ESCAPES = new HashMap<String, String>();
 
     private FSDataOutputStream outStream;
 
     static {
         // Hive doesn't handle newlines well at all, and they aren't particularly
         // useful from an analytics standpoint.
-        escapes.put("\n", " ");
+        ESCAPES.put("\n", " ");
     }
 
-    public HiveMailWriter(FSDataOutputStream output)
+    public HiveMailWriter(final FSDataOutputStream output)
     {
         outStream = output;
     }
 
-    private static String escape(String value)
+    private static String escape(final String value)
     {
         if (value == null)
         {
@@ -73,14 +69,14 @@ public class HiveMailWriter implements MailWriter
         }
 
         String ret = value;
-        for (String s : escapes.keySet())
+        for (String s : ESCAPES.keySet())
         {
-            ret = ret.replace(s, escapes.get(s));
+            ret = ret.replace(s, ESCAPES.get(s));
         }
         return ret;
     }
 
-    private static ArrayList<String> valueHeaders(MailboxItem mail)
+    private static ArrayList<String> valueHeaders(final MailboxItem mail)
     {
         ArrayList<String> headers = new ArrayList<String>();
         for (String header : mail.possibleHeaderKeys())
@@ -93,7 +89,7 @@ public class HiveMailWriter implements MailWriter
         return headers;
     }
 
-    private void write(Iterable<MailboxItem> mails, SequenceFile.Writer writer)
+    private void write(final Iterable<MailboxItem> mails, final SequenceFile.Writer writer)
         throws IOException
     {
         for (MailboxItem mail : mails)
@@ -105,7 +101,7 @@ public class HiveMailWriter implements MailWriter
     }
 
     @Override
-    public void write(Iterable<MailboxItem> mails)
+    public void write(final Iterable<MailboxItem> mails)
     {
         try
         {

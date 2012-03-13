@@ -19,49 +19,50 @@ package com.ripariandata.timberwolf.hive;
 
 import com.ripariandata.timberwolf.MailboxItem;
 
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.fs.PositionedReadable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.any;
 
+/** Excercises and verifies the functionality of HiveMailWriter. */
 public class HiveMailWriterTest
 {
+    /** An entirely in-memory input stream that can be consumed by FSDataInputStream. */
     private class SeekablePositionedReadableByteArrayInputStream
         extends ByteArrayInputStream
         implements Seekable, PositionedReadable
     {
-        public SeekablePositionedReadableByteArrayInputStream(byte[] data)
+        public SeekablePositionedReadableByteArrayInputStream(final byte[] data)
         {
             super(data);
         }
 
         // PositionReadable methods
 
-        public int read(long position, byte[] buffer, int offset, int length) throws IOException
+        public int read(final long position, final byte[] buffer, final int offset, final int length) throws IOException
         {
             this.mark(0);
 
@@ -79,7 +80,8 @@ public class HiveMailWriterTest
             return r;
         }
 
-        public void readFully(long position, byte[] buffer, int offset, int length) throws IOException
+        public void readFully(final long position, final byte[] buffer, final int offset, final int length)
+            throws IOException
         {
             this.mark(0);
 
@@ -92,21 +94,27 @@ public class HiveMailWriterTest
             finally
             {
                 this.reset();
-                if (r != length) { throw new IOException(); }
+                if (r != length)
+                {
+                    throw new IOException();
+                }
             }
         }
 
-        public void readFully(long position, byte[] buffer) throws IOException
+        public void readFully(final long position, final byte[] buffer) throws IOException
         {
             this.readFully(position, buffer, 0, buffer.length);
         }
 
         // Seekable methods
 
-        public void seek(long pos) throws IOException
+        public void seek(final long pos) throws IOException
         {
-            if (pos > this.count) { throw new IOException(); }
-            this.pos = (int)pos;
+            if (pos > this.count)
+            {
+                throw new IOException();
+            }
+            this.pos = (int) pos;
         }
 
         public long getPos() throws IOException
@@ -114,25 +122,25 @@ public class HiveMailWriterTest
             return this.pos;
         }
 
-        public boolean seekToNewSource(long targetPos) throws IOException
+        public boolean seekToNewSource(final long targetPos) throws IOException
         {
             throw new IOException("I don't really know what this is supposed to do.");
         }
     }
 
     @SuppressWarnings("deprecation")
-    private FileSystem mockFileSystem(String path, byte[] data) throws IOException
+    private FileSystem mockFileSystem(final String path, final byte[] data) throws IOException
     {
         FileSystem fs = mock(FileSystem.class);
         Path fsPath = new Path(path);
         when(fs.open(eq(fsPath), any(int.class)))
             .thenReturn(new FSDataInputStream(new SeekablePositionedReadableByteArrayInputStream(data)));
-        when(fs.getLength(eq(fsPath))).thenReturn((long)data.length);
+        when(fs.getLength(eq(fsPath))).thenReturn((long) data.length);
         return fs;
     }
 
     @SuppressWarnings("deprecation")
-    private SequenceFile.Reader writeMails(Iterable<MailboxItem> mails) throws IOException
+    private SequenceFile.Reader writeMails(final Iterable<MailboxItem> mails) throws IOException
     {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         FSDataOutputStream output = new FSDataOutputStream(byteOut);
@@ -154,10 +162,11 @@ public class HiveMailWriterTest
         assertFalse(reader.next(key, value));
     }
 
-    private static MailboxItem mockMailboxItem(String key, String alpha, String beta, String gamma)
+    private static MailboxItem mockMailboxItem(final String key, final String alpha, final String beta,
+                                               final String gamma)
     {
         MailboxItem mail = mock(MailboxItem.class);
-        String[] headers = { "Item ID", "Alpha", "Beta", "Gamma" };
+        String[] headers = {"Item ID", "Alpha", "Beta", "Gamma" };
         when(mail.getHeaderKeys()).thenReturn(headers);
         when(mail.possibleHeaderKeys()).thenReturn(headers);
         when(mail.hasKey(any(String.class))).thenReturn(true);
@@ -239,7 +248,7 @@ public class HiveMailWriterTest
     public void testWriteMailWithNoHeaders() throws IOException
     {
         MailboxItem mail = mock(MailboxItem.class);
-        String[] headers = { "Item ID" };
+        String[] headers = {"Item ID" };
         when(mail.getHeaderKeys()).thenReturn(headers);
         when(mail.possibleHeaderKeys()).thenReturn(headers);
         when(mail.hasKey(any(String.class))).thenReturn(true);
@@ -255,10 +264,11 @@ public class HiveMailWriterTest
         assertEquals("", value.toString());
     }
 
+    /** An output stream that throws an exception whenever you try to write to it. */
     private class ExceptionalOutputStream extends OutputStream
     {
         @Override
-        public void write(int b) throws IOException
+        public void write(final int b) throws IOException
         {
             throw new IOException("Can't write to exceptional stream.");
         }
@@ -281,7 +291,8 @@ public class HiveMailWriterTest
         }
         catch (HiveMailWriterException e)
         {
-            // Pass
+            // Our static analysis doesn't like empty blocks.
+            assertTrue(true);
         }
         catch (Exception e)
         {

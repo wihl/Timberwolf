@@ -151,7 +151,7 @@ public class ExchangeEmail implements MailboxItem
 
     public final String[] possibleHeaderKeys()
     {
-        return new String[] { BODY_KEY, SUBJECT_KEY, TIME_SENT_KEY, ID_KEY, SENDER_KEY, TORECIPIENT_KEY,
+        return new String[] {BODY_KEY, SUBJECT_KEY, TIME_SENT_KEY, ID_KEY, SENDER_KEY, TORECIPIENT_KEY,
                               CCRECIPIENT_KEY, BCCRECIPIENT_KEY };
     }
 
