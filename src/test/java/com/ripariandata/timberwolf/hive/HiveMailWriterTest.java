@@ -22,6 +22,7 @@ import com.ripariandata.timberwolf.MailboxItem;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.ArrayList;
 
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.eq;
@@ -251,5 +253,39 @@ public class HiveMailWriterTest
         assertTrue(reader.next(key, value));
         assertEquals("key", key.toString());
         assertEquals("", value.toString());
+    }
+
+    private class ExceptionalOutputStream extends OutputStream
+    {
+        @Override
+        public void write(int b) throws IOException
+        {
+            throw new IOException("Can't write to exceptional stream.");
+        }
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testWriteMailToStreamWithException() throws IOException
+    {
+        ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
+        mails.add(mockMailboxItem("key1", "One", "Two", "Three"));
+        OutputStream byteOut = new ExceptionalOutputStream();
+        FSDataOutputStream output = new FSDataOutputStream(byteOut);
+        HiveMailWriter writer = new HiveMailWriter(output);
+
+        try
+        {
+            writer.write(mails);
+            fail("Call to write should have thrown an exception.");
+        }
+        catch (HiveMailWriterException e)
+        {
+            // Pass
+        }
+        catch (Exception e)
+        {
+            fail("Wrong exception type.");
+        }
     }
 }
