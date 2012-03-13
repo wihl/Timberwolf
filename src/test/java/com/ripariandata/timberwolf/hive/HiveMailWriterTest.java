@@ -177,4 +177,29 @@ public class HiveMailWriterTest
         assertEquals("One" + separator + "Two" + separator + "Three", value.toString());
         assertFalse(reader.next(key, value));
     }
+
+    @Test
+    public void testWriteSomeHeaders() throws IOException
+    {
+        MailboxItem mail = mock(MailboxItem.class);
+        String[] headers = { "Item ID", "Alpha", "Beta", "Gamma" };
+        when(mail.getHeaderKeys()).thenReturn(headers);
+        when(mail.possibleHeaderKeys()).thenReturn(headers);
+        when(mail.hasKey(any(String.class))).thenReturn(true);
+        when(mail.getHeader("Item ID")).thenReturn("key");
+        when(mail.getHeader("Alpha")).thenReturn("One");
+        when(mail.getHeader("Gamma")).thenReturn("Three");
+
+        ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
+        mails.add(mail);
+        SequenceFile.Reader reader = writeMails(mails);
+
+        char separator = 0x1F;
+        Text key = new Text();
+        Text value = new Text();
+        assertTrue(reader.next(key, value));
+        assertEquals("key", key.toString());
+        assertEquals("One" + separator + separator + "Three", value.toString());
+        assertFalse(reader.next(key, value));
+    }
 }
