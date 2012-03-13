@@ -152,19 +152,33 @@ public class HiveMailWriterTest
         assertFalse(reader.next(key, value));
     }
 
-    @Test
-    public void testWriteAllHeaders() throws IOException
+    private static MailboxItem mockMailboxItem(String key, String alpha, String beta, String gamma)
     {
         MailboxItem mail = mock(MailboxItem.class);
         String[] headers = { "Item ID", "Alpha", "Beta", "Gamma" };
         when(mail.getHeaderKeys()).thenReturn(headers);
         when(mail.possibleHeaderKeys()).thenReturn(headers);
         when(mail.hasKey(any(String.class))).thenReturn(true);
-        when(mail.getHeader("Item ID")).thenReturn("key");
-        when(mail.getHeader("Alpha")).thenReturn("One");
-        when(mail.getHeader("Beta")).thenReturn("Two");
-        when(mail.getHeader("Gamma")).thenReturn("Three");
+        when(mail.getHeader("Item ID")).thenReturn(key);
+        if (alpha != null)
+        {
+            when(mail.getHeader("Alpha")).thenReturn(alpha);
+        }
+        if (beta != null)
+        {
+            when(mail.getHeader("Beta")).thenReturn(beta);
+        }
+        if (gamma != null)
+        {
+            when(mail.getHeader("Gamma")).thenReturn(gamma);
+        }
+        return mail;
+    }
 
+    @Test
+    public void testWriteAllHeaders() throws IOException
+    {
+        MailboxItem mail = mockMailboxItem("key", "One", "Two", "Three");
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
         SequenceFile.Reader reader = writeMails(mails);
@@ -181,15 +195,7 @@ public class HiveMailWriterTest
     @Test
     public void testWriteSomeHeaders() throws IOException
     {
-        MailboxItem mail = mock(MailboxItem.class);
-        String[] headers = { "Item ID", "Alpha", "Beta", "Gamma" };
-        when(mail.getHeaderKeys()).thenReturn(headers);
-        when(mail.possibleHeaderKeys()).thenReturn(headers);
-        when(mail.hasKey(any(String.class))).thenReturn(true);
-        when(mail.getHeader("Item ID")).thenReturn("key");
-        when(mail.getHeader("Alpha")).thenReturn("One");
-        when(mail.getHeader("Gamma")).thenReturn("Three");
-
+        MailboxItem mail = mockMailboxItem("key", "One", null, "Three");
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
         SequenceFile.Reader reader = writeMails(mails);
@@ -200,6 +206,30 @@ public class HiveMailWriterTest
         assertTrue(reader.next(key, value));
         assertEquals("key", key.toString());
         assertEquals("One" + separator + separator + "Three", value.toString());
+        assertFalse(reader.next(key, value));
+    }
+
+    @Test
+    public void testWriteManyMails() throws IOException
+    {
+        ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
+        mails.add(mockMailboxItem("key1", "One", "Two", "Three"));
+        mails.add(mockMailboxItem("key2", "A", "B", "C"));
+        mails.add(mockMailboxItem("key3", "Dee", "Eee", "Eff"));
+        SequenceFile.Reader reader = writeMails(mails);
+
+        char separator = 0x1F;
+        Text key = new Text();
+        Text value = new Text();
+        assertTrue(reader.next(key, value));
+        assertEquals("key1", key.toString());
+        assertEquals("One" + separator + "Two" + separator + "Three", value.toString());
+        assertTrue(reader.next(key, value));
+        assertEquals("key2", key.toString());
+        assertEquals("A" + separator + "B" + separator + "C", value.toString());
+        assertTrue(reader.next(key, value));
+        assertEquals("key3", key.toString());
+        assertEquals("Dee" + separator + "Eee" + separator + "Eff", value.toString());
         assertFalse(reader.next(key, value));
     }
 }
