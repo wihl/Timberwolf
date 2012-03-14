@@ -16,5 +16,5 @@ ExchangeSender = jenkinsSender
 ExchangeIgnoredUser = jenkinsIgnored
 EOF
 
-# jclouseau is the user who can impersonate everyone else.
-echo pass@word1 | kinit jenkinsSender@INT.TARTARUS.COM
+# jenkinsSender is the user who the integration tests run as.
+echo pass@word2 | kinit jenkinsSender@INT.TARTARUS.COM
