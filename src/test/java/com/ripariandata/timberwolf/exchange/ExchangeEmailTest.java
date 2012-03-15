@@ -271,4 +271,20 @@ public class ExchangeEmailTest
         assertNull(mail.getHeader("Cc"));
         assertNull(mail.getHeader("Bcc"));
     }
+
+    @Test
+    public void testPossibleHeaders()
+    {
+        MailboxItem mail = new ExchangeEmail(mock(MessageType.class));
+        String[] headers = mail.possibleHeaderKeys();
+        assertEquals(8, headers.length);
+        assertEquals("Body", headers[0]);
+        assertEquals("Subject", headers[1]);
+        assertEquals("Time Sent", headers[2]);
+        assertEquals("Item ID", headers[3]);
+        assertEquals("Sender", headers[4]);
+        assertEquals("To", headers[5]);
+        assertEquals("Cc", headers[6]);
+        assertEquals("Bcc", headers[7]);
+    }
 }

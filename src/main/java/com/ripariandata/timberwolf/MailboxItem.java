@@ -29,6 +29,13 @@ public interface MailboxItem
     /** Returns all the keys that this item exports. */
     String[] getHeaderKeys();
 
+    /**
+     * Returns all the keys that this implementation of MailboxItem <em>might</em>
+     * export.  In valid implementations, possibleHeaderKeys() will be a superset
+     * of getHeaderKeys().
+     */
+    String[] possibleHeaderKeys();
+
     /** Returns true if this item exports the given key, false otherwise. */
     boolean hasKey(String key);
 
