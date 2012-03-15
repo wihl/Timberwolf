@@ -83,21 +83,10 @@ public class HiveMailWriterTest
         public void readFully(final long position, final byte[] buffer, final int offset, final int length)
             throws IOException
         {
-            this.mark(0);
-
-            int r = 0;
-            try
+            int r = this.read(position, buffer, offset, length);
+            if (r != length)
             {
-                this.seek(position);
-                r = this.read(buffer, offset, length);
-            }
-            finally
-            {
-                this.reset();
-                if (r != length)
-                {
-                    throw new IOException();
-                }
+                throw new IOException();
             }
         }
 
