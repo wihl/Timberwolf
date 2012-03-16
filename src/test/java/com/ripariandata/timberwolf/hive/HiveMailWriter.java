@@ -24,5 +24,13 @@ public class HiveMailWriter extends MailWriter
 {
     public void write(Iterable<MailboxItem> mail)
     {
+        // TODO: Open Hive JDBC connection, check that target table is available with `show tables`.
+        // TODO: If it is, excellent.
+        // TODO: If not, create it.
+        // TODO: Open HDFS connection (with `FileSystem.get`) to timberwolf's temporary folder.
+        // TODO: Write sequence file into that temp folder.
+        // TODO: Use Hive JDBC connection to use `load data` on the file we just wrote into the
+        //       table from before.
+        // TODO: Dispose of everything.
     }
 }
