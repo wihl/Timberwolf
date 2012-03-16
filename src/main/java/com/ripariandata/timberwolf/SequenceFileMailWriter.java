@@ -36,11 +36,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An implementation of MailWriter that creates files suitable for use with Hive.
+ * An implementation of MailWriter that creates sequence files suitable for use with Hive.
  */
-public class HiveMailWriter implements MailWriter
+public class SequenceFileMailWriter implements MailWriter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SequenceFileMailWriter.class);
 
     // This is a non-whitespace control character, so it should, I
     // hope, not show up in any of our data.
@@ -56,7 +56,7 @@ public class HiveMailWriter implements MailWriter
         ESCAPES.put("\n", " ");
     }
 
-    public HiveMailWriter(final FSDataOutputStream output)
+    public SequenceFileMailWriter(final FSDataOutputStream output)
     {
         outStream = output;
     }

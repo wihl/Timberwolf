@@ -47,8 +47,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** Excercises and verifies the functionality of HiveMailWriter. */
-public class HiveMailWriterTest
+/** Excercises and verifies the functionality of SequenceFileMailWriter. */
+public class SequenceFileMailWriterTest
 {
     /** An entirely in-memory input stream that can be consumed by FSDataInputStream. */
     private class SeekablePositionedReadableByteArrayInputStream
@@ -133,7 +133,7 @@ public class HiveMailWriterTest
     {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         FSDataOutputStream output = new FSDataOutputStream(byteOut);
-        HiveMailWriter writer = new HiveMailWriter(output);
+        SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
 
         writer.write(mails);
 
@@ -271,7 +271,7 @@ public class HiveMailWriterTest
         mails.add(mockMailboxItem("key1", "One", "Two", "Three"));
         OutputStream byteOut = new ExceptionalOutputStream();
         FSDataOutputStream output = new FSDataOutputStream(byteOut);
-        HiveMailWriter writer = new HiveMailWriter(output);
+        SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
 
         try
         {
