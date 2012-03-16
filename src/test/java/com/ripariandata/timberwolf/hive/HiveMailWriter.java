@@ -20,8 +20,46 @@ package com.ripariandata.timberwolf.hive;
 import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
 
-public class HiveMailWriter extends MailWriter
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HiveMailWriter implements MailWriter
 {
+    private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
+
+    private URI hdfsUri;
+    private URI hiveUri;
+
+    public HiveMailWriter(URI hdfs, URI hive)
+    {
+        hdfsUri = hdfs;
+        hiveUri = hive;
+    }
+
+    public HiveMailWriter(String hdfs, String hive)
+    {
+        try
+        {
+            hdfsUri = new URI(hdfs);
+        }
+        catch (URISyntaxException e)
+        {
+            HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
+        }
+
+        try
+        {
+            hiveUri = new URI(hive);
+        }
+        catch(URISyntaxException e)
+        {
+            HiveMailWriterException.log(LOG, new HiveMailWriterException(hive + " is not a valid URI.", e));
+        }
+    }
+
     public void write(Iterable<MailboxItem> mail)
     {
         // TODO: Open Hive JDBC connection, check that target table is available with `show tables`.
