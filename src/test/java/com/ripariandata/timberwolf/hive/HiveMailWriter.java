@@ -23,6 +23,12 @@ import com.ripariandata.timberwolf.MailboxItem;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.sql.SqlException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.DriverManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +38,18 @@ public class HiveMailWriter implements MailWriter
 
     private URI hdfsUri;
     private URI hiveUri;
+    private String tableName;
 
-    public HiveMailWriter(URI hdfs, URI hive)
+    public HiveMailWriter(URI hdfs, URI hive, String table)
     {
+        tableName = table;
         hdfsUri = hdfs;
         hiveUri = hive;
     }
 
-    public HiveMailWriter(String hdfs, String hive)
+    public HiveMailWriter(String hdfs, String hive, String table)
     {
+        tableName = table;
         try
         {
             hdfsUri = new URI(hdfs);
@@ -62,9 +71,16 @@ public class HiveMailWriter implements MailWriter
 
     public void write(Iterable<MailboxItem> mail)
     {
-        // TODO: Open Hive JDBC connection, check that target table is available with `show tables`.
-        // TODO: If it is, excellent.
-        // TODO: If not, create it.
+        Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
+        // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
+        String showTableQuery = "show tables '" + tableName "'";
+        LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
+        ResultSet showTableResult = conn.createStatement().executeQuery(showTableQuery);
+        if (!showTableResult.next())
+        {
+            // TODO: The table doesn't exist, create it.
+        }
+
         // TODO: Open HDFS connection (with `FileSystem.get`) to timberwolf's temporary folder.
         // TODO: Write sequence file into that temp folder.
         // TODO: Use Hive JDBC connection to use `load data` on the file we just wrote into the
