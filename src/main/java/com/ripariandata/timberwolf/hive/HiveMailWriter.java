@@ -71,14 +71,21 @@ public class HiveMailWriter implements MailWriter
 
     public void write(Iterable<MailboxItem> mail)
     {
-        Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
-        // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
-        String showTableQuery = "show tables '" + tableName + "'";
-        LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
-        ResultSet showTableResult = hiveConn.createStatement().executeQuery(showTableQuery);
-        if (!showTableResult.next())
+        try
         {
-            // TODO: The table doesn't exist, create it.
+            Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
+            // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
+            String showTableQuery = "show tables '" + tableName + "'";
+            LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
+            ResultSet showTableResult = hiveConn.createStatement().executeQuery(showTableQuery);
+            if (!showTableResult.next())
+            {
+                // TODO: The table doesn't exist, create it.
+            }
+        }
+        catch (SQLException e)
+        {
+            // TODO: Log properly.
         }
 
         // TODO: Open HDFS connection (with `FileSystem.get`) to timberwolf's temporary folder.
