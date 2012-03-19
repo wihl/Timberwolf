@@ -31,6 +31,8 @@ import java.sql.DriverManager;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,10 +97,18 @@ public class HiveMailWriter implements MailWriter
             // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
             String showTableQuery = "show tables '" + tableName + "'";
             LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
-            ResultSet showTableResult = hiveConn.createStatement().executeQuery(showTableQuery);
+            Statement statement = hiveConn.createStatement();
+            ResultSet showTableResult = statement.executeQuery(showTableQuery);
             if (!showTableResult.next())
             {
-                // TODO: The table doesn't exist, create it.
+                String[] createQueryTokens = { "create table", tableName,
+                                                // TODO: Sanitize header key names.
+                                               "(", StringUtils.join(VALUE_HEADER_KEYS, "string, ") , " string )",
+                                               "row format delimited fields terminated by '\\037'",
+                                               "stored as sequencefile" };
+                String createTableQuery = StringUtils.join(createQueryTokens, " ");
+                // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
+                ResultSet createTableResult = statement.executeQuery(createTableQuery);
             }
         }
         catch (SQLException e)
