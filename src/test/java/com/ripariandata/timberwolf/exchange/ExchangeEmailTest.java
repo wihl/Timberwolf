@@ -275,8 +275,7 @@ public class ExchangeEmailTest
     @Test
     public void testPossibleHeaders()
     {
-        MailboxItem mail = new ExchangeEmail(mock(MessageType.class));
-        String[] headers = mail.possibleHeaderKeys();
+        String[] headers = ExchangeEmail.possibleHeaderKeys();
         assertEquals(8, headers.length);
         assertEquals("Body", headers[0]);
         assertEquals("Subject", headers[1]);

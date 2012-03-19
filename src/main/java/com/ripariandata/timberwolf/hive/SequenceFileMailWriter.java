@@ -79,7 +79,7 @@ public class SequenceFileMailWriter implements MailWriter
     private static ArrayList<String> valueHeaders(final MailboxItem mail)
     {
         ArrayList<String> headers = new ArrayList<String>();
-        for (String header : mail.possibleHeaderKeys())
+        for (String header : MailboxItem.possibleHeaderKeys())
         {
             if (header != KEY_HEADER)
             {

@@ -26,6 +26,8 @@ import java.io.OutputStream;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -151,34 +153,58 @@ public class SequenceFileMailWriterTest
         assertFalse(reader.next(key, value));
     }
 
-    private static MailboxItem mockMailboxItem(final String key, final String alpha, final String beta,
-                                               final String gamma)
+    private static MailboxItem mockMailboxItem(final String key, final String body, final String subject,
+                                               final String timesent, final String sender, final String to,
+                                               final String cc, final String bcc)
     {
         MailboxItem mail = mock(MailboxItem.class);
-        String[] headers = {"Item ID", "Alpha", "Beta", "Gamma" };
-        when(mail.getHeaderKeys()).thenReturn(headers);
-        when(mail.possibleHeaderKeys()).thenReturn(headers);
+        ArrayList<String> headers = new ArrayList<String>();
         when(mail.hasKey(any(String.class))).thenReturn(true);
         when(mail.getHeader("Item ID")).thenReturn(key);
-        if (alpha != null)
+        if (body != null)
         {
-            when(mail.getHeader("Alpha")).thenReturn(alpha);
+            when(mail.getHeader("Body")).thenReturn(body);
+            headers.add("Body");
         }
-        if (beta != null)
+        if (subject != null)
         {
-            when(mail.getHeader("Beta")).thenReturn(beta);
+            when(mail.getHeader("Subject")).thenReturn(subject);
+            headers.add("Subject");
         }
-        if (gamma != null)
+        if (timesent != null)
         {
-            when(mail.getHeader("Gamma")).thenReturn(gamma);
+            when(mail.getHeader("Time Sent")).thenReturn(timesent);
+            headers.add("Time Sent");
         }
+        if (sender != null)
+        {
+            when(mail.getHeader("Sender")).thenReturn(sender);
+            headers.add("Sender");
+        }
+        if (to != null)
+        {
+            when(mail.getHeader("To")).thenReturn(to);
+            headers.add("To");
+        }
+        if (cc != null)
+        {
+            when(mail.getHeader("Cc")).thenReturn(cc);
+            headers.add("Cc");
+        }
+        if (bcc != null)
+        {
+            when(mail.getHeader("Bcc")).thenReturn(bcc);
+            headers.add("Bcc");
+        }
+        when(mail.getHeaderKeys()).thenReturn(headers.toArray(new String[0]));
         return mail;
     }
 
     @Test
     public void testWriteAllHeaders() throws IOException
     {
-        MailboxItem mail = mockMailboxItem("key", "One", "Two", "Three");
+        MailboxItem mail = mockMailboxItem("key", "Here's an email.", "Subject!!", "11 o'clock", "jim@example.com",
+                                           "james@example.com", "j@example.com", "jane@example.com");
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
         SequenceFile.Reader reader = writeMails(mails);
@@ -188,14 +214,17 @@ public class SequenceFileMailWriterTest
         Text value = new Text();
         assertTrue(reader.next(key, value));
         assertEquals("key", key.toString());
-        assertEquals("One" + separator + "Two" + separator + "Three", value.toString());
+        assertEquals(StringUtils.join(new String[] { "Here's an email.", "Subject!!", "11 o'clock", "jim@example.com",
+                                                     "james@example.com", "j@example.com", "jane@example.com" },
+                                      separator), value.toString());
         assertFalse(reader.next(key, value));
     }
 
     @Test
     public void testWriteSomeHeaders() throws IOException
     {
-        MailboxItem mail = mockMailboxItem("key", "One", null, "Three");
+        MailboxItem mail = mockMailboxItem("key", "Body of an email.", null, "12 o'clock", null, null, null,
+                                           "j@example.com");
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
         SequenceFile.Reader reader = writeMails(mails);
@@ -205,7 +234,8 @@ public class SequenceFileMailWriterTest
         Text value = new Text();
         assertTrue(reader.next(key, value));
         assertEquals("key", key.toString());
-        assertEquals("One" + separator + separator + "Three", value.toString());
+        assertEquals(StringUtils.join(new String[] { "Body of an email.", "", "12 o'clock", "", "", "",
+                                                     "j@example.com" }, separator), value.toString());
         assertFalse(reader.next(key, value));
     }
 
@@ -213,9 +243,9 @@ public class SequenceFileMailWriterTest
     public void testWriteManyMails() throws IOException
     {
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
-        mails.add(mockMailboxItem("key1", "One", "Two", "Three"));
-        mails.add(mockMailboxItem("key2", "A", "B", "C"));
-        mails.add(mockMailboxItem("key3", "Dee", "Eee", "Eff"));
+        mails.add(mockMailboxItem("key1", "BodyOne", "SubjectTwo", "TimeSentThree", null, null, null, null));
+        mails.add(mockMailboxItem("key2", "BodyA", "SubjectB", "TimeSentC", null, null, null, null));
+        mails.add(mockMailboxItem("key3", "BodyDee", "SubjectEee", "TimeSentEff", null, null, null, null));
         SequenceFile.Reader reader = writeMails(mails);
 
         char separator = 0x1F;
@@ -223,13 +253,16 @@ public class SequenceFileMailWriterTest
         Text value = new Text();
         assertTrue(reader.next(key, value));
         assertEquals("key1", key.toString());
-        assertEquals("One" + separator + "Two" + separator + "Three", value.toString());
+        assertEquals(StringUtils.join(new String[] { "BodyOne", "SubjectTwo", "TimeSentThree", "", "", "", "" },
+                                      separator), value.toString());
         assertTrue(reader.next(key, value));
         assertEquals("key2", key.toString());
-        assertEquals("A" + separator + "B" + separator + "C", value.toString());
+        assertEquals(StringUtils.join(new String[] { "BodyA", "SubjectB", "TimeSentC", "", "", "", "" }, separator),
+                     value.toString());
         assertTrue(reader.next(key, value));
         assertEquals("key3", key.toString());
-        assertEquals("Dee" + separator + "Eee" + separator + "Eff", value.toString());
+        assertEquals(StringUtils.join(new String[] { "BodyDee", "SubjectEee", "TimeSentEff", "", "" , "", "" },
+                                      separator), value.toString());
         assertFalse(reader.next(key, value));
     }
 
@@ -239,18 +272,18 @@ public class SequenceFileMailWriterTest
         MailboxItem mail = mock(MailboxItem.class);
         String[] headers = {"Item ID" };
         when(mail.getHeaderKeys()).thenReturn(headers);
-        when(mail.possibleHeaderKeys()).thenReturn(headers);
         when(mail.hasKey(any(String.class))).thenReturn(true);
         when(mail.getHeader("Item ID")).thenReturn("key");
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
         mails.add(mail);
         SequenceFile.Reader reader = writeMails(mails);
 
+        char separator = 0x1F;
         Text key = new Text();
         Text value = new Text();
         assertTrue(reader.next(key, value));
         assertEquals("key", key.toString());
-        assertEquals("", value.toString());
+        assertEquals(StringUtils.join(new String[] { "", "", "", "", "", "", "" }, separator), value.toString());
     }
 
     /** An output stream that throws an exception whenever you try to write to it. */
@@ -268,7 +301,7 @@ public class SequenceFileMailWriterTest
     public void testWriteMailToStreamWithException() throws IOException
     {
         ArrayList<MailboxItem> mails = new ArrayList<MailboxItem>();
-        mails.add(mockMailboxItem("key1", "One", "Two", "Three"));
+        mails.add(mockMailboxItem("key1", "body", "subject", "timesent", "sender", "to", "cc", "bcc"));
         OutputStream byteOut = new ExceptionalOutputStream();
         FSDataOutputStream output = new FSDataOutputStream(byteOut);
         SequenceFileMailWriter writer = new SequenceFileMailWriter(output);

@@ -47,18 +47,8 @@ import java.util.Map;
  * <li>"Bcc": A semicolon-delimited list of bcc-recipients.
  * </ul>
  */
-public class ExchangeEmail implements MailboxItem
+public class ExchangeEmail extends MailboxItem
 {
-    private static final String BODY_KEY = "Body";
-    private static final String SUBJECT_KEY = "Subject";
-    private static final String TIME_SENT_KEY = "Time Sent";
-    private static final String ID_KEY = "Item ID";
-    private static final String SENDER_KEY = "Sender";
-    private static final String TORECIPIENT_KEY = "To";
-    private static final String CCRECIPIENT_KEY = "Cc";
-    private static final String BCCRECIPIENT_KEY = "Bcc";
-    private static final char EMAIL_DELIMITER = ';';
-
     /** The headers that this email exports. */
     private final Map<String, String> headers;
 
@@ -144,22 +134,19 @@ public class ExchangeEmail implements MailboxItem
         return emailList.toString();
     }
 
+    @Override
     public final String[] getHeaderKeys()
     {
         return headers.keySet().toArray(new String[headers.keySet().size()]);
     }
 
-    public final String[] possibleHeaderKeys()
-    {
-        return new String[] {BODY_KEY, SUBJECT_KEY, TIME_SENT_KEY, ID_KEY, SENDER_KEY, TORECIPIENT_KEY,
-                              CCRECIPIENT_KEY, BCCRECIPIENT_KEY };
-    }
-
+    @Override
     public final boolean hasKey(final String key)
     {
         return headers.containsKey(key);
     }
 
+    @Override
     public final String getHeader(final String key)
     {
         return headers.get(key);

@@ -24,24 +24,38 @@ package com.ripariandata.timberwolf;
  * keys are exported, and what pieces of data they correspond to, is
  * defined by implementers of MailboxItem.
  */
-public interface MailboxItem
+public abstract class MailboxItem
 {
-    /** Returns all the keys that this item exports. */
-    String[] getHeaderKeys();
+    protected static final String BODY_KEY = "Body";
+    protected static final String SUBJECT_KEY = "Subject";
+    protected static final String TIME_SENT_KEY = "Time Sent";
+    protected static final String ID_KEY = "Item ID";
+    protected static final String SENDER_KEY = "Sender";
+    protected static final String TORECIPIENT_KEY = "To";
+    protected static final String CCRECIPIENT_KEY = "Cc";
+    protected static final String BCCRECIPIENT_KEY = "Bcc";
+    protected static final char EMAIL_DELIMITER = ';';
 
     /**
-     * Returns all the keys that this implementation of MailboxItem <em>might</em>
-     * export.  In valid implementations, possibleHeaderKeys() will be a superset
-     * of getHeaderKeys().
+     * Returns all the keys that implementations of MailboxItem <em>might</em>
+     * export.  In valid implementations, getHeaderKeys() will be a subset
+     * of possibleHeaderKeys().
      */
-    String[] possibleHeaderKeys();
+    public static String[] possibleHeaderKeys()
+    {
+        return new String[] {BODY_KEY, SUBJECT_KEY, TIME_SENT_KEY, ID_KEY, SENDER_KEY, TORECIPIENT_KEY,
+                              CCRECIPIENT_KEY, BCCRECIPIENT_KEY };
+    }
+
+    /** Returns all the keys that this item exports. */
+    public abstract String[] getHeaderKeys();
 
     /** Returns true if this item exports the given key, false otherwise. */
-    boolean hasKey(String key);
+    public abstract boolean hasKey(String key);
 
     /**
      * Returns the data associated with the given key, or null if that key
      * isn't exported by this item.
      */
-    String getHeader(String key);
+    public abstract String getHeader(String key);
 }
