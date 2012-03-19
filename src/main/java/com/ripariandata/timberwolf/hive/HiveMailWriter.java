@@ -73,7 +73,7 @@ public class HiveMailWriter implements MailWriter
     {
         Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
         // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
-        String showTableQuery = "show tables '" + tableName "'";
+        String showTableQuery = "show tables '" + tableName + "'";
         LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
         ResultSet showTableResult = conn.createStatement().executeQuery(showTableQuery);
         if (!showTableResult.next())
