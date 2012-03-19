@@ -78,12 +78,9 @@ public class SequenceFileMailWriter implements MailWriter
     private static ArrayList<String> valueHeaders(final MailboxItem mail)
     {
         ArrayList<String> headers = new ArrayList<String>();
-        for (String header : MailboxItem.possibleHeaderKeys())
+        for (String header : HiveMailWriter.VALUE_HEADER_KEYS)
         {
-            if (header != HiveMailWriter.DEFAULT_KEY_HEADER)
-            {
-                headers.add(escape(mail.getHeader(header)));
-            }
+            headers.add(escape(mail.getHeader(header)));
         }
         return headers;
     }

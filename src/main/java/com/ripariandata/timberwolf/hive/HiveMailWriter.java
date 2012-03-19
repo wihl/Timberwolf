@@ -29,6 +29,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.DriverManager;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +38,25 @@ public class HiveMailWriter implements MailWriter
 {
     private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
     public static final String DEFAULT_KEY_HEADER = "Item ID";
+    public static final String[] VALUE_HEADER_KEYS;
 
     private URI hdfsUri;
     private URI hiveUri;
     private String tableName;
+
+    static
+    {
+        String[] possible = MailboxItem.possibleHeaderKeys();
+        ArrayList<String> values = new ArrayList<String>();
+        for (String header : possible)
+        {
+            if (header != DEFAULT_KEY_HEADER)
+            {
+                values.add(header);
+            }
+        }
+        VALUE_HEADER_KEYS = values.toArray(new String[possible.length - 1]);
+    }
 
     public HiveMailWriter(URI hdfs, URI hive, String table)
     {
