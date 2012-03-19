@@ -23,7 +23,7 @@ import com.ripariandata.timberwolf.MailboxItem;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.sql.SqlException;
+import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
