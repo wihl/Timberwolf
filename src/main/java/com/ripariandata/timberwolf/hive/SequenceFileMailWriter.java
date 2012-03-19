@@ -45,7 +45,6 @@ public class SequenceFileMailWriter implements MailWriter
     // This is a non-whitespace control character, so it should, I
     // hope, not show up in any of our data.
     private static final char COLUMN_SEPARATOR = 0x1F;
-    private static final String KEY_HEADER = "Item ID";
     private static final Map<String, String> ESCAPES = new HashMap<String, String>();
 
     private FSDataOutputStream outStream;
@@ -81,7 +80,7 @@ public class SequenceFileMailWriter implements MailWriter
         ArrayList<String> headers = new ArrayList<String>();
         for (String header : MailboxItem.possibleHeaderKeys())
         {
-            if (header != KEY_HEADER)
+            if (header != HiveMailWriter.DEFAULT_KEY_HEADER)
             {
                 headers.add(escape(mail.getHeader(header)));
             }
@@ -94,7 +93,7 @@ public class SequenceFileMailWriter implements MailWriter
     {
         for (MailboxItem mail : mails)
         {
-            Text key = new Text(mail.getHeader(KEY_HEADER));
+            Text key = new Text(mail.getHeader(HiveMailWriter.DEFAULT_KEY_HEADER));
             Text value = new Text(StringUtils.join(valueHeaders(mail), COLUMN_SEPARATOR));
             writer.append(key, value);
         }

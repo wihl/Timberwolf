@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class HiveMailWriter implements MailWriter
 {
     private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
+    public static final String DEFAULT_KEY_HEADER = "Item ID";
 
     private URI hdfsUri;
     private URI hiveUri;
