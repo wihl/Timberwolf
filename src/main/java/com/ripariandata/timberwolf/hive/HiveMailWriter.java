@@ -75,7 +75,7 @@ public class HiveMailWriter implements MailWriter
         // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
         String showTableQuery = "show tables '" + tableName + "'";
         LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
-        ResultSet showTableResult = conn.createStatement().executeQuery(showTableQuery);
+        ResultSet showTableResult = hiveConn.createStatement().executeQuery(showTableQuery);
         if (!showTableResult.next())
         {
             // TODO: The table doesn't exist, create it.
