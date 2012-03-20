@@ -20,6 +20,8 @@ package com.ripariandata.timberwolf.hive;
 import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
 
+import java.io.IOException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -30,8 +32,15 @@ import java.sql.Statement;
 import java.sql.DriverManager;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +50,7 @@ public class HiveMailWriter implements MailWriter
     private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
     public static final String DEFAULT_KEY_HEADER = "Item ID";
     public static final String[] VALUE_HEADER_KEYS;
+    private static final Path TEMP_FOLDER = new Path("/tmp/timberwolf");
 
     private URI hdfsUri;
     private URI hiveUri;
@@ -112,6 +122,23 @@ public class HiveMailWriter implements MailWriter
         ResultSet createTableResult = statement.executeQuery(createTableQuery);
     }
 
+    private Path writeTemporaryFile(Iterable<MailboxItem> mail) throws IOException
+    {
+        FileSystem hdfs = FileSystem.get(hdfsUri, new Configuration());
+        if (!hdfs.exists(TEMP_FOLDER))
+        {
+            hdfs.mkdirs(TEMP_FOLDER);
+        }
+
+        Path tempFile = new Path(TEMP_FOLDER + "/" + UUID.randomUUID().toString());
+        FSDataOutputStream output = hdfs.create(tempFile);
+        SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
+        writer.write(mail);
+        output.close();
+
+        return tempFile;
+    }
+
     public void write(Iterable<MailboxItem> mail)
     {
         try
@@ -127,8 +154,15 @@ public class HiveMailWriter implements MailWriter
             // TODO: Log properly. In individual functions.
         }
 
-        // TODO: Open HDFS connection (with `FileSystem.get`) to timberwolf's temporary folder.
-        // TODO: Write sequence file into that temp folder.
+        try
+        {
+            Path tempFile = writeTemporaryFile(mail);
+        }
+        catch (IOException e)
+        {
+            // TODO: Log properly.  In the function.
+        }
+
         // TODO: Use Hive JDBC connection to use `load data` on the file we just wrote into the
         //       table from before.
         // TODO: Dispose of everything.
