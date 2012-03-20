@@ -122,9 +122,8 @@ public class HiveMailWriter implements MailWriter
         ResultSet createTableResult = statement.executeQuery(createTableQuery);
     }
 
-    private Path writeTemporaryFile(Iterable<MailboxItem> mail) throws IOException
+    private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail) throws IOException
     {
-        FileSystem hdfs = FileSystem.get(hdfsUri, new Configuration());
         if (!hdfs.exists(TEMP_FOLDER))
         {
             hdfs.mkdirs(TEMP_FOLDER);
@@ -161,7 +160,12 @@ public class HiveMailWriter implements MailWriter
             Path tempFile;
             try
             {
-                 tempFile = writeTemporaryFile(mail);
+                FileSystem hdfs = FileSystem.get(hdfsUri, new Configuration());
+                tempFile = writeTemporaryFile(hdfs, mail);
+                loadTempFile(hiveConn, tempFile);
+
+                hdfs.delete(tempFile, false);
+                hdfs.close();
             }
             catch (IOException e)
             {
@@ -169,13 +173,11 @@ public class HiveMailWriter implements MailWriter
                 // TODO: Log properly.  In the function.
             }
 
-            loadTempFile(hiveConn, tempFile);
+            hiveConn.close();
         }
         catch (SQLException e)
         {
             // TODO: Log properly. In individual functions.
         }
-
-        // TODO: Dispose of everything.
     }
 }
