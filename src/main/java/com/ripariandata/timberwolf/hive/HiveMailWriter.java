@@ -139,6 +139,15 @@ public class HiveMailWriter implements MailWriter
         return tempFile;
     }
 
+    private void loadTempFile(Connection conn, Path tempFile) throws SQLException
+    {
+        Statement statement = conn.createStatement();
+        String[] loadQueryTokens = { "load data inpath", "'" + tempFile.toString() + "'", "into table", tableName };
+        String loadDataQuery = StringUtils.join(loadQueryTokens, " ");
+        // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
+        ResultSet loadDataResult = statement.executeQuery(loadDataQuery);
+    }
+
     public void write(Iterable<MailboxItem> mail)
     {
         try
@@ -149,22 +158,24 @@ public class HiveMailWriter implements MailWriter
                 createTable(hiveConn);
             }
 
+            Path tempFile;
             try
             {
-                Path tempFile = writeTemporaryFile(mail);
+                 tempFile = writeTemporaryFile(mail);
             }
             catch (IOException e)
             {
+                throw new HiveMailWriterException("", e);
                 // TODO: Log properly.  In the function.
             }
+
+            loadTempFile(hiveConn, tempFile);
         }
         catch (SQLException e)
         {
             // TODO: Log properly. In individual functions.
         }
 
-        // TODO: Use Hive JDBC connection to use `load data` on the file we just wrote into the
-        //       table from before.
         // TODO: Dispose of everything.
     }
 }
