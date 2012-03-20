@@ -89,31 +89,42 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
+    private boolean tableExists(Connection conn) throws SQLException
+    {
+        // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
+        String showTableQuery = "show tables '" + tableName + "'";
+        LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
+        Statement statement = conn.createStatement();
+        ResultSet showTableResult = statement.executeQuery(showTableQuery);
+        return showTableResult.next();
+    }
+
+    private void createTable(Connection conn) throws SQLException
+    {
+        Statement statement = conn.createStatement();
+        String[] createQueryTokens = { "create table", tableName,
+                                        // TODO: Sanitize header key names.
+                                       "(", StringUtils.join(VALUE_HEADER_KEYS, "string, ") , " string )",
+                                       "row format delimited fields terminated by '\\037'",
+                                       "stored as sequencefile" };
+        String createTableQuery = StringUtils.join(createQueryTokens, " ");
+        // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
+        ResultSet createTableResult = statement.executeQuery(createTableQuery);
+    }
+
     public void write(Iterable<MailboxItem> mail)
     {
         try
         {
             Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
-            // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
-            String showTableQuery = "show tables '" + tableName + "'";
-            LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
-            Statement statement = hiveConn.createStatement();
-            ResultSet showTableResult = statement.executeQuery(showTableQuery);
-            if (!showTableResult.next())
+            if (!tableExists(hiveConn))
             {
-                String[] createQueryTokens = { "create table", tableName,
-                                                // TODO: Sanitize header key names.
-                                               "(", StringUtils.join(VALUE_HEADER_KEYS, "string, ") , " string )",
-                                               "row format delimited fields terminated by '\\037'",
-                                               "stored as sequencefile" };
-                String createTableQuery = StringUtils.join(createQueryTokens, " ");
-                // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
-                ResultSet createTableResult = statement.executeQuery(createTableQuery);
+                createTable(hiveConn);
             }
         }
         catch (SQLException e)
         {
-            // TODO: Log properly.
+            // TODO: Log properly. In individual functions.
         }
 
         // TODO: Open HDFS connection (with `FileSystem.get`) to timberwolf's temporary folder.
