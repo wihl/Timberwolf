@@ -148,19 +148,19 @@ public class HiveMailWriter implements MailWriter
             {
                 createTable(hiveConn);
             }
+
+            try
+            {
+                Path tempFile = writeTemporaryFile(mail);
+            }
+            catch (IOException e)
+            {
+                // TODO: Log properly.  In the function.
+            }
         }
         catch (SQLException e)
         {
             // TODO: Log properly. In individual functions.
-        }
-
-        try
-        {
-            Path tempFile = writeTemporaryFile(mail);
-        }
-        catch (IOException e)
-        {
-            // TODO: Log properly.  In the function.
         }
 
         // TODO: Use Hive JDBC connection to use `load data` on the file we just wrote into the
