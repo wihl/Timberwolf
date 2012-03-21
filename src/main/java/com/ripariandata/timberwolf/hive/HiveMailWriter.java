@@ -52,6 +52,7 @@ public class HiveMailWriter implements MailWriter
     public static final String DEFAULT_KEY_HEADER = "Item ID";
     public static final String[] VALUE_HEADER_KEYS;
     private static final Path TEMP_FOLDER = new Path("/tmp/timberwolf");
+    private static final String DRIVER_NAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
 
     private URI hdfsUri;
     private URI hiveUri;
@@ -147,6 +148,16 @@ public class HiveMailWriter implements MailWriter
 
     public void write(Iterable<MailboxItem> mail)
     {
+        try
+        {
+            Class.forName(DRIVER_NAME);
+        }
+        catch (ClassNotFoundException e)
+        {
+            String msg = "Cannot load Hive JDBC driver " + DRIVER_NAME;
+            HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+
         try
         {
             Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
