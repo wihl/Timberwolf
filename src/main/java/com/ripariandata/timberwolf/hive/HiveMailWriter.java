@@ -122,6 +122,14 @@ public class HiveMailWriter implements MailWriter
         statement.executeQuery(createTableQuery);
     }
 
+    private void loadTempFile(Connection conn, Path tempFile) throws SQLException
+    {
+        // We aren't using a statement variable for the table name since the escaping will mess it up.
+        PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
+        statement.setString(1, tempFile.toString());
+        statement.executeQuery();
+    }
+
     private FileSystem getHdfs()
     {
         FileSystem fs;
@@ -171,14 +179,6 @@ public class HiveMailWriter implements MailWriter
         {
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error cleaning up temporary file.", e));
         }
-    }
-
-    private void loadTempFile(Connection conn, Path tempFile) throws SQLException
-    {
-        // We aren't using a statement variable for the table name since the escaping will mess it up.
-        PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
-        statement.setString(1, tempFile.toString());
-        statement.executeQuery();
     }
 
     public void write(Iterable<MailboxItem> mail)
