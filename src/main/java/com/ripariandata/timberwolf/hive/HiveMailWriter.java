@@ -101,6 +101,21 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
+    private Connection getHive()
+    {
+        Connection hive;
+        try
+        {
+            hive = DriverManager.getConnection(hiveUri.toString());
+        }
+        catch (SQLException e)
+        {
+            String msg = "Error opening connection to hive at " + hiveUri.toString();
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+        return hive;
+    }
+
     private boolean tableExists(Connection conn) throws SQLException
     {
         PreparedStatement statement = conn.prepareStatement("show tables ?");
@@ -193,9 +208,9 @@ public class HiveMailWriter implements MailWriter
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
 
+        Connection hiveConn = getHive();
         try
         {
-            Connection hiveConn = DriverManager.getConnection(hiveUri.toString());
             if (!tableExists(hiveConn))
             {
                 createTable(hiveConn);
