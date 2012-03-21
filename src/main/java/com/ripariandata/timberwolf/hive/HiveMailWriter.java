@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.DriverManager;
@@ -101,19 +102,18 @@ public class HiveMailWriter implements MailWriter
 
     private boolean tableExists(Connection conn) throws SQLException
     {
-        // TODO: How much sanitization do we need here?  Check for * and |?  Protect from all injection?
-        String showTableQuery = "show tables '" + tableName + "'";
-        LOG.trace("Verifying Hive table existence with query: " + showTableQuery);
-        Statement statement = conn.createStatement();
-        ResultSet showTableResult = statement.executeQuery(showTableQuery);
+        PreparedStatement statement = conn.prepareStatement("show tables ?");
+        statement.setString(1, tableName);
+        ResultSet showTableResult = statement.executeQuery();
         return showTableResult.next();
     }
 
     private void createTable(Connection conn) throws SQLException
     {
+        // We aren't using a PreparedStatement here since the escaping only really works for arguments,
+        // not for table and column names.
         Statement statement = conn.createStatement();
         String[] createQueryTokens = { "create table", tableName,
-                                        // TODO: Sanitize header key names.
                                        "(", StringUtils.join(VALUE_HEADER_KEYS, "string, ") , " string )",
                                        "row format delimited fields terminated by '\\037'",
                                        "stored as sequencefile" };
@@ -140,11 +140,11 @@ public class HiveMailWriter implements MailWriter
 
     private void loadTempFile(Connection conn, Path tempFile) throws SQLException
     {
-        Statement statement = conn.createStatement();
-        String[] loadQueryTokens = { "load data inpath", "'" + tempFile.toString() + "'", "into table", tableName };
-        String loadDataQuery = StringUtils.join(loadQueryTokens, " ");
+        // We aren't using a statement variable for the table name since the escaping will mess it up.
+        PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
+        statement.setString(1, tempFile.toString());
         // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
-        ResultSet loadDataResult = statement.executeQuery(loadDataQuery);
+        ResultSet loadDataResult = statement.executeQuery();
     }
 
     public void write(Iterable<MailboxItem> mail)
