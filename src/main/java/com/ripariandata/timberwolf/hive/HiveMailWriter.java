@@ -155,7 +155,7 @@ public class HiveMailWriter implements MailWriter
         catch (ClassNotFoundException e)
         {
             String msg = "Cannot load Hive JDBC driver " + DRIVER_NAME;
-            HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
 
         try
