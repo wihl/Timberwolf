@@ -114,12 +114,11 @@ public class HiveMailWriter implements MailWriter
         // not for table and column names.
         Statement statement = conn.createStatement();
         String[] createQueryTokens = { "create table", tableName,
-                                       "(", StringUtils.join(VALUE_HEADER_KEYS, "string, ") , " string )",
+                                       "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
                                        "row format delimited fields terminated by '\\037'",
                                        "stored as sequencefile" };
         String createTableQuery = StringUtils.join(createQueryTokens, " ");
-        // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
-        ResultSet createTableResult = statement.executeQuery(createTableQuery);
+        statement.executeQuery(createTableQuery);
     }
 
     private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail) throws IOException
@@ -143,8 +142,7 @@ public class HiveMailWriter implements MailWriter
         // We aren't using a statement variable for the table name since the escaping will mess it up.
         PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
         statement.setString(1, tempFile.toString());
-        // TODO: Figure out what constitutes failure here.  No rows?  > 1 row?  Rows with particular contents?
-        ResultSet loadDataResult = statement.executeQuery();
+        statement.executeQuery();
     }
 
     public void write(Iterable<MailboxItem> mail)
