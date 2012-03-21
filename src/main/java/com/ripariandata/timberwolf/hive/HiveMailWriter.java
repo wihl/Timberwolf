@@ -137,19 +137,26 @@ public class HiveMailWriter implements MailWriter
         return fs;
     }
 
-    private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail) throws IOException
+    private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail)
     {
-        if (!hdfs.exists(TEMP_FOLDER))
+        Path tempFile;
+        try
         {
-            hdfs.mkdirs(TEMP_FOLDER);
+            if (!hdfs.exists(TEMP_FOLDER))
+            {
+                hdfs.mkdirs(TEMP_FOLDER);
+            }
+
+            tempFile = new Path(TEMP_FOLDER + "/" + UUID.randomUUID().toString());
+            FSDataOutputStream output = hdfs.create(tempFile);
+            SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
+            writer.write(mail);
+            output.close();
         }
-
-        Path tempFile = new Path(TEMP_FOLDER + "/" + UUID.randomUUID().toString());
-        FSDataOutputStream output = hdfs.create(tempFile);
-        SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
-        writer.write(mail);
-        output.close();
-
+        catch (IOException e)
+        {
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error writing temporary file.", e));
+        }
         return tempFile;
     }
 
@@ -182,12 +189,10 @@ public class HiveMailWriter implements MailWriter
             }
 
             FileSystem hdfs = getHdfs();
-            Path tempFile;
+            Path tempFile = writeTemporaryFile(hdfs, mail);
+            loadTempFile(hiveConn, tempFile);
             try
             {
-                tempFile = writeTemporaryFile(hdfs, mail);
-                loadTempFile(hiveConn, tempFile);
-
                 hdfs.delete(tempFile, false);
                 hdfs.close();
             }
