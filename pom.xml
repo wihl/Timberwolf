@@ -308,6 +308,19 @@
       <version>0.20.203.0</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-jdbc</artifactId>
+      <version>0.8.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.jdo</groupId>
+      <artifactId>jdo2-api</artifactId>
+      <!-- hive-jdbc lists v2.3-ec in its pom, but that version
+           isn't in the maven central repo.  This is my best guess. -->
+      <version>2.3-20090302111651</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
       <version>2.0.16</version>
