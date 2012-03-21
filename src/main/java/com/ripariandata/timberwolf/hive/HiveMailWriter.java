@@ -160,6 +160,19 @@ public class HiveMailWriter implements MailWriter
         return tempFile;
     }
 
+    private void cleanupFileSystem(FileSystem hdfs, Path tempFile)
+    {
+        try
+        {
+            hdfs.delete(tempFile, false);
+            hdfs.close();
+        }
+        catch (IOException e)
+        {
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error cleaning up temporary file.", e));
+        }
+    }
+
     private void loadTempFile(Connection conn, Path tempFile) throws SQLException
     {
         // We aren't using a statement variable for the table name since the escaping will mess it up.
@@ -191,16 +204,7 @@ public class HiveMailWriter implements MailWriter
             FileSystem hdfs = getHdfs();
             Path tempFile = writeTemporaryFile(hdfs, mail);
             loadTempFile(hiveConn, tempFile);
-            try
-            {
-                hdfs.delete(tempFile, false);
-                hdfs.close();
-            }
-            catch (IOException e)
-            {
-                throw new HiveMailWriterException("", e);
-                // TODO: Log properly.  In the function.
-            }
+            cleanupFileSystem(hdfs, tempFile);
 
             hiveConn.close();
         }
