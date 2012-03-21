@@ -122,6 +122,21 @@ public class HiveMailWriter implements MailWriter
         statement.executeQuery(createTableQuery);
     }
 
+    private FileSystem getHdfs()
+    {
+        FileSystem fs;
+        try
+        {
+            fs = FileSystem.get(hdfsUri, new Configuration());
+        }
+        catch (IOException e)
+        {
+            String msg = "Cannot access HDFS filesystem at " + hdfsUri.toString();
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+        return fs;
+    }
+
     private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail) throws IOException
     {
         if (!hdfs.exists(TEMP_FOLDER))
@@ -166,10 +181,10 @@ public class HiveMailWriter implements MailWriter
                 createTable(hiveConn);
             }
 
+            FileSystem hdfs = getHdfs();
             Path tempFile;
             try
             {
-                FileSystem hdfs = FileSystem.get(hdfsUri, new Configuration());
                 tempFile = writeTemporaryFile(hdfs, mail);
                 loadTempFile(hiveConn, tempFile);
 
