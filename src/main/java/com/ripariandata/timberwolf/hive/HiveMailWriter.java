@@ -169,6 +169,19 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
+    private void cleanupHive(Connection conn)
+    {
+        try
+        {
+            conn.close();
+        }
+        catch (SQLException e)
+        {
+            String msg = "Error closing connection to Hive.";
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+    }
+
     private FileSystem getHdfs()
     {
         FileSystem fs;
@@ -240,17 +253,9 @@ public class HiveMailWriter implements MailWriter
 
         FileSystem hdfs = getHdfs();
         Path tempFile = writeTemporaryFile(hdfs, mail);
-
         loadTempFile(hiveConn, tempFile);
-        cleanupFileSystem(hdfs, tempFile);
 
-        try
-        {
-            hiveConn.close();
-        }
-        catch (SQLException e)
-        {
-            // TODO: Log properly. In individual functions.
-        }
+        cleanupFileSystem(hdfs, tempFile);
+        hiveConn.close();
     }
 }
