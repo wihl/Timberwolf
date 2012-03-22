@@ -101,6 +101,19 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
+    private void loadHiveDriver()
+    {
+        try
+        {
+            Class.forName(DRIVER_NAME);
+        }
+        catch (ClassNotFoundException e)
+        {
+            String msg = "Cannot load Hive JDBC driver " + DRIVER_NAME;
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+    }
+
     private Connection getHive()
     {
         Connection hive;
@@ -235,15 +248,7 @@ public class HiveMailWriter implements MailWriter
 
     public void write(Iterable<MailboxItem> mail)
     {
-        try
-        {
-            Class.forName(DRIVER_NAME);
-        }
-        catch (ClassNotFoundException e)
-        {
-            String msg = "Cannot load Hive JDBC driver " + DRIVER_NAME;
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
+        loadHiveDriver();
 
         Connection hiveConn = getHive();
         if (!tableExists(hiveConn))
@@ -256,6 +261,6 @@ public class HiveMailWriter implements MailWriter
         loadTempFile(hiveConn, tempFile);
 
         cleanupFileSystem(hdfs, tempFile);
-        hiveConn.close();
+        cleanupHive(hiveConn);
     }
 }
