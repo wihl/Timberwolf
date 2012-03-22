@@ -54,8 +54,8 @@ public class HiveMailWriter implements MailWriter
     private static final Path TEMP_FOLDER = new Path("/tmp/timberwolf");
     private static final String DRIVER_NAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
 
-    private URI hdfsUri;
-    private URI hiveUri;
+    private FileSystem hdfs;
+    private Connection hive;
     private String tableName;
 
     static
@@ -72,33 +72,23 @@ public class HiveMailWriter implements MailWriter
         VALUE_HEADER_KEYS = values.toArray(new String[possible.length - 1]);
     }
 
-    public HiveMailWriter(URI hdfs, URI hive, String table)
+    public HiveMailWriter(String hdfsUri, String hiveUri, String table)
     {
         tableName = table;
-        hdfsUri = hdfs;
-        hiveUri = hive;
-    }
 
-    public HiveMailWriter(String hdfs, String hive, String table)
-    {
-        tableName = table;
+        URI hdfsLocation;
         try
         {
-            hdfsUri = new URI(hdfs);
+            hdfsLocation = new URI(hdfsUri);
         }
         catch (URISyntaxException e)
         {
-            HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
         }
+        getHdfs(hdfsLocation);
 
-        try
-        {
-            hiveUri = new URI(hive);
-        }
-        catch(URISyntaxException e)
-        {
-            HiveMailWriterException.log(LOG, new HiveMailWriterException(hive + " is not a valid URI.", e));
-        }
+        loadHiveDriver();
+        getHive(hiveUri);
     }
 
     private void loadHiveDriver()
@@ -114,26 +104,24 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private Connection getHive()
+    private void getHive(String hiveUri)
     {
-        Connection hive;
         try
         {
-            hive = DriverManager.getConnection(hiveUri.toString());
+            hive = DriverManager.getConnection(hiveUri);
         }
         catch (SQLException e)
         {
             String msg = "Error opening connection to hive at " + hiveUri.toString();
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
-        return hive;
     }
 
-    private boolean tableExists(Connection conn)
+    private boolean tableExists()
     {
         try
         {
-            PreparedStatement statement = conn.prepareStatement("show tables ?");
+            PreparedStatement statement = hive.prepareStatement("show tables ?");
             statement.setString(1, tableName);
             ResultSet showTableResult = statement.executeQuery();
             return showTableResult.next();
@@ -145,13 +133,13 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void createTable(Connection conn)
+    private void createTable()
     {
         try
         {
             // We aren't using a PreparedStatement here since the escaping only really works for arguments,
             // not for table and column names.
-            Statement statement = conn.createStatement();
+            Statement statement = hive.createStatement();
             String[] createQueryTokens = { "create table", tableName,
                                            "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
                                            "row format delimited fields terminated by '\\037'",
@@ -166,12 +154,12 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void loadTempFile(Connection conn, Path tempFile)
+    private void loadTempFile(Path tempFile)
     {
         try
         {
             // We aren't using a statement variable for the table name since the escaping will mess it up.
-            PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
+            PreparedStatement statement = hive.prepareStatement("load data inpath ? into table " + tableName);
             statement.setString(1, tempFile.toString());
             statement.executeQuery();
         }
@@ -182,11 +170,11 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void cleanupHive(Connection conn)
+    private void closeHive()
     {
         try
         {
-            conn.close();
+            hive.close();
         }
         catch (SQLException e)
         {
@@ -195,22 +183,20 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private FileSystem getHdfs()
+    private void getHdfs(URI hdfsUri)
     {
-        FileSystem fs;
         try
         {
-            fs = FileSystem.get(hdfsUri, new Configuration());
+            hdfs = FileSystem.get(hdfsUri, new Configuration());
         }
         catch (IOException e)
         {
             String msg = "Cannot access HDFS filesystem at " + hdfsUri.toString();
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
-        return fs;
     }
 
-    private Path writeTemporaryFile(FileSystem hdfs, Iterable<MailboxItem> mail)
+    private Path writeTemporaryFile(Iterable<MailboxItem> mail)
     {
         Path tempFile;
         try
@@ -233,12 +219,11 @@ public class HiveMailWriter implements MailWriter
         return tempFile;
     }
 
-    private void cleanupFileSystem(FileSystem hdfs, Path tempFile)
+    private void deleteTempFile(Path tempFile)
     {
         try
         {
             hdfs.delete(tempFile, false);
-            hdfs.close();
         }
         catch (IOException e)
         {
@@ -246,21 +231,33 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
+    private void closeHdfs()
+    {
+        try
+        {
+            hdfs.close();
+        }
+        catch (IOException e)
+        {
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error closing HDFS connection.", e));
+        }
+    }
+
     public void write(Iterable<MailboxItem> mail)
     {
-        loadHiveDriver();
-
-        Connection hiveConn = getHive();
-        if (!tableExists(hiveConn))
+        if (!tableExists())
         {
-            createTable(hiveConn);
+            createTable();
         }
 
-        FileSystem hdfs = getHdfs();
-        Path tempFile = writeTemporaryFile(hdfs, mail);
-        loadTempFile(hiveConn, tempFile);
+        Path tempFile = writeTemporaryFile(mail);
+        loadTempFile(tempFile);
+        deleteTempFile(tempFile);
+    }
 
-        cleanupFileSystem(hdfs, tempFile);
-        cleanupHive(hiveConn);
+    private void close()
+    {
+        closeHdfs();
+        closeHive();
     }
 }
