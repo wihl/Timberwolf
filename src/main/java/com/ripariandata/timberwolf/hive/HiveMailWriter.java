@@ -116,12 +116,20 @@ public class HiveMailWriter implements MailWriter
         return hive;
     }
 
-    private boolean tableExists(Connection conn) throws SQLException
+    private boolean tableExists(Connection conn)
     {
-        PreparedStatement statement = conn.prepareStatement("show tables ?");
-        statement.setString(1, tableName);
-        ResultSet showTableResult = statement.executeQuery();
-        return showTableResult.next();
+        try
+        {
+            PreparedStatement statement = conn.prepareStatement("show tables ?");
+            statement.setString(1, tableName);
+            ResultSet showTableResult = statement.executeQuery();
+            return showTableResult.next();
+        }
+        catch (SQLException e)
+        {
+            String msg = "Error determining if table " + tableName + "exists.";
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
     }
 
     private void createTable(Connection conn) throws SQLException
