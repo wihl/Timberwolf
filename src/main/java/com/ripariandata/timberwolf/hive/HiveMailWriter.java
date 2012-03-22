@@ -153,12 +153,20 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void loadTempFile(Connection conn, Path tempFile) throws SQLException
+    private void loadTempFile(Connection conn, Path tempFile)
     {
-        // We aren't using a statement variable for the table name since the escaping will mess it up.
-        PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
-        statement.setString(1, tempFile.toString());
-        statement.executeQuery();
+        try
+        {
+            // We aren't using a statement variable for the table name since the escaping will mess it up.
+            PreparedStatement statement = conn.prepareStatement("load data inpath ? into table " + tableName);
+            statement.setString(1, tempFile.toString());
+            statement.executeQuery();
+        }
+        catch (SQLException e)
+        {
+            String msg = "Error loading data into table.";
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
     }
 
     private FileSystem getHdfs()
@@ -233,11 +241,11 @@ public class HiveMailWriter implements MailWriter
         FileSystem hdfs = getHdfs();
         Path tempFile = writeTemporaryFile(hdfs, mail);
 
+        loadTempFile(hiveConn, tempFile);
+        cleanupFileSystem(hdfs, tempFile);
+
         try
         {
-            loadTempFile(hiveConn, tempFile);
-            cleanupFileSystem(hdfs, tempFile);
-
             hiveConn.close();
         }
         catch (SQLException e)
