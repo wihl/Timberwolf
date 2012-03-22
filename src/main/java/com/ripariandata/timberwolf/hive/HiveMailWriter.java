@@ -132,17 +132,25 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void createTable(Connection conn) throws SQLException
+    private void createTable(Connection conn)
     {
-        // We aren't using a PreparedStatement here since the escaping only really works for arguments,
-        // not for table and column names.
-        Statement statement = conn.createStatement();
-        String[] createQueryTokens = { "create table", tableName,
-                                       "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
-                                       "row format delimited fields terminated by '\\037'",
-                                       "stored as sequencefile" };
-        String createTableQuery = StringUtils.join(createQueryTokens, " ");
-        statement.executeQuery(createTableQuery);
+        try
+        {
+            // We aren't using a PreparedStatement here since the escaping only really works for arguments,
+            // not for table and column names.
+            Statement statement = conn.createStatement();
+            String[] createQueryTokens = { "create table", tableName,
+                                           "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
+                                           "row format delimited fields terminated by '\\037'",
+                                           "stored as sequencefile" };
+            String createTableQuery = StringUtils.join(createQueryTokens, " ");
+            statement.executeQuery(createTableQuery);
+        }
+        catch (SQLException e)
+        {
+            String msg = "Error creating table " + tableName;
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
     }
 
     private void loadTempFile(Connection conn, Path tempFile) throws SQLException
@@ -217,15 +225,16 @@ public class HiveMailWriter implements MailWriter
         }
 
         Connection hiveConn = getHive();
+        if (!tableExists(hiveConn))
+        {
+            createTable(hiveConn);
+        }
+
+        FileSystem hdfs = getHdfs();
+        Path tempFile = writeTemporaryFile(hdfs, mail);
+
         try
         {
-            if (!tableExists(hiveConn))
-            {
-                createTable(hiveConn);
-            }
-
-            FileSystem hdfs = getHdfs();
-            Path tempFile = writeTemporaryFile(hdfs, mail);
             loadTempFile(hiveConn, tempFile);
             cleanupFileSystem(hdfs, tempFile);
 
