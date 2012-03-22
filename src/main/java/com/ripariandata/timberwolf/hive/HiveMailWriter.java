@@ -91,6 +91,13 @@ public class HiveMailWriter implements MailWriter
         getHive(hiveUri);
     }
 
+    public HiveMailWriter(FileSystem fs, Connection conn, String table)
+    {
+        tableName = table;
+        hdfs = fs;
+        hive = conn;
+    }
+
     private void loadHiveDriver()
     {
         try
