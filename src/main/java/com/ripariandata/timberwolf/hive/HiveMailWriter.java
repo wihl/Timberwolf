@@ -262,7 +262,7 @@ public class HiveMailWriter implements MailWriter
         deleteTempFile(tempFile);
     }
 
-    private void close()
+    public void close()
     {
         closeHdfs();
         closeHive();
