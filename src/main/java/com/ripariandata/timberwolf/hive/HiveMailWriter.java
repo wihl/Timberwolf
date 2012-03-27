@@ -147,10 +147,12 @@ public class HiveMailWriter implements MailWriter
             // We aren't using a PreparedStatement here since the escaping only really works for arguments,
             // not for table and column names.
             Statement statement = hive.createStatement();
-            String[] createQueryTokens = { "create table", tableName,
-                                           "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
-                                           "row format delimited fields terminated by '\\037'",
-                                           "stored as sequencefile" };
+            String[] createQueryTokens = {
+                "create table", tableName,
+                "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
+                "row format delimited fields terminated by '\\037'",
+                "stored as sequencefile"
+            };
             String createTableQuery = StringUtils.join(createQueryTokens, " ");
             statement.executeQuery(createTableQuery);
         }

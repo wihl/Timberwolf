@@ -111,4 +111,34 @@ public class HiveMailWriterTest
         verify(hdfs).mkdirs(eq(new Path("/tmp/timberwolf")));
         verify(hdfs).delete(any(Path.class), eq(false));
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testWritingToExistingTable() throws SQLException, IOException
+    {
+        Connection hive = mock(Connection.class);
+        FileSystem hdfs = mock(FileSystem.class);
+
+        PreparedStatement showStmt = mock(PreparedStatement.class);
+        ResultSet showResult = mock(ResultSet.class);
+        when(showResult.next()).thenReturn(true);
+        when(showStmt.executeQuery()).thenReturn(showResult);
+        when(hive.prepareStatement("show tables ?")).thenReturn(showStmt);
+
+        PreparedStatement loadStmt = mock(PreparedStatement.class);
+        when(hive.prepareStatement("load data inpath ? into table new_table")).thenReturn(loadStmt);
+
+        when(hdfs.exists(eq(new Path("/tmp/timberwolf")))).thenReturn(false);
+        when(hdfs.create(any(Path.class))).thenReturn(new FSDataOutputStream(new ByteArrayOutputStream()));
+
+        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "new_table");
+        writer.write(new ArrayList<MailboxItem>());
+
+        verify(showStmt).setString(1, "new_table");
+        verify(loadStmt).setString(eq(1), startsWith("/tmp/timberwolf/"));
+        verify(loadStmt).executeQuery();
+
+        verify(hdfs).mkdirs(eq(new Path("/tmp/timberwolf")));
+        verify(hdfs).delete(any(Path.class), eq(false));
+    }
 }
