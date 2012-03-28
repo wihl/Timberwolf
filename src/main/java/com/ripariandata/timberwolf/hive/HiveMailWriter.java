@@ -228,6 +228,12 @@ public class HiveMailWriter implements MailWriter
         return tempFile;
     }
 
+    /**Delete the temporary file in hdfs.
+     *
+     * This does not throw an exception because this may be called during
+     * a stack rewind. If that's the case, we don't want to override the
+     * already thrown exception. We just log.
+     */
     private void deleteTempFile(Path tempFile)
     {
         try
@@ -236,7 +242,8 @@ public class HiveMailWriter implements MailWriter
         }
         catch (IOException e)
         {
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error cleaning up temporary file.", e));
+            LOG.warn("Error cleaning up temporary file: " + e.getMessage());
+            LOG.debug("", e);
         }
     }
 
@@ -260,8 +267,14 @@ public class HiveMailWriter implements MailWriter
         }
 
         Path tempFile = writeTemporaryFile(mail);
-        loadTempFile(tempFile);
-        deleteTempFile(tempFile);
+        try
+        {
+            loadTempFile(tempFile);
+        }
+        finally
+        {
+            deleteTempFile(tempFile);
+        }
     }
 
     public void close()
