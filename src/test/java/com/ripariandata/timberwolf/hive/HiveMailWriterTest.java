@@ -134,6 +134,49 @@ public class HiveMailWriterTest
         verify(hdfs).delete(any(Path.class), eq(false));
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testWritingAndFailing() throws SQLException, IOException
+    {
+        Connection hive = mock(Connection.class);
+        FileSystem hdfs = mock(FileSystem.class);
+
+        PreparedStatement showStmt = createMockTableExistsResponse(hive, true);
+
+        PreparedStatement loadStmt = mock(PreparedStatement.class);
+        when(hive.prepareStatement("load data inpath ? into table new_table")).thenReturn(loadStmt);
+        // Here is the change, we throw an exception instead of returning
+        when(loadStmt.executeQuery()).thenThrow(new SQLException("mock failed to load"));
+
+        when(hdfs.exists(eq(new Path("/tmp/timberwolf")))).thenReturn(true);
+        when(hdfs.create(any(Path.class))).thenReturn(new FSDataOutputStream(new ByteArrayOutputStream()));
+
+        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "new_table");
+        try
+        {
+            writer.write(new ArrayList<MailboxItem>());
+            fail("The SQLException got swallowed. It should not be swallowed.");
+        }
+        catch (HiveMailWriterException e)
+        {
+        }
+
+        verify(showStmt).setString(1, "new_table");
+        verify(loadStmt).setString(eq(1), startsWith("/tmp/timberwolf/"));
+
+        // This is what we're testing really.
+        // We want to make sure this happens in case of exception.
+        verify(hdfs).delete(any(Path.class), eq(false));
+    }
+
+
+    /**
+     * When the hive connection is told to prepare "show tables ?",
+     * it will return the object returned by this method. This object
+     * will return 'tableWillExist' when executed.
+     *
+     * That question mark gets set by a setString call to the PreparedStatement.
+     */
     private static PreparedStatement createMockTableExistsResponse(
             Connection hive,
             boolean tableWillExist)
