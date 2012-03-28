@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.DriverManager;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -38,14 +38,14 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**Writes mail into a Hadoop Hive database. */
 public class HiveMailWriter implements MailWriter
 {
     private static final Logger LOG = LoggerFactory.getLogger(HiveMailWriter.class);
@@ -72,7 +72,7 @@ public class HiveMailWriter implements MailWriter
         VALUE_HEADER_KEYS = values.toArray(new String[possible.length - 1]);
     }
 
-    public HiveMailWriter(String hdfsUri, String hiveUri, String table)
+    public HiveMailWriter(final String hdfsUri, final String hiveUri, final String table)
     {
         tableName = table;
 
@@ -91,7 +91,7 @@ public class HiveMailWriter implements MailWriter
         getHive(hiveUri);
     }
 
-    public HiveMailWriter(FileSystem fs, Connection conn, String table)
+    public HiveMailWriter(final FileSystem fs, final Connection conn, final String table)
     {
         tableName = table;
         hdfs = fs;
@@ -111,7 +111,7 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void getHive(String hiveUri)
+    private void getHive(final String hiveUri)
     {
         try
         {
@@ -163,7 +163,7 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void loadTempFile(Path tempFile)
+    private void loadTempFile(final Path tempFile)
     {
         try
         {
@@ -192,7 +192,7 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void getHdfs(URI hdfsUri)
+    private void getHdfs(final URI hdfsUri)
     {
         try
         {
@@ -205,7 +205,7 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private Path writeTemporaryFile(Iterable<MailboxItem> mail)
+    private Path writeTemporaryFile(final Iterable<MailboxItem> mail)
     {
         Path tempFile;
         try
@@ -234,7 +234,7 @@ public class HiveMailWriter implements MailWriter
      * a stack rewind. If that's the case, we don't want to override the
      * already thrown exception. We just log.
      */
-    private void deleteTempFile(Path tempFile)
+    private void deleteTempFile(final Path tempFile)
     {
         try
         {
@@ -259,7 +259,7 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    public void write(Iterable<MailboxItem> mail)
+    public void write(final Iterable<MailboxItem> mail)
     {
         if (!tableExists())
         {

@@ -17,51 +17,35 @@
  */
 package com.ripariandata.timberwolf.hive;
 
-import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.DriverManager;
 
 import java.util.ArrayList;
-import java.util.UUID;
+
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import org.junit.Test;
 
-import org.apache.commons.lang.StringUtils;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.Path;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.startsWith;
 import static org.mockito.Matchers.matches;
+import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.regex.PatternSyntaxException;
-
+/**Tests the HiveMailWriter.*/
 public class HiveMailWriterTest
 {
     @Test
@@ -99,7 +83,9 @@ public class HiveMailWriterTest
         writer.write(new ArrayList<MailboxItem>());
 
         verify(showStmt).setString(1, "new_table");
-        String s = "create table new_table \\([^)]+\\) row format delimited fields terminated by '\\\\037' stored as sequencefile";
+        String s = "create table new_table \\([^)]+\\)"
+            + " row format delimited fields terminated by '\\\\037'"
+            + " stored as sequencefile";
         verify(createStmt).executeQuery(matches(s));
         verify(loadStmt).setString(eq(1), startsWith("/tmp/timberwolf/"));
         verify(loadStmt).executeQuery();
@@ -159,14 +145,13 @@ public class HiveMailWriterTest
         }
         catch (HiveMailWriterException e)
         {
+            // This is what we're testing really.
+            // We want to make sure this happens in case of exception.
+            verify(hdfs).delete(any(Path.class), eq(false));
         }
 
         verify(showStmt).setString(1, "new_table");
         verify(loadStmt).setString(eq(1), startsWith("/tmp/timberwolf/"));
-
-        // This is what we're testing really.
-        // We want to make sure this happens in case of exception.
-        verify(hdfs).delete(any(Path.class), eq(false));
     }
 
 
@@ -178,8 +163,8 @@ public class HiveMailWriterTest
      * That question mark gets set by a setString call to the PreparedStatement.
      */
     private static PreparedStatement createMockTableExistsResponse(
-            Connection hive,
-            boolean tableWillExist)
+            final Connection hive,
+            final boolean tableWillExist)
             throws SQLException
     {
         PreparedStatement showStmt = mock(PreparedStatement.class);
