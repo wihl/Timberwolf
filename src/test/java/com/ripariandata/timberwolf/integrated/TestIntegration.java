@@ -62,14 +62,15 @@ public class TestIntegration
 
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
-    public IntegrationTestProperties properties = new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
-                                                                                EXCHANGE_USER1_PROPERTY_NAME,
-                                                                                EXCHANGE_USER2_PROPERTY_NAME,
-                                                                                EXCHANGE_USER3_PROPERTY_NAME,
-                                                                                EXCHANGE_SENDER_PROPERTY_NAME,
-                                                                                EXCHANGE_IGNORED_USER_PROPERTY_NAME,
-                                                                                LDAP_DOMAIN_PROPERTY_NAME,
-                                                                                LDAP_CONFIG_ENTRY_PROPERTY_NAME);
+    public IntegrationTestProperties properties =
+        new IntegrationTestProperties(EXCHANGE_URI_PROPERTY_NAME,
+                                      EXCHANGE_USER1_PROPERTY_NAME,
+                                      EXCHANGE_USER2_PROPERTY_NAME,
+                                      EXCHANGE_USER3_PROPERTY_NAME,
+                                      EXCHANGE_SENDER_PROPERTY_NAME,
+                                      EXCHANGE_IGNORED_USER_PROPERTY_NAME,
+                                      LDAP_DOMAIN_PROPERTY_NAME,
+                                      LDAP_CONFIG_ENTRY_PROPERTY_NAME);
 
     // @junitRule: This prevents checkstyle from complaining about junit rules being public fields.
     @Rule
