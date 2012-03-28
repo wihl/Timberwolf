@@ -84,11 +84,7 @@ public class HiveMailWriterTest
         Connection hive = mock(Connection.class);
         FileSystem hdfs = mock(FileSystem.class);
 
-        PreparedStatement showStmt = mock(PreparedStatement.class);
-        ResultSet showResult = mock(ResultSet.class);
-        when(showResult.next()).thenReturn(false);
-        when(showStmt.executeQuery()).thenReturn(showResult);
-        when(hive.prepareStatement("show tables ?")).thenReturn(showStmt);
+        PreparedStatement showStmt = createMockTableExistsResponse(hive, false);
 
         Statement createStmt = mock(Statement.class);
         when(hive.createStatement()).thenReturn(createStmt);
@@ -119,11 +115,7 @@ public class HiveMailWriterTest
         Connection hive = mock(Connection.class);
         FileSystem hdfs = mock(FileSystem.class);
 
-        PreparedStatement showStmt = mock(PreparedStatement.class);
-        ResultSet showResult = mock(ResultSet.class);
-        when(showResult.next()).thenReturn(true);
-        when(showStmt.executeQuery()).thenReturn(showResult);
-        when(hive.prepareStatement("show tables ?")).thenReturn(showStmt);
+        PreparedStatement showStmt = createMockTableExistsResponse(hive, true);
 
         PreparedStatement loadStmt = mock(PreparedStatement.class);
         when(hive.prepareStatement("load data inpath ? into table new_table")).thenReturn(loadStmt);
@@ -141,4 +133,18 @@ public class HiveMailWriterTest
         verify(hdfs).mkdirs(eq(new Path("/tmp/timberwolf")));
         verify(hdfs).delete(any(Path.class), eq(false));
     }
+
+    private static PreparedStatement createMockTableExistsResponse(
+            Connection hive,
+            boolean tableWillExist)
+            throws SQLException
+    {
+        PreparedStatement showStmt = mock(PreparedStatement.class);
+        ResultSet showResult = mock(ResultSet.class);
+        when(showResult.next()).thenReturn(tableWillExist);
+        when(showStmt.executeQuery()).thenReturn(showResult);
+        when(hive.prepareStatement("show tables ?")).thenReturn(showStmt);
+        return showStmt;
+    }
+
 }
