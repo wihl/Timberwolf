@@ -15,20 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf;
+package com.ripariandata.timberwolf.writer.hbase;
 
-import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
+import org.slf4j.Logger;
 
-/**
- * MailStore represents a repository, either local or remote, of mail.
- */
-public interface MailStore
+/** Non-checked exception thrown by classes that talk to HBase. */
+public class HBaseRuntimeException extends RuntimeException
 {
-    /**
-     * Returns some mail for the given users, only getting the mail for each user since the
-     * last sync according to syncStateStorage.
-     * @param targetUsers The users whose email will be returned.
-     * @param syncStateStorage The sync states for all folders for all the target users.
-     */
-    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserFolderSyncStateStorage syncStateStorage);
+    public HBaseRuntimeException(final String message, final Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public static HBaseRuntimeException log(final Logger logger, final HBaseRuntimeException e)
+    {
+        logger.error(e.getMessage());
+        logger.debug("", e);
+
+        return e;
+    }
 }
+

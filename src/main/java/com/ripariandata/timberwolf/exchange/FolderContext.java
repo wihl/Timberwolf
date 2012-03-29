@@ -20,8 +20,8 @@ package com.ripariandata.timberwolf.exchange;
 import com.microsoft.schemas.exchange.services.x2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services.x2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import com.microsoft.schemas.exchange.services.x2006.types.TargetFolderIdType;
-import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
-import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.console.InMemoryUserFolderSyncStateStorage;
 
 /**
  * FolderContext class holds information about where a service call should be looking for
