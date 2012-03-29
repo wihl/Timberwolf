@@ -17,7 +17,7 @@
  */
 package com.ripariandata.timberwolf.integrated;
 
-import com.ripariandata.timberwolf.hbase.IHBaseTable;
+import com.ripariandata.timberwolf.writer.hbase.IHBaseTable;
 
 import java.io.IOException;
 
