@@ -228,7 +228,8 @@ public class HiveMailWriter implements MailWriter
         return tempFile;
     }
 
-    /**Delete the temporary file in hdfs.
+    /**
+     * Delete the temporary file in hdfs.
      *
      * This does not throw an exception because this may be called during
      * a stack rewind. If that's the case, we don't want to override the

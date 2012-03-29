@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 /**
- * All interfaces and classes for writing emails to databases exists
+ * All interfaces and classes for writing emails exists
  * in this package or a subpackage.
  */
 package com.ripariandata.timberwolf.writer;
