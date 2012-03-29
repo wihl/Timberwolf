@@ -151,7 +151,7 @@ public class TestIntegration
         user2.moveEmails(pump);
         user3.moveEmails(pump);
 
-        // We need to close the tables, because HBaseUserTimeUpdater and
+        // We need to close the tables, because HBaseUserSyncStateStorage and
         // HBaseMailWriter call CreateTable, so we can't have any
         // references to that open
         userTable.closeTables();
