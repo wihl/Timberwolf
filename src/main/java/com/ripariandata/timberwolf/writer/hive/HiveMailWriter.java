@@ -85,10 +85,10 @@ public class HiveMailWriter implements MailWriter
         {
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
         }
-        getHdfs(hdfsLocation);
+        hdfs = getHdfs(hdfsLocation);
 
         loadHiveDriver();
-        getHive(hiveUri);
+        hive = getHive(hiveUri);
     }
 
     public HiveMailWriter(final FileSystem fs, final Connection conn, final String table)
@@ -111,15 +111,28 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void getHive(final String hiveUri)
+    private static Connection getHive(final String hiveUri)
     {
         try
         {
-            hive = DriverManager.getConnection(hiveUri);
+            return DriverManager.getConnection(hiveUri);
         }
         catch (SQLException e)
         {
             String msg = "Error opening connection to hive at " + hiveUri.toString();
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
+        }
+    }
+
+    private static FileSystem getHdfs(final URI hdfsUri)
+    {
+        try
+        {
+            return FileSystem.get(hdfsUri, new Configuration());
+        }
+        catch (IOException e)
+        {
+            String msg = "Cannot access HDFS filesystem at " + hdfsUri.toString();
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
     }
@@ -188,19 +201,6 @@ public class HiveMailWriter implements MailWriter
         catch (SQLException e)
         {
             String msg = "Error closing connection to Hive.";
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private void getHdfs(final URI hdfsUri)
-    {
-        try
-        {
-            hdfs = FileSystem.get(hdfsUri, new Configuration());
-        }
-        catch (IOException e)
-        {
-            String msg = "Cannot access HDFS filesystem at " + hdfsUri.toString();
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
         }
     }
