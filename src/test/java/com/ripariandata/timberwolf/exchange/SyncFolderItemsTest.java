@@ -26,7 +26,7 @@ import com.microsoft.schemas.exchange.services.x2006.types.DefaultShapeNamesType
 import com.microsoft.schemas.exchange.services.x2006.types.MessageType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services.x2006.types.SyncFolderItemsCreateOrUpdateType;
-import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.console.InMemoryUserFolderSyncStateStorage;
 
 import java.util.List;
 import java.util.Vector;

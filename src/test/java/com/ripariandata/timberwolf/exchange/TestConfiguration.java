@@ -17,8 +17,8 @@
  */
 package com.ripariandata.timberwolf.exchange;
 
-import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
-import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.console.InMemoryUserFolderSyncStateStorage;
 import org.junit.Assert;
 import org.junit.Test;
 

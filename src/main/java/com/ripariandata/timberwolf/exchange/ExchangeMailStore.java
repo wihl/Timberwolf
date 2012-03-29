@@ -19,7 +19,7 @@ package com.ripariandata.timberwolf.exchange;
 
 import com.ripariandata.timberwolf.MailStore;
 import com.ripariandata.timberwolf.MailboxItem;
-import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
 
 import java.util.Iterator;
 

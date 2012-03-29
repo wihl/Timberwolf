@@ -17,9 +17,9 @@
  */
 package com.ripariandata.timberwolf.integrated;
 
-import com.ripariandata.timberwolf.hbase.HBaseConfigurator;
-import com.ripariandata.timberwolf.hbase.HBaseManager;
-import com.ripariandata.timberwolf.hbase.IHBaseTable;
+import com.ripariandata.timberwolf.writer.hbase.HBaseConfigurator;
+import com.ripariandata.timberwolf.writer.hbase.HBaseManager;
+import com.ripariandata.timberwolf.writer.hbase.IHBaseTable;
 
 import java.io.IOException;
 import java.math.BigInteger;

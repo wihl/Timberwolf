@@ -19,21 +19,21 @@ package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
 import com.ripariandata.timberwolf.Auth;
-import com.ripariandata.timberwolf.InMemoryUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.MailStore;
-import com.ripariandata.timberwolf.MailWriter;
 import com.ripariandata.timberwolf.MailboxItem;
-import com.ripariandata.timberwolf.UserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.exchange.ExchangeMailStore;
 import com.ripariandata.timberwolf.exchange.ExchangePump;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToCreateMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
 import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToMoveMessage;
 import com.ripariandata.timberwolf.exchange.RequiredFolder;
-import com.ripariandata.timberwolf.hbase.HBaseMailWriter;
-import com.ripariandata.timberwolf.hbase.HBaseUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
+import com.ripariandata.timberwolf.writer.MailWriter;
+import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.console.InMemoryUserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.hbase.HBaseMailWriter;
+import com.ripariandata.timberwolf.writer.hbase.HBaseUserFolderSyncStateStorage;
 import java.io.IOException;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
@@ -151,7 +151,7 @@ public class TestIntegration
         user2.moveEmails(pump);
         user3.moveEmails(pump);
 
-        // We need to close the tables, because HBaseUserTimeUpdater and
+        // We need to close the tables, because HBaseUserSyncStateStorage and
         // HBaseMailWriter call CreateTable, so we can't have any
         // references to that open
         userTable.closeTables();

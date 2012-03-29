@@ -15,20 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf;
-
-import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
-
 /**
- * MailStore represents a repository, either local or remote, of mail.
+ * Provides classes to write data for Hive tables.
  */
-public interface MailStore
-{
-    /**
-     * Returns some mail for the given users, only getting the mail for each user since the
-     * last sync according to syncStateStorage.
-     * @param targetUsers The users whose email will be returned.
-     * @param syncStateStorage The sync states for all folders for all the target users.
-     */
-    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserFolderSyncStateStorage syncStateStorage);
-}
+package com.ripariandata.timberwolf.writer.hive;
