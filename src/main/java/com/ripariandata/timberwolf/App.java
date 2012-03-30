@@ -29,12 +29,15 @@ import com.ripariandata.timberwolf.services.LdapFetcher;
 import com.ripariandata.timberwolf.services.PrincipalFetchException;
 import com.ripariandata.timberwolf.services.PrincipalFetcher;
 import com.ripariandata.timberwolf.writer.MailWriter;
+import com.ripariandata.timberwolf.writer.Manager;
 import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.writer.console.ConsoleMailWriter;
 import com.ripariandata.timberwolf.writer.console.InMemoryUserFolderSyncStateStorage;
 import com.ripariandata.timberwolf.writer.hbase.HBaseMailWriter;
 import com.ripariandata.timberwolf.writer.hbase.HBaseManager;
 import com.ripariandata.timberwolf.writer.hbase.HBaseUserFolderSyncStateStorage;
+import com.ripariandata.timberwolf.writer.hive.HiveMailWriter;
+import com.ripariandata.timberwolf.writer.hive.HiveManager;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -58,6 +61,7 @@ final class App implements PrivilegedAction<Integer>
 
     /** This will get set to true if any hbase arguments are set. */
     private boolean useHBase;
+    private boolean useHive;
 
     @Option(name = "--config",
             usage = "Sets the location to look for a configuration properties file.  Defaults to "
@@ -90,10 +94,10 @@ final class App implements PrivilegedAction<Integer>
     @ConfigEntry(name = "hbase.clientport", usage = "The ZooKeeper client port used to connect to HBase.")
     private String hbaseclientPort;
 
-    @Option(name = "--hbase-table",
-            usage = "The HBase table name that email data will be imported into.")
-    @ConfigEntry(name = "hbase.table", usage = "The HBase table name that email data will be imported into.")
-    private String hbaseTableName;
+    @Option(name = "--table",
+            usage = "The table name that email data will be imported into, whether that be HBase or Hive.")
+    @ConfigEntry(name = "table", usage = "The table name that email data will be imported into, whether that be HBase or Hive.")
+    private String tableName;
 
     @Option(name = "--hbase-metadata-table",
             usage = "The HBase table that will store timberwolf metatdata, such as the last time that we gathered "
@@ -113,6 +117,16 @@ final class App implements PrivilegedAction<Integer>
     @ConfigEntry(name = "hbase.column.family", usage = "The column family for the imported email data.  "
                                                      + "Default family is 'h'.")
     private String hbaseColumnFamily = HBaseMailWriter.DEFAULT_COLUMN_FAMILY;
+
+    @Option(name = "--hdfs-address",
+            usage = "The address used to connect to Hdfs.")
+    @ConfigEntry(name = "hdfs.address", usage = "The address used to connect to Hdfs.")
+    private String hdfsAddress;
+
+    @Option(name = "--hive-address",
+            usage = "The address used to connect to Hive.")
+    @ConfigEntry(name = "hive.address", usage = "The address used to connect to Hive.")
+    private String hiveAddress;
 
     private App()
     {
@@ -205,24 +219,35 @@ final class App implements PrivilegedAction<Integer>
         LOG.debug("Timberwolf invoked with the following arguments:");
         LOG.debug("Domain: {}", domain);
         LOG.debug("Exchange URL: {}", exchangeUrl);
+        LOG.debug("Table Name: {}", tableName);
         LOG.debug("HBase ZooKeeper Quorum: {}", hbaseQuorum);
         LOG.debug("HBase ZooKeeper Client Port: {}", hbaseclientPort);
-        LOG.debug("HBase Table Name: {}", hbaseTableName);
         LOG.debug("HBase Metadata Table Name: {}", hbaseMetadataTableName);
         LOG.debug("HBase Key Header: {}", hbaseKeyHeader);
         LOG.debug("HBase Column Family: {}", hbaseColumnFamily);
+        LOG.debug("Hive JDBC Address: {}", hiveAddress);
+        LOG.debug("Hive hdfs Address: {}", hdfsAddress);
 
         boolean noHBaseArgs =
                 hbaseQuorum == null && hbaseclientPort == null
-                && hbaseTableName == null && hbaseMetadataTableName == null;
+                && tableName == null && hbaseMetadataTableName == null;
         boolean allHBaseArgs =
                 hbaseQuorum != null && hbaseclientPort != null
-                && hbaseTableName != null && hbaseMetadataTableName != null;
+                && tableName != null && hbaseMetadataTableName != null;
+        boolean noHiveArgs = hiveAddress == null && hdfsAddress == null && tableName == null;
+        boolean allHiveArgs = hiveAddress != null && hdfsAddress != null && tableName != null;
 
         if (!noHBaseArgs && !allHBaseArgs)
         {
             throw new CmdLineException(cliParser, "HBase ZooKeeper Quorum, HBase ZooKeeper Client Port, and HBase "
                                                 + "Table Name must all be specified if at least one is specified");
+        }
+        if (!noHiveArgs && !allHiveArgs)
+        {
+            throw new CmdLineException(cliParser,
+                                       "Hive jdbc address and hdfs address "
+                                       + "must all be specified if at least "
+                                       + "one is specified");
         }
 
         if (domain == null)
@@ -236,6 +261,7 @@ final class App implements PrivilegedAction<Integer>
         }
 
         useHBase = allHBaseArgs;
+        useHive = allHiveArgs;
         return true;
     }
 
@@ -243,13 +269,19 @@ final class App implements PrivilegedAction<Integer>
     {
         MailWriter mailWriter;
         UserFolderSyncStateStorage syncStateStorage;
-        HBaseManager hbaseManager = null;
-        if (useHBase)
+        Manager manager = null;
+        if (useHive)
         {
-            hbaseManager = new HBaseManager(hbaseQuorum, hbaseclientPort);
-            mailWriter = HBaseMailWriter.create(hbaseManager, hbaseTableName, hbaseKeyHeader,
+            manager = new HiveManager(hdfsAddress, hiveAddress);
+            mailWriter = new HiveMailWriter((HiveManager)manager, tableName);
+            syncStateStorage = new InMemoryUserFolderSyncStateStorage();
+        }
+        else if (useHBase)
+        {
+            manager = new HBaseManager(hbaseQuorum, hbaseclientPort);
+            mailWriter = HBaseMailWriter.create((HBaseManager)manager, tableName, hbaseKeyHeader,
                                                 hbaseColumnFamily);
-            syncStateStorage = new HBaseUserFolderSyncStateStorage(hbaseManager, hbaseMetadataTableName);
+            syncStateStorage = new HBaseUserFolderSyncStateStorage((HBaseManager)manager, hbaseMetadataTableName);
         }
         else
         {
@@ -316,9 +348,9 @@ final class App implements PrivilegedAction<Integer>
         }
         finally
         {
-            if (hbaseManager != null)
+            if (manager != null)
             {
-                hbaseManager.close();
+                manager.close();
             }
         }
         return 1;

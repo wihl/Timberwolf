@@ -17,6 +17,8 @@
  */
 package com.ripariandata.timberwolf.writer.hbase;
 
+import com.ripariandata.timberwolf.writer.Manager;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages the set of HBaseTables currently in use.
  */
-public class HBaseManager
+public class HBaseManager implements Manager
 {
     /**
      * The logger for this class.

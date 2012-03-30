@@ -17,6 +17,8 @@
  */
 package com.ripariandata.timberwolf.writer.hive;
 
+import com.ripariandata.timberwolf.writer.Manager;
+
 import java.io.IOException;
 
 import java.net.URI;
@@ -39,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Manages a connection with hive; handing out writers to tables. */
-public class HiveManager
+public class HiveManager implements Manager
 {
     private static final Logger LOG = LoggerFactory.getLogger(HiveManager.class);
     private static final String DRIVER_NAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
@@ -56,7 +58,7 @@ public class HiveManager
         }
         catch (URISyntaxException e)
         {
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
+            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfsUri + " is not a valid URI.", e));
         }
         hdfs = createHdfs(hdfsLocation);
 
