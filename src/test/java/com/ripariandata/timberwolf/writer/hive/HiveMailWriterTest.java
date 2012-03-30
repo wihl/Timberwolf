@@ -54,8 +54,9 @@ public class HiveMailWriterTest
         Connection hive = mock(Connection.class);
         FileSystem hdfs = mock(FileSystem.class);
 
-        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "table");
-        writer.close();
+        HiveManager manager = new HiveManager(hdfs, hive);
+        HiveMailWriter writer = new HiveMailWriter(manager, "table");
+        manager.close();
 
         verify(hive).close();
         verify(hdfs).close();
@@ -79,7 +80,8 @@ public class HiveMailWriterTest
         when(hdfs.exists(eq(new Path("/tmp/timberwolf")))).thenReturn(false);
         when(hdfs.create(any(Path.class))).thenReturn(new FSDataOutputStream(new ByteArrayOutputStream()));
 
-        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "new_table");
+        HiveManager manager = new HiveManager(hdfs, hive);
+        HiveMailWriter writer = new HiveMailWriter(manager, "new_table");
         writer.write(new ArrayList<MailboxItem>());
 
         verify(showStmt).setString(1, "new_table");
@@ -109,7 +111,8 @@ public class HiveMailWriterTest
         when(hdfs.exists(eq(new Path("/tmp/timberwolf")))).thenReturn(false);
         when(hdfs.create(any(Path.class))).thenReturn(new FSDataOutputStream(new ByteArrayOutputStream()));
 
-        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "new_table");
+        HiveManager manager = new HiveManager(hdfs, hive);
+        HiveMailWriter writer = new HiveMailWriter(manager, "new_table");
         writer.write(new ArrayList<MailboxItem>());
 
         verify(showStmt).setString(1, "new_table");
@@ -137,7 +140,8 @@ public class HiveMailWriterTest
         when(hdfs.exists(eq(new Path("/tmp/timberwolf")))).thenReturn(true);
         when(hdfs.create(any(Path.class))).thenReturn(new FSDataOutputStream(new ByteArrayOutputStream()));
 
-        HiveMailWriter writer = new HiveMailWriter(hdfs, hive, "new_table");
+        HiveManager manager = new HiveManager(hdfs, hive);
+        HiveMailWriter writer = new HiveMailWriter(manager, "new_table");
         try
         {
             writer.write(new ArrayList<MailboxItem>());

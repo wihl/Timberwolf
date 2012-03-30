@@ -22,22 +22,9 @@ import com.ripariandata.timberwolf.writer.MailWriter;
 
 import java.io.IOException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
-
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,10 +39,8 @@ public class HiveMailWriter implements MailWriter
     public static final String DEFAULT_KEY_HEADER = "Item ID";
     public static final String[] VALUE_HEADER_KEYS;
     private static final Path TEMP_FOLDER = new Path("/tmp/timberwolf");
-    private static final String DRIVER_NAME = "org.apache.hadoop.hive.jdbc.HiveDriver";
 
-    private FileSystem hdfs;
-    private Connection hive;
+    private HiveManager hive;
     private String tableName;
 
     static
@@ -72,160 +57,33 @@ public class HiveMailWriter implements MailWriter
         VALUE_HEADER_KEYS = values.toArray(new String[possible.length - 1]);
     }
 
-    public HiveMailWriter(final String hdfsUri, final String hiveUri, final String table)
+    public HiveMailWriter(final HiveManager hiveManager, final String table)
     {
+        hive = hiveManager;
         tableName = table;
-
-        URI hdfsLocation;
-        try
-        {
-            hdfsLocation = new URI(hdfsUri);
-        }
-        catch (URISyntaxException e)
-        {
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(hdfs + " is not a valid URI.", e));
-        }
-        hdfs = getHdfs(hdfsLocation);
-
-        loadHiveDriver();
-        hive = getHive(hiveUri);
     }
 
-    public HiveMailWriter(final FileSystem fs, final Connection conn, final String table)
-    {
-        tableName = table;
-        hdfs = fs;
-        hive = conn;
-    }
-
-    private void loadHiveDriver()
+    private Path writeTempFile(final Iterable<MailboxItem> mail)
     {
         try
         {
-            Class.forName(DRIVER_NAME);
-        }
-        catch (ClassNotFoundException e)
-        {
-            String msg = "Cannot load Hive JDBC driver " + DRIVER_NAME;
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private static Connection getHive(final String hiveUri)
-    {
-        try
-        {
-            return DriverManager.getConnection(hiveUri);
-        }
-        catch (SQLException e)
-        {
-            String msg = "Error opening connection to hive at " + hiveUri.toString();
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private static FileSystem getHdfs(final URI hdfsUri)
-    {
-        try
-        {
-            return FileSystem.get(hdfsUri, new Configuration());
-        }
-        catch (IOException e)
-        {
-            String msg = "Cannot access HDFS filesystem at " + hdfsUri.toString();
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private boolean tableExists()
-    {
-        try
-        {
-            PreparedStatement statement = hive.prepareStatement("show tables ?");
-            statement.setString(1, tableName);
-            ResultSet showTableResult = statement.executeQuery();
-            return showTableResult.next();
-        }
-        catch (SQLException e)
-        {
-            String msg = "Error determining if table " + tableName + "exists.";
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private void createTable()
-    {
-        try
-        {
-            // We aren't using a PreparedStatement here since the escaping only really works for arguments,
-            // not for table and column names.
-            Statement statement = hive.createStatement();
-            String[] createQueryTokens = {
-                "create table", tableName,
-                "(", StringUtils.join(VALUE_HEADER_KEYS, " string, ") , "string )",
-                "row format delimited fields terminated by '\\037'",
-                "stored as sequencefile"
-            };
-            String createTableQuery = StringUtils.join(createQueryTokens, " ");
-            statement.executeQuery(createTableQuery);
-        }
-        catch (SQLException e)
-        {
-            String msg = "Error creating table " + tableName;
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private void loadTempFile(final Path tempFile)
-    {
-        try
-        {
-            // We aren't using a statement variable for the table name since the escaping will mess it up.
-            PreparedStatement statement = hive.prepareStatement("load data inpath ? into table " + tableName);
-            statement.setString(1, tempFile.toString());
-            statement.executeQuery();
-        }
-        catch (SQLException e)
-        {
-            String msg = "Error loading data into table.";
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private void closeHive()
-    {
-        try
-        {
-            hive.close();
-        }
-        catch (SQLException e)
-        {
-            String msg = "Error closing connection to Hive.";
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException(msg, e));
-        }
-    }
-
-    private Path writeTemporaryFile(final Iterable<MailboxItem> mail)
-    {
-        Path tempFile;
-        try
-        {
+            FileSystem hdfs = hive.getHdfs();
             if (!hdfs.exists(TEMP_FOLDER))
             {
                 hdfs.mkdirs(TEMP_FOLDER);
             }
 
-            tempFile = new Path(TEMP_FOLDER + "/" + UUID.randomUUID().toString());
+            Path tempFile = new Path(TEMP_FOLDER + "/" + UUID.randomUUID().toString());
             FSDataOutputStream output = hdfs.create(tempFile);
             SequenceFileMailWriter writer = new SequenceFileMailWriter(output);
             writer.write(mail);
             output.close();
+            return tempFile;
         }
         catch (IOException e)
         {
             throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error writing temporary file.", e));
         }
-        return tempFile;
     }
 
     /**
@@ -239,7 +97,7 @@ public class HiveMailWriter implements MailWriter
     {
         try
         {
-            hdfs.delete(tempFile, false);
+            hive.getHdfs().delete(tempFile, false);
         }
         catch (IOException e)
         {
@@ -248,39 +106,21 @@ public class HiveMailWriter implements MailWriter
         }
     }
 
-    private void closeHdfs()
-    {
-        try
-        {
-            hdfs.close();
-        }
-        catch (IOException e)
-        {
-            throw HiveMailWriterException.log(LOG, new HiveMailWriterException("Error closing HDFS connection.", e));
-        }
-    }
-
     public void write(final Iterable<MailboxItem> mail)
     {
-        if (!tableExists())
+        if (!hive.tableExists(tableName))
         {
-            createTable();
+            hive.createTable(tableName, VALUE_HEADER_KEYS);
         }
 
-        Path tempFile = writeTemporaryFile(mail);
+        Path tempFile = writeTempFile(mail);
         try
         {
-            loadTempFile(tempFile);
+            hive.loadTempFile(tableName, tempFile);
         }
         finally
         {
             deleteTempFile(tempFile);
         }
-    }
-
-    public void close()
-    {
-        closeHdfs();
-        closeHive();
     }
 }
