@@ -230,12 +230,14 @@ final class App implements PrivilegedAction<Integer>
 
         boolean noHBaseArgs =
                 hbaseQuorum == null && hbaseclientPort == null
-                && tableName == null && hbaseMetadataTableName == null;
+                && hbaseMetadataTableName == null;
         boolean allHBaseArgs =
                 hbaseQuorum != null && hbaseclientPort != null
-                && tableName != null && hbaseMetadataTableName != null;
-        boolean noHiveArgs = hiveAddress == null && hdfsAddress == null && tableName == null;
-        boolean allHiveArgs = hiveAddress != null && hdfsAddress != null && tableName != null;
+                && hbaseMetadataTableName != null && tableName != null;
+        boolean noHiveArgs =
+                hiveAddress == null && hdfsAddress == null;
+        boolean allHiveArgs =
+                hiveAddress != null && hdfsAddress != null && tableName != null;
 
         if (!noHBaseArgs && !allHBaseArgs)
         {
