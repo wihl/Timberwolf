@@ -175,7 +175,10 @@ public class HiveManager implements Manager
     {
         try
         {
-            hive.close();
+            if (hive != null)
+            {
+                hive.close();
+            }
         }
         catch (SQLException e)
         {
@@ -188,7 +191,10 @@ public class HiveManager implements Manager
     {
         try
         {
-            hdfs.close();
+            if (hdfs != null)
+            {
+                hdfs.close();
+            }
         }
         catch (IOException e)
         {
