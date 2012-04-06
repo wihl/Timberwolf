@@ -17,8 +17,8 @@
  */
 package com.ripariandata.timberwolf.writer.hbase;
 
-import com.ripariandata.timberwolf.MailboxItem;
 import com.ripariandata.timberwolf.MockHTable;
+import com.ripariandata.timberwolf.mail.MailboxItem;
 import com.ripariandata.timberwolf.writer.MailWriter;
 
 import java.io.IOException;

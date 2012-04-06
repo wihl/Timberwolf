@@ -18,12 +18,12 @@
 package com.ripariandata.timberwolf.integrated;
 
 import com.microsoft.schemas.exchange.services.x2006.types.DistinguishedFolderIdNameType;
-import com.ripariandata.timberwolf.exchange.ExchangePump;
-import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToDeleteMessage;
-import com.ripariandata.timberwolf.exchange.ExchangePump.FailedToFindMessage;
-import com.ripariandata.timberwolf.exchange.ExchangePump.MessageId;
-import com.ripariandata.timberwolf.exchange.RequiredEmail;
-import com.ripariandata.timberwolf.exchange.RequiredFolder;
+import com.ripariandata.timberwolf.mail.exchange.ExchangePump;
+import com.ripariandata.timberwolf.mail.exchange.ExchangePump.FailedToDeleteMessage;
+import com.ripariandata.timberwolf.mail.exchange.ExchangePump.FailedToFindMessage;
+import com.ripariandata.timberwolf.mail.exchange.ExchangePump.MessageId;
+import com.ripariandata.timberwolf.mail.exchange.RequiredEmail;
+import com.ripariandata.timberwolf.mail.exchange.RequiredFolder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

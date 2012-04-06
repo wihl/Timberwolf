@@ -15,16 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf.writer;
-
-import com.ripariandata.timberwolf.mail.MailboxItem;
-
 /**
- * MailWriter is an object that can take some MailboxItems and write them into
- * some repository.
+ * Package provides the interfaces and implementations for accessing mail
+ * datastores and reading their email.
  */
-public interface MailWriter
-{
-    /** Writes the given MailboxItems into the repository. */
-    void write(Iterable<MailboxItem> mails);
-}
+package com.ripariandata.timberwolf.mail;
