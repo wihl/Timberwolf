@@ -17,7 +17,7 @@
  */
 package com.ripariandata.timberwolf.integrated;
 
-import com.ripariandata.timberwolf.exchange.RequiredEmail;
+import com.ripariandata.timberwolf.mail.exchange.RequiredEmail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;

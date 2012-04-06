@@ -15,16 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf.writer;
+package com.ripariandata.timberwolf.mail;
 
-import com.ripariandata.timberwolf.mail.MailboxItem;
+import com.ripariandata.timberwolf.writer.UserFolderSyncStateStorage;
 
 /**
- * MailWriter is an object that can take some MailboxItems and write them into
- * some repository.
+ * MailStore represents a repository, either local or remote, of mail.
  */
-public interface MailWriter
+public interface MailStore
 {
-    /** Writes the given MailboxItems into the repository. */
-    void write(Iterable<MailboxItem> mails);
+    /**
+     * Returns some mail for the given users, only getting the mail for each user since the
+     * last sync according to syncStateStorage.
+     * @param targetUsers The users whose email will be returned.
+     * @param syncStateStorage The sync states for all folders for all the target users.
+     */
+    Iterable<MailboxItem> getMail(Iterable<String> targetUsers, UserFolderSyncStateStorage syncStateStorage);
 }

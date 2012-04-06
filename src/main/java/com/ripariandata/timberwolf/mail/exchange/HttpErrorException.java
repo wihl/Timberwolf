@@ -15,16 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf.writer;
-
-import com.ripariandata.timberwolf.mail.MailboxItem;
+package com.ripariandata.timberwolf.mail.exchange;
 
 /**
- * MailWriter is an object that can take some MailboxItems and write them into
- * some repository.
+ * Exception that gets thrown when an HTTP request returns
+ * an error (non-200) response.
  */
-public interface MailWriter
+public class HttpErrorException extends Exception
 {
-    /** Writes the given MailboxItems into the repository. */
-    void write(Iterable<MailboxItem> mails);
+    private int errorCode;
+
+    public HttpErrorException(final int error)
+    {
+        super("There was an HTTP " + error + " error while sending a request.");
+        errorCode = error;
+    }
+
+    public int getErrorCode()
+    {
+        return errorCode;
+    }
 }

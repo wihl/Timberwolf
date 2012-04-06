@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ripariandata.timberwolf.writer;
+package com.ripariandata.timberwolf.mail.exchange;
 
-import com.ripariandata.timberwolf.mail.MailboxItem;
+import java.net.HttpURLConnection;
 
-/**
- * MailWriter is an object that can take some MailboxItems and write them into
- * some repository.
- */
-public interface MailWriter
+/** Represents a factory for HTTP requests. */
+interface HttpUrlConnectionFactory
 {
-    /** Writes the given MailboxItems into the repository. */
-    void write(Iterable<MailboxItem> mails);
+    /**
+     * Constructs a new HttpURLConnection that will make a request to the
+     * specified url with the specified request as a payload.
+     */
+    HttpURLConnection newInstance(String address, byte[] request) throws ServiceCallException;
 }

@@ -17,7 +17,7 @@
  */
 package com.ripariandata.timberwolf.writer.console;
 
-import com.ripariandata.timberwolf.MailboxItem;
+import com.ripariandata.timberwolf.mail.MailboxItem;
 import com.ripariandata.timberwolf.writer.MailWriter;
 
 /**

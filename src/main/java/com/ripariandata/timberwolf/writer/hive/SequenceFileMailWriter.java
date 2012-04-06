@@ -17,7 +17,7 @@
  */
 package com.ripariandata.timberwolf.writer.hive;
 
-import com.ripariandata.timberwolf.MailboxItem;
+import com.ripariandata.timberwolf.mail.MailboxItem;
 import com.ripariandata.timberwolf.writer.MailWriter;
 
 import java.io.IOException;
